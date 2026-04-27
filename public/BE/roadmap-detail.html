@@ -1,0 +1,2176 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lộ Trình A-Z — .NET Developer từ Zero đến Lead</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="wisdom.css">
+    <link rel="stylesheet" href="roadmap-detail.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html" style="color:inherit;-webkit-text-fill-color:inherit;">.NET<span class="accent">Mastery</span></a></div>
+            <div class="nav-links">
+                <a href="index.html">Roadmap</a>
+                <a href="index.html#quiz">Kiểm tra</a>
+                <a href="wisdom.html">Kinh nghiệm</a>
+                <a href="ai-era.html">AI Era</a>
+                <a href="roadmap-detail.html" class="nav-active">Lộ trình A-Z</a>
+                <a href="skill-test.html">Phỏng vấn</a>
+                <a href="advice.html">Lời khuyên</a>
+                <a href="backend-path.html">Backend Path</a>
+            </div>
+            <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <header class="rd-hero">
+        <div class="hero-content">
+            <div class="hero-badge">COMPLETE ROADMAP — FROM ZERO TO LEAD</div>
+            <h1>Lộ Trình <span class="gradient-text-rd">A → Z</span></h1>
+            <p class="hero-desc">Từ Fresher đến Lead — mỗi level cần học gì, training gì, đọc source ở đâu.<br>Dùng cho bản thân hoặc training team.</p>
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-number stat-rd">4</span>
+                    <span class="stat-label">Career Levels</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number stat-rd">12+</span>
+                    <span class="stat-label">Công cụ liên quan</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number stat-rd">20+</span>
+                    <span class="stat-label">Source nên đọc</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- LEVEL SELECTOR -->
+    <div class="level-selector">
+        <div class="container">
+            <div class="ls-links">
+                <a href="#fresher" class="ls-link ls-fresher">Fresher</a>
+                <a href="#junior" class="ls-link ls-junior">Junior</a>
+                <a href="#mid-senior" class="ls-link ls-mid">Mid / Senior</a>
+                <a href="#lead" class="ls-link ls-lead">Lead</a>
+                <a href="#tools" class="ls-link ls-tools">Công cụ & Ngôn ngữ</a>
+                <a href="#sources" class="ls-link ls-sources">Source nên đọc</a>
+                <a href="#training" class="ls-link ls-training">Training Plan</a>
+                <a href="#assessment" class="ls-link ls-assessment">Đánh giá trình độ</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== FRESHER ==================== -->
+    <section class="section" id="fresher">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-icon">🌱</span>
+                <h2>Fresher (0-1 năm)</h2>
+                <p>Xây nền móng chắc — đừng vội chạy khi chưa biết đi</p>
+            </div>
+
+            <div class="phase-timeline">
+                <div class="phase">
+                    <div class="phase-header ph-1">
+                        <span class="phase-tag">THÁNG 1-2</span>
+                        <h3>C# Fundamentals — Ngôn ngữ là vũ khí</h3>
+                    </div>
+                    <div class="phase-body">
+                        <div class="phase-grid">
+                            <div class="skill-block must-know">
+                                <h4>Phải nắm chắc</h4>
+                                <ul>
+                                    <li>Syntax cơ bản: variables, types, operators, control flow</li>
+                                    <li>OOP 4 trụ cột: Encapsulation, Inheritance, Polymorphism, Abstraction</li>
+                                    <li>Value types vs Reference types — hiểu memory allocation</li>
+                                    <li>Collections: List, Dictionary, HashSet, Queue, Stack — khi nào dùng cái nào</li>
+                                    <li>Exception handling: try/catch/finally, custom exceptions</li>
+                                    <li>String manipulation, DateTime, null handling (nullable types, null-coalescing)</li>
+                                    <li>LINQ basics: Where, Select, OrderBy, GroupBy, First, Any, All</li>
+                                </ul>
+                            </div>
+                            <div class="skill-block practice">
+                                <h4>Bài tập thực hành</h4>
+                                <ul>
+                                    <li>Console app quản lý sinh viên (CRUD in-memory)</li>
+                                    <li>Viết class Library + Consumer app</li>
+                                    <li>Implement các design patterns đơn giản: Singleton, Factory</li>
+                                    <li>Giải 50 bài LeetCode Easy bằng C#</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="lesson-block">
+                            <h4>Bài giảng & Tài liệu học</h4>
+                            <div class="lesson-links">
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://learn.microsoft.com/vi-vn/dotnet/csharp/tour-of-csharp/" target="_blank">Microsoft Learn — Tour of C#</a>
+                                        <div class="ll-desc">Tổng quan ngôn ngữ C# chính thức từ Microsoft. Bắt đầu từ đây.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://learn.microsoft.com/vi-vn/dotnet/csharp/fundamentals/object-oriented/" target="_blank">C# OOP Fundamentals</a>
+                                        <div class="ll-desc">4 trụ cột OOP giải thích chi tiết với ví dụ code.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://learn.microsoft.com/vi-vn/dotnet/csharp/programming-guide/concepts/linq/" target="_blank">LINQ (Language-Integrated Query)</a>
+                                        <div class="ll-desc">Hướng dẫn LINQ từ cơ bản đến nâng cao. PHẢI đọc kỹ phần này.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://learn.microsoft.com/vi-vn/dotnet/standard/collections/" target="_blank">Collections trong .NET</a>
+                                        <div class="ll-desc">List, Dictionary, HashSet... — khi nào dùng cái nào, performance so sánh.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">🎬</span>
+                                    <div>
+                                        <a href="https://www.youtube.com/playlist?list=PLdo4fOcmZ0oVxKLQCHpiUWun7vlJJvUiN" target="_blank">C# for Beginners — dotnet YouTube</a>
+                                        <div class="ll-desc">Video series chính thức từ Microsoft, dành cho người mới bắt đầu.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">🇻🇳</span>
+                                    <div>
+                                        <a href="https://www.youtube.com/playlist?list=PLRhlTlpDUGsdy_do2_GGV0Xn4JelJHo-j" target="_blank">Lập trình C# cơ bản — Tự Học ICT (Tiếng Việt)</a>
+                                        <div class="ll-desc">Series C# tiếng Việt: syntax, OOP, LINQ. Giải thích dễ hiểu, phù hợp người mới.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">🇻🇳</span>
+                                    <div>
+                                        <a href="https://howkteam.vn/course/khoa-hoc-lap-trinh-c-can-ban-1" target="_blank">HowKteam — Khóa C# Căn Bản (Tiếng Việt)</a>
+                                        <div class="ll-desc">Khóa học C# tiếng Việt miễn phí. Video + bài tập thực hành kèm theo.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">💻</span>
+                                    <div>
+                                        <a href="https://leetcode.com/problemset/?difficulty=EASY&topicSlugs=array%2Cstring%2Chash-table&page=1" target="_blank">LeetCode Easy — Array, String, Hash Table</a>
+                                        <div class="ll-desc">50 bài Easy để luyện syntax C# và tư duy giải thuật cơ bản.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="lesson-summary">Học xong phần này → bạn phải viết được console app CRUD hoàn chỉnh mà không cần mở docs.</div>
+                        </div>
+
+                        <div class="phase-checkpoint">
+                            <strong>Checkpoint:</strong> Viết được 1 console app hoàn chỉnh KHÔNG nhìn docs. Giải thích được value type vs reference type cho người khác.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="phase">
+                    <div class="phase-header ph-2">
+                        <span class="phase-tag">THÁNG 3-4</span>
+                        <h3>ASP.NET Core Basics — Từ Console sang Web</h3>
+                    </div>
+                    <div class="phase-body">
+                        <div class="phase-grid">
+                            <div class="skill-block must-know">
+                                <h4>Phải nắm chắc</h4>
+                                <ul>
+                                    <li>HTTP fundamentals: methods, status codes, headers, body</li>
+                                    <li>Request/Response lifecycle trong ASP.NET Core</li>
+                                    <li>Controllers, Actions, Routing (attribute routing)</li>
+                                    <li>Model Binding & Validation (Data Annotations)</li>
+                                    <li>Dependency Injection — constructor injection, lifetimes (Singleton, Scoped, Transient)</li>
+                                    <li>Configuration: appsettings.json, environment variables, Options pattern</li>
+                                    <li>Middleware pipeline — hiểu thứ tự và cách custom middleware</li>
+                                </ul>
+                            </div>
+                            <div class="skill-block practice">
+                                <h4>Bài tập thực hành</h4>
+                                <ul>
+                                    <li>REST API CRUD cho Todo app</li>
+                                    <li>API với validation, error handling chuẩn</li>
+                                    <li>Custom middleware: logging, request timing</li>
+                                    <li>Dùng Postman/Thunder Client test API</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="lesson-block">
+                            <h4>Bài giảng & Tài liệu học</h4>
+                            <div class="lesson-links">
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://learn.microsoft.com/vi-vn/aspnet/core/tutorials/first-web-api" target="_blank">Tutorial: Tạo Web API với ASP.NET Core</a>
+                                        <div class="ll-desc">Tutorial chính thức step-by-step tạo REST API đầu tiên. Làm theo từng bước.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://learn.microsoft.com/vi-vn/aspnet/core/fundamentals/dependency-injection" target="_blank">Dependency Injection trong ASP.NET Core</a>
+                                        <div class="ll-desc">Hiểu DI container, lifetimes (Singleton/Scoped/Transient), best practices.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://learn.microsoft.com/vi-vn/aspnet/core/fundamentals/middleware" target="_blank">ASP.NET Core Middleware</a>
+                                        <div class="ll-desc">Hiểu request pipeline, thứ tự middleware, cách viết custom middleware.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://learn.microsoft.com/vi-vn/aspnet/core/mvc/models/validation" target="_blank">Model Validation</a>
+                                        <div class="ll-desc">Data Annotations, FluentValidation, custom validation attributes.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">🎬</span>
+                                    <div>
+                                        <a href="https://www.youtube.com/playlist?list=PLdo4fOcmZ0oVjOKgzsWqdFVvzGL2_d72v" target="_blank">ASP.NET Core for Beginners — dotnet YouTube</a>
+                                        <div class="ll-desc">Video series từ Microsoft về ASP.NET Core Web API cơ bản.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">🇻🇳</span>
+                                    <div>
+                                        <a href="https://howkteam.vn/course/khoa-hoc-aspnet-core-co-ban-49" target="_blank">HowKteam — ASP.NET Core Căn Bản (Tiếng Việt)</a>
+                                        <div class="ll-desc">Series ASP.NET Core tiếng Việt miễn phí: MVC, Web API, DI, Middleware.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">🇻🇳</span>
+                                    <div>
+                                        <a href="https://xuanthulab.net/asp-net-core/" target="_blank">XuanThuLab — ASP.NET Core (Tiếng Việt)</a>
+                                        <div class="ll-desc">Bài viết chi tiết về ASP.NET Core bằng tiếng Việt. Routing, Model Binding, Razor.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://learn.microsoft.com/vi-vn/aspnet/core/web-api/action-return-types" target="_blank">Controller Action Return Types</a>
+                                        <div class="ll-desc">IActionResult vs ActionResult&lt;T&gt; — khi nào dùng cái nào.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="lesson-summary">Học xong → tự tạo REST API với CRUD, validation, DI, custom middleware. Test bằng Postman.</div>
+                        </div>
+
+                        <div class="phase-checkpoint">
+                            <strong>Checkpoint:</strong> Tạo được 1 REST API hoàn chỉnh với CRUD, validation, error handling. Giải thích được DI lifetime cho người khác.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="phase">
+                    <div class="phase-header ph-3">
+                        <span class="phase-tag">THÁNG 5-6</span>
+                        <h3>Database + EF Core — Data là trái tim</h3>
+                    </div>
+                    <div class="phase-body">
+                        <div class="phase-grid">
+                            <div class="skill-block must-know">
+                                <h4>Phải nắm chắc</h4>
+                                <ul>
+                                    <li>SQL fundamentals: SELECT, JOIN, GROUP BY, subquery, window functions</li>
+                                    <li>Database design: normalization (1NF-3NF), relationships, indexes</li>
+                                    <li>EF Core: DbContext, DbSet, migrations, Fluent API</li>
+                                    <li>EF Core relationships: one-to-one, one-to-many, many-to-many</li>
+                                    <li>LINQ to Entities — hiểu nó translate sang SQL thế nào</li>
+                                    <li>N+1 problem — nhận biết và fix bằng Include/ThenInclude</li>
+                                    <li>Transaction basics</li>
+                                </ul>
+                            </div>
+                            <div class="skill-block practice">
+                                <h4>Bài tập thực hành</h4>
+                                <ul>
+                                    <li>E-commerce database design (Users, Products, Orders, OrderItems)</li>
+                                    <li>API + EF Core + SQL Server full CRUD</li>
+                                    <li>Viết raw SQL rồi convert sang LINQ — so sánh</li>
+                                    <li>Tìm và fix N+1 queries trong code</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="lesson-block">
+                            <h4>Bài giảng & Tài liệu học</h4>
+                            <div class="lesson-links">
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://learn.microsoft.com/vi-vn/ef/core/get-started/overview/first-app" target="_blank">Getting Started with EF Core</a>
+                                        <div class="ll-desc">Tutorial chính thức EF Core — từ setup DbContext đến first query.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://learn.microsoft.com/vi-vn/ef/core/modeling/relationships" target="_blank">EF Core Relationships</a>
+                                        <div class="ll-desc">One-to-one, one-to-many, many-to-many — cấu hình bằng Fluent API.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://learn.microsoft.com/vi-vn/ef/core/performance/" target="_blank">EF Core Performance — Tránh N+1</a>
+                                        <div class="ll-desc">Hướng dẫn performance: eager loading, split queries, compiled queries.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://www.sqlservertutorial.net/" target="_blank">SQL Server Tutorial</a>
+                                        <div class="ll-desc">Học SQL từ cơ bản đến advanced: JOIN, GROUP BY, window functions.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">🇻🇳</span>
+                                    <div>
+                                        <a href="https://xuanthulab.net/sql/" target="_blank">XuanThuLab — SQL Server (Tiếng Việt)</a>
+                                        <div class="ll-desc">Bài viết SQL Server tiếng Việt: SELECT, JOIN, stored procedures, index.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">🇻🇳</span>
+                                    <div>
+                                        <a href="https://howkteam.vn/course/khoa-hoc-sql-server-36" target="_blank">HowKteam — SQL Server (Tiếng Việt)</a>
+                                        <div class="ll-desc">Video SQL Server tiếng Việt miễn phí: query, stored procedure, design.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">🎬</span>
+                                    <div>
+                                        <a href="https://www.youtube.com/watch?v=SfEbJRuAJKo" target="_blank">Database Design Full Course — freeCodeCamp</a>
+                                        <div class="ll-desc">8 giờ database design từ zero. Normalization, ERD, index strategies.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://use-the-index-luke.com/" target="_blank">Use The Index, Luke!</a>
+                                        <div class="ll-desc">Free online book về SQL indexing và performance. Cực kỳ hay cho mọi level.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="lesson-summary">Học xong → design được database, viết complex query, biết đọc execution plan cơ bản.</div>
+                        </div>
+
+                        <div class="phase-checkpoint">
+                            <strong>Checkpoint:</strong> Design được database cho 1 app thực tế. Viết được complex LINQ query. Nhận biết N+1 khi đọc code.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="phase">
+                    <div class="phase-header ph-4">
+                        <span class="phase-tag">THÁNG 7-8</span>
+                        <h3>Git + Testing + Deployment — Làm việc chuyên nghiệp</h3>
+                    </div>
+                    <div class="phase-body">
+                        <div class="phase-grid">
+                            <div class="skill-block must-know">
+                                <h4>Phải nắm chắc</h4>
+                                <ul>
+                                    <li>Git: branch, merge, rebase, resolve conflicts, PR workflow</li>
+                                    <li>Unit testing với xUnit: Arrange-Act-Assert, Moq, FluentAssertions</li>
+                                    <li>Test đúng thứ: behavior not implementation</li>
+                                    <li>Docker basics: Dockerfile, docker-compose, containerize .NET app</li>
+                                    <li>Basic CI/CD: GitHub Actions hoặc Azure DevOps pipeline</li>
+                                    <li>Logging với Serilog: structured logging, log levels</li>
+                                </ul>
+                            </div>
+                            <div class="skill-block practice">
+                                <h4>Bài tập thực hành</h4>
+                                <ul>
+                                    <li>Viết 20+ unit tests cho API project</li>
+                                    <li>Setup CI pipeline: build → test → report</li>
+                                    <li>Dockerize app + docker-compose với SQL Server</li>
+                                    <li>Contribute 1 PR cho team project</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="lesson-block">
+                            <h4>Bài giảng & Tài liệu học</h4>
+                            <div class="lesson-links">
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://learn.microsoft.com/vi-vn/dotnet/core/testing/unit-testing-with-dotnet-test" target="_blank">Unit Testing với xUnit</a>
+                                        <div class="ll-desc">Tutorial chính thức viết unit test cho .NET project.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://docs.docker.com/guides/dotnet/" target="_blank">Docker cho .NET — Official Guide</a>
+                                        <div class="ll-desc">Containerize .NET app, multi-stage build, docker-compose.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://learngitbranching.js.org/?locale=vi" target="_blank">Learn Git Branching — Interactive (Tiếng Việt)</a>
+                                        <div class="ll-desc">Học Git visual + interactive. Branch, merge, rebase trực quan. Có giao diện tiếng Việt.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">🇻🇳</span>
+                                    <div>
+                                        <a href="https://git-scm.com/book/vi/v2" target="_blank">Pro Git Book — Tiếng Việt</a>
+                                        <div class="ll-desc">Sách Git miễn phí bản dịch tiếng Việt chính thức. Từ cơ bản đến nâng cao.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://docs.github.com/en/actions/quickstart" target="_blank">GitHub Actions Quickstart</a>
+                                        <div class="ll-desc">Setup CI/CD pipeline đầu tiên: build → test → deploy.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://github.com/serilog/serilog/wiki/Getting-Started" target="_blank">Serilog Getting Started</a>
+                                        <div class="ll-desc">Structured logging cho .NET — setup, sinks, enrichers.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">🎬</span>
+                                    <div>
+                                        <a href="https://www.youtube.com/watch?v=ULsBE-8dQow" target="_blank">Nick Chapsas — Unit Testing in .NET</a>
+                                        <div class="ll-desc">Best practices testing: Arrange-Act-Assert, Moq, FluentAssertions.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="lesson-summary">Học xong → tự dockerize app, viết unit tests, setup CI pipeline, dùng Git workflow chuẩn.</div>
+                        </div>
+
+                        <div class="phase-checkpoint">
+                            <strong>Checkpoint:</strong> Tự setup được project mới với Docker, tests, CI. Resolve merge conflict không hoảng.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="level-summary">
+                <h4>Tóm tắt Fresher: Sau 8 tháng bạn cần có</h4>
+                <div class="summary-grid">
+                    <div class="sum-item done">C# OOP + LINQ thành thạo</div>
+                    <div class="sum-item done">ASP.NET Core REST API</div>
+                    <div class="sum-item done">SQL + EF Core</div>
+                    <div class="sum-item done">Git workflow</div>
+                    <div class="sum-item done">Unit Testing basics</div>
+                    <div class="sum-item done">Docker basics</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== JUNIOR ==================== -->
+    <section class="section section-dark" id="junior">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-icon">🚀</span>
+                <h2>Junior (1-3 năm)</h2>
+                <p>Từ "làm được" sang "làm tốt" — hiểu WHY, không chỉ HOW</p>
+            </div>
+
+            <div class="phase-timeline">
+                <div class="phase">
+                    <div class="phase-header ph-5">
+                        <span class="phase-tag">NĂM 1-2</span>
+                        <h3>Nâng cao C# & .NET Internals</h3>
+                    </div>
+                    <div class="phase-body">
+                        <div class="phase-grid">
+                            <div class="skill-block must-know">
+                                <h4>Phải hiểu sâu</h4>
+                                <ul>
+                                    <li>async/await bản chất: Task, ValueTask, SynchronizationContext, ConfigureAwait</li>
+                                    <li>CLR internals: GC generations, LOH, memory pressure, finalizers vs IDisposable</li>
+                                    <li>Generics deep dive: constraints, covariance/contravariance</li>
+                                    <li>Delegates, Events, Func/Action, Expression Trees</li>
+                                    <li>Reflection basics & source generators</li>
+                                    <li>Span&lt;T&gt;, Memory&lt;T&gt; — high-performance scenarios</li>
+                                    <li>C# latest features: records, pattern matching, global usings, file-scoped namespaces</li>
+                                </ul>
+                            </div>
+                            <div class="skill-block practice">
+                                <h4>Project thực hành</h4>
+                                <ul>
+                                    <li>Build custom middleware pipeline (mini ASP.NET Core)</li>
+                                    <li>Implement caching layer với IMemoryCache + IDistributedCache</li>
+                                    <li>Benchmark code với BenchmarkDotNet</li>
+                                    <li>Profile app với dotnet-counters, dotnet-trace</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="lesson-block">
+                            <h4>Bài giảng & Tài liệu học</h4>
+                            <div class="lesson-links">
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://learn.microsoft.com/vi-vn/dotnet/csharp/asynchronous-programming/" target="_blank">Async Programming in C#</a>
+                                        <div class="ll-desc">Official guide: Task, async/await, cancellation tokens, best practices.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://blog.stephencleary.com/2012/02/async-and-await.html" target="_blank">Stephen Cleary — Async and Await</a>
+                                        <div class="ll-desc">Series bài viết kinh điển về async/await. "There Is No Thread" — phải đọc.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://learn.microsoft.com/vi-vn/dotnet/standard/garbage-collection/" target="_blank">Garbage Collection — .NET Docs</a>
+                                        <div class="ll-desc">GC generations, LOH, memory pressure — hiểu cách .NET quản lý memory.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://learn.microsoft.com/vi-vn/dotnet/standard/memory-and-spans/" target="_blank">Memory&lt;T&gt; and Span&lt;T&gt;</a>
+                                        <div class="ll-desc">High-performance scenarios — giảm allocation, tăng throughput.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">🎬</span>
+                                    <div>
+                                        <a href="https://www.youtube.com/@nickchapsas" target="_blank">Nick Chapsas YouTube Channel</a>
+                                        <div class="ll-desc">Video ngắn, đi thẳng vào C# advanced features, performance tips.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">🇻🇳</span>
+                                    <div>
+                                        <a href="https://viblo.asia/tags/csharp" target="_blank">Viblo — Bài viết C# (Tiếng Việt)</a>
+                                        <div class="ll-desc">Cộng đồng dev Việt Nam. Nhiều bài viết C# advanced, async/await, performance.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">🇻🇳</span>
+                                    <div>
+                                        <a href="https://viblo.asia/tags/dotnet" target="_blank">Viblo — .NET Articles (Tiếng Việt)</a>
+                                        <div class="ll-desc">Bài viết .NET internals, CLR, GC từ cộng đồng dev Việt Nam.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://github.com/dotnet/BenchmarkDotNet" target="_blank">BenchmarkDotNet — GitHub</a>
+                                        <div class="ll-desc">Benchmark code C# đúng cách. Đọc docs + samples để bắt đầu.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="phase">
+                    <div class="phase-header ph-6">
+                        <span class="phase-tag">NĂM 1-2</span>
+                        <h3>Design Patterns & Architecture</h3>
+                    </div>
+                    <div class="phase-body">
+                        <div class="phase-grid">
+                            <div class="skill-block must-know">
+                                <h4>Phải nắm chắc</h4>
+                                <ul>
+                                    <li>SOLID principles — áp dụng thực tế, không chỉ lý thuyết</li>
+                                    <li>Repository + Unit of Work pattern</li>
+                                    <li>Clean Architecture / Onion Architecture</li>
+                                    <li>CQRS basics: tách Command và Query</li>
+                                    <li>MediatR: Request/Handler pattern, Pipeline behaviors</li>
+                                    <li>Design patterns thường dùng: Strategy, Observer, Decorator, Builder, Chain of Responsibility</li>
+                                    <li>Domain-Driven Design basics: Entity, Value Object, Aggregate, Repository</li>
+                                </ul>
+                            </div>
+                            <div class="skill-block practice">
+                                <h4>Project thực hành</h4>
+                                <ul>
+                                    <li>Refactor monolith app sang Clean Architecture</li>
+                                    <li>Implement CQRS với MediatR</li>
+                                    <li>Apply DDD cho 1 bounded context</li>
+                                    <li>Code review: tìm SOLID violations trong codebase</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="lesson-block">
+                            <h4>Bài giảng & Tài liệu học</h4>
+                            <div class="lesson-links">
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://refactoring.guru/vi/design-patterns" target="_blank">Refactoring Guru — Design Patterns (Tiếng Việt)</a>
+                                        <div class="ll-desc">Tất cả design patterns giải thích visual bằng tiếng Việt. Strategy, Observer, Decorator...</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://github.com/ardalis/CleanArchitecture" target="_blank">ardalis/CleanArchitecture Template</a>
+                                        <div class="ll-desc">Clean Architecture template cho ASP.NET Core. Clone về đọc structure.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://github.com/jasontaylordev/CleanArchitecture" target="_blank">Jason Taylor — Clean Architecture</a>
+                                        <div class="ll-desc">Template phổ biến nhất. So sánh với ardalis để hiểu trade-offs.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://github.com/jbogard/MediatR/wiki" target="_blank">MediatR Wiki — CQRS Pattern</a>
+                                        <div class="ll-desc">Docs MediatR: Request/Handler, Pipeline Behaviors, Notifications.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://learn.microsoft.com/vi-vn/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/" target="_blank">Microsoft — DDD & CQRS Patterns</a>
+                                        <div class="ll-desc">DDD concepts: Entity, Value Object, Aggregate, Bounded Context. Phải đọc.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">🎬</span>
+                                    <div>
+                                        <a href="https://www.youtube.com/@amaborosura" target="_blank">Raw Coding — YouTube</a>
+                                        <div class="ll-desc">ASP.NET Core advanced: Clean Architecture, CQRS thực hành.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">🇻🇳</span>
+                                    <div>
+                                        <a href="https://viblo.asia/tags/design-patterns" target="_blank">Viblo — Design Patterns (Tiếng Việt)</a>
+                                        <div class="ll-desc">Nhiều bài viết SOLID, Clean Architecture, DDD bằng tiếng Việt từ cộng đồng.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="phase">
+                    <div class="phase-header ph-7">
+                        <span class="phase-tag">NĂM 2-3</span>
+                        <h3>Security, Performance & Advanced Database</h3>
+                    </div>
+                    <div class="phase-body">
+                        <div class="phase-grid">
+                            <div class="skill-block must-know">
+                                <h4>Phải nắm chắc</h4>
+                                <ul>
+                                    <li>Authentication: JWT, OAuth 2.0, OpenID Connect, Identity Server</li>
+                                    <li>Authorization: Policy-based, Role-based, Resource-based</li>
+                                    <li>OWASP Top 10: SQL injection, XSS, CSRF — hiểu và phòng chống</li>
+                                    <li>HTTPS, CORS, CSP headers</li>
+                                    <li>Database: Execution plans, index optimization, query tuning</li>
+                                    <li>Caching strategy: Cache-aside, Write-through, Redis basics</li>
+                                    <li>Performance: Response compression, output caching, connection pooling</li>
+                                    <li>API versioning, rate limiting, pagination best practices</li>
+                                </ul>
+                            </div>
+                            <div class="skill-block practice">
+                                <h4>Project thực hành</h4>
+                                <ul>
+                                    <li>Implement JWT auth + refresh token flow hoàn chỉnh</li>
+                                    <li>Audit API cho security vulnerabilities</li>
+                                    <li>Optimize slow queries — từ 5s xuống 50ms</li>
+                                    <li>Setup Redis caching cho hot data</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="lesson-block">
+                            <h4>Bài giảng & Tài liệu học</h4>
+                            <div class="lesson-links">
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://learn.microsoft.com/vi-vn/aspnet/core/security/authentication/" target="_blank">ASP.NET Core Authentication</a>
+                                        <div class="ll-desc">JWT Bearer, Cookie auth, Identity — official docs đầy đủ.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://learn.microsoft.com/vi-vn/aspnet/core/security/authorization/policies" target="_blank">Policy-based Authorization</a>
+                                        <div class="ll-desc">Authorization nâng cao: policies, requirements, handlers.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://owasp.org/www-project-top-ten/" target="_blank">OWASP Top 10</a>
+                                        <div class="ll-desc">10 lỗ hổng bảo mật phổ biến nhất. Backend dev PHẢI biết.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://redis.io/docs/latest/develop/get-started/" target="_blank">Redis Getting Started</a>
+                                        <div class="ll-desc">Học Redis từ cơ bản: data types, caching patterns, pub/sub.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://use-the-index-luke.com/sql/explain-plan" target="_blank">Reading Execution Plans</a>
+                                        <div class="ll-desc">Đọc execution plan SQL — tìm bottleneck, optimize query.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">🎬</span>
+                                    <div>
+                                        <a href="https://www.youtube.com/watch?v=rI4kdGLaUiQ" target="_blank">Nick Chapsas — JWT Authentication in .NET</a>
+                                        <div class="ll-desc">Implement JWT + Refresh Token flow từ đầu đến cuối.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">🇻🇳</span>
+                                    <div>
+                                        <a href="https://viblo.asia/tags/security" target="_blank">Viblo — Bảo mật ứng dụng (Tiếng Việt)</a>
+                                        <div class="ll-desc">Bài viết bảo mật web, OWASP, JWT bằng tiếng Việt. Thực tế và dễ hiểu.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="level-summary">
+                <h4>Tóm tắt Junior: Sau 3 năm bạn cần có</h4>
+                <div class="summary-grid">
+                    <div class="sum-item done">async/await + CLR hiểu sâu</div>
+                    <div class="sum-item done">Clean Architecture thực hành</div>
+                    <div class="sum-item done">SOLID + Design Patterns</div>
+                    <div class="sum-item done">Security (JWT, OWASP)</div>
+                    <div class="sum-item done">Database optimization</div>
+                    <div class="sum-item done">Caching (Redis)</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== MID/SENIOR ==================== -->
+    <section class="section" id="mid-senior">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-icon">⚡</span>
+                <h2>Mid / Senior (3-6 năm)</h2>
+                <p>Từ "làm tốt" sang "dẫn dắt kỹ thuật" — system thinking & ownership</p>
+            </div>
+
+            <div class="phase-timeline">
+                <div class="phase">
+                    <div class="phase-header ph-8">
+                        <span class="phase-tag">NĂM 3-4</span>
+                        <h3>Distributed Systems & Microservices</h3>
+                    </div>
+                    <div class="phase-body">
+                        <div class="phase-grid">
+                            <div class="skill-block must-know">
+                                <h4>Phải hiểu sâu</h4>
+                                <ul>
+                                    <li>Microservices patterns: API Gateway, Service Discovery, Circuit Breaker</li>
+                                    <li>Message Queue: RabbitMQ / Kafka — khi nào dùng, trade-offs</li>
+                                    <li>Event-driven architecture: Event Sourcing, CQRS advanced</li>
+                                    <li>gRPC: protobuf, streaming, khi nào chọn gRPC vs REST</li>
+                                    <li>Distributed caching: Redis cluster, cache invalidation strategies</li>
+                                    <li>Database patterns: Read replicas, sharding, eventual consistency</li>
+                                    <li>Observability: Distributed tracing (OpenTelemetry), metrics, dashboards</li>
+                                    <li>Resilience: Polly (retry, circuit breaker, timeout, bulkhead)</li>
+                                </ul>
+                            </div>
+                            <div class="skill-block practice">
+                                <h4>Project thực hành</h4>
+                                <ul>
+                                    <li>Tách 1 monolith thành 2-3 microservices</li>
+                                    <li>Setup RabbitMQ/Kafka cho async communication</li>
+                                    <li>Implement Saga pattern cho distributed transaction</li>
+                                    <li>Setup Grafana + Prometheus monitoring</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="lesson-block">
+                            <h4>Bài giảng & Tài liệu học</h4>
+                            <div class="lesson-links">
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://learn.microsoft.com/vi-vn/dotnet/architecture/microservices/" target="_blank">Microsoft — .NET Microservices Architecture</a>
+                                        <div class="ll-desc">eBook miễn phí từ Microsoft: microservices patterns, DDD, CQRS, event-driven.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://www.rabbitmq.com/tutorials" target="_blank">RabbitMQ Tutorials</a>
+                                        <div class="ll-desc">6 tutorials từ cơ bản đến advanced. Có ví dụ C#/.NET.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://kafka.apache.org/documentation/#gettingStarted" target="_blank">Apache Kafka Documentation</a>
+                                        <div class="ll-desc">Kafka concepts: topics, partitions, consumer groups, exactly-once semantics.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://github.com/App-vNext/Polly/wiki" target="_blank">Polly Wiki — Resilience Patterns</a>
+                                        <div class="ll-desc">Retry, Circuit Breaker, Timeout, Bulkhead — patterns với ví dụ code.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://opentelemetry.io/docs/languages/net/" target="_blank">OpenTelemetry for .NET</a>
+                                        <div class="ll-desc">Distributed tracing, metrics, logging — observability standard.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://github.com/dotnet/eShop" target="_blank">dotnet/eShop — Reference App</a>
+                                        <div class="ll-desc">Reference microservices app mới nhất từ Microsoft. Thay thế eShopOnContainers.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">🇻🇳</span>
+                                    <div>
+                                        <a href="https://viblo.asia/tags/microservices" target="_blank">Viblo — Microservices (Tiếng Việt)</a>
+                                        <div class="ll-desc">Bài viết microservices, message queue, event-driven bằng tiếng Việt.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="phase">
+                    <div class="phase-header ph-9">
+                        <span class="phase-tag">NĂM 4-6</span>
+                        <h3>Cloud & DevOps & System Design</h3>
+                    </div>
+                    <div class="phase-body">
+                        <div class="phase-grid">
+                            <div class="skill-block must-know">
+                                <h4>Phải nắm chắc</h4>
+                                <ul>
+                                    <li>Cloud (Azure/AWS): App Service, Functions, Container Apps, Storage, Key Vault</li>
+                                    <li>Kubernetes basics: Pods, Services, Deployments, ConfigMaps, Secrets</li>
+                                    <li>CI/CD advanced: multi-stage pipelines, canary deployments, feature flags</li>
+                                    <li>Infrastructure as Code: Terraform / Bicep basics</li>
+                                    <li>System Design: CAP theorem, load balancing, CDN, horizontal vs vertical scaling</li>
+                                    <li>Database selection: SQL vs NoSQL — khi nào dùng MongoDB, Elasticsearch</li>
+                                    <li>Architecture Decision Records (ADR) — document WHY</li>
+                                </ul>
+                            </div>
+                            <div class="skill-block practice">
+                                <h4>Project thực hành</h4>
+                                <ul>
+                                    <li>Deploy app lên K8s cluster (minikube hoặc AKS)</li>
+                                    <li>Design system cho 100K concurrent users</li>
+                                    <li>Viết ADR cho 3 technical decisions</li>
+                                    <li>Setup zero-downtime deployment</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="lesson-block">
+                            <h4>Bài giảng & Tài liệu học</h4>
+                            <div class="lesson-links">
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://learn.microsoft.com/vi-vn/azure/architecture/guide/" target="_blank">Azure Architecture Guide</a>
+                                        <div class="ll-desc">Architecture styles, best practices, cloud design patterns từ Microsoft.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://kubernetes.io/docs/tutorials/kubernetes-basics/" target="_blank">Kubernetes Basics — Official Tutorial</a>
+                                        <div class="ll-desc">Interactive tutorial: deploy, expose, scale, update app trên K8s.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://developer.hashicorp.com/terraform/tutorials" target="_blank">Terraform Tutorials</a>
+                                        <div class="ll-desc">Infrastructure as Code từ cơ bản. Có tutorials cho Azure/AWS.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://github.com/donnemartin/system-design-primer" target="_blank">System Design Primer — GitHub</a>
+                                        <div class="ll-desc">230K+ stars. Tổng hợp kiến thức system design: scaling, caching, load balancing.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">🎬</span>
+                                    <div>
+                                        <a href="https://www.youtube.com/@ByteByteGo" target="_blank">ByteByteGo — YouTube</a>
+                                        <div class="ll-desc">System design giải thích visual. Mỗi video 10-15 phút, rất dễ hiểu.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">📄</span>
+                                    <div>
+                                        <a href="https://learn.microsoft.com/vi-vn/azure/architecture/patterns/" target="_blank">Cloud Design Patterns</a>
+                                        <div class="ll-desc">40+ cloud design patterns: CQRS, Event Sourcing, Saga, Circuit Breaker...</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">🇻🇳</span>
+                                    <div>
+                                        <a href="https://viblo.asia/tags/docker" target="_blank">Viblo — Docker & DevOps (Tiếng Việt)</a>
+                                        <div class="ll-desc">Docker, K8s, CI/CD, cloud deployment bằng tiếng Việt từ cộng đồng dev.</div>
+                                    </div>
+                                </div>
+                                <div class="lesson-link">
+                                    <span class="ll-icon">🇻🇳</span>
+                                    <div>
+                                        <a href="https://viblo.asia/tags/system-design" target="_blank">Viblo — System Design (Tiếng Việt)</a>
+                                        <div class="ll-desc">Bài viết system design, scalability, CAP theorem giải thích bằng tiếng Việt.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="level-summary">
+                <h4>Tóm tắt Mid/Senior: Bạn cần có</h4>
+                <div class="summary-grid">
+                    <div class="sum-item done">Microservices thực chiến</div>
+                    <div class="sum-item done">Message Queue (RabbitMQ/Kafka)</div>
+                    <div class="sum-item done">Cloud deployment</div>
+                    <div class="sum-item done">System Design skills</div>
+                    <div class="sum-item done">Kubernetes basics</div>
+                    <div class="sum-item done">Observability & Monitoring</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== LEAD ==================== -->
+    <section class="section section-dark" id="lead">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-icon">👑</span>
+                <h2>Tech Lead (5+ năm)</h2>
+                <p>Từ "dẫn dắt kỹ thuật" sang "dẫn dắt con người" — multiply through others</p>
+            </div>
+
+            <div class="lead-skills-grid">
+                <div class="lead-skill-card">
+                    <div class="lsc-icon">🏗️</div>
+                    <h4>Architecture Ownership</h4>
+                    <ul>
+                        <li>Đưa ra architecture decisions cho cả team</li>
+                        <li>Evaluate trade-offs: build vs buy, mono vs micro</li>
+                        <li>Technical roadmap planning (quarter/year)</li>
+                        <li>Tech debt management — khi nào trả, khi nào chấp nhận</li>
+                        <li>Vendor/library evaluation và migration planning</li>
+                    </ul>
+                </div>
+                <div class="lead-skill-card">
+                    <div class="lsc-icon">👥</div>
+                    <h4>Team Development</h4>
+                    <ul>
+                        <li>Code review culture: constructive, educational</li>
+                        <li>Mentoring: 1-on-1, pair programming, tech talks</li>
+                        <li>Hiring: technical interview design, evaluation criteria</li>
+                        <li>Onboarding process cho new members</li>
+                        <li>Growth plans cho từng member (IC path vs Management path)</li>
+                    </ul>
+                </div>
+                <div class="lead-skill-card">
+                    <div class="lsc-icon">📊</div>
+                    <h4>Project Management</h4>
+                    <ul>
+                        <li>Technical estimation (story points, t-shirt sizing)</li>
+                        <li>Sprint planning: balance features, bugs, tech debt</li>
+                        <li>Stakeholder communication: translate tech → business</li>
+                        <li>Risk assessment và mitigation plans</li>
+                        <li>Post-mortem / Retrospective facilitation</li>
+                    </ul>
+                </div>
+                <div class="lead-skill-card">
+                    <div class="lsc-icon">🚨</div>
+                    <h4>Incident Management</h4>
+                    <ul>
+                        <li>On-call rotation setup</li>
+                        <li>Incident response protocol: detect → triage → fix → review</li>
+                        <li>Blameless post-mortem culture</li>
+                        <li>SLI/SLO/SLA definition</li>
+                        <li>Chaos engineering basics</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== TOOLS & LANGUAGES ==================== -->
+    <section class="section" id="tools">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-icon">🧰</span>
+                <h2>Công Cụ & Ngôn Ngữ Liên Quan</h2>
+                <p>Ngoài C# .NET Core, bạn nên biết thêm những gì để trở thành developer toàn diện?</p>
+            </div>
+
+            <div class="tools-section">
+                <h3>Ngôn ngữ nên học thêm</h3>
+                <div class="tools-grid">
+                    <div class="tool-card priority-high">
+                        <div class="tool-priority">BẮT BUỘC</div>
+                        <div class="tool-icon">📜</div>
+                        <h4>SQL</h4>
+                        <p>Backend developer PHẢI giỏi SQL. Không chỉ LINQ — bạn cần viết raw SQL, đọc execution plan, optimize queries.</p>
+                        <div class="tool-when">Dùng hàng ngày. EF Core generate SQL — bạn phải đọc được nó tốt hay tệ.</div>
+                    </div>
+                    <div class="tool-card priority-high">
+                        <div class="tool-priority">BẮT BUỘC</div>
+                        <div class="tool-icon">🟨</div>
+                        <h4>JavaScript / TypeScript</h4>
+                        <p>Kể cả chỉ làm backend, bạn sẽ gặp JS/TS ở frontend, scripts, hoặc Node.js tools. TypeScript đặc biệt quan trọng.</p>
+                        <div class="tool-when">Khi cần debug frontend issues, viết scripts, hoặc hiểu full-stack context.</div>
+                    </div>
+                    <div class="tool-card priority-medium">
+                        <div class="tool-priority">NÊN BIẾT</div>
+                        <div class="tool-icon">🐍</div>
+                        <h4>Python</h4>
+                        <p>Scripting, automation, data analysis, AI/ML integration. Rất hữu ích cho DevOps scripts và prototyping nhanh.</p>
+                        <div class="tool-when">Khi cần automation, data processing, hoặc AI integration.</div>
+                    </div>
+                    <div class="tool-card priority-low">
+                        <div class="tool-priority">NICE TO HAVE</div>
+                        <div class="tool-icon">🦀</div>
+                        <h4>Go / Rust</h4>
+                        <p>Go cho microservices performance-critical. Rust cho system-level hiểu biết. Mở rộng tư duy engineering.</p>
+                        <div class="tool-when">Khi muốn hiểu sâu về concurrency (Go) hoặc memory management (Rust).</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tools-section">
+                <h3>Công cụ & Technologies phải biết</h3>
+                <div class="tool-categories">
+                    <div class="tool-cat">
+                        <div class="tc-header tc-essential">
+                            <h4>Hàng ngày phải dùng</h4>
+                        </div>
+                        <div class="tc-body">
+                            <div class="tc-item">
+                                <strong>Docker</strong>
+                                <p>Containerize app, docker-compose cho local dev. Không biết Docker = không deploy được.</p>
+                            </div>
+                            <div class="tc-item">
+                                <strong>Git</strong>
+                                <p>Advanced: rebase, cherry-pick, bisect, reflog. Git là time machine — phải dùng thành thạo.</p>
+                            </div>
+                            <div class="tc-item">
+                                <strong>Postman / Bruno / Thunder Client</strong>
+                                <p>API testing, collections, environments. Bruno (open source) đang lên.</p>
+                            </div>
+                            <div class="tc-item">
+                                <strong>VS Code / Visual Studio / Rider</strong>
+                                <p>Thành thạo IDE: shortcuts, debugger, refactoring tools. Rider mạnh nhất cho .NET.</p>
+                            </div>
+                            <div class="tc-item">
+                                <strong>SQL Server Management Studio / Azure Data Studio</strong>
+                                <p>Query, execution plan, profiler. Azure Data Studio nhẹ hơn, cross-platform.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tool-cat">
+                        <div class="tc-header tc-important">
+                            <h4>Phải biết khi lên Senior</h4>
+                        </div>
+                        <div class="tc-body">
+                            <div class="tc-item">
+                                <strong>Redis</strong>
+                                <p>Distributed cache, session store, pub/sub, rate limiting. Dùng rất nhiều trong production.</p>
+                            </div>
+                            <div class="tc-item">
+                                <strong>RabbitMQ / Kafka</strong>
+                                <p>Message queue cho async processing. RabbitMQ đơn giản hơn. Kafka cho scale lớn + event streaming.</p>
+                            </div>
+                            <div class="tc-item">
+                                <strong>Elasticsearch / OpenSearch</strong>
+                                <p>Full-text search, log aggregation (ELK stack). Khi SQL LIKE '%keyword%' không đủ nhanh.</p>
+                            </div>
+                            <div class="tc-item">
+                                <strong>Kubernetes</strong>
+                                <p>Container orchestration. Hiểu concepts: pods, services, deployments, ingress. Không cần expert nhưng phải hiểu.</p>
+                            </div>
+                            <div class="tc-item">
+                                <strong>Terraform / Bicep</strong>
+                                <p>Infrastructure as Code. Tạo cloud resources bằng code thay vì click UI.</p>
+                            </div>
+                            <div class="tc-item">
+                                <strong>Grafana + Prometheus / Application Insights</strong>
+                                <p>Monitoring, alerting, dashboards. "If you can't measure it, you can't improve it."</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tool-cat">
+                        <div class="tc-header tc-extra">
+                            <h4>Mở rộng khi có thời gian</h4>
+                        </div>
+                        <div class="tc-body">
+                            <div class="tc-item">
+                                <strong>SignalR</strong>
+                                <p>Real-time communication: chat, notifications, live dashboards.</p>
+                            </div>
+                            <div class="tc-item">
+                                <strong>GraphQL (HotChocolate)</strong>
+                                <p>Alternative cho REST khi client cần flexible queries. Không thay thế REST — bổ sung.</p>
+                            </div>
+                            <div class="tc-item">
+                                <strong>Dapr</strong>
+                                <p>Distributed Application Runtime — simplify microservices development.</p>
+                            </div>
+                            <div class="tc-item">
+                                <strong>Blazor</strong>
+                                <p>C# trên browser. Hữu ích khi cần full-stack C# — nhưng không thay thế React/Angular.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SOURCE NÊN ĐỌC ==================== -->
+    <section class="section section-dark" id="sources">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-icon">📖</span>
+                <h2>Source Nên Đọc — Nâng Cao Kinh Nghiệm</h2>
+                <p>Đọc code người giỏi = cách nhanh nhất để giỏi. Đây là nơi bạn nên đọc.</p>
+            </div>
+
+            <div class="source-section">
+                <h3>GitHub Repositories phải follow & đọc source</h3>
+                <div class="source-grid">
+                    <div class="source-card src-critical">
+                        <div class="src-badge">ĐỌC TRƯỚC</div>
+                        <h4>dotnet/aspnetcore</h4>
+                        <p>Source code ASP.NET Core. Đọc để hiểu: middleware pipeline, DI container, routing, model binding thật sự hoạt động thế nào bên trong.</p>
+                        <div class="src-start">Bắt đầu: <code>src/Hosting</code> → <code>src/Http</code> → <code>src/Mvc</code></div>
+                        <a href="https://github.com/dotnet/aspnetcore" target="_blank" class="src-link">GitHub →</a>
+                    </div>
+                    <div class="source-card src-critical">
+                        <div class="src-badge">ĐỌC TRƯỚC</div>
+                        <h4>dotnet/runtime</h4>
+                        <p>.NET runtime, BCL (Base Class Library). Đọc để hiểu: GC, ThreadPool, Task, Collections thật sự implement thế nào.</p>
+                        <div class="src-start">Bắt đầu: <code>src/libraries/System.Collections</code> → <code>System.Threading</code></div>
+                        <a href="https://github.com/dotnet/runtime" target="_blank" class="src-link">GitHub →</a>
+                    </div>
+                    <div class="source-card src-important">
+                        <div class="src-badge">NÊN ĐỌC</div>
+                        <h4>dotnet/efcore</h4>
+                        <p>Entity Framework Core source. Đọc để hiểu: change tracking, query translation, migrations engine.</p>
+                        <div class="src-start">Bắt đầu: <code>src/EFCore</code> → <code>src/EFCore.SqlServer</code></div>
+                        <a href="https://github.com/dotnet/efcore" target="_blank" class="src-link">GitHub →</a>
+                    </div>
+                    <div class="source-card src-important">
+                        <div class="src-badge">NÊN ĐỌC</div>
+                        <h4>jbogard/MediatR</h4>
+                        <p>CQRS mediator pattern. Code ngắn, clean, dễ đọc. Học cách viết library đúng chuẩn.</p>
+                        <div class="src-start">Bắt đầu: <code>src/MediatR</code> — chỉ vài file nhưng rất tinh tế</div>
+                        <a href="https://github.com/jbogard/MediatR" target="_blank" class="src-link">GitHub →</a>
+                    </div>
+                    <div class="source-card src-important">
+                        <div class="src-badge">NÊN ĐỌC</div>
+                        <h4>App-vNext/Polly</h4>
+                        <p>Resilience library. Học cách implement retry, circuit breaker, bulkhead pattern.</p>
+                        <div class="src-start">Bắt đầu: <code>src/Polly.Core</code></div>
+                        <a href="https://github.com/App-vNext/Polly" target="_blank" class="src-link">GitHub →</a>
+                    </div>
+                    <div class="source-card src-extra">
+                        <div class="src-badge">MỞ RỘNG</div>
+                        <h4>ardalis/CleanArchitecture</h4>
+                        <p>Template Clean Architecture cho ASP.NET Core. Tham khảo cách structure project.</p>
+                        <div class="src-start">Bắt đầu: Đọc toàn bộ — đây là template ngắn gọn</div>
+                        <a href="https://github.com/ardalis/CleanArchitecture" target="_blank" class="src-link">GitHub →</a>
+                    </div>
+                    <div class="source-card src-extra">
+                        <div class="src-badge">MỞ RỘNG</div>
+                        <h4>jasontaylordev/CleanArchitecture</h4>
+                        <p>Một template Clean Architecture khác, popular hơn. So sánh với ardalis để hiểu trade-offs.</p>
+                        <div class="src-start">Bắt đầu: <code>src/Application</code> → <code>src/Domain</code> → <code>src/Infrastructure</code></div>
+                        <a href="https://github.com/jasontaylordev/CleanArchitecture" target="_blank" class="src-link">GitHub →</a>
+                    </div>
+                    <div class="source-card src-extra">
+                        <div class="src-badge">MỞ RỘNG</div>
+                        <h4>dotnet/eShop (eShopOnContainers)</h4>
+                        <p>Reference app microservices từ Microsoft. Mẫu thực tế cho microservices architecture.</p>
+                        <div class="src-start">Bắt đầu: README → Architecture overview → từng service</div>
+                        <a href="https://github.com/dotnet/eShop" target="_blank" class="src-link">GitHub →</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="source-section">
+                <h3>Blogs & Channels phải follow</h3>
+                <div class="blog-grid">
+                    <div class="blog-item">
+                        <div class="blog-type">📝 Blog</div>
+                        <div>
+                            <strong><a href="https://andrewlock.net" target="_blank" class="blog-link">Andrew Lock — andrewlock.net</a></strong>
+                            <p>ASP.NET Core deep dives. Bài nào cũng chất lượng, giải thích rõ internals.</p>
+                        </div>
+                    </div>
+                    <div class="blog-item">
+                        <div class="blog-type">📝 Blog</div>
+                        <div>
+                            <strong><a href="https://blog.stephencleary.com" target="_blank" class="blog-link">Stephen Cleary — blog.stephencleary.com</a></strong>
+                            <p>async/await master. Đọc series "A Tour of Task" và "There Is No Thread".</p>
+                        </div>
+                    </div>
+                    <div class="blog-item">
+                        <div class="blog-type">📝 Blog</div>
+                        <div>
+                            <strong><a href="https://www.youtube.com/@nickchapsas" target="_blank" class="blog-link">Nick Chapsas — YouTube + Blog</a></strong>
+                            <p>.NET tips, performance, new features. Video ngắn, đi thẳng vào vấn đề.</p>
+                        </div>
+                    </div>
+                    <div class="blog-item">
+                        <div class="blog-type">📝 Blog</div>
+                        <div>
+                            <strong><a href="https://ardalis.com" target="_blank" class="blog-link">Steve Smith (ardalis) — ardalis.com</a></strong>
+                            <p>Design patterns, architecture, DDD cho .NET. Tác giả Clean Architecture template.</p>
+                        </div>
+                    </div>
+                    <div class="blog-item">
+                        <div class="blog-type">📝 Blog</div>
+                        <div>
+                            <strong><a href="https://blog.maartenballiauw.be" target="_blank" class="blog-link">Maarten Balliauw — blog.maartenballiauw.be</a></strong>
+                            <p>.NET internals, JetBrains, performance. Deep technical content.</p>
+                        </div>
+                    </div>
+                    <div class="blog-item">
+                        <div class="blog-type">📺 YouTube</div>
+                        <div>
+                            <strong><a href="https://www.youtube.com/@dotnet" target="_blank" class="blog-link">dotnet / .NET Conf</a></strong>
+                            <p>Official .NET channel. Mỗi năm có .NET Conf — cập nhật features mới nhất.</p>
+                        </div>
+                    </div>
+                    <div class="blog-item">
+                        <div class="blog-type">📺 YouTube</div>
+                        <div>
+                            <strong><a href="https://www.youtube.com/@amaborosura" target="_blank" class="blog-link">Raw Coding</a></strong>
+                            <p>ASP.NET Core, authentication, advanced topics. Giải thích rất kỹ.</p>
+                        </div>
+                    </div>
+                    <div class="blog-item">
+                        <div class="blog-type">📄 Docs</div>
+                        <div>
+                            <strong><a href="https://learn.microsoft.com/vi-vn/dotnet/" target="_blank" class="blog-link">learn.microsoft.com</a></strong>
+                            <p>Official docs. PHẢI đọc official docs trước khi hỏi AI. Docs .NET rất chất lượng.</p>
+                        </div>
+                    </div>
+                    <div class="blog-item">
+                        <div class="blog-type">💬 Community</div>
+                        <div>
+                            <strong><a href="https://www.reddit.com/r/dotnet/" target="_blank" class="blog-link">r/dotnet (Reddit) + .NET Discord</a></strong>
+                            <p>Cộng đồng active. Đặt câu hỏi, đọc discussions, thấy vấn đề người khác gặp.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="source-section">
+                <h3>Sách phải đọc theo level</h3>
+                <div class="book-by-level">
+                    <div class="bbl-card">
+                        <div class="bbl-header bbl-fresher">FRESHER</div>
+                        <div class="bbl-body">
+                            <div class="bbl-item"><strong>C# in Depth</strong> — Jon Skeet <span class="bbl-note">Bible của C#</span></div>
+                            <div class="bbl-item"><strong>Head First Design Patterns</strong> <span class="bbl-note">Visual, dễ hiểu</span></div>
+                            <div class="bbl-item"><strong>Pro ASP.NET Core</strong> — Adam Freeman <span class="bbl-note">Comprehensive guide</span></div>
+                        </div>
+                    </div>
+                    <div class="bbl-card">
+                        <div class="bbl-header bbl-junior">JUNIOR</div>
+                        <div class="bbl-body">
+                            <div class="bbl-item"><strong>CLR via C#</strong> — Jeffrey Richter <span class="bbl-note">Deep .NET internals</span></div>
+                            <div class="bbl-item"><strong>Clean Code</strong> — Robert C. Martin <span class="bbl-note">Code quality foundation</span></div>
+                            <div class="bbl-item"><strong>SQL Performance Explained</strong> — Markus Winand <span class="bbl-note">Index & query tuning</span></div>
+                        </div>
+                    </div>
+                    <div class="bbl-card">
+                        <div class="bbl-header bbl-senior">SENIOR</div>
+                        <div class="bbl-body">
+                            <div class="bbl-item"><strong>Designing Data-Intensive Applications</strong> — Martin Kleppmann <span class="bbl-note">PHẢI đọc #1</span></div>
+                            <div class="bbl-item"><strong>Clean Architecture</strong> — Robert C. Martin <span class="bbl-note">Architecture principles</span></div>
+                            <div class="bbl-item"><strong>Building Microservices</strong> — Sam Newman <span class="bbl-note">Microservices bible</span></div>
+                        </div>
+                    </div>
+                    <div class="bbl-card">
+                        <div class="bbl-header bbl-lead">LEAD</div>
+                        <div class="bbl-body">
+                            <div class="bbl-item"><strong>The Manager's Path</strong> — Camille Fournier <span class="bbl-note">IC → Lead → Manager</span></div>
+                            <div class="bbl-item"><strong>An Elegant Puzzle</strong> — Will Larson <span class="bbl-note">Engineering management</span></div>
+                            <div class="bbl-item"><strong>Staff Engineer</strong> — Will Larson <span class="bbl-note">Beyond Senior</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== TRAINING PLAN ==================== -->
+    <section class="section" id="training">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-icon">📋</span>
+                <h2>Training Plan — Dùng Cho Team</h2>
+                <p>Copy plan này để training Fresher/Junior trong team. Đã test thực tế.</p>
+            </div>
+
+            <div class="training-plans">
+                <div class="tp-card">
+                    <div class="tp-header tp-fresher">
+                        <h3>Fresher Onboarding (8 tuần)</h3>
+                        <p>Mục tiêu: Sau 8 tuần, fresher tự deliver được feature đơn giản end-to-end.</p>
+                    </div>
+                    <div class="tp-body">
+                        <div class="tp-week">
+                            <span class="tp-w">Tuần 1-2</span>
+                            <div>
+                                <strong>C# + Project Structure</strong>
+                                <p>Đọc code project, hiểu structure. Viết console app recap C#. Code review 1-on-1.</p>
+                            </div>
+                        </div>
+                        <div class="tp-week">
+                            <span class="tp-w">Tuần 3-4</span>
+                            <div>
+                                <strong>ASP.NET Core + Database</strong>
+                                <p>Viết 1 API endpoint mới. Pair programming với senior. Hiểu DI, middleware, EF Core.</p>
+                            </div>
+                        </div>
+                        <div class="tp-week">
+                            <span class="tp-w">Tuần 5-6</span>
+                            <div>
+                                <strong>Testing + Git workflow</strong>
+                                <p>Viết unit tests cho feature. Tạo PR đầu tiên. Nhận code review, iterate.</p>
+                            </div>
+                        </div>
+                        <div class="tp-week">
+                            <span class="tp-w">Tuần 7-8</span>
+                            <div>
+                                <strong>Solo Feature</strong>
+                                <p>Tự deliver 1 feature nhỏ end-to-end: design → implement → test → PR → deploy.</p>
+                            </div>
+                        </div>
+                        <div class="tp-success">
+                            <strong>Definition of Done:</strong> Fresher tự tạo PR chất lượng, có tests, qua code review ≤ 2 rounds.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tp-card">
+                    <div class="tp-header tp-junior">
+                        <h3>Junior → Mid Growth Plan (6 tháng)</h3>
+                        <p>Mục tiêu: Junior bắt đầu own component/module, tự ra technical decisions nhỏ.</p>
+                    </div>
+                    <div class="tp-body">
+                        <div class="tp-week">
+                            <span class="tp-w">Tháng 1-2</span>
+                            <div>
+                                <strong>Deep Dive + Ownership</strong>
+                                <p>Own 1 module/service. Viết tech spec trước khi code. Bắt đầu review code người khác.</p>
+                            </div>
+                        </div>
+                        <div class="tp-week">
+                            <span class="tp-w">Tháng 3-4</span>
+                            <div>
+                                <strong>Architecture + Performance</strong>
+                                <p>Refactor 1 phần code theo Clean Architecture. Optimize 1 slow query. Setup caching.</p>
+                            </div>
+                        </div>
+                        <div class="tp-week">
+                            <span class="tp-w">Tháng 5-6</span>
+                            <div>
+                                <strong>Leadership Lite</strong>
+                                <p>Mentor 1 fresher. Viết ADR cho 1 technical decision. Present tech topic cho team.</p>
+                            </div>
+                        </div>
+                        <div class="tp-success">
+                            <strong>Definition of Done:</strong> Junior tự estimate, design, implement features phức tạp. Code review quality cao. Bắt đầu mentor người khác.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tp-card">
+                    <div class="tp-header tp-mid">
+                        <h3>Mid → Senior Acceleration (12 tháng)</h3>
+                        <p>Mục tiêu: Think in systems, not just features. Own technical direction.</p>
+                    </div>
+                    <div class="tp-body">
+                        <div class="tp-week">
+                            <span class="tp-w">Q1</span>
+                            <div>
+                                <strong>System Thinking</strong>
+                                <p>Design 1 feature end-to-end bao gồm scalability, security, monitoring. Viết RFC cho team review.</p>
+                            </div>
+                        </div>
+                        <div class="tp-week">
+                            <span class="tp-w">Q2</span>
+                            <div>
+                                <strong>Cross-team Impact</strong>
+                                <p>Solve 1 cross-team technical problem. Setup shared library/package. Improve CI/CD pipeline.</p>
+                            </div>
+                        </div>
+                        <div class="tp-week">
+                            <span class="tp-w">Q3</span>
+                            <div>
+                                <strong>Production Ownership</strong>
+                                <p>Own production incidents. Setup monitoring + alerting. Blameless post-mortem.</p>
+                            </div>
+                        </div>
+                        <div class="tp-week">
+                            <span class="tp-w">Q4</span>
+                            <div>
+                                <strong>Technical Leadership</strong>
+                                <p>Lead 1 technical initiative. Present architecture proposal. Đánh giá và adopt new technology.</p>
+                            </div>
+                        </div>
+                        <div class="tp-success">
+                            <strong>Definition of Done:</strong> Team và stakeholders tin tưởng technical decisions. Tự drive technical direction không cần guidance.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SKILL ASSESSMENT ==================== -->
+    <section class="section section-dark" id="assessment">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-icon">🎯</span>
+                <h2>Đánh Giá Trình Độ — Bạn Đang Ở Đâu?</h2>
+                <p>Tự đánh giá từng kỹ năng để biết mạnh/yếu ở đâu. Kết quả lưu lại để theo dõi tiến bộ.</p>
+            </div>
+
+            <div class="assess-legend">
+                <div class="al-item al-0"><span class="al-dot"></span> Chưa biết</div>
+                <div class="al-item al-1"><span class="al-dot"></span> Biết sơ qua</div>
+                <div class="al-item al-2"><span class="al-dot"></span> Hiểu rõ, dùng được</div>
+                <div class="al-item al-3"><span class="al-dot"></span> Thành thạo, dạy được</div>
+            </div>
+
+            <!-- RESULT PANEL (hidden initially, shown after assessment) -->
+            <div class="assess-result" id="assessResult" style="display:none;">
+                <h3>Kết Quả Đánh Giá</h3>
+                <div class="ar-overall" id="arOverall"></div>
+                <div class="ar-bars" id="arBars"></div>
+                <div class="ar-weak" id="arWeak"></div>
+                <div class="ar-actions">
+                    <button class="ar-btn ar-reset" onclick="resetAssessment()">Đánh giá lại</button>
+                    <button class="ar-btn ar-save" onclick="saveAssessment()">Lưu kết quả</button>
+                </div>
+                <div class="ar-history" id="arHistory"></div>
+            </div>
+
+            <!-- ASSESSMENT CATEGORIES -->
+            <div class="assess-cats" id="assessCats">
+                <!-- C# Fundamentals -->
+                <div class="assess-cat" data-cat="csharp">
+                    <div class="ac-header">
+                        <span class="ac-icon">⚡</span>
+                        <h4>C# & .NET Core</h4>
+                        <span class="ac-score" id="score-csharp">0%</span>
+                    </div>
+                    <div class="ac-body">
+                        <div class="ac-skill" data-skill="cs-syntax">
+                            <span class="ac-name">Syntax, OOP, Collections, LINQ</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="cs-async">
+                            <span class="ac-name">async/await, Task, ValueTask, ConfigureAwait</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="cs-clr">
+                            <span class="ac-name">CLR internals: GC, Memory, Span&lt;T&gt;</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="cs-generics">
+                            <span class="ac-name">Generics, Delegates, Events, Expression Trees</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="cs-modern">
+                            <span class="ac-name">C# modern: records, pattern matching, source generators</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ASP.NET Core -->
+                <div class="assess-cat" data-cat="aspnet">
+                    <div class="ac-header">
+                        <span class="ac-icon">🌐</span>
+                        <h4>ASP.NET Core & Web API</h4>
+                        <span class="ac-score" id="score-aspnet">0%</span>
+                    </div>
+                    <div class="ac-body">
+                        <div class="ac-skill" data-skill="asp-basics">
+                            <span class="ac-name">Controllers, Routing, Model Binding, Validation</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="asp-di">
+                            <span class="ac-name">Dependency Injection: lifetimes, custom containers</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="asp-middleware">
+                            <span class="ac-name">Middleware pipeline, custom middleware</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="asp-config">
+                            <span class="ac-name">Configuration, Options pattern, Environments</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="asp-api">
+                            <span class="ac-name">API versioning, rate limiting, pagination, caching</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Database -->
+                <div class="assess-cat" data-cat="database">
+                    <div class="ac-header">
+                        <span class="ac-icon">🗄️</span>
+                        <h4>Database & EF Core</h4>
+                        <span class="ac-score" id="score-database">0%</span>
+                    </div>
+                    <div class="ac-body">
+                        <div class="ac-skill" data-skill="db-sql">
+                            <span class="ac-name">SQL: JOIN, GROUP BY, window functions, subquery</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="db-design">
+                            <span class="ac-name">Database design: normalization, indexes, relationships</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="db-ef">
+                            <span class="ac-name">EF Core: migrations, Fluent API, relationships, LINQ to Entities</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="db-perf">
+                            <span class="ac-name">Execution plans, query optimization, N+1 fix</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="db-advanced">
+                            <span class="ac-name">Sharding, read replicas, NoSQL, Elasticsearch</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Architecture -->
+                <div class="assess-cat" data-cat="architecture">
+                    <div class="ac-header">
+                        <span class="ac-icon">🏗️</span>
+                        <h4>Architecture & Design Patterns</h4>
+                        <span class="ac-score" id="score-architecture">0%</span>
+                    </div>
+                    <div class="ac-body">
+                        <div class="ac-skill" data-skill="arch-solid">
+                            <span class="ac-name">SOLID principles — áp dụng thực tế</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="arch-patterns">
+                            <span class="ac-name">Design Patterns: Strategy, Observer, Decorator, Builder...</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="arch-clean">
+                            <span class="ac-name">Clean Architecture / CQRS / MediatR</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="arch-ddd">
+                            <span class="ac-name">DDD: Entity, Value Object, Aggregate, Bounded Context</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="arch-system">
+                            <span class="ac-name">System Design: CAP, scaling, load balancing, CDN</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security -->
+                <div class="assess-cat" data-cat="security">
+                    <div class="ac-header">
+                        <span class="ac-icon">🔒</span>
+                        <h4>Security</h4>
+                        <span class="ac-score" id="score-security">0%</span>
+                    </div>
+                    <div class="ac-body">
+                        <div class="ac-skill" data-skill="sec-auth">
+                            <span class="ac-name">JWT, OAuth 2.0, OpenID Connect</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="sec-authz">
+                            <span class="ac-name">Authorization: Policy-based, Role-based, Resource-based</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="sec-owasp">
+                            <span class="ac-name">OWASP Top 10: SQL injection, XSS, CSRF</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="sec-https">
+                            <span class="ac-name">HTTPS, CORS, CSP headers, HSTS</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DevOps -->
+                <div class="assess-cat" data-cat="devops">
+                    <div class="ac-header">
+                        <span class="ac-icon">🚀</span>
+                        <h4>DevOps & Infrastructure</h4>
+                        <span class="ac-score" id="score-devops">0%</span>
+                    </div>
+                    <div class="ac-body">
+                        <div class="ac-skill" data-skill="dev-docker">
+                            <span class="ac-name">Docker: Dockerfile, compose, multi-stage builds</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="dev-cicd">
+                            <span class="ac-name">CI/CD: GitHub Actions, Azure DevOps, pipelines</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="dev-k8s">
+                            <span class="ac-name">Kubernetes: pods, services, deployments, ingress</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="dev-cloud">
+                            <span class="ac-name">Cloud (Azure/AWS): App Service, Functions, Key Vault</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="dev-monitor">
+                            <span class="ac-name">Monitoring: Grafana, Prometheus, OpenTelemetry</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Distributed Systems -->
+                <div class="assess-cat" data-cat="distributed">
+                    <div class="ac-header">
+                        <span class="ac-icon">🌍</span>
+                        <h4>Distributed Systems & Microservices</h4>
+                        <span class="ac-score" id="score-distributed">0%</span>
+                    </div>
+                    <div class="ac-body">
+                        <div class="ac-skill" data-skill="dist-micro">
+                            <span class="ac-name">Microservices: API Gateway, Service Discovery</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="dist-mq">
+                            <span class="ac-name">Message Queue: RabbitMQ / Kafka</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="dist-cache">
+                            <span class="ac-name">Redis: caching, pub/sub, distributed lock</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="dist-event">
+                            <span class="ac-name">Event Sourcing, Saga pattern, eventual consistency</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="dist-grpc">
+                            <span class="ac-name">gRPC, Polly (retry, circuit breaker)</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testing & Quality -->
+                <div class="assess-cat" data-cat="testing">
+                    <div class="ac-header">
+                        <span class="ac-icon">🧪</span>
+                        <h4>Testing & Code Quality</h4>
+                        <span class="ac-score" id="score-testing">0%</span>
+                    </div>
+                    <div class="ac-body">
+                        <div class="ac-skill" data-skill="test-unit">
+                            <span class="ac-name">Unit testing: xUnit, Moq, FluentAssertions</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="test-integ">
+                            <span class="ac-name">Integration testing, WebApplicationFactory</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="test-git">
+                            <span class="ac-name">Git advanced: rebase, cherry-pick, bisect, reflog</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                        <div class="ac-skill" data-skill="test-log">
+                            <span class="ac-name">Logging: Serilog, structured logging, log levels</span>
+                            <div class="ac-levels">
+                                <button class="ac-lv" data-lv="0">0</button>
+                                <button class="ac-lv" data-lv="1">1</button>
+                                <button class="ac-lv" data-lv="2">2</button>
+                                <button class="ac-lv" data-lv="3">3</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="assess-submit" id="assessSubmit" onclick="showAssessResult()">Xem kết quả đánh giá</button>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p style="margin-bottom:16px;">
+                <a href="index.html">← Roadmap</a> ·
+                <a href="wisdom.html">Kinh nghiệm</a> ·
+                <a href="ai-era.html">AI Era</a>
+            </p>
+            <p class="footer-quote">"Không có shortcut cho mastery. Nhưng có roadmap để không đi lạc."</p>
+        </div>
+    </footer>
+    <script>
+    // ===== SKILL ASSESSMENT SYSTEM =====
+    const catNames = {
+        csharp: 'C# & .NET Core',
+        aspnet: 'ASP.NET Core & Web API',
+        database: 'Database & EF Core',
+        architecture: 'Architecture & Design Patterns',
+        security: 'Security',
+        devops: 'DevOps & Infrastructure',
+        distributed: 'Distributed Systems',
+        testing: 'Testing & Code Quality'
+    };
+
+    // Click handlers for level buttons
+    document.querySelectorAll('.ac-lv').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const siblings = this.parentElement.querySelectorAll('.ac-lv');
+            siblings.forEach(s => s.classList.remove('selected'));
+            this.classList.add('selected');
+            updateCatScore(this.closest('.assess-cat'));
+        });
+    });
+
+    // Toggle category body
+    document.querySelectorAll('.ac-header').forEach(header => {
+        header.addEventListener('click', function(e) {
+            if (e.target.closest('.ac-levels')) return;
+            const body = this.nextElementSibling;
+            body.style.display = body.style.display === 'none' ? 'flex' : 'none';
+        });
+    });
+
+    function updateCatScore(catEl) {
+        const cat = catEl.dataset.cat;
+        const skills = catEl.querySelectorAll('.ac-skill');
+        let total = 0, answered = 0;
+        skills.forEach(skill => {
+            const selected = skill.querySelector('.ac-lv.selected');
+            if (selected) {
+                total += parseInt(selected.dataset.lv);
+                answered++;
+            }
+        });
+        const max = skills.length * 3;
+        const pct = max > 0 ? Math.round((total / max) * 100) : 0;
+        const scoreEl = document.getElementById('score-' + cat);
+        scoreEl.textContent = answered > 0 ? pct + '%' : '0%';
+        scoreEl.className = 'ac-score';
+        if (answered > 0) {
+            if (pct >= 75) scoreEl.classList.add('good');
+            else if (pct >= 40) scoreEl.classList.add('warn');
+            else scoreEl.classList.add('bad');
+        }
+    }
+
+    function getScores() {
+        const scores = {};
+        document.querySelectorAll('.assess-cat').forEach(catEl => {
+            const cat = catEl.dataset.cat;
+            const skills = catEl.querySelectorAll('.ac-skill');
+            let total = 0, count = 0, answered = 0;
+            const weakSkills = [];
+            skills.forEach(skill => {
+                count++;
+                const selected = skill.querySelector('.ac-lv.selected');
+                const lv = selected ? parseInt(selected.dataset.lv) : -1;
+                if (selected) {
+                    total += lv;
+                    answered++;
+                }
+                if (lv <= 1) {
+                    weakSkills.push(skill.querySelector('.ac-name').textContent);
+                }
+            });
+            const max = count * 3;
+            scores[cat] = {
+                pct: max > 0 && answered > 0 ? Math.round((total / max) * 100) : 0,
+                weak: weakSkills,
+                answered: answered,
+                total: count
+            };
+        });
+        return scores;
+    }
+
+    function showAssessResult() {
+        const scores = getScores();
+        const totalAnswered = Object.values(scores).reduce((s, v) => s + v.answered, 0);
+        if (totalAnswered < 5) {
+            alert('Hãy đánh giá ít nhất 5 kỹ năng để xem kết quả!');
+            return;
+        }
+
+        // Overall score
+        const allPcts = Object.values(scores).filter(v => v.answered > 0).map(v => v.pct);
+        const overallPct = Math.round(allPcts.reduce((a, b) => a + b, 0) / allPcts.length);
+
+        let level, levelClass;
+        if (overallPct >= 80) { level = 'SENIOR / LEAD'; levelClass = 'senior'; }
+        else if (overallPct >= 55) { level = 'MID DEVELOPER'; levelClass = 'mid'; }
+        else if (overallPct >= 30) { level = 'JUNIOR'; levelClass = 'junior'; }
+        else { level = 'FRESHER'; levelClass = 'fresher'; }
+
+        const overallEl = document.getElementById('arOverall');
+        overallEl.innerHTML = `
+            <div class="ar-percent">${overallPct}%</div>
+            <div class="ar-level-badge ${levelClass}">${level}</div>
+            <p style="color:var(--text-muted);font-size:0.85rem;margin-top:8px;">Trình độ tổng thể dựa trên tự đánh giá</p>
+        `;
+
+        // Bar chart
+        const barsEl = document.getElementById('arBars');
+        let barsHtml = '';
+        Object.keys(scores).forEach(cat => {
+            const s = scores[cat];
+            if (s.answered === 0) return;
+            let fillClass = 'bad';
+            if (s.pct >= 75) fillClass = 'great';
+            else if (s.pct >= 55) fillClass = 'good';
+            else if (s.pct >= 30) fillClass = 'warn';
+            barsHtml += `
+                <div class="ar-bar-item">
+                    <span class="ar-bar-label">${catNames[cat]}</span>
+                    <div class="ar-bar-track">
+                        <div class="ar-bar-fill ${fillClass}" style="width:${s.pct}%">
+                            <span class="ar-bar-text">${s.pct}%</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        barsEl.innerHTML = barsHtml;
+
+        // Weak areas
+        const weakEl = document.getElementById('arWeak');
+        const allWeak = [];
+        Object.keys(scores).forEach(cat => {
+            scores[cat].weak.forEach(w => {
+                allWeak.push({ skill: w, cat: catNames[cat] });
+            });
+        });
+
+        if (allWeak.length > 0) {
+            let weakHtml = '<h4>Cần cải thiện (' + allWeak.length + ' kỹ năng)</h4><div class="ar-weak-list">';
+            allWeak.forEach(w => {
+                weakHtml += `<div class="ar-weak-item"><span class="awi-badge">YẾU</span><span>${w.skill}</span></div>`;
+            });
+            weakHtml += '</div>';
+            weakEl.innerHTML = weakHtml;
+        } else {
+            weakEl.innerHTML = '<p style="text-align:center;color:var(--success);font-weight:600;">Tuyệt vời! Không có điểm yếu rõ ràng.</p>';
+        }
+
+        // Show history
+        loadHistory();
+
+        document.getElementById('assessResult').style.display = 'block';
+        document.getElementById('assessResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function resetAssessment() {
+        document.querySelectorAll('.ac-lv.selected').forEach(btn => btn.classList.remove('selected'));
+        document.querySelectorAll('.ac-score').forEach(el => {
+            el.textContent = '0%';
+            el.className = 'ac-score';
+        });
+        document.getElementById('assessResult').style.display = 'none';
+    }
+
+    function saveAssessment() {
+        const scores = getScores();
+        const allPcts = Object.values(scores).filter(v => v.answered > 0).map(v => v.pct);
+        const overallPct = Math.round(allPcts.reduce((a, b) => a + b, 0) / allPcts.length);
+
+        const history = JSON.parse(localStorage.getItem('assessHistory') || '[]');
+        const entry = {
+            date: new Date().toLocaleDateString('vi-VN'),
+            overall: overallPct,
+            scores: {}
+        };
+        Object.keys(scores).forEach(cat => {
+            if (scores[cat].answered > 0) entry.scores[cat] = scores[cat].pct;
+        });
+        history.push(entry);
+        if (history.length > 10) history.shift();
+        localStorage.setItem('assessHistory', JSON.stringify(history));
+
+        // Save selected levels
+        const selections = {};
+        document.querySelectorAll('.ac-skill').forEach(skill => {
+            const selected = skill.querySelector('.ac-lv.selected');
+            if (selected) selections[skill.dataset.skill] = parseInt(selected.dataset.lv);
+        });
+        localStorage.setItem('assessSelections', JSON.stringify(selections));
+
+        loadHistory();
+        alert('Đã lưu! Đánh giá lại sau 1-2 tháng để thấy tiến bộ.');
+    }
+
+    function loadHistory() {
+        const history = JSON.parse(localStorage.getItem('assessHistory') || '[]');
+        const el = document.getElementById('arHistory');
+        if (history.length === 0) { el.innerHTML = ''; return; }
+        let html = '<h4>Lịch sử đánh giá</h4><div class="ar-history-list">';
+        history.forEach(h => {
+            html += `<span class="ar-hist-item">${h.date}: ${h.overall}%</span>`;
+        });
+        html += '</div>';
+        el.innerHTML = html;
+    }
+
+    // Load saved selections on page load
+    (function() {
+        const saved = JSON.parse(localStorage.getItem('assessSelections') || '{}');
+        Object.keys(saved).forEach(skillId => {
+            const skillEl = document.querySelector(`.ac-skill[data-skill="${skillId}"]`);
+            if (skillEl) {
+                const btn = skillEl.querySelector(`.ac-lv[data-lv="${saved[skillId]}"]`);
+                if (btn) {
+                    btn.classList.add('selected');
+                }
+            }
+        });
+        document.querySelectorAll('.assess-cat').forEach(updateCatScore);
+    })();
+    </script>
+    <script src="nav.js"></script>
+</body>
+</html>

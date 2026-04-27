@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Claude Code Tips & FAQ — Prompt Patterns + Best Practices</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">Claude<span class="accent">Code</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="basics.html">Cơ Bản</a>
+      <a href="commands.html">Commands</a>
+      <a href="customize.html">Customize</a>
+      <a href="integrations.html">Integrations</a>
+      <a href="tips.html" class="active">Tips & FAQ</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">LEVEL 5 · MASTER</div>
+  <h1>Tips, Patterns &amp; <span class="gradient">FAQ</span></h1>
+  <p class="hero-desc">Prompt patterns cho task khó, workflow bài bản, anti-patterns cần tránh, debug khi Claude "đi sai hướng", và FAQ từ cộng đồng.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">1. 10 Prompt Patterns hiệu quả</h2>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>① Context → Goal → Constraint → Verify</h4>
+        <p>Công thức chuẩn đã gặp ở trang <a href="basics.html" style="color:var(--primary)">Cơ Bản</a>. Dùng cho mọi task không trivial.</p>
+      </div>
+      <div class="card">
+        <h4>② Explore first, act second</h4>
+        <pre class="code">Before making changes, explore:
+1. Read related files
+2. Run tests to establish baseline
+3. Show me your understanding
+
+I'll approve before you edit.</pre>
+      </div>
+      <div class="card">
+        <h4>③ Pinpoint the WHY</h4>
+        <p>Không phải "fix bug", mà "fix bug VÌ..." → Claude hiểu đúng intent.</p>
+        <pre class="code">Fix the slow load on /dashboard.
+<span class="c">// vì: user complaint tăng 30% tuần qua</span>
+<span class="c">// giả thuyết: N+1 query trong widget C</span>
+<span class="c">// ưu tiên: sửa cause, không caching workaround</span></pre>
+      </div>
+      <div class="card">
+        <h4>④ Negative constraint</h4>
+        <p>Nêu rõ thứ <strong>không</strong> được làm.</p>
+        <pre class="code">Refactor this service. BUT:
+- Don't touch the public interface
+- Don't add new dependencies
+- Don't rename files
+- Don't modify tests (they should still pass)</pre>
+      </div>
+      <div class="card">
+        <h4>⑤ Style match existing</h4>
+        <pre class="code">Add new feature X.
+Follow exactly the pattern in src/features/Y/ —
+  folder structure, naming, test style.
+Don't invent new conventions.</pre>
+      </div>
+      <div class="card">
+        <h4>⑥ Show don't tell</h4>
+        <p>Thay vì mô tả, cho example.</p>
+        <pre class="code">Add a "Currency" formatter util.
+Example I want:
+  format(1234.5)         =&gt; "1,234.50 ₫"
+  format(1_000_000)      =&gt; "1,000,000.00 ₫"
+  format(0.5, { short: true }) =&gt; "0.5"</pre>
+      </div>
+      <div class="card">
+        <h4>⑦ Think step by step + reflect</h4>
+        <pre class="code">Task: migrate auth from JWT to session cookies.
+
+Before coding, list:
+1. All files affected
+2. Breaking changes for client
+3. Deployment order (migrate order matters)
+4. Rollback plan</pre>
+      </div>
+      <div class="card">
+        <h4>⑧ Try smaller scope first</h4>
+        <pre class="code">Start with just /pages/login.tsx — convert that
+one file to new auth pattern. Show me the result.
+If I approve, continue with rest of the pages.</pre>
+      </div>
+      <div class="card">
+        <h4>⑨ Compare options</h4>
+        <pre class="code">Implement rate limiting. Compare 3 approaches:
+A) Middleware with Redis (sliding window)
+B) In-memory (no Redis)
+C) Third-party lib
+
+Recommend one. I'll approve before coding.</pre>
+      </div>
+      <div class="card">
+        <h4>⑩ Role prompt</h4>
+        <pre class="code">You are a senior security engineer reviewing this
+code pre-release. Your job: find vulnerabilities,
+not to bless the code.
+
+Be paranoid. List every concern, no matter how small.</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">2. Workflow "Explore → Plan → Act → Verify"</h2>
+    <p class="section-sub">Framework mạnh nhất cho task lớn. Dùng Plan Mode + subagents.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>🔍 Phase 1: Explore</h3>
+        <p>Mục tiêu: <strong>hiểu trước khi đụng vào</strong>.</p>
+        <pre class="code">Use the Explore agent.
+Research: how does auth currently work?
+Where is token created, validated, refreshed?
+List files + functions involved.</pre>
+        <p style="color: var(--muted); margin-top:.3rem">Dùng <code>Explore</code> subagent → không nhồi main context</p>
+      </div>
+
+      <div class="card">
+        <h3>📝 Phase 2: Plan</h3>
+        <p>Dựa vào kết quả explore, lập plan.</p>
+        <pre class="code"><span class="c">/plan</span>
+Based on what we learned in exploration, design
+migration plan from JWT to sessions.
+
+Include: order of file changes, deploy steps,
+client breaking changes, rollback.</pre>
+      </div>
+
+      <div class="card">
+        <h3>⚡ Phase 3: Act</h3>
+        <p>Chia nhỏ theo plan, approve từng bước.</p>
+        <pre class="code">Execute step 1 of the plan: create new
+session store module. Don't touch anything
+else yet.
+
+Show me diff before writing.</pre>
+      </div>
+
+      <div class="card">
+        <h3>✅ Phase 4: Verify</h3>
+        <p>Kiểm tra với code-reviewer agent.</p>
+        <pre class="code">Use the code-reviewer agent.
+Review my changes in this branch.
+Compare against requirements in plan.
+Report gaps or concerns.</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Tại sao pattern này work?</strong> Tách bạch <em>nghiên cứu</em> khỏi <em>hành động</em>. Claude không rush vào code khi chưa hiểu. Subagent giữ main context gọn.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">3. Multi-agent Workflow</h2>
+    <p class="section-sub">Chạy 2-3 subagent song song cho task lớn. Mỗi agent có vai trò riêng.</p>
+
+    <div class="terminal">
+<span class="user">You:</span> Migrate 30 React class components to function components.
+
+<span class="asst">Claude:</span> I'll parallelize across 3 worker agents for speed.
+
+<span class="comment">● Agent(general-purpose) — Worker 1</span>
+  Migrating src/legacy/auth/*.jsx (10 files)
+<span class="comment">● Agent(general-purpose) — Worker 2</span>
+  Migrating src/legacy/dashboard/*.jsx (10 files)
+<span class="comment">● Agent(general-purpose) — Worker 3</span>
+  Migrating src/legacy/settings/*.jsx (10 files)
+
+<span class="comment">[All 3 running in parallel, takes ~4 min]</span>
+
+<span class="asst">All workers done.</span> Now verifying with code-reviewer.
+
+<span class="comment">● Agent(code-reviewer)</span>
+  Reviewed 30 files. Found:
+  - 2 hooks misused (worker 1, file X, Y)
+  - All tests still pass
+
+Want me to fix those 2 issues?
+    </div>
+
+    <div class="info-box">
+      <strong>Khi nào parallel?</strong> Task độc lập giữa các chunk. <strong>Không parallel</strong> nếu các task depend nhau (ví dụ: refactor module A phải xong trước khi refactor B dùng nó).
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">4. Context Engineering — CLAUDE.md strategy</h2>
+    <p class="section-sub">CLAUDE.md là "system prompt" của bạn. Viết giỏi = Claude làm tốt hơn 2-3× mà không phải prompt hay.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>✅ CLAUDE.md nên có</h3>
+        <ul>
+          <li>Stack + version chính xác (Next 15, React 19, Node 22)</li>
+          <li>Commands quan trọng (<code>npm run dev</code>, <code>test</code>, <code>migrate</code>)</li>
+          <li>Folder structure + convention</li>
+          <li>Non-obvious rules ("không dùng X vì Y")</li>
+          <li>Gotchas, legacy areas</li>
+          <li>Testing strategy (unit/integration/E2E)</li>
+          <li>Git workflow (branch naming, PR rules)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>❌ Không cần có</h3>
+        <ul>
+          <li>Thứ đọc được từ <code>package.json</code>, <code>README</code></li>
+          <li>Marketing copy ("our app is amazing")</li>
+          <li>File list dài (Claude đọc được qua <code>Glob</code>)</li>
+          <li>Code example dài &gt;30 dòng</li>
+          <li>Hướng dẫn general về React/TypeScript</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Mẹo:</strong> Cứ 2-3 tuần, review CLAUDE.md một lần. Xem Claude có hay mắc lỗi gì có thể ngăn bằng document rule? Nếu có → thêm vào.
+    </div>
+
+    <h3 style="color: var(--primary); margin-top: 1.5rem">Dấu hiệu CLAUDE.md cần fix</h3>
+    <table class="cmp">
+      <tr><th>Triệu chứng</th><th>Fix</th></tr>
+      <tr><td>Claude hay hỏi "which file?" cho thứ rõ ràng</td><td>Thêm folder structure vào doc</td></tr>
+      <tr><td>Claude dùng lib cũ đã deprecate</td><td>Ghi version và "KHÔNG dùng lib X, dùng Y"</td></tr>
+      <tr><td>Claude viết test sai framework</td><td>Specify "Test framework: Vitest. Examples in tests/example.test.ts"</td></tr>
+      <tr><td>Claude commit format sai</td><td>Ghi rõ Conventional Commits examples</td></tr>
+      <tr><td>Claude touch file không nên đụng</td><td>Thêm section "DO NOT MODIFY: src/legacy/"</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">5. Anti-patterns cần tránh</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>❌ Prompt 1 dòng cho task phức tạp</h4>
+        <pre class="code"><span class="c">// Dở</span>
+"migrate to v2"
+
+<span class="c">// Tốt — 10 giây gõ thêm = 10 phút save</span>
+"Migrate from v1 API to v2.
+ Files affected: src/api/client.ts + all call sites.
+ Breaking changes: endpoint prefix /api/v1 → /api/v2,
+ auth header format changed (see v2 docs).
+ Preserve all existing tests.
+ Plan first before editing."</pre>
+      </div>
+
+      <div class="card">
+        <h4>❌ Không đọc diff Claude làm</h4>
+        <p>Luôn <code>git diff</code> sau khi Claude xong. Không tin blindly "✓ Done". Claude đôi khi claim xong nhưng:</p>
+        <ul>
+          <li>Fix 1 trong 3 file, bỏ 2 file</li>
+          <li>Xoá test không báo</li>
+          <li>Thêm <code>any</code> type để bypass TS error</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h4>❌ Dùng YOLO mode mọi nơi</h4>
+        <p>Tiện nhưng nguy hiểm. Claude có thể:</p>
+        <ul>
+          <li>Xoá file uncommitted</li>
+          <li>Push force lên main</li>
+          <li>Chạy migration destructive</li>
+        </ul>
+        <p>Dùng YOLO chỉ trong: container sandbox, git worktree riêng, hoặc Docker throwaway.</p>
+      </div>
+
+      <div class="card">
+        <h4>❌ Context quá nặng</h4>
+        <p>Dumping 50 file vào context = Claude confused, miss chi tiết. Thay vì:</p>
+        <ul>
+          <li>Dùng <code>Explore</code> subagent để isolate</li>
+          <li><code>/compact</code> định kỳ</li>
+          <li>Chia task nhỏ hơn</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h4>❌ Bỏ qua Plan Mode cho task lớn</h4>
+        <p>Task &gt;5 file thay đổi, không dùng Plan Mode = gamble. 50% Claude làm sai hướng, bạn phát hiện khi đã quá muộn.</p>
+      </div>
+
+      <div class="card">
+        <h4>❌ Không version control giữa chừng</h4>
+        <p>Claude làm 2h không commit → sai ở bước cuối → mất hết. Commit checkpoint sau mỗi milestone.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">6. Debug khi Claude sai</h2>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>🔴 Claude loop tìm file không ra</h3>
+        <p><strong>Nguyên nhân:</strong> glob pattern sai, hoặc file thật không tồn tại.</p>
+        <p><strong>Fix:</strong> <kbd>Esc</kbd> → cho Claude đường dẫn cụ thể: <code>The file is at src/X/Y.ts, not src/Y.ts</code>.</p>
+      </div>
+
+      <div class="card">
+        <h3>🔴 Claude tạo code không compile</h3>
+        <p><strong>Fix:</strong> sau khi Claude xong, prompt: <code>Run npm run build. Fix errors.</code> Claude tự iterate đến khi green.</p>
+      </div>
+
+      <div class="card">
+        <h3>🔴 Claude hallucination (tên hàm/file không có)</h3>
+        <p><strong>Nguyên nhân:</strong> thiếu context, Claude đoán.</p>
+        <p><strong>Fix:</strong> add CLAUDE.md về dependencies, hoặc prompt: <code>Don't assume. Read actual source to verify names exist.</code></p>
+      </div>
+
+      <div class="card">
+        <h3>🔴 Claude đi sai hướng ngay từ đầu</h3>
+        <p><strong>Fix:</strong> <kbd>Esc</kbd> <kbd>Esc</kbd> rewind. Viết lại prompt rõ hơn. Hoặc dùng Plan Mode để kiểm duyệt trước khi act.</p>
+      </div>
+
+      <div class="card">
+        <h3>🔴 Claude đòi hỏi quá nhiều xác nhận</h3>
+        <p><strong>Fix:</strong> Shift+Tab chuyển sang Accept Edits. Hoặc thêm file pattern vào <code>allow</code> trong <code>settings.json</code>.</p>
+      </div>
+
+      <div class="card">
+        <h3>🔴 Performance chậm / lag</h3>
+        <ul>
+          <li><code>/compact</code> nén context</li>
+          <li><code>/model haiku</code> cho task đơn giản</li>
+          <li><code>/fast</code> toggle Fast Mode (Opus nhanh hơn)</li>
+          <li>Restart session (<code>/clear</code>)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">7. FAQ</h2>
+
+    <div class="card">
+      <h4>❓ Claude Code miễn phí không?</h4>
+      <p>CLI + extension cài miễn phí. Để chạy cần tài khoản:</p>
+      <ul>
+        <li><strong>Claude Pro</strong> ($20/tháng) — đủ cho dev cá nhân</li>
+        <li><strong>Claude Max</strong> ($100-200/tháng) — heavy usage</li>
+        <li><strong>API key</strong> — pay-per-token, tốt cho automation</li>
+      </ul>
+    </div>
+
+    <div class="card" style="margin-top: 1rem">
+      <h4>❓ Claude có đọc được private repo/code của tôi?</h4>
+      <p>Khi dùng CLI local: code trên máy bạn, gửi từng bit Claude cần tới API Anthropic. Anthropic không train từ data bạn gửi (Zero Data Retention có thể bật).</p>
+      <p>Khi dùng claude.ai/code web: code clone vào sandbox của Anthropic — vẫn tuân thủ privacy, nhưng nếu data siêu nhạy cảm → ưu tiên CLI local.</p>
+    </div>
+
+    <div class="card" style="margin-top: 1rem">
+      <h4>❓ Khác gì Cursor / GitHub Copilot?</h4>
+      <p>Ngắn gọn: Claude Code <strong>agentic + terminal-first + 1M context</strong>. Copilot chủ yếu autocomplete. Cursor là IDE fork với agent mode. Xem bảng so sánh ở <a href="index.html" style="color:var(--primary)">trang Roadmap</a>.</p>
+    </div>
+
+    <div class="card" style="margin-top: 1rem">
+      <h4>❓ Claude Code có chạy offline không?</h4>
+      <p><strong>Không.</strong> Cần internet để gọi API Anthropic. Dùng model local → tools khác (Aider + Ollama, LM Studio).</p>
+    </div>
+
+    <div class="card" style="margin-top: 1rem">
+      <h4>❓ Dùng với codebase 1M+ LOC có nổi không?</h4>
+      <p><strong>Có.</strong> Context Opus 1M token (~750k LOC). Với repo lớn hơn: dùng <code>Explore</code> agent để focus 1 subsection. CLAUDE.md chỉ Claude tới folder quan trọng.</p>
+    </div>
+
+    <div class="card" style="margin-top: 1rem">
+      <h4>❓ Có thể dùng Claude Code cho ngôn ngữ non-English không?</h4>
+      <p>Prompt/response bằng tiếng Việt OK. Code comment bằng tiếng Việt cũng OK nếu CLAUDE.md nói rõ. Claude hiểu 100+ ngôn ngữ tự nhiên.</p>
+    </div>
+
+    <div class="card" style="margin-top: 1rem">
+      <h4>❓ Claude có "quên" sau session không?</h4>
+      <p>Có — mỗi session là context riêng. Muốn nhớ xuyên session: dùng <code>CLAUDE.md</code>, hoặc memory MCP server, hoặc slash command <code>/memory</code>.</p>
+    </div>
+
+    <div class="card" style="margin-top: 1rem">
+      <h4>❓ Làm sao share Claude Code config với team?</h4>
+      <p>Commit <code>CLAUDE.md</code> + <code>.claude/settings.json</code> + <code>.claude/commands/</code> + <code>.claude/skills/</code> vào repo. Mỗi dev clone repo xong là có sẵn config.</p>
+    </div>
+
+    <div class="card" style="margin-top: 1rem">
+      <h4>❓ Debug Claude bị đơ / không respond?</h4>
+      <p>Thứ tự check:</p>
+      <ol style="padding-left: 1.3rem">
+        <li><code>/doctor</code> — scan setup</li>
+        <li><code>/status</code> — session info</li>
+        <li>Check Anthropic status: <a href="https://status.anthropic.com" target="_blank" style="color:var(--primary)">status.anthropic.com</a></li>
+        <li>Logout + login lại</li>
+        <li>Update: <code>npm i -g @anthropic-ai/claude-code@latest</code></li>
+        <li>Submit <code>/bug</code></li>
+      </ol>
+    </div>
+
+    <div class="card" style="margin-top: 1rem">
+      <h4>❓ Làm sao hạn chế token cost?</h4>
+      <ul>
+        <li>Dùng Haiku cho task đơn giản</li>
+        <li><code>/compact</code> thường xuyên</li>
+        <li>CLAUDE.md ngắn gọn — đừng 1000 dòng</li>
+        <li>Giới hạn scope mỗi session</li>
+        <li><code>Explore</code> subagent thay vì nhồi file vào main context</li>
+        <li>Theo dõi qua <code>/cost</code></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">8. Tóm tắt — 10 nguyên tắc vàng</h2>
+    <div class="card">
+      <ol class="steps" style="padding-left: 0;">
+        <li><strong>Context rõ, goal rõ, constraint rõ, verify rõ</strong> — công thức 4C của prompt tốt.</li>
+        <li><strong>Đọc plan trước khi accept</strong> — dùng Plan Mode cho task lớn.</li>
+        <li><strong>CLAUDE.md là đầu tư</strong> — 1 giờ viết, tiết kiệm nhiều ngày prompt lặp.</li>
+        <li><strong>Git commit thường xuyên</strong> — checkpoint sau mỗi milestone, dễ revert.</li>
+        <li><strong>Tin nhưng verify</strong> — <code>git diff</code> mỗi lần Claude claim "done".</li>
+        <li><strong>Isolate với subagents</strong> — Explore để không nhồi main context.</li>
+        <li><strong>Interrupt khi thấy sai</strong> — <kbd>Esc</kbd> <kbd>Esc</kbd> rẻ hơn để Claude đi xa rồi sửa.</li>
+        <li><strong>Model đúng cho task đúng</strong> — Opus khó, Sonnet default, Haiku vặt.</li>
+        <li><strong>Hooks cho việc lặp lại</strong> — auto-format, auto-test sau edit.</li>
+        <li><strong>Coi Claude như đồng nghiệp</strong> — sếp giỏi điều hành team, không micromanage từng dòng.</li>
+      </ol>
+    </div>
+
+    <div class="tip" style="margin-top: 1rem">
+      <strong>Hành trình học:</strong> đọc xong 6 trang này rồi <em>thực hành 1 tuần</em> với project thật. Sau đó quay lại scan các mục bạn cần sâu hơn. Mastery = <strong>kiến thức × thực hành</strong>.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">📚 Nguồn tham khảo chính thống</h2>
+    <div class="grid grid-3">
+      <div class="card">
+        <h4>Docs</h4>
+        <ul>
+          <li><a href="https://docs.claude.com/en/docs/claude-code/overview" target="_blank" style="color:var(--primary)">Claude Code Docs</a></li>
+          <li><a href="https://docs.claude.com/en/docs/agents-and-tools/agent-sdk" target="_blank" style="color:var(--primary)">Agent SDK Docs</a></li>
+          <li><a href="https://modelcontextprotocol.io" target="_blank" style="color:var(--primary)">MCP Spec</a></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>GitHub</h4>
+        <ul>
+          <li><a href="https://github.com/anthropics/claude-code" target="_blank" style="color:var(--primary)">anthropics/claude-code</a> — releases</li>
+          <li><a href="https://github.com/modelcontextprotocol/servers" target="_blank" style="color:var(--primary)">MCP servers list</a></li>
+          <li><a href="https://github.com/anthropics/claude-agent-sdk-python" target="_blank" style="color:var(--primary)">Agent SDK Python</a></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Cộng đồng</h4>
+        <ul>
+          <li>Discord Anthropic</li>
+          <li>r/ClaudeAI subreddit</li>
+          <li>Twitter @AnthropicAI</li>
+          <li>Blog Anthropic News</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Claude Code Mastery · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

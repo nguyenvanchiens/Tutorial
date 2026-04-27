@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Hub — Tin Tức AI & Công Cụ Hỗ Trợ Lập Trình Viên</title>
+    <link rel="stylesheet" href="ai.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!--
+        NAVBAR - Thanh điều hướng cố định trên cùng
+        - Logo bên trái, link về trang BE
+        - Các tab lọc nguồn tin: Tất cả / Dev.to / Hacker News / GitHub / Reddit / Product Hunt
+        - refresh-info: đồng hồ đếm ngược đến lần cập nhật tiếp
+        - nav-hamburger: nút menu 3 gạch cho mobile
+    -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><a href="../BE/index.html">AI<span class="accent">Hub</span></a></div>
+            <div class="nav-links">
+                <a href="learn.html" style="color:#7C3AED;font-weight:700">📘 Hoc AI</a>
+                <a href="#" class="nav-active" data-filter="all">Tất cả</a>
+                <a href="#" data-filter="devto">Dev.to</a>
+                <a href="#" data-filter="hackernews">Hacker News</a>
+                <a href="#" data-filter="github">GitHub</a>
+                <a href="#" data-filter="reddit">Reddit</a>
+                <a href="#" data-filter="producthunt">Product Hunt</a>
+            </div>
+            <div class="refresh-info">
+                <span class="refresh-dot"></span>
+                <span id="refreshTimer">Cập nhật sau 5:00</span>
+            </div>
+            <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <!--
+        HERO - Banner giới thiệu
+        - Mô tả mục đích trang: tổng hợp tin AI cho dev
+        - hero-stats: 3 số liệu (bài viết, nguồn, thời gian cập nhật)
+    -->
+    <header class="ai-hero">
+        <div class="hero-content">
+            <div class="hero-badge">AI CHO LẬP TRÌNH VIÊN — CẬP NHẬT MỖI 5 PHÚT</div>
+            <h1>AI <span class="gradient-text">Hub</span></h1>
+            <p class="hero-desc">Tổng hợp tin tức AI mới nhất dành cho lập trình viên.<br>Model mới, tool hỗ trợ code, framework, ứng dụng thực tế — tự động cập nhật.</p>
+            <div class="hero-stats">
+                <div class="stat"><span class="stat-number" id="totalArticles">0</span><span class="stat-label">Bài viết</span></div>
+                <div class="stat"><span class="stat-number" id="totalSources">5</span><span class="stat-label">Nguồn tin</span></div>
+                <div class="stat"><span class="stat-number" id="lastUpdate">--:--</span><span class="stat-label">Cập nhật lần cuối</span></div>
+            </div>
+        </div>
+    </header>
+
+    <!--
+        GIẢI THÍCH NGUỒN TIN - 5 card mô tả từng nguồn
+        + hướng dẫn sử dụng trang
+        Giúp người dùng hiểu mỗi nguồn là gì và tại sao nên đọc.
+    -->
+    <section class="sources-explain">
+        <div class="container">
+            <div class="sources-grid">
+                <!-- Dev.to AI: Bài viết về AI/ML từ cộng đồng dev -->
+                <div class="source-card source-card-devto">
+                    <div class="source-card-icon">📝</div>
+                    <h3>Dev.to — AI</h3>
+                    <p>Bài viết, tutorial, chia sẻ kinh nghiệm về AI/ML từ cộng đồng lập trình viên. Từ hướng dẫn dùng ChatGPT API đến xây model ML — đủ cấp độ.</p>
+                    <div class="source-card-what">Bạn sẽ thấy: <strong>Tutorial AI, tích hợp LLM, prompt engineering, ML projects</strong></div>
+                </div>
+                <!-- Hacker News: Tin AI nóng nhất, cộng đồng tech bàn luận -->
+                <div class="source-card source-card-hn">
+                    <div class="source-card-icon">🔶</div>
+                    <h3>Hacker News — AI</h3>
+                    <p>Tin tức AI nóng nhất từ cộng đồng tech lớn nhất. Mỗi khi có model mới ra (GPT, Claude, Gemini...) hay drama AI — đều xuất hiện ở đây trước.</p>
+                    <div class="source-card-what">Bạn sẽ thấy: <strong>Model mới, nghiên cứu, startup AI, tranh luận đạo đức AI</strong></div>
+                </div>
+                <!-- GitHub: Repo AI/ML đang trending -->
+                <div class="source-card source-card-gh">
+                    <div class="source-card-icon">🐙</div>
+                    <h3>GitHub Trending — AI</h3>
+                    <p>Repo AI/ML đang được nhiều dev quan tâm nhất. Đây là nơi tốt nhất để biết framework, tool, model nào đang hot và được cộng đồng sử dụng.</p>
+                    <div class="source-card-what">Bạn sẽ thấy: <strong>LLM framework, AI tools, model weights, training code</strong></div>
+                </div>
+                <!-- Reddit: Thảo luận AI từ nhiều subreddit -->
+                <div class="source-card source-card-reddit">
+                    <div class="source-card-icon">🤖</div>
+                    <h3>Reddit — AI</h3>
+                    <p>Tổng hợp từ r/MachineLearning, r/artificial, r/LocalLLaMA — nơi dev và researcher thảo luận chuyên sâu về AI, chia sẻ kết quả thí nghiệm.</p>
+                    <div class="source-card-what">Bạn sẽ thấy: <strong>Nghiên cứu mới, benchmark, so sánh model, self-hosted AI</strong></div>
+                </div>
+                <!-- Product Hunt: Sản phẩm AI mới ra mắt -->
+                <div class="source-card source-card-ph">
+                    <div class="source-card-icon">🚀</div>
+                    <h3>Product Hunt — AI</h3>
+                    <p>Sản phẩm AI mới ra mắt mỗi ngày. Từ code assistant, design tool, chatbot đến AI agent — đây là nơi để biết tool AI nào đáng thử cho workflow của bạn.</p>
+                    <div class="source-card-what">Bạn sẽ thấy: <strong>AI SaaS mới, code assistant, productivity tools, AI agents</strong></div>
+                </div>
+            </div>
+
+            <!-- Hướng dẫn sử dụng -->
+            <div class="guide-box">
+                <h3>📌 Hướng dẫn sử dụng</h3>
+                <div class="guide-items">
+                    <div class="guide-item">
+                        <span class="guide-label">🔄 Tự động cập nhật</span>
+                        <span class="guide-desc">Trang tự lấy tin mới mỗi <strong>5 phút</strong> — không cần refresh.</span>
+                    </div>
+                    <div class="guide-item">
+                        <span class="guide-label">🏷️ Lọc theo nguồn</span>
+                        <span class="guide-desc">Click tab trên menu để xem riêng từng nguồn.</span>
+                    </div>
+                    <div class="guide-item">
+                        <span class="guide-label">🔍 Tìm kiếm</span>
+                        <span class="guide-desc">Gõ từ khóa (VD: "langchain", "copilot", "llama") để lọc tin.</span>
+                    </div>
+                    <div class="guide-item">
+                        <span class="guide-label">🏷️ Phân loại tự động</span>
+                        <span class="guide-desc">Mỗi bài được <strong>phân tích tự động</strong> — loại nội dung, công nghệ, mức độ quan tâm.</span>
+                    </div>
+                    <div class="guide-item">
+                        <span class="guide-label">👆 Click vào bài</span>
+                        <span class="guide-desc">Click card để mở link gốc trong tab mới.</span>
+                    </div>
+                    <div class="guide-item">
+                        <span class="guide-label">⭐ Đánh giá hữu ích</span>
+                        <span class="guide-desc">Mỗi bài có <strong>nhãn "Hữu ích cho dev"</strong> nếu liên quan trực tiếp đến công việc lập trình.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!--
+        CONTROLS BAR - Thanh tìm kiếm + sắp xếp (sticky khi cuộn)
+        - searchInput: ô tìm kiếm, JS debounce 300ms
+        - btnRefresh: nút cập nhật ngay
+        - sortBy: sắp xếp (mới nhất / phổ biến nhất)
+    -->
+    <div class="controls-bar">
+        <div class="container">
+            <div class="controls-inner">
+                <div class="search-box">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    <input type="text" id="searchInput" placeholder="Tìm kiếm tin AI... (VD: langchain, copilot, llm)" autocomplete="off">
+                </div>
+                <div class="controls-right">
+                    <!-- Lọc theo lĩnh vực: Web / Mobile / Design -->
+                    <select id="fieldFilter" class="sort-select" title="Lọc theo lĩnh vực">
+                        <option value="all">Tất cả lĩnh vực</option>
+                        <option value="web">🌐 Web Dev</option>
+                        <option value="mobile">📱 Mobile</option>
+                        <option value="design">🎨 Design</option>
+                    </select>
+                    <button id="btnRefresh" class="btn-refresh" title="Cập nhật ngay">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                    </button>
+                    <select id="sortBy" class="sort-select">
+                        <option value="newest">Mới nhất</option>
+                        <option value="popular">Phổ biến nhất</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--
+        LOADING STATE - Skeleton loading (khung xám nhấp nháy khi đang fetch)
+    -->
+    <div id="loadingState" class="loading-state">
+        <div class="container">
+            <div class="loading-grid">
+                <div class="skeleton-card"><div class="skeleton-source"></div><div class="skeleton-title"></div><div class="skeleton-desc"></div><div class="skeleton-meta"></div></div>
+                <div class="skeleton-card"><div class="skeleton-source"></div><div class="skeleton-title"></div><div class="skeleton-desc"></div><div class="skeleton-meta"></div></div>
+                <div class="skeleton-card"><div class="skeleton-source"></div><div class="skeleton-title"></div><div class="skeleton-desc"></div><div class="skeleton-meta"></div></div>
+                <div class="skeleton-card"><div class="skeleton-source"></div><div class="skeleton-title"></div><div class="skeleton-desc"></div><div class="skeleton-meta"></div></div>
+                <div class="skeleton-card"><div class="skeleton-source"></div><div class="skeleton-title"></div><div class="skeleton-desc"></div><div class="skeleton-meta"></div></div>
+                <div class="skeleton-card"><div class="skeleton-source"></div><div class="skeleton-title"></div><div class="skeleton-desc"></div><div class="skeleton-meta"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!--
+        NEWS GRID - Khu vực hiển thị card tin tức AI
+        JS tạo HTML và chèn vào #newsGrid
+    -->
+    <main class="news-main">
+        <div class="container">
+            <div class="news-grid" id="newsGrid"></div>
+            <div id="emptyState" class="empty-state" style="display:none;">
+                <div class="empty-icon">🔍</div>
+                <h3>Không tìm thấy kết quả</h3>
+                <p>Thử tìm kiếm với từ khóa khác hoặc đổi bộ lọc.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <p>Dữ liệu từ <a href="https://dev.to" target="_blank">Dev.to</a> · <a href="https://news.ycombinator.com" target="_blank">Hacker News</a> · <a href="https://github.com/trending" target="_blank">GitHub</a> · <a href="https://reddit.com" target="_blank">Reddit</a> · <a href="https://www.producthunt.com" target="_blank">Product Hunt</a></p>
+            <p class="footer-note">Tự động cập nhật mỗi 5 phút · Tập trung AI cho lập trình viên · 100% miễn phí</p>
+        </div>
+    </footer>
+
+    <script src="ai.js"></script>
+</body>
+</html>

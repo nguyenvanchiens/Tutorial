@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code Thực Chiến — Từ Beginner đến Pro</title>
+    <style>
+        :root {
+            --primary: #667eea;
+            --accent: #f5576c;
+            --bg: #0f1117;
+            --card: #1a1d2e;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --border: #2d3148;
+            --success: #43e97b;
+            --tab-active: #f5a623;
+            --warning: #f5a623;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+        .hero {
+            background: linear-gradient(135deg, #1a1d2e 0%, #2d1f4e 50%, #1a1d2e 100%);
+            padding: 60px 40px 36px; text-align: center; border-bottom: 1px solid var(--border);
+        }
+        .hero h1 {
+            font-size: 2.2rem; margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--tab-active));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero .subtitle { color: var(--muted); font-size: 1.05rem; max-width: 660px; margin: 0 auto; }
+
+        .toc-bar {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--card); border-bottom: 1px solid var(--border);
+            display: flex; overflow-x: auto; padding: 0 16px;
+            scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+        }
+        .toc-bar::-webkit-scrollbar { height: 4px; }
+        .toc-bar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        .toc-link {
+            flex-shrink: 0; padding: 12px 18px; color: var(--muted); text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; white-space: nowrap;
+            border-radius: 8px 8px 0 0; transition: all .2s; cursor: pointer;
+        }
+        .toc-link:hover { color: var(--text); }
+        .toc-link.active { background: var(--tab-active); color: #1a1d2e; }
+
+        .content { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+        .section { margin-bottom: 64px; scroll-margin-top: 56px; }
+        .section-header {
+            display: flex; align-items: center; gap: 14px;
+            margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid var(--border);
+        }
+        .badge { background: var(--primary); color: #fff; padding: 5px 14px; border-radius: 8px; font-weight: 700; font-size: 0.82rem; flex-shrink: 0; }
+        .section-header h2 { font-size: 1.35rem; }
+
+        .card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+            padding: 22px 24px; margin-bottom: 20px;
+        }
+        .card h3 { color: var(--primary); margin-bottom: 10px; font-size: 1.1rem; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px,1fr)); gap: 18px; margin-bottom: 20px; }
+
+        .tip, .warn {
+            border-left: 4px solid var(--success); background: rgba(67,233,123,.06);
+            padding: 14px 18px; border-radius: 0 10px 10px 0; margin: 16px 0;
+        }
+        .tip strong { color: var(--success); }
+        .warn { border-left-color: var(--warning); background: rgba(245,166,35,.06); }
+        .warn strong { color: var(--warning); }
+
+        table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: .92rem; }
+        th, td { padding: 10px 14px; text-align: left; border: 1px solid var(--border); }
+        th { background: var(--card); color: var(--primary); font-weight: 700; }
+        td { background: rgba(26,29,46,.5); }
+
+        pre {
+            background: #13151f; border: 1px solid var(--border); border-radius: 10px;
+            padding: 16px 20px; overflow-x: auto; margin: 12px 0; font-size: .88rem; line-height: 1.6;
+        }
+        code { font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace; }
+        p code, li code, td code {
+            background: rgba(102,126,234,.15); padding: 2px 7px; border-radius: 4px; font-size: .88em;
+        }
+
+        .steps { counter-reset: step; list-style: none; padding: 0; }
+        .steps li {
+            counter-increment: step; padding: 10px 0 10px 48px; position: relative;
+            border-left: 2px solid var(--border); margin-left: 16px;
+        }
+        .steps li::before {
+            content: counter(step);
+            position: absolute; left: -14px; top: 10px;
+            width: 28px; height: 28px; background: var(--primary); color: #fff;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: .82rem;
+        }
+        .steps li:last-child { border-left-color: transparent; }
+
+        ul, ol { margin: 8px 0 8px 22px; }
+        li { margin-bottom: 4px; }
+        p { margin-bottom: 10px; }
+        h4 { color: var(--tab-active); margin: 20px 0 10px; font-size: 1rem; }
+
+        @media (max-width: 700px) {
+            .hero { padding: 36px 18px 28px; }
+            .hero h1 { font-size: 1.5rem; }
+            .card-grid { grid-template-columns: 1fr; }
+            pre { font-size: .8rem; padding: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+    <h1>Claude Code Thực Chiến — Từ Beginner đến Pro</h1>
+    <p class="subtitle">Học cách làm việc hiệu quả với AI: tư duy đúng, prompt chuẩn, quản lý dự án thực tế bằng Claude Code</p>
+</div>
+
+<!-- TOC -->
+<nav class="toc-bar">
+    <a class="toc-link active" href="#overview">Tổng quan</a>
+    <a class="toc-link" href="#module01">Setup</a>
+    <a class="toc-link" href="#module02">Beginner</a>
+    <a class="toc-link" href="#module03">Tư duy</a>
+    <a class="toc-link" href="#module04">Plan Mode</a>
+    <a class="toc-link" href="#module05">CLAUDE.md</a>
+    <a class="toc-link" href="#module06">Full-Stack</a>
+    <a class="toc-link" href="#module07">Skill</a>
+    <a class="toc-link" href="#module08">Git Debug</a>
+</nav>
+
+<!-- CONTENT -->
+<div class="content">
+
+<!-- ==================== OVERVIEW ==================== -->
+<div class="section" id="overview">
+    <div class="section-header">
+        <span class="badge">TỔNG QUAN</span>
+        <h2>Mục Tiêu &amp; Lộ Trình Khoá Học</h2>
+    </div>
+
+    <div class="card">
+        <h3>Mục tiêu cốt lõi</h3>
+        <p>Khoá học này không chỉ dạy bạn sử dụng một công cụ AI. Mục tiêu thực sự là <strong>thay đổi cách bạn tư duy khi làm việc với AI</strong>. Sau khoá học, bạn sẽ chuyển từ <em>người dùng AI thụ động</em> (hỏi gì cũng copy-paste) sang <em>người điều khiển AI chủ động</em> — biết ra lệnh chính xác, review kết quả, và xây dựng sản phẩm chất lượng.</p>
+        <p>Cụ thể, bạn sẽ:</p>
+        <ul>
+            <li>Hiểu cách AI hoạt động (LLM, token, context window) để biết giới hạn của nó</li>
+            <li>Thao tác thành thạo Claude Code trên CLI và IDE</li>
+            <li>Áp dụng quy trình: <strong>Lên kế hoạch &rarr; Ra lệnh &rarr; Review &rarr; Phản hồi &rarr; Hoàn thiện</strong></li>
+            <li>Xây dựng dự án full-stack thực tế với sự hỗ trợ của AI</li>
+            <li>Tạo workflow tự động (Skill) để tái sử dụng cho nhiều dự án</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>Đối tượng phù hợp</h3>
+        <div class="card-grid">
+            <div class="card">
+                <strong style="color:var(--primary)">Developer muốn tăng tốc</strong>
+                <p>Đã biết code, muốn dùng AI để làm nhanh hơn 3–5 lần mà vẫn đảm bảo chất lượng.</p>
+            </div>
+            <div class="card">
+                <strong style="color:var(--success)">Beginner muốn học code</strong>
+                <p>Mới bắt đầu, muốn AI hỗ trợ học và làm dự án thực tế thay vì chỉ đọc lý thuyết.</p>
+            </div>
+            <div class="card">
+                <strong style="color:var(--tab-active)">Đã dùng ChatGPT / Claude</strong>
+                <p>Đã quen với AI nhưng cảm thấy chưa khai thác hết, muốn lên level tiếp theo.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="warn">
+        <strong>Yêu cầu:</strong> Bạn cần tài khoản trả phí Claude AI (gói Pro hoặc Max) để thực hành đầy đủ các bài trong khoá học.
+    </div>
+
+    <h4>Bảng tổng quan 8 Module</h4>
+    <table>
+        <tr><th>Module</th><th>Chủ đề</th><th>Bạn học được gì</th></tr>
+        <tr><td>01</td><td>Setup Dự Án</td><td>Hiểu Claude AI, cài đặt, token, context window</td></tr>
+        <tr><td>02</td><td>Beginner</td><td>CLI, prompt cơ bản, giới hạn của cách dùng đơn giản</td></tr>
+        <tr><td>03</td><td>Thay Đổi Tư Duy</td><td>Tư duy kiến trúc sư, review code AI, chia nhỏ vấn đề</td></tr>
+        <tr><td>04</td><td>Plan Mode</td><td>Lên kế hoạch trước khi code, phản biện kế hoạch</td></tr>
+        <tr><td>05</td><td>CLAUDE.md</td><td>Quản lý bộ nhớ dài hạn, cấu trúc CLAUDE.md chuẩn</td></tr>
+        <tr><td>06</td><td>Full-Stack</td><td>Quy trình xây dự án thực tế end-to-end với AI</td></tr>
+        <tr><td>07</td><td>Skill &amp; Workflow</td><td>Tạo workflow tái sử dụng, tự động hoá quy trình</td></tr>
+        <tr><td>08</td><td>Git, Debug &amp; Rewind</td><td>Version control, debug hiệu quả, rewind code</td></tr>
+    </table>
+</div>
+
+<!-- ==================== MODULE 01 ==================== -->
+<div class="section" id="module01">
+    <div class="section-header">
+        <span class="badge">MODULE 01</span>
+        <h2>Setup Dự Án</h2>
+    </div>
+
+    <div class="card">
+        <h3>Claude AI là gì?</h3>
+        <p><strong>Claude</strong> là một mô hình ngôn ngữ lớn (LLM) do công ty <strong>Anthropic</strong> phát triển. Anthropic được thành lập bởi các cựu thành viên của OpenAI, tập trung vào việc xây dựng AI an toàn và hữu ích. Claude nổi bật với khả năng:</p>
+        <ul>
+            <li><strong>Hiểu ngôn ngữ tự nhiên</strong> cực tốt — đọc hiểu code, viết văn bản, phân tích vấn đề</li>
+            <li><strong>Context window lớn</strong> — có thể xử lý hàng trăm nghìn token trong 1 cuộc hội thoại</li>
+            <li><strong>Claude Code</strong> — công cụ CLI/IDE cho phép AI trực tiếp đọc, viết, và chỉnh sửa code trong dự án của bạn</li>
+        </ul>
+    </div>
+
+    <h4>So sánh các công cụ AI cho developer</h4>
+    <table>
+        <tr><th>Tiêu chí</th><th>Claude Code</th><th>ChatGPT</th><th>Gemini</th><th>GitHub Copilot</th></tr>
+        <tr><td>Thế mạnh</td><td>Code dài, reasoning sâu, đọc cả project</td><td>Đa năng, plugin phong phú</td><td>Context 1M+, tích hợp Google</td><td>Autocomplete nhanh trong IDE</td></tr>
+        <tr><td>Context Window</td><td>200K (Opus có thể hơn)</td><td>128K (GPT-4o)</td><td>1M–2M token</td><td>Giới hạn theo file đang mở</td></tr>
+        <tr><td>Cách dùng</td><td>CLI + IDE panel</td><td>Web chat, API</td><td>Web chat, API</td><td>Extension IDE</td></tr>
+        <tr><td>Ưu điểm code</td><td>Đọc toàn bộ project, edit trực tiếp file</td><td>Giải thích tốt, đa ngôn ngữ</td><td>Xử lý file lớn</td><td>Gợi ý realtime khi gõ</td></tr>
+        <tr><td>Hạn chế</td><td>Cần trả phí, learning curve</td><td>Không trực tiếp edit file</td><td>Code quality không ổn định</td><td>Chỉ autocomplete, không reasoning</td></tr>
+    </table>
+
+    <div class="card">
+        <h3>Các model Claude — Khi nào dùng model nào?</h3>
+        <table>
+            <tr><th>Model</th><th>Đặc điểm</th><th>Khi nào dùng</th></tr>
+            <tr><td><strong>Haiku</strong></td><td>Nhanh nhất, rẻ nhất, độ chính xác vừa phải</td><td>Trả lời nhanh, xử lý đơn giản, tiết kiệm token. Ví dụ: dịch văn bản, format code, hỏi nhanh cú pháp</td></tr>
+            <tr><td><strong>Sonnet</strong></td><td>Cân bằng giữa tốc độ và chất lượng</td><td>Phần lớn công việc hàng ngày: viết code, debug, giải thích. Đây là model mặc định nên dùng</td></tr>
+            <tr><td><strong>Opus</strong></td><td>Mạnh nhất, reasoning sâu nhất, chậm nhất</td><td>Bài toán phức tạp: thiết kế kiến trúc, refactor lớn, phân tích bug khó. Dùng khi Sonnet cho kết quả không đủ tốt</td></tr>
+        </table>
+        <div class="tip">
+            <strong>Mẹo:</strong> Bắt đầu với Sonnet cho hầu hết công việc. Chỉ chuyển sang Opus khi gặp bài toán khó mà Sonnet không giải quyết được. Dùng Haiku cho các tác vụ đơn giản để tiết kiệm chi phí.
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Tạo tài khoản &amp; Cài đặt</h3>
+        <ol class="steps">
+            <li><strong>Tạo tài khoản tại <code>claude.ai</code></strong> — Đăng ký bằng email, xác nhận. Gói Free có giới hạn, nên nâng cấp lên <strong>Pro ($20/tháng)</strong> để có đủ token thực hành, hoặc <strong>Max ($100/tháng)</strong> nếu dùng nhiều.</li>
+            <li><strong>Cài Claude Code CLI</strong> — Mở terminal và chạy:
+<pre><code>npm install -g @anthropic-ai/claude-code</code></pre>
+                Sau khi cài xong, gõ <code>claude</code> trong terminal để bắt đầu. Lần đầu sẽ yêu cầu đăng nhập.</li>
+            <li><strong>Cài extension VS Code</strong> — Tìm "Claude" trong VS Code Extensions marketplace, cài đặt, đăng nhập. Sau đó bạn có thể mở Claude panel ngay trong IDE.</li>
+            <li><strong>Kiểm tra</strong> — Chạy <code>claude --version</code> để xác nhận đã cài thành công. Chạy <code>claude</code> trong thư mục dự án để bắt đầu làm việc.</li>
+        </ol>
+    </div>
+
+    <div class="card">
+        <h3>Token là gì? Tại sao quan trọng?</h3>
+        <p>Mỗi khi bạn gửi prompt cho AI và nhận phản hồi, hệ thống đếm số lượng <strong>token</strong> — đơn vị nhỏ nhất mà AI xử lý (khoảng 3/4 từ tiếng Anh = 1 token, tiếng Việt có thể nhiều token hơn do dấu).</p>
+        <table>
+            <tr><th>Loại</th><th>Giải thích</th><th>Ví dụ</th></tr>
+            <tr><td><strong>Input token</strong></td><td>Những gì bạn gửi cho AI (prompt, code, file đính kèm)</td><td>Bạn paste 200 dòng code + câu hỏi = ~1500 input token</td></tr>
+            <tr><td><strong>Output token</strong></td><td>Những gì AI trả về (câu trả lời, code mới)</td><td>AI viết lại 200 dòng code + giải thích = ~2000 output token</td></tr>
+        </table>
+        <div class="warn">
+            <strong>Mẹo tiết kiệm token:</strong> Không paste toàn bộ file khi chỉ cần hỏi về 1 function. Chỉ định rõ file và dòng cần sửa. Dùng <code>/clear</code> để xoá lịch sử khi chuyển sang chủ đề mới.
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Context Window — Tại sao AI "quên"?</h3>
+        <p><strong>Context Window</strong> là giới hạn tổng số token mà AI có thể "nhớ" trong 1 cuộc hội thoại. Ví dụ, Claude Sonnet có context window ~200K token.</p>
+        <p>Khi cuộc hội thoại vượt quá giới hạn này, AI bắt đầu <strong>bỏ bớt</strong> những nội dung cũ đi — đây là lý do bạn thấy AI "quên" những gì đã nói trước đó. Hậu quả:</p>
+        <ul>
+            <li>AI làm lại những gì đã làm</li>
+            <li>AI thay đổi phong cách code giữa chừng (vì "quên" phong cách ban đầu)</li>
+            <li>AI nói "tôi chưa thấy file đó" dù bạn đã gửi trước đó</li>
+        </ul>
+        <div class="tip">
+            <strong>Giải pháp:</strong> Chia công việc thành nhiều phiên ngắn. Dùng CLAUDE.md (Module 05) để lưu thông tin quan trọng mà AI cần nhớ xuyên suốt dự án. Dùng <code>/clear</code> và bắt đầu phiên mới khi cuộc hội thoại quá dài.
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MODULE 02 ==================== -->
+<div class="section" id="module02">
+    <div class="section-header">
+        <span class="badge">MODULE 02</span>
+        <h2>Sử Dụng Claude Code Như Beginner</h2>
+    </div>
+
+    <div class="card">
+        <h3>Giao diện và các lệnh cơ bản</h3>
+        <p>Khi bạn gõ <code>claude</code> trong terminal (tại thư mục dự án), một phiên làm việc sẽ bắt đầu. Bạn có thể gõ câu hỏi trực tiếp và AI sẽ trả lời, đọc file, hoặc chỉnh sửa code.</p>
+        <p>Các lệnh thường dùng trong CLI:</p>
+        <table>
+            <tr><th>Lệnh</th><th>Chức năng</th></tr>
+            <tr><td><code>claude</code></td><td>Bắt đầu phiên làm việc mới trong thư mục hiện tại</td></tr>
+            <tr><td><code>/help</code></td><td>Xem danh sách các lệnh có sẵn</td></tr>
+            <tr><td><code>/clear</code></td><td>Xoá toàn bộ lịch sử cuộc hội thoại (giải phóng context)</td></tr>
+            <tr><td><code>/status</code></td><td>Kiểm tra trạng thái: model đang dùng, token đã sử dụng</td></tr>
+            <tr><td><code>/model</code></td><td>Chuyển đổi model (Haiku, Sonnet, Opus)</td></tr>
+            <tr><td><code>/cost</code></td><td>Xem chi phí token của phiên hiện tại</td></tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>Sử dụng trong IDE (VS Code)</h3>
+        <p>Sau khi cài extension, bạn mở <strong>Claude panel</strong> (thường ở sidebar). Quy trình cơ bản:</p>
+        <ol class="steps">
+            <li><strong>Mở file cần làm việc</strong> — Claude sẽ tự động nhận biết file đang mở</li>
+            <li><strong>Gõ prompt</strong> — Mô tả những gì bạn muốn, ví dụ: "Thêm validation cho form đăng ký"</li>
+            <li><strong>Review thay đổi</strong> — AI sẽ hiển thị diff (phần thay đổi). Bạn đọc kỹ rồi chọn <strong>Accept</strong> hoặc <strong>Reject</strong> từng thay đổi</li>
+            <li><strong>Tiếp tục phản hồi</strong> — Nếu chưa ưng ý, gõ tiếp yêu cầu chỉnh sửa cụ thể</li>
+        </ol>
+    </div>
+
+    <div class="card">
+        <h3>Kỹ thuật prompt cơ bản</h3>
+        <p>Cách bạn đặt câu hỏi quyết định 80% chất lượng câu trả lời. Nguyên tắc cơ bản:</p>
+
+        <h4>1. Mô tả rõ ràng, cụ thể</h4>
+<pre><code>// TỆ:
+"Sửa lỗi form"
+
+// TỐT:
+"Trong file src/components/LoginForm.jsx, form submit không hiển thị
+error message khi email không hợp lệ. Hãy thêm validation email và
+hiển thị lỗi phía dưới input field."</code></pre>
+
+        <h4>2. Dùng tên cụ thể (file, function, biến)</h4>
+<pre><code>// TỆ:
+"Sửa cái function xử lý dữ liệu"
+
+// TỐT:
+"Trong file src/utils/api.js, function fetchUserData() đang trả về
+undefined khi API lỗi 404. Hãy thêm error handling để throw error
+với message rõ ràng."</code></pre>
+
+        <h4>3. Prompt theo từng bước (Step by Step)</h4>
+<pre><code>"Tạo API endpoint GET /api/users với các bước:
+1. Tạo route trong routes/users.js
+2. Tạo controller function trong controllers/userController.js
+3. Query database lấy danh sách users, có pagination
+4. Trả về JSON với format: { data: [], total, page, limit }"</code></pre>
+
+        <h4>4. Cung cấp context</h4>
+<pre><code>"Dự án dùng React 19 + Vite, backend là Express + PostgreSQL.
+Đang có file structure như sau: src/components/, src/hooks/,
+server/routes/, server/controllers/.
+Hãy tạo component UserProfile theo đúng pattern của các component
+đang có trong dự án."</code></pre>
+    </div>
+
+    <div class="card">
+        <h3>Copy/Paste vs Inline Edit</h3>
+        <table>
+            <tr><th></th><th>Copy/Paste</th><th>Inline Edit (trong IDE)</th></tr>
+            <tr><td><strong>Cách dùng</strong></td><td>Copy code, paste vào chat, hỏi AI sửa</td><td>Chọn code, nhấn Claude edit, gõ yêu cầu</td></tr>
+            <tr><td><strong>Khi nào dùng</strong></td><td>Hỏi giải thích, học khái niệm, so sánh cách làm</td><td>Sửa code trực tiếp, refactor, thêm tính năng</td></tr>
+            <tr><td><strong>Ưu điểm</strong></td><td>Linh hoạt, có thể hỏi nhiều file cùng lúc</td><td>Nhanh, AI hiểu context file, apply ngay</td></tr>
+            <tr><td><strong>Nhược điểm</strong></td><td>Mất context file gốc, phải paste lại</td><td>Khó hỏi về nhiều file cùng lúc</td></tr>
+        </table>
+    </div>
+
+    <div class="card" style="border-color: var(--accent);">
+        <h3 style="color: var(--accent);">Giới hạn của cách dùng Beginner</h3>
+        <p>Nếu bạn chỉ dùng AI theo kiểu "hỏi — copy — paste", bạn sẽ gặp những vấn đề sau khi dự án lớn lên:</p>
+        <ul>
+            <li><strong>Code chạy được nhưng chất lượng thấp:</strong> Không có error handling, không có validation, không có test. "Nó chạy" không có nghĩa là "nó tốt".</li>
+            <li><strong>AI làm sai nhưng bạn không biết kiểm tra:</strong> AI rất tự tin khi trả lời sai. Nếu bạn không hiểu code, bạn không phát hiện được bug.</li>
+            <li><strong>Dự án lớn thì AI bắt đầu "loạn":</strong> Khi project có nhiều file, AI không nhớ hết context, bắt đầu tạo code trùng lặp, phong cách không nhất quán, thậm chí ghi đè code cũ.</li>
+        </ul>
+        <div class="warn">
+            <strong>Đây là lý do bạn cần Module 03 trở đi:</strong> Để thực sự hiệu quả với AI, bạn phải thay đổi tư duy — từ "người hỏi" thành "người điều khiển".
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MODULE 03 ==================== -->
+<div class="section" id="module03">
+    <div class="section-header">
+        <span class="badge">MODULE 03</span>
+        <h2>Thay Đổi Tư Duy</h2>
+    </div>
+
+    <div class="card">
+        <h3>"Sản phẩm chạy được" khác "Sản phẩm chất lượng"</h3>
+        <p>Nhiều người nghĩ rằng nếu code chạy được là xong. Nhưng trong thực tế, code chất lượng phải đạt nhiều tiêu chí:</p>
+        <table>
+            <tr><th>Tiêu chí</th><th>Code "chạy được"</th><th>Code chất lượng</th></tr>
+            <tr><td>Đọc hiểu</td><td>Tên biến <code>x</code>, <code>d</code>, <code>temp</code></td><td>Tên biến rõ nghĩa: <code>userEmail</code>, <code>isLoading</code></td></tr>
+            <tr><td>Bảo trì</td><td>Tất cả logic trong 1 file 500 dòng</td><td>Tách thành modules, mỗi file 1 trách nhiệm</td></tr>
+            <tr><td>Error handling</td><td>Không có try-catch</td><td>Xử lý mọi trường hợp lỗi có thể xảy ra</td></tr>
+            <tr><td>Security</td><td>Query SQL trực tiếp từ input</td><td>Dùng parameterized queries, validate input</td></tr>
+            <tr><td>Test</td><td>Test thủ bằng tay, "thấy chạy là OK"</td><td>Unit test, integration test tự động</td></tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>AI hoạt động như thế nào? (LLM cơ bản)</h3>
+        <p>Claude (và các AI ngôn ngữ khác) là <strong>Large Language Model</strong> — mô hình dự đoán <strong>token tiếp theo</strong> dựa trên xác suất. Điều này có nghĩa:</p>
+        <ul>
+            <li><strong>AI không "hiểu" như con người.</strong> Nó tính xác suất token nào có khả năng xuất hiện tiếp theo cao nhất dựa trên dữ liệu đã học.</li>
+            <li><strong>Hallucination:</strong> AI có thể tự tin nói sai. Ví dụ, nó có thể "phát minh" ra một API không tồn tại, hoặc nói một thư viện có function mà thực tế không có.</li>
+            <li><strong>Kết quả không nhất quán:</strong> Cùng 1 câu hỏi, hỏi 2 lần có thể cho 2 câu trả lời khác nhau. Đây không phải lỗi — đây là bản chất của mô hình xác suất.</li>
+        </ul>
+        <div class="tip">
+            <strong>Hệ quả thực tế:</strong> Không bao giờ tin AI 100%. Luôn kiểm tra code AI viết, đặc biệt là: tên hàm/thư viện có tồn tại không, logic có đúng không, có bảo mật không.
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Tư duy đúng: BẠN là Kiến Trúc Sư, AI là Thợ Xây</h3>
+        <p>Đây là thay đổi quan trọng nhất trong khoá học. Thay vì để AI quyết định mọi thứ, bạn phải:</p>
+        <ul>
+            <li><strong>BẠN quyết định WHAT</strong> (làm gì) và <strong>HOW</strong> (làm như thế nào)</li>
+            <li><strong>AI thực thi</strong> theo chỉ dẫn của bạn</li>
+        </ul>
+        <p>Quy trình làm việc đúng:</p>
+        <ol class="steps">
+            <li><strong>Bạn ra yêu cầu cụ thể</strong> — "Tạo function validateEmail nhận string, trả về boolean, dùng regex"</li>
+            <li><strong>AI làm</strong> — AI viết code theo yêu cầu</li>
+            <li><strong>BẠN review</strong> — Đọc code, kiểm tra logic, test thử</li>
+            <li><strong>Bạn phản hồi</strong> — "Regex này không bắt được email có dấu +. Sửa lại dùng RFC 5322"</li>
+            <li><strong>AI sửa</strong> — AI cập nhật theo feedback của bạn</li>
+        </ol>
+    </div>
+
+    <div class="card">
+        <h3>Checklist review code AI tạo ra</h3>
+        <p>Mỗi khi AI trả về code, hãy kiểm tra:</p>
+        <ul>
+            <li>Logic có đúng với yêu cầu không? (không phải chỉ "chạy được" là đúng)</li>
+            <li>Có xử lý trường hợp lỗi (error handling) không?</li>
+            <li>Có xử lý trường hợp biên (edge cases) không? (array rỗng, null, undefined)</li>
+            <li>Tên biến, tên function có rõ nghĩa không?</li>
+            <li>Có code trùng lặp (duplicate) không?</li>
+            <li>Có import đúng thư viện không? Thư viện đó có tồn tại và đúng version không?</li>
+            <li>Có vấn đề bảo mật không? (SQL injection, XSS, lộ secret)</li>
+        </ul>
+        <div class="warn">
+            <strong>Lỗi thường gặp của AI:</strong> Import thư viện không tồn tại, dùng API deprecated, hardcode secret, không close database connection, tạo code trùng lặp với code đã có trong project.
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Tư duy Chia Nhỏ Vấn Đề (Divide &amp; Conquer)</h3>
+        <p>Sai lầm lớn nhất của người mới là prompt 1 cục lớn: <em>"Tạo cho tôi app e-commerce với đăng nhập, giỏ hàng, thanh toán, quản lý đơn hàng"</em>. Kết quả sẽ rất tệ.</p>
+        <p>Cách đúng:</p>
+<pre><code>// THAY VÌ:
+"Tạo app e-commerce hoàn chỉnh"
+
+// HÃY CHIA NHỎ:
+Phiên 1: "Thiết kế database schema cho sản phẩm (products table)"
+Phiên 2: "Tạo API GET /api/products với pagination và filter"
+Phiên 3: "Tạo component ProductList hiển thị danh sách"
+Phiên 4: "Thêm chức năng search và filter theo category"
+...</code></pre>
+        <p>Mỗi phiên tập trung 1 nhiệm vụ nhỏ, AI sẽ làm tốt hơn rất nhiều. Sau mỗi phiên, bạn review và đảm bảo code chuẩn trước khi chuyển sang phiên tiếp.</p>
+    </div>
+</div>
+
+<!-- ==================== MODULE 04 ==================== -->
+<div class="section" id="module04">
+    <div class="section-header">
+        <span class="badge">MODULE 04</span>
+        <h2>Plan Mode — Lên Kế Hoạch Trước Khi Code</h2>
+    </div>
+
+    <div class="card">
+        <h3>Plan Mode là gì?</h3>
+        <p><strong>Plan Mode</strong> là chế độ trong Claude Code nơi AI chỉ <strong>lên kế hoạch</strong> mà <strong>không viết code</strong>. Đây là bước cực kỳ quan trọng mà nhiều người bỏ qua.</p>
+        <p>Tại sao cần Plan Mode?</p>
+        <ul>
+            <li>Tránh tình trạng AI viết code sai hướng ngay từ đầu</li>
+            <li>Bạn nhìn thấy "bức tranh toàn cảnh" trước khi đi vào chi tiết</li>
+            <li>Dễ phát hiện vấn đề thiết kế sớm, trước khi lãng phí thời gian code</li>
+            <li>Tiết kiệm token — sửa kế hoạch rẻ hơn sửa code</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>Cách sử dụng Plan Mode</h3>
+        <p><strong>Trong CLI:</strong></p>
+<pre><code># Bật Plan Mode khi bắt đầu phiên
+claude --plan
+
+# Hoặc trong phiên, yêu cầu AI chỉ lên kế hoạch
+"Hãy lên kế hoạch chi tiết để implement chức năng authentication.
+KHÔNG viết code, chỉ mô tả kế hoạch từng bước."</code></pre>
+        <p><strong>Trong IDE:</strong> Khi dùng Claude panel, bắt đầu prompt với chỉ dẫn rõ ràng rằng chỉ muốn kế hoạch, chưa muốn code.</p>
+        <div class="tip">
+            <strong>Mẹo:</strong> Viết rõ "KHÔNG viết code" hoặc "Chỉ lên kế hoạch" trong prompt. AI đôi khi sẽ "nóng vội" và bắt đầu code nếu bạn không nói rõ.
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Thành phần của kế hoạch tốt</h3>
+        <table>
+            <tr><th>Thành phần</th><th>Mô tả</th><th>Ví dụ</th></tr>
+            <tr><td><strong>Mục tiêu</strong></td><td>Kết quả cuối cùng cần đạt</td><td>"User có thể đăng ký và đăng nhập bằng email/password"</td></tr>
+            <tr><td><strong>Các bước thực hiện</strong></td><td>Từng bước cụ thể, có thứ tự</td><td>"1. Tạo User model 2. Tạo auth routes 3. Implement JWT..."</td></tr>
+            <tr><td><strong>Cấu trúc file</strong></td><td>File nào cần tạo/sửa</td><td>"models/User.js, routes/auth.js, middleware/auth.js"</td></tr>
+            <tr><td><strong>Dependencies</strong></td><td>Thư viện/công cụ cần cài</td><td>"bcrypt, jsonwebtoken, express-validator"</td></tr>
+            <tr><td><strong>Edge cases</strong></td><td>Trường hợp đặc biệt cần xử lý</td><td>"Email đã tồn tại, password quá yếu, token hết hạn"</td></tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>Phản biện kế hoạch — Câu hỏi nên đặt</h3>
+        <p>Sau khi AI đưa ra kế hoạch, <strong>đừng chấp nhận ngay</strong>. Hãy hỏi:</p>
+        <ul>
+            <li>"Cách này có scale được khi có 10.000 users không?"</li>
+            <li>"Có cách nào đơn giản hơn không?"</li>
+            <li>"Nếu X xảy ra thì sao?" (X = lỗi mạng, dữ liệu sai, user hack...)</li>
+            <li>"Tại sao chọn thư viện A mà không phải B?"</li>
+            <li>"Bước nào có thể gặp vấn đề nhất?"</li>
+        </ul>
+        <p><strong>Iterative Planning (lập kế hoạch nhiều vòng):</strong> Vòng 1: AI đưa kế hoạch &rarr; Vòng 2: Bạn phản biện, AI sửa &rarr; Vòng 3: Bạn duyệt kế hoạch cuối &rarr; Bắt đầu code.</p>
+    </div>
+
+    <div class="card" style="border-color: var(--accent);">
+        <h3 style="color: var(--accent);">Red flags — Kế hoạch tệ</h3>
+        <ul>
+            <li>Kế hoạch quá chung chung, không có tên file/function cụ thể</li>
+            <li>Bỏ qua error handling và security</li>
+            <li>Không đề cập đến edge cases</li>
+            <li>Dùng quá nhiều thư viện không cần thiết</li>
+            <li>Không có bước testing</li>
+            <li>Cấu trúc thư mục phức tạp không cần thiết cho dự án nhỏ</li>
+        </ul>
+        <div class="tip">
+            <strong>Nhớ:</strong> Cung cấp càng nhiều context (tech stack, cấu trúc hiện tại, yêu cầu cụ thể), AI sẽ lên kế hoạch càng tốt. Kế hoạch mơ hồ &larr; prompt mơ hồ.
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MODULE 05 ==================== -->
+<div class="section" id="module05">
+    <div class="section-header">
+        <span class="badge">MODULE 05</span>
+        <h2>Quản Lý Bộ Nhớ Với CLAUDE.md</h2>
+    </div>
+
+    <div class="card">
+        <h3>Tại sao AI bị quên?</h3>
+        <p>Như đã học ở Module 01, AI có <strong>Context Window</strong> giới hạn. Khi cuộc hội thoại dài, AI "quên" những gì bạn nói trước đó. Với dự án thực tế kéo dài nhiều ngày, vấn đề này rất nghiêm trọng:</p>
+        <ul>
+            <li>Ngày 1: Bạn nói "Dùng camelCase cho tất cả biến" — Ngày 3: AI bắt đầu dùng snake_case</li>
+            <li>Bạn đã thống nhất cấu trúc folder, nhưng phiên mới AI tạo file ở nơi khác</li>
+            <li>AI tạo function trùng với function đã có vì không nhớ</li>
+        </ul>
+        <p>Giải pháp: <strong>CLAUDE.md</strong> — file bộ nhớ dài hạn cho AI.</p>
+    </div>
+
+    <div class="card">
+        <h3>CLAUDE.md là gì?</h3>
+        <p><strong>CLAUDE.md</strong> là file đặt ở thư mục gốc của dự án. Mỗi khi bắt đầu phiên làm việc, Claude Code tự động đọc file này và "nhớ" tất cả nội dung trong đó. Nó giống như bạn viết <em>brief</em> cho nhân viên mới để họ hiểu dự án ngay.</p>
+        <p><strong>Vị trí đặt file:</strong></p>
+        <ul>
+            <li><code>./CLAUDE.md</code> — Ở root dự án (áp dụng cho dự án này)</li>
+            <li><code>~/.claude/CLAUDE.md</code> — Ở thư mục home (áp dụng cho tất cả dự án)</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>Cấu trúc CLAUDE.md chuẩn</h3>
+<pre><code># CLAUDE.md
+
+## Mô tả dự án
+DevHub — Ứng dụng web học tập cho developer. React SPA với iframe
+cho nội dung tĩnh.
+
+## Tech Stack
+- Frontend: React 19 + Vite 8, plain JSX (không TypeScript)
+- Styling: CSS thuần với CSS variables (dark theme)
+- State: useState/useEffect, không dùng state library
+- Content: File HTML tĩnh trong public/, load qua iframe
+
+## Cấu trúc thư mục
+src/
+  components/    # React components
+  hooks/         # Custom hooks
+  App.jsx        # Component chính, điều khiển navigation
+public/
+  BE/            # Nội dung Backend
+  SQL/           # Nội dung SQL
+  AI/            # Nội dung AI
+
+## Quy ước coding
+- Component dùng PascalCase: UserProfile.jsx
+- Hook dùng camelCase với prefix "use": useCheckbox.js
+- CSS dùng BEM-like: .card-grid, .module-header
+- Nội dung tiếng Việt có dấu
+
+## Lưu ý quan trọng
+- KHÔNG dùng TypeScript
+- KHÔNG thêm thư viện mới khi chưa hỏi
+- Mọi nội dung mới: tạo file HTML trong public/, thêm vào SECTIONS
+  trong App.jsx
+- Giữ dark theme nhất quán với CSS variables đã định nghĩa</code></pre>
+    </div>
+
+    <div class="card">
+        <h3>Khi nào cần cập nhật CLAUDE.md?</h3>
+        <ul>
+            <li>Thêm thư viện/dependency mới vào dự án</li>
+            <li>Thay đổi cấu trúc thư mục</li>
+            <li>Phát hiện AI làm sai liên tục (thêm quy tắc để AI không lặp lại)</li>
+            <li>Thêm quy ước mới (naming convention, commit convention...)</li>
+            <li>Thay đổi yêu cầu dự án</li>
+        </ul>
+        <div class="tip">
+            <strong>Mẹo:</strong> Khi AI làm sai điều gì đó, thay vì chỉ sửa code, hãy <strong>cập nhật CLAUDE.md</strong> để AI không làm sai nữa. Ví dụ: AI cứ thêm <code>console.log</code> vào code &rarr; Thêm quy tắc "Không để console.log trong code production".
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Memory System trong Claude Code</h3>
+        <p>Ngoài CLAUDE.md, Claude Code còn có hệ thống Memory rộng hơn:</p>
+        <table>
+            <tr><th>Loại</th><th>Vị trí</th><th>Phạm vi</th></tr>
+            <tr><td><strong>Project Memory</strong></td><td><code>./CLAUDE.md</code></td><td>Chỉ dự án này</td></tr>
+            <tr><td><strong>User Memory</strong></td><td><code>~/.claude/CLAUDE.md</code></td><td>Tất cả dự án của bạn</td></tr>
+            <tr><td><strong>Feedback Memory</strong></td><td>Tự động lưu khi bạn sửa AI</td><td>AI học từ phản hồi của bạn</td></tr>
+            <tr><td><strong>Reference files</strong></td><td>File bất kỳ trong dự án</td><td>AI đọc khi cần</td></tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>Nên và Không nên đặt trong CLAUDE.md</h3>
+        <div class="card-grid">
+            <div class="card" style="border-color: var(--success);">
+                <strong style="color:var(--success)">NÊN</strong>
+                <ul>
+                    <li>Mô tả ngắn gọn về dự án</li>
+                    <li>Tech stack và version</li>
+                    <li>Cấu trúc thư mục</li>
+                    <li>Quy ước code (naming, style)</li>
+                    <li>Lệnh build/run/test</li>
+                    <li>Lưu ý quan trọng, giới hạn</li>
+                </ul>
+            </div>
+            <div class="card" style="border-color: var(--accent);">
+                <strong style="color:var(--accent)">KHÔNG NÊN</strong>
+                <ul>
+                    <li>Nội dung quá dài (>200 dòng) — tốn token</li>
+                    <li>Secret, API key, password</li>
+                    <li>Toàn bộ code example</li>
+                    <li>Lịch sử thay đổi dự án</li>
+                    <li>Thông tin cá nhân không liên quan</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MODULE 06 ==================== -->
+<div class="section" id="module06">
+    <div class="section-header">
+        <span class="badge">MODULE 06</span>
+        <h2>Dự Án Thực Hành Full-Stack</h2>
+    </div>
+
+    <div class="card">
+        <h3>Quy trình làm dự án full-stack với AI</h3>
+        <p>Khi xây dựng dự án thực tế với Claude Code, hãy tuân thủ quy trình 8 bước:</p>
+        <ol class="steps">
+            <li><strong>Phân tích yêu cầu</strong> — Liệt kê tất cả tính năng cần có. Dùng Plan Mode hỏi AI giúp phân tích. Kết quả: danh sách features rõ ràng.</li>
+            <li><strong>Thiết kế</strong> — Database schema, API endpoints, cấu trúc thư mục. Đây là bước quan trọng nhất — sai ở đây thì toàn bộ project lệch.</li>
+            <li><strong>Setup project</strong> — Init project, cài dependencies, cấu hình. Yêu cầu AI tạo cấu trúc folder chuẩn.</li>
+            <li><strong>Code Backend</strong> — CRUD, middleware, validation. Làm từng API, test xong mới chuyển sang API tiếp.</li>
+            <li><strong>Code Frontend</strong> — Layout, components, kết nối API. Làm từng trang, không làm 1 lúc tất cả.</li>
+            <li><strong>Authentication</strong> — Đăng ký, đăng nhập, JWT, protected routes. Làm sau khi CRUD chạy ổn định.</li>
+            <li><strong>Review &amp; Test</strong> — Kiểm tra toàn bộ, fix bug, tối ưu. Yêu cầu AI review code và viết test.</li>
+            <li><strong>Deploy</strong> — Chuẩn bị environment, deploy lên cloud.</li>
+        </ol>
+    </div>
+
+    <div class="card">
+        <h3>Thiết kế Database Schema</h3>
+        <p>Trước khi code, bạn cần thiết kế cơ sở dữ liệu. Prompt mẫu:</p>
+<pre><code>"Thiết kế database schema cho ứng dụng Task Manager với các yêu cầu:
+- User có thể đăng ký/đăng nhập
+- Mỗi User có nhiều Projects
+- Mỗi Project có nhiều Tasks
+- Task có trạng thái: todo, in_progress, done
+- Task có độ ưu tiên: low, medium, high
+
+Hãy tạo SQL schema với các bảng, foreign keys, và indexes.
+Dùng PostgreSQL syntax."</code></pre>
+        <p>Sau khi AI trả về, bạn review: các bảng đã có đủ trường chưa? Relationships có đúng không? Có cần thêm index nào không?</p>
+    </div>
+
+    <div class="card">
+        <h3>Backend: CRUD và Middleware</h3>
+        <p>Khi code backend, chia thành nhiều phiên nhỏ:</p>
+        <h4>Phiên 1: Setup và Model</h4>
+<pre><code>"Tạo Express server với cấu trúc:
+server/
+  index.js        # Entry point
+  config/db.js    # Database connection
+  models/User.js  # User model
+  models/Task.js  # Task model
+Dùng PostgreSQL với thư viện pg. Thiết kế theo pattern đã thống nhất."</code></pre>
+
+        <h4>Phiên 2: CRUD cho 1 resource</h4>
+<pre><code>"Tạo CRUD API cho Tasks:
+- GET /api/tasks — lấy danh sách, có pagination và filter theo status
+- GET /api/tasks/:id — lấy chi tiết
+- POST /api/tasks — tạo mới, validate: title bắt buộc, status mặc định 'todo'
+- PUT /api/tasks/:id — cập nhật
+- DELETE /api/tasks/:id — xoá (soft delete)
+Tạo riêng: route file, controller file, validation middleware."</code></pre>
+
+        <h4>Middleware quan trọng</h4>
+        <ul>
+            <li><strong>Error handling middleware:</strong> Bắt tất cả lỗi, trả về format nhất quán</li>
+            <li><strong>Auth middleware:</strong> Kiểm tra JWT token</li>
+            <li><strong>Validation middleware:</strong> Kiểm tra input trước khi xử lý</li>
+            <li><strong>CORS middleware:</strong> Cho phép frontend gọi API</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>Frontend: Components và Kết nối API</h3>
+        <p>Ở frontend, làm theo thứ tự: Layout &rarr; Components tĩnh &rarr; Kết nối API &rarr; State management.</p>
+<pre><code>"Tạo component TaskList trong src/components/TaskList.jsx:
+- Gọi API GET /api/tasks để lấy danh sách
+- Hiển thị dạng table với các cột: Title, Status, Priority, Created
+- Có loading state và error state
+- Có nút 'Thêm Task' mở modal tạo mới
+- Dùng fetch API (không cài axios)
+- Styling dùng CSS module hoặc CSS thuần theo pattern của dự án"</code></pre>
+        <div class="tip">
+            <strong>Mẹo:</strong> Làm xong phần hiển thị trước (với dữ liệu giả), test layout OK rồi mới kết nối API thực. Như vậy nếu API lỗi, bạn biết lỗi ở đâu.
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Authentication: JWT</h3>
+        <p>Quy trình authentication với JWT:</p>
+        <ol>
+            <li><strong>Đăng ký:</strong> User gửi email + password &rarr; Server hash password (bcrypt) &rarr; Lưu vào DB &rarr; Trả về thành công</li>
+            <li><strong>Đăng nhập:</strong> User gửi email + password &rarr; Server kiểm tra email tồn tại &rarr; So sánh password với hash &rarr; Tạo JWT token &rarr; Trả về token</li>
+            <li><strong>Protected route:</strong> Frontend gửi token trong header <code>Authorization: Bearer &lt;token&gt;</code> &rarr; Middleware kiểm tra token &rarr; Nếu hợp lệ: cho phép truy cập &rarr; Nếu không: trả về 401</li>
+        </ol>
+<pre><code>// Ví dụ auth middleware
+const authMiddleware = (req, res, next) =&gt; {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ error: 'Không có token' });
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (err) {
+        res.status(401).json({ error: 'Token không hợp lệ' });
+    }
+};</code></pre>
+    </div>
+
+    <div class="card">
+        <h3>Deploy</h3>
+        <table>
+            <tr><th>Dịch vụ</th><th>Phù hợp cho</th><th>Free tier</th></tr>
+            <tr><td><strong>Vercel</strong></td><td>Frontend React/Next.js</td><td>Có, giới hạn bandwidth</td></tr>
+            <tr><td><strong>Railway</strong></td><td>Backend Node.js + Database</td><td>Có, $5 credit/tháng</td></tr>
+            <tr><td><strong>Render</strong></td><td>Full-stack, backend + DB</td><td>Có, sleep sau 15 phút không dùng</td></tr>
+        </table>
+        <p>Trước khi deploy, đảm bảo:</p>
+        <ul>
+            <li>Tất cả secret nằm trong environment variables (không hardcode)</li>
+            <li>Có file <code>.env.example</code> liệt kê các biến môi trường cần thiết</li>
+            <li>Database connection string dùng production URL</li>
+            <li>CORS chỉ cho phép domain production</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ==================== MODULE 07 ==================== -->
+<div class="section" id="module07">
+    <div class="section-header">
+        <span class="badge">MODULE 07</span>
+        <h2>Skill &amp; Workflow</h2>
+    </div>
+
+    <div class="card">
+        <h3>Skill là gì?</h3>
+        <p><strong>Skill</strong> trong Claude Code là <em>workflow được đóng gói thành file</em>, có thể tái sử dụng nhiều lần. Thay vì gõ lại prompt dài mỗi lần muốn làm 1 việc, bạn viết 1 lần thành Skill và chạy bằng lệnh ngắn.</p>
+        <p>Tưởng tượng Skill như <em>macro</em> hoặc <em>script</em> — nhưng thay vì code, nó là tập hợp chỉ dẫn cho AI.</p>
+    </div>
+
+    <div class="card">
+        <h3>Cấu trúc file Skill</h3>
+        <p>Skill là các file <code>.md</code> đặt trong thư mục <code>.claude/commands/</code> của dự án:</p>
+<pre><code>project/
+  .claude/
+    commands/
+      create-crud.md      # Skill tạo CRUD
+      write-test.md       # Skill viết test
+      explain-code.md     # Skill giải thích code
+      review.md           # Skill review code
+  src/
+  ...</code></pre>
+        <p>Sau khi tạo, bạn chạy Skill bằng: <code>/create-crud</code>, <code>/write-test</code>,... ngay trong Claude Code.</p>
+    </div>
+
+    <div class="card">
+        <h3>Cú pháp viết Skill</h3>
+        <p>Một file Skill là Markdown với chỉ dẫn cho AI. Ví dụ <code>.claude/commands/create-crud.md</code>:</p>
+<pre><code># Tạo CRUD API
+
+Tạo đầy đủ CRUD API cho resource được chỉ định.
+
+## Input
+- $ARGUMENTS: tên resource (ví dụ: "product", "order")
+
+## Các bước thực hiện
+1. Tạo model file trong `server/models/{Resource}.js`
+   - Định nghĩa schema với các trường phù hợp
+   - Export model
+
+2. Tạo controller trong `server/controllers/{resource}Controller.js`
+   - getAll: pagination, filter, sort
+   - getById: kiểm tra tồn tại
+   - create: validate input
+   - update: kiểm tra tồn tại, validate
+   - delete: soft delete (set deletedAt)
+
+3. Tạo routes trong `server/routes/{resource}Routes.js`
+   - GET /{resources} -&gt; getAll
+   - GET /{resources}/:id -&gt; getById
+   - POST /{resources} -&gt; create
+   - PUT /{resources}/:id -&gt; update
+   - DELETE /{resources}/:id -&gt; delete
+
+4. Thêm route vào server/index.js
+
+## Quy tắc
+- Dùng try-catch trong mọi controller
+- Trả về JSON format: { success, data, message }
+- Status code đúng chuẩn: 200, 201, 400, 404, 500</code></pre>
+        <p>Chạy: gõ <code>/create-crud product</code> và AI sẽ tự động làm tất cả các bước trên.</p>
+    </div>
+
+    <div class="card">
+        <h3>Các Skill hữu ích nên tạo</h3>
+        <div class="card-grid">
+            <div class="card">
+                <strong style="color:var(--primary)">Skill CRUD</strong>
+                <p>Tự động tạo model, controller, route, validation cho bất kỳ resource nào. Tiết kiệm 30–60 phút mỗi lần.</p>
+            </div>
+            <div class="card">
+                <strong style="color:var(--success)">Skill Unit Test</strong>
+                <p>Truyền vào file, AI tự động viết test cho tất cả các function trong đó. Bao gồm happy path và edge cases.</p>
+            </div>
+            <div class="card">
+                <strong style="color:var(--tab-active)">Skill Explain</strong>
+                <p>AI đọc file và giải thích từng phần: mục đích, logic, dependencies. Hữu ích khi đọc code người khác.</p>
+            </div>
+            <div class="card">
+                <strong style="color:var(--accent)">Skill Review</strong>
+                <p>AI review code theo checklist: security, performance, readability, error handling. Đưa ra gợi ý cải thiện.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Kết hợp nhiều Skill: Quy trình hoàn chỉnh</h3>
+        <p>Sức mạnh thực sự của Skill là khi bạn kết hợp chúng thành quy trình:</p>
+<pre><code># Quy trình thêm feature mới:
+
+1. /plan "Thêm chức năng comment cho blog posts"
+   → AI lên kế hoạch chi tiết
+
+2. /create-crud comment
+   → AI tạo model, controller, route
+
+3. /write-test server/controllers/commentController.js
+   → AI viết unit test
+
+4. /review server/controllers/commentController.js
+   → AI review code và gợi ý cải thiện
+
+# Tổng thời gian: 15–20 phút thay vì 2–3 giờ</code></pre>
+    </div>
+
+    <div class="card">
+        <h3>Chia sẻ Skill qua Git</h3>
+        <p>Vì Skill nằm trong <code>.claude/commands/</code> của dự án, bạn có thể:</p>
+        <ul>
+            <li><strong>Commit vào git:</strong> Cả team dùng chung Skill, đảm bảo nhất quán</li>
+            <li><strong>Copy giữa dự án:</strong> Skill CRUD tạo cho project A dùng được cho project B (chỉ cần chỉnh template)</li>
+            <li><strong>Tạo bộ sưu tập:</strong> Theo thời gian, bạn sẽ có "kho" Skill cho nhiều loại công việc</li>
+        </ul>
+        <div class="tip">
+            <strong>Mẹo:</strong> Bắt đầu với 2–3 Skill đơn giản. Sau mỗi dự án, review và cải thiện chúng. Skill tốt nhất là Skill được tinh chỉnh qua nhiều lần sử dụng thực tế.
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MODULE 08 ==================== -->
+<div class="section" id="module08">
+    <div class="section-header">
+        <span class="badge">MODULE 08</span>
+        <h2>Git, Debug &amp; Rewind</h2>
+    </div>
+
+    <div class="card">
+        <h3>Git cơ bản với Claude Code</h3>
+        <p>Claude Code tích hợp sâu với Git. Bạn có thể yêu cầu AI thực hiện các thao tác Git trực tiếp:</p>
+<pre><code># Khởi tạo Git
+"Init git repo, tạo .gitignore cho Node.js project"
+
+# Commit
+"Commit những thay đổi hiện tại với message mô tả"
+
+# AI sẽ tự động:
+# 1. git add các file phù hợp (không add .env, node_modules)
+# 2. Viết commit message chuẩn
+# 3. Thực hiện commit</code></pre>
+    </div>
+
+    <div class="card">
+        <h3>Conventional Commits</h3>
+        <p>Conventional Commits là quy ước viết commit message giúp lịch sử Git rõ ràng và có thể tự động hoá:</p>
+        <table>
+            <tr><th>Prefix</th><th>Khi nào dùng</th><th>Ví dụ</th></tr>
+            <tr><td><code>feat:</code></td><td>Thêm tính năng mới</td><td><code>feat: add user registration form</code></td></tr>
+            <tr><td><code>fix:</code></td><td>Sửa lỗi</td><td><code>fix: resolve login timeout issue</code></td></tr>
+            <tr><td><code>refactor:</code></td><td>Sửa code mà không đổi chức năng</td><td><code>refactor: extract validation logic</code></td></tr>
+            <tr><td><code>docs:</code></td><td>Thêm/sửa tài liệu</td><td><code>docs: update API documentation</code></td></tr>
+            <tr><td><code>test:</code></td><td>Thêm/sửa test</td><td><code>test: add unit tests for auth</code></td></tr>
+            <tr><td><code>chore:</code></td><td>Công việc bảo trì</td><td><code>chore: update dependencies</code></td></tr>
+            <tr><td><code>style:</code></td><td>Định dạng code, không đổi logic</td><td><code>style: fix indentation</code></td></tr>
+        </table>
+
+        <h4>Định nghĩa trong CLAUDE.md</h4>
+<pre><code>## Git Convention
+- Dùng Conventional Commits: feat|fix|refactor|docs|test|chore
+- Commit message bằng tiếng Anh, ngắn gọn (&lt;72 ký tự)
+- Mỗi commit chỉ làm 1 việc (atomic commits)
+- KHÔNG commit file .env, node_modules, dist/</code></pre>
+    </div>
+
+    <div class="card">
+        <h3>Giải quyết Merge Conflict với AI</h3>
+        <p>Khi gặp merge conflict, thay vì tự đọc và sửa, bạn có thể nhờ AI:</p>
+<pre><code>"Đang có merge conflict trong file src/components/UserList.jsx.
+Branch main có version mới của function fetchUsers dùng pagination.
+Branch feature/search có version thêm chức năng search.
+Hãy merge cả 2 thay đổi: giữ pagination và thêm search."</code></pre>
+        <p>AI sẽ đọc cả 2 version, hiểu ý đồ của từng bên, và gộp lại hợp lý. Bạn chỉ cần review kết quả.</p>
+        <div class="warn">
+            <strong>Lưu ý:</strong> Luôn giải thích cho AI <strong>ý đồ</strong> của mỗi bên trong conflict. Nếu chỉ nói "giải quyết conflict", AI có thể chọn sai bên.
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Rewind — Quay lại code quá khứ</h3>
+        <p><strong>Rewind</strong> là tính năng của Claude Code cho phép quay lại trạng thái code trước đó trong phiên làm việc. Nó khác với <code>git reset</code>:</p>
+        <table>
+            <tr><th></th><th>Rewind (Claude Code)</th><th>git reset</th></tr>
+            <tr><td>Phạm vi</td><td>Những thay đổi AI làm trong phiên hiện tại</td><td>Bất kỳ commit nào trong lịch sử Git</td></tr>
+            <tr><td>Cách dùng</td><td>Chọn điểm trong timeline phiên làm việc</td><td><code>git reset --hard &lt;commit&gt;</code></td></tr>
+            <tr><td>An toàn</td><td>Rất an toàn, chỉ ảnh hưởng phiên hiện tại</td><td>Nguy hiểm nếu dùng sai, mất code</td></tr>
+            <tr><td>Khi nào dùng</td><td>AI làm sai, muốn quay lại bước trước</td><td>Muốn bỏ commit đã push/chưa push</td></tr>
+        </table>
+        <div class="tip">
+            <strong>Mẹo:</strong> Commit thường xuyên! Mỗi khi AI làm xong 1 bước và bạn đã review OK, hãy commit ngay. Như vậy nếu bước sau AI làm hỏng, bạn có thể quay lại commit trước đó an toàn.
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Debug hiệu quả với AI</h3>
+        <p>Debug là kỹ năng quan trọng nhất khi làm việc với AI. Quy trình debug chuẩn:</p>
+        <ol class="steps">
+            <li><strong>Mô tả bug rõ ràng</strong>
+<pre><code>"Khi bấm nút 'Save' trong form tạo Task, trang bị reload nhưng
+Task không được lưu vào database. Console hiện lỗi 400 Bad Request."</code></pre>
+            </li>
+            <li><strong>Cung cấp error log</strong> — Copy chính xác lỗi từ console, terminal, hoặc log file. AI cần thấy lỗi gốc, không phải mô tả của bạn.</li>
+            <li><strong>Thu hẹp phạm vi</strong>
+<pre><code>"Lỗi xảy ra ở API POST /api/tasks. Tôi đã kiểm tra:
+- Frontend gửi đúng dữ liệu (đã log request body)
+- Server nhận được request (có log 'Request received')
+- Lỗi xảy ra ở bước validation — req.body.title là undefined"</code></pre>
+            </li>
+            <li><strong>Kiểm tra giả thuyết</strong> — Yêu cầu AI đưa ra giả thuyết và kiểm tra từng cái:
+<pre><code>"Giả thuyết 1: Frontend không gửi Content-Type header
+Giả thuyết 2: Body parser chưa được cấu hình
+Giả thuyết 3: Tên field không khớp giữa FE và BE
+Hãy kiểm tra từng giả thuyết."</code></pre>
+            </li>
+            <li><strong>Xác nhận fix</strong> — Sau khi AI sửa, test lại. Nếu vẫn lỗi, quay lại bước 1 với thông tin mới.</li>
+        </ol>
+    </div>
+
+    <div class="card" style="border-color: var(--success);">
+        <h3 style="color: var(--success);">Tổng Kết Khoá Học</h3>
+        <p>Sau 8 module, bạn đã có đầy đủ kiến thức để làm việc hiệu quả với Claude Code:</p>
+        <ul>
+            <li><strong>Hiểu AI:</strong> Biết giới hạn, biết cách AI hoạt động, không kỳ vọng sai</li>
+            <li><strong>Tư duy đúng:</strong> Bạn là kiến trúc sư, AI là thợ xây. Bạn review, AI thực thi</li>
+            <li><strong>Quy trình:</strong> Plan &rarr; Code &rarr; Review &rarr; Test &rarr; Commit</li>
+            <li><strong>Công cụ:</strong> CLAUDE.md, Plan Mode, Skill, Git, Debug, Rewind</li>
+        </ul>
+        <p><strong>Bước tiếp theo:</strong> Áp dụng ngay vào dự án thực tế. Bắt đầu với dự án nhỏ, làm quen quy trình, rồi tăng dần độ phức tạp. Mỗi dự án hoàn thành, bạn lại giỏi hơn — không chỉ về code, mà về cách làm việc với AI.</p>
+    </div>
+</div>
+
+</div><!-- end .content -->
+
+<!-- IntersectionObserver for active tab highlighting -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const links = document.querySelectorAll('.toc-link');
+    const sections = document.querySelectorAll('.section');
+
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                links.forEach(l => l.classList.remove('active'));
+                const active = document.querySelector(`.toc-link[href="#${entry.target.id}"]`);
+                if (active) {
+                    active.classList.add('active');
+                    active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }
+            }
+        });
+    }, { rootMargin: '-20% 0px -75% 0px', threshold: 0 });
+
+    sections.forEach(s => observer.observe(s));
+
+    links.forEach(link => {
+        link.addEventListener('click', e => {
+            e.preventDefault();
+            const target = document.querySelector(link.getAttribute('href'));
+            if (target) target.scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+});
+</script>
+</body>
+</html>

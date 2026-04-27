@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(npm create:*)",
+      "Bash(npx --yes create-vite@latest devhub --template react)",
+      "Bash(npm install:*)",
+      "Bash(rm -rf src/assets src/App.css src/App.jsx src/index.css src/main.jsx)",
+      "Bash(mkdir -p src/components src/hooks src/data)",
+      "Bash(npm run:*)",
+      "Bash(cmd //c \"mklink /J BE \\\\\"D:\\\\AI LEARN TUTORIAL\\\\BE\\\\\"\")",
+      "Bash(cmd //c \"mklink /J SQL \\\\\"D:\\\\AI LEARN TUTORIAL\\\\SQL\\\\\"\")",
+      "Bash(cmd //c \"mklink /J BUILD \\\\\"D:\\\\AI LEARN TUTORIAL\\\\BUILD\\\\\"\")",
+      "Bash(cmd //c \"mklink /J ENGLISH \\\\\"D:\\\\AI LEARN TUTORIAL\\\\ENGLISH\\\\\"\")",
+      "Bash(cmd //c \"mklink /J TODO \\\\\"D:\\\\AI LEARN TUTORIAL\\\\TODO\\\\\"\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5175/BE/index.html)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"http://localhost:5175/TUTORIAL%20WEB/index.html\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5175/SQL/index.html)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5175/BE/wisdom.html)",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' http://localhost:5175__TRACKED_VAR__)",
+      "Bash(find \"d:/AI LEARN TUTORIAL REACTJS/public\" -name \"*.html\" -exec sh -c 'echo \"$\\(wc -l < \"$1\"\\) lines — $1\"' _ {} \\\\;)"
+    ]
+  }
+}

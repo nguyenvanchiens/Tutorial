@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>React Phỏng Vấn - 80+ Câu Hỏi Junior → Senior</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  .qa { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 10px; padding: 1.1rem 1.3rem; margin-bottom: 1rem; }
+  .qa .q { color: var(--primary); font-weight: 700; font-size: 1.02rem; margin-bottom: .55rem; }
+  .qa .a { color: var(--text); font-size: .95rem; }
+  .qa .a p { margin-bottom: .55rem; }
+  .qa .a ul { padding-left: 1.3rem; margin: .3rem 0; color: var(--muted); }
+  .lvl-tag { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: .7rem; font-weight: 700; margin-right: .5rem; letter-spacing: 1px; }
+  .lvl-jr { background: rgba(67,233,123,.15); color: var(--success); }
+  .lvl-mid { background: rgba(243,156,18,.15); color: var(--warn); }
+  .lvl-sr { background: rgba(255,107,107,.15); color: var(--danger); }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">React<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="basics.html">Cơ bản</a>
+      <a href="hooks.html">Hooks</a>
+      <a href="advanced.html">Nâng cao</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="ecosystem.html">Ecosystem</a>
+      <a href="interview.html" class="active">Phỏng vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">50+ CÂU HỎI · JUNIOR → SENIOR</div>
+  <h1>Phỏng vấn <span class="gradient">React</span></h1>
+  <p class="hero-desc">Câu hỏi thường gặp, đáp án ngắn gọn nhưng đầy đủ. Đọc xong tự trả lời — đừng học thuộc.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🟢 Junior (L1-L2)</h2>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-jr">JR</span>1. Virtual DOM là gì? Khác gì Real DOM?</div>
+      <div class="a">
+        <p>Virtual DOM là cây object JS mô tả UI. Mỗi lần state đổi, React tạo VDOM mới, <strong>diff</strong> với VDOM cũ để tìm thay đổi tối thiểu, rồi <strong>patch</strong> lên DOM thật.</p>
+        <p>Lợi ích: (1) DX tốt — mình viết khai báo, không tự thao tác DOM; (2) batch nhiều update → giảm reflow; (3) abstraction cho SSR, React Native.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-jr">JR</span>2. Phân biệt State vs Props</div>
+      <div class="a">
+        <ul>
+          <li><strong>Props</strong>: truyền <em>từ cha xuống con</em>, immutable trong con. Giống tham số function.</li>
+          <li><strong>State</strong>: dữ liệu <em>nội bộ</em> component, thay đổi qua <code>setState</code>, trigger re-render.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-jr">JR</span>3. Tại sao <code>key</code> quan trọng trong list?</div>
+      <div class="a">
+        <p>React dùng key để nhận diện item giữa các lần render. Key ổn định → tái sử dụng DOM node, giữ state. Key trùng/đổi → bug state dính sai item, hoặc remount tốn tài nguyên.</p>
+        <p>Tránh dùng <code>index</code> khi list có thể reorder/insert/remove.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-jr">JR</span>4. Controlled vs Uncontrolled Component?</div>
+      <div class="a">
+        <ul>
+          <li><strong>Controlled</strong>: <code>value</code> + <code>onChange</code> — React giữ state. Dễ validate, nhiều render.</li>
+          <li><strong>Uncontrolled</strong>: <code>defaultValue</code> + <code>ref</code> — DOM giữ. Ít render, đọc qua ref.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-jr">JR</span>5. JSX là gì?</div>
+      <div class="a">
+        <p>Cú pháp extension của JS cho phép viết UI giống HTML. Trình biên dịch (Babel/SWC) compile thành <code>React.createElement(type, props, children)</code>. Cuối cùng nó vẫn là object JS.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-jr">JR</span>6. Khi nào dùng Fragment <code>&lt;&gt;...&lt;/&gt;</code>?</div>
+      <div class="a">
+        <p>Component phải return 1 root element. Nếu không muốn thêm <code>div</code> thừa vào DOM (ảnh hưởng layout, CSS selector) → dùng Fragment.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-jr">JR</span>7. <code>useEffect</code> với deps array hoạt động ra sao?</div>
+      <div class="a">
+        <ul>
+          <li>Không truyền: chạy <strong>mọi</strong> render.</li>
+          <li><code>[]</code>: chạy 1 lần sau mount.</li>
+          <li><code>[a, b]</code>: chạy khi <code>a</code> hoặc <code>b</code> đổi (so sánh <code>Object.is</code>).</li>
+        </ul>
+        <p>Cleanup chạy trước lần effect kế tiếp và khi unmount.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-jr">JR</span>8. Lift state up là gì?</div>
+      <div class="a">
+        <p>Khi 2 component anh em cần chia sẻ state → di chuyển state lên component cha chung gần nhất, truyền xuống qua props + callback. Là pattern cơ bản của unidirectional data flow.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-jr">JR</span>9. Sự khác nhau giữa class component và function component?</div>
+      <div class="a">
+        <p>Function component + hooks là <strong>chuẩn hiện tại</strong>. Class vẫn hợp lệ nhưng verbose, không dùng được hooks. Error Boundary hiện vẫn cần class.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-jr">JR</span>10. <code>setState</code> có phải async không?</div>
+      <div class="a">
+        <p>Không hoàn toàn. Nó <strong>lên lịch</strong> update, React batch nhiều <code>setState</code> cùng tick rồi render 1 lần. Trong cùng handler, đọc state ngay sau <code>setState</code> vẫn là giá trị cũ. Dùng <code>setCount(c =&gt; c + 1)</code> khi cần giá trị mới dựa trên cũ.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🟠 Middle (L3)</h2>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>11. Reconciliation là gì?</div>
+      <div class="a">
+        <p>Quá trình React so sánh VDOM cũ/mới để tính diff tối thiểu. Heuristic:</p>
+        <ul>
+          <li>Khác loại element (vd <code>div</code> → <code>span</code>) → huỷ sub-tree, tạo mới.</li>
+          <li>Cùng loại: giữ DOM, update prop.</li>
+          <li>List: so sánh qua <code>key</code> để reorder thay vì tạo mới.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>12. Khi nào dùng <code>useMemo</code>/<code>useCallback</code>?</div>
+      <div class="a">
+        <p>Chỉ 3 trường hợp:</p>
+        <ul>
+          <li>Tính toán thực sự nặng (sort/filter list lớn, parse data)</li>
+          <li>Giữ reference ổn định cho prop của component đã <code>React.memo</code></li>
+          <li>Làm dep cho <code>useEffect</code> để tránh chạy lại không cần thiết</li>
+        </ul>
+        <p>Ngoài ra: đừng memo. Memo có chi phí compare + lưu bộ nhớ.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>13. <code>React.memo</code> hoạt động ra sao?</div>
+      <div class="a">
+        <p>Bọc component, so sánh props bằng shallow equality. Nếu prop không đổi → skip render. Mặc định so sánh <code>Object.is</code> từng key; có thể truyền custom <code>areEqual</code>.</p>
+        <p><strong>Điều kiện hiệu quả:</strong> prop phải stable reference — nếu cha truyền object/function inline → memo vô dụng.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>14. Stale closure là gì? Cho ví dụ.</div>
+      <div class="a">
+        <pre class="code"><span class="k">function</span> <span class="n">Counter</span>() {
+  <span class="k">const</span> [c, setC] = useState(<span class="s">0</span>);
+  useEffect(() =&gt; {
+    <span class="k">const</span> id = setInterval(() =&gt; {
+      setC(c + <span class="s">1</span>);  <span class="c">// c đóng gói từ render đầu = 0</span>
+    }, <span class="s">1000</span>);
+    <span class="k">return</span> () =&gt; clearInterval(id);
+  }, []);  <span class="c">// [] → không bao giờ tạo lại closure</span>
+}</pre>
+        <p>Fix: <code>setC(prev =&gt; prev + 1)</code> hoặc thêm <code>c</code> vào deps.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>15. Context hiệu suất kém khi nào?</div>
+      <div class="a">
+        <p>Mọi consumer re-render khi <code>value</code> đổi. Nếu:</p>
+        <ul>
+          <li>Value là object mới mỗi render (không memo)</li>
+          <li>Nhiều component consume chỉ 1 phần nhỏ của value</li>
+        </ul>
+        <p>→ toàn cây re-render. Giải pháp: memo value, split context theo domain (ThemeContext, AuthContext), hoặc dùng Zustand/Jotai cho state phức tạp.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>16. <code>useLayoutEffect</code> khác <code>useEffect</code> thế nào?</div>
+      <div class="a">
+        <ul>
+          <li><code>useEffect</code>: chạy <em>bất đồng bộ</em> sau khi DOM đã paint.</li>
+          <li><code>useLayoutEffect</code>: chạy <em>đồng bộ</em> sau DOM mutation, trước paint.</li>
+        </ul>
+        <p>Dùng layout effect khi cần đo DOM (<code>getBoundingClientRect</code>) rồi điều chỉnh để tránh flash.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>17. Cách tránh fetch data gây race condition?</div>
+      <div class="a">
+        <p>Trong <code>useEffect</code> dùng <code>AbortController</code> huỷ request cũ khi deps đổi hoặc unmount. Hoặc đơn giản hơn: dùng React Query/SWR — tự xử lý.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>18. Suspense là gì, dùng khi nào?</div>
+      <div class="a">
+        <p>Component đặc biệt render fallback trong khi child "đang load". Dùng với:</p>
+        <ul>
+          <li><code>lazy</code> để code split</li>
+          <li>Data fetching tương thích (RSC, Relay, React Query + <code>useSuspenseQuery</code>)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>19. Phân biệt <code>useTransition</code> vs <code>useDeferredValue</code></div>
+      <div class="a">
+        <ul>
+          <li><code>useTransition</code>: đánh dấu <strong>update</strong> là non-urgent. Có <code>isPending</code>.</li>
+          <li><code>useDeferredValue</code>: đánh dấu <strong>value</strong> deferred. Không có pending flag, nhưng không cần đụng setter.</li>
+        </ul>
+        <p>Dùng cho filter/search UI mượt khi list lớn.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>20. Khi nào chọn Context thay Redux?</div>
+      <div class="a">
+        <ul>
+          <li>Context: state tương đối static (theme, locale, user info), ít consumer.</li>
+          <li>Redux/Zustand: state có nhiều action, cần devtools, selector fine-grained để tránh re-render.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>21. Portal là gì?</div>
+      <div class="a">
+        <p><code>createPortal(children, domNode)</code> render child vào 1 DOM node khác (thường <code>body</code>) nhưng giữ nguyên vị trí trong React tree — event vẫn bubble theo React tree. Dùng cho Modal, Tooltip.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>22. StrictMode làm gì?</div>
+      <div class="a">
+        <p>Trong dev, cố ý gọi effect và component function <strong>2 lần</strong> để phát hiện side effect bẩn, cảnh báo API deprecate. Production không ảnh hưởng.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>23. Làm sao cancel request khi unmount?</div>
+      <div class="a">
+        <pre class="code">useEffect(() =&gt; {
+  <span class="k">const</span> ctrl = <span class="k">new</span> AbortController();
+  fetch(url, { signal: ctrl.signal });
+  <span class="k">return</span> () =&gt; ctrl.abort();
+}, [url]);</pre>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>24. Error Boundary bắt được những lỗi nào?</div>
+      <div class="a">
+        <p><strong>Bắt:</strong> lỗi trong render, lifecycle, constructor của component con.</p>
+        <p><strong>Không bắt:</strong> event handler (try/catch), async code (Promise reject), SSR, lỗi trong chính Error Boundary.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>25. Code splitting trong React?</div>
+      <div class="a">
+        <p>Chia bundle thành nhiều chunk, load theo nhu cầu bằng dynamic import. React cung cấp <code>React.lazy</code> + <code>Suspense</code>. Áp dụng cho route, modal lớn, editor, chart lib.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🔴 Senior (L4-L5)</h2>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>26. Giải thích cơ chế Fiber</div>
+      <div class="a">
+        <p>Fiber là kiến trúc reconciler từ React 16. Mỗi element thành 1 "fiber node" — đơn vị công việc có thể <strong>interrupt, resume, prioritize</strong>. Nhờ đó có Concurrent Mode, time-slicing, Suspense.</p>
+        <p>Render phase bây giờ không phải stack đệ quy mà là linked list các fiber, cho phép React nhường CPU cho event browser.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>27. Server Components khác Client Components?</div>
+      <div class="a">
+        <ul>
+          <li><strong>Server Component</strong>: render ở server, không có state/effect, không gửi JS xuống client. Truy cập trực tiếp DB/file.</li>
+          <li><strong>Client Component</strong>: có <code>'use client'</code>, có hook/state/event, JS gửi xuống browser.</li>
+        </ul>
+        <p>Chiến lược: Server làm default, đẩy Client ra lá cây để giảm bundle client.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>28. Làm sao thiết kế component reusable?</div>
+      <div class="a">
+        <ul>
+          <li><strong>Composition over props</strong>: ưu tiên <code>children</code>/slot hơn là 20 cờ <code>showX</code>.</li>
+          <li><strong>Sensible defaults</strong>: 90% dùng không cần config.</li>
+          <li><strong>Escape hatch</strong>: <code>className</code>, <code>style</code>, ref forward cho custom.</li>
+          <li><strong>Controlled + uncontrolled</strong>: support cả hai.</li>
+          <li><strong>Accessibility mặc định</strong>: role, aria, keyboard.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>29. Strategy tối ưu perf một trang nặng?</div>
+      <div class="a">
+        <ol>
+          <li>Measure: Profiler + Performance tab, xác định bottleneck (render, JS, network, layout).</li>
+          <li>Nếu render thừa: restructure (push state xuống, pass children, memo có mục đích).</li>
+          <li>Nếu list lớn: virtualize.</li>
+          <li>Nếu bundle lớn: code split, tree-shake, import theo nhu cầu.</li>
+          <li>Nếu network: React Query cache, prefetch, HTTP cache, CDN.</li>
+          <li>Image: lazy load, AVIF/WebP, responsive srcSet.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>30. Cách test custom hook?</div>
+      <div class="a">
+        <p>Dùng <code>renderHook</code> của RTL:</p>
+        <pre class="code"><span class="k">import</span> { renderHook, act } <span class="k">from</span> <span class="s">'@testing-library/react'</span>;
+
+test(<span class="s">'useCounter tăng'</span>, () =&gt; {
+  <span class="k">const</span> { result } = renderHook(() =&gt; useCounter(<span class="s">0</span>));
+  act(() =&gt; result.current.increment());
+  expect(result.current.count).toBe(<span class="s">1</span>);
+});</pre>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>31. Khi nào Redux Toolkit thắng Zustand?</div>
+      <div class="a">
+        <ul>
+          <li>Team &gt; 10 dev, cần convention chặt (slice, thunk).</li>
+          <li>Cần Redux DevTools + time-travel debug.</li>
+          <li>Tích hợp với middleware phức tạp (saga, offline sync).</li>
+          <li>Migrate từ code Redux cũ.</li>
+        </ul>
+        <p>Còn lại Zustand gần như luôn đủ và đơn giản hơn.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>32. Giải thích useSyncExternalStore</div>
+      <div class="a">
+        <p>Hook chuẩn để subscribe vào external store (Redux, Zustand internal, browser API). Đảm bảo tính nhất quán với concurrent rendering — tránh tearing (component đọc snapshot khác nhau trong cùng render).</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>33. React 19 có gì mới đáng chú ý?</div>
+      <div class="a">
+        <ul>
+          <li><strong>Actions</strong> &amp; <code>useActionState</code>, <code>useFormStatus</code> — form workflow với Server Actions.</li>
+          <li><strong><code>useOptimistic</code></strong> — optimistic UI dễ dàng.</li>
+          <li><strong><code>use()</code></strong> — đọc Promise/Context ngay trong render.</li>
+          <li>Ref giờ là prop thường, không cần <code>forwardRef</code>.</li>
+          <li>Document metadata (title, meta) render trực tiếp trong component.</li>
+          <li>Compiler (experimental) — tự memo, bỏ useMemo/useCallback thủ công.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>34. React Compiler làm gì?</div>
+      <div class="a">
+        <p>Compiler tại build time phân tích component, tự động memo giá trị và function đủ điều kiện → bỏ <code>useMemo</code>/<code>useCallback</code>/<code>React.memo</code> thủ công. Tương tự Svelte/Solid nhưng vẫn giữ mental model React.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>35. Design system với React — architecture thế nào?</div>
+      <div class="a">
+        <ul>
+          <li><strong>Tokens</strong>: color, spacing, typography bằng CSS variable — dễ theme.</li>
+          <li><strong>Primitives</strong>: Radix/Headless UI cho logic &amp; a11y.</li>
+          <li><strong>Styled layer</strong>: Tailwind/CVA/CSS Module.</li>
+          <li><strong>Component API chuẩn hoá</strong>: <code>variant</code>, <code>size</code>, <code>asChild</code> pattern.</li>
+          <li><strong>Storybook</strong> + visual regression.</li>
+          <li>Publish qua npm workspace hoặc monorepo (Turborepo).</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>36. Hydration mismatch là gì?</div>
+      <div class="a">
+        <p>Xảy ra khi HTML render ở server khác với lần render đầu ở client (ví dụ: dùng <code>Date.now()</code>, <code>window</code>, <code>localStorage</code> trong render). Warning trong dev, có thể gây UI nhảy.</p>
+        <p>Fix: dùng <code>useEffect</code> để set giá trị client-only, hoặc <code>suppressHydrationWarning</code> cho node dự kiến sẽ khác.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>37. SSR, SSG, ISR khác nhau thế nào?</div>
+      <div class="a">
+        <ul>
+          <li><strong>SSR</strong>: render HTML mỗi request. Luôn mới. Tốn CPU server.</li>
+          <li><strong>SSG</strong>: render tại build time, trả file tĩnh. Nhanh nhất, cache CDN.</li>
+          <li><strong>ISR</strong>: SSG + revalidate định kỳ/on-demand. Cân bằng speed và freshness.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>38. Bạn xử lý auth trong React app lớn ra sao?</div>
+      <div class="a">
+        <ul>
+          <li>Token (JWT/session) lưu httpOnly cookie (chống XSS) hoặc memory + refresh token rotation.</li>
+          <li>Context/Store cung cấp <code>user</code>, <code>login</code>, <code>logout</code>.</li>
+          <li>Route guard (<code>RequireAuth</code>) check user, redirect <code>/login</code> và giữ <code>from</code> location.</li>
+          <li>API client interceptor: đính token, retry khi 401 với refresh.</li>
+          <li>Framework: NextAuth/Clerk/Auth0 nếu cần OAuth, MFA, SSO.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>39. Làm sao kiểm soát bundle size?</div>
+      <div class="a">
+        <ul>
+          <li>Bundle analyzer (<code>rollup-plugin-visualizer</code>) — tìm chunk to.</li>
+          <li>Tree-shake: import theo tên, tránh <code>import *</code>.</li>
+          <li>Chọn lib nhẹ: <code>date-fns</code> &gt; <code>moment</code>, <code>lodash-es/</code> &gt; <code>lodash</code> full.</li>
+          <li>Code splitting theo route/feature.</li>
+          <li>Avoid duplicate: dùng <code>peerDependencies</code> đúng, check lockfile.</li>
+          <li>SSR render static content để giảm JS gửi xuống client.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>40. Monorepo React: Turborepo vs Nx?</div>
+      <div class="a">
+        <ul>
+          <li><strong>Turborepo</strong>: nhẹ, tập trung task cache &amp; pipeline. Dễ adopt.</li>
+          <li><strong>Nx</strong>: feature-rich — plugin cho mọi framework, code generator, module boundary rule. Phù hợp enterprise.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🧠 Coding Challenges</h2>
+    <p class="section-sub">Bài code thực tế trong phỏng vấn React. Tự làm trước, đáp án chỉ để tham khảo.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>CC-1: useFetch với cancel</h4>
+        <p>Viết hook <code>useFetch(url)</code> trả về <code>{data, loading, error}</code>, huỷ request cũ khi url đổi hoặc unmount.</p>
+      </div>
+      <div class="card">
+        <h4>CC-2: useDebounce</h4>
+        <p>Hook debounce giá trị. Dùng để search instant mà không spam API.</p>
+      </div>
+      <div class="card">
+        <h4>CC-3: Todo app + localStorage</h4>
+        <p>Add, toggle, delete, filter all/active/done. Persist qua reload.</p>
+      </div>
+      <div class="card">
+        <h4>CC-4: Star Rating component</h4>
+        <p>5 sao click chọn, hover preview, keyboard accessibility, controlled.</p>
+      </div>
+      <div class="card">
+        <h4>CC-5: Compound Tabs</h4>
+        <p>API <code>&lt;Tabs&gt;&lt;Tabs.List&gt;&lt;Tabs.Tab/&gt;...&lt;/Tabs&gt;</code>, share state qua Context.</p>
+      </div>
+      <div class="card">
+        <h4>CC-6: Infinite scroll</h4>
+        <p>IntersectionObserver để load trang kế khi sentinel element xuất hiện.</p>
+      </div>
+      <div class="card">
+        <h4>CC-7: Autocomplete</h4>
+        <p>Input + dropdown gợi ý. Debounce input, keyboard nav (↑↓ Enter Esc), click outside đóng.</p>
+      </div>
+      <div class="card">
+        <h4>CC-8: Modal với Portal</h4>
+        <p>Open/close, close ESC &amp; click overlay, focus trap, scroll lock body.</p>
+      </div>
+      <div class="card">
+        <h4>CC-9: Virtualized List 10k item</h4>
+        <p>Tự viết (không lib) render chỉ item trong viewport, handle scroll position.</p>
+      </div>
+      <div class="card">
+        <h4>CC-10: Form với nested fields</h4>
+        <p>Form "Invoice" có array items <code>{name, qty, price}</code>. Add/remove row, tính total real-time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🎯 Tips đi phỏng vấn</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>Khi được hỏi lý thuyết</h4>
+        <ul>
+          <li>Trả lời định nghĩa → ví dụ code ngắn → use case thực tế</li>
+          <li>Nhắc đến trade-off, không nói "luôn đúng"</li>
+          <li>Nhận biết câu hỏi gài (vd "bạn có dùng useMemo không?" → nói <em>khi nào</em>, đừng gật đại)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Khi code live</h4>
+        <ul>
+          <li>Đọc đề to, xác nhận yêu cầu trước khi code</li>
+          <li>Bắt đầu skeleton chạy được, sau đó mới tối ưu</li>
+          <li>Nói thành tiếng suy nghĩ — interviewer đánh giá cả process</li>
+          <li>Hỏi về test/edge case khi xong — chứng tỏ tư duy chất lượng</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Câu nên hỏi lại</h4>
+        <ul>
+          <li>Quy mô app, traffic, team size?</li>
+          <li>Stack hiện tại + plan tương lai?</li>
+          <li>Code review, testing culture, CI/CD?</li>
+          <li>Lộ trình phát triển của vị trí này?</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Cảnh báo đỏ</h4>
+        <ul>
+          <li>Công ty không có version control/PR review</li>
+          <li>"Deploy thẳng production không có test"</li>
+          <li>Từ chối cho thấy code mẫu/kiến trúc</li>
+          <li>Tech debt khổng lồ + không có roadmap cải thiện</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>ReactJS Mastery · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

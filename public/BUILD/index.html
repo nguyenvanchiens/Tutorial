@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Build & Deploy — Triển Khai Website Từ A→Z</title>
+    <link rel="stylesheet" href="build.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .topic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem; margin-top: 1.5rem; }
+        .topic-card {
+            display: block;
+            background: var(--card, #1a1d2e);
+            border: 1px solid var(--border, #2d3148);
+            border-radius: 14px;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: inherit;
+            transition: transform .2s, border-color .2s, box-shadow .2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .topic-card::before {
+            content: '';
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 3px;
+            background: var(--topic-accent, linear-gradient(90deg, #667eea, #764ba2));
+        }
+        .topic-card:hover {
+            transform: translateY(-4px);
+            border-color: #667eea;
+            box-shadow: 0 12px 30px rgba(102, 126, 234, .15);
+        }
+        .topic-card .topic-icon { font-size: 2.2rem; margin-bottom: .6rem; display: block; }
+        .topic-card .topic-chapter {
+            font-size: .72rem;
+            letter-spacing: 1.5px;
+            color: #94a3b8;
+            font-weight: 700;
+            margin-bottom: .25rem;
+        }
+        .topic-card h3 { font-size: 1.15rem; margin-bottom: .5rem; color: #e2e8f0; }
+        .topic-card p { color: #94a3b8; font-size: .9rem; line-height: 1.55; }
+        .topic-card .topic-arrow {
+            margin-top: .9rem;
+            color: #667eea;
+            font-size: .85rem;
+            font-weight: 600;
+        }
+        .topic-card.git      { --topic-accent: linear-gradient(90deg, #f05033, #f5576c); }
+        .topic-card.cicd     { --topic-accent: linear-gradient(90deg, #2088ff, #667eea); }
+        .topic-card.jenkins  { --topic-accent: linear-gradient(90deg, #d33833, #f39c12); }
+        .topic-card.docker   { --topic-accent: linear-gradient(90deg, #2496ed, #00d4ff); }
+        .topic-card.hosting  { --topic-accent: linear-gradient(90deg, #00c896, #43e97b); }
+        .topic-card.cloud    { --topic-accent: linear-gradient(90deg, #ff9900, #fbbf24); }
+        .topic-card.domain   { --topic-accent: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+        .topic-card.ssl      { --topic-accent: linear-gradient(90deg, #10b981, #059669); }
+        .topic-card.monitor  { --topic-accent: linear-gradient(90deg, #f43f5e, #ec4899); }
+        .topic-card.workflow { --topic-accent: linear-gradient(90deg, #6366f1, #8b5cf6); }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html">Build<span class="accent">&Deploy</span></a></div>
+            <div class="nav-links">
+                <a href="index.html" class="active">🗺️ Tổng quan</a>
+                <a href="git.html">📦 Git</a>
+                <a href="cicd.html">⚙️ CI/CD</a>
+                <a href="jenkins.html">🔴 Jenkins</a>
+                <a href="docker.html">🐳 Docker</a>
+                <a href="hosting.html">☁️ Hosting</a>
+                <a href="cloud.html">⛅ Cloud</a>
+                <a href="domain.html">🌐 Domain</a>
+                <a href="ssl.html">🔒 SSL</a>
+                <a href="monitoring.html">📊 Monitoring</a>
+                <a href="workflow.html">🔄 Workflow</a>
+            </div>
+            <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <header class="build-hero">
+        <div class="hero-content">
+            <div class="hero-badge">BUILD & DEPLOY — TỪ CODE ĐẾN PRODUCTION</div>
+            <h1>Build & <span class="gradient-text">Deploy</span></h1>
+            <p class="hero-desc">Hướng dẫn triển khai website từ đầu đến cuối cho web developer.<br>Git, CI/CD, Docker, Hosting, Cloud, Domain, SSL, Monitoring — đầy đủ từ A→Z.</p>
+            <div class="hero-stats">
+                <div class="stat"><span class="stat-number">10</span><span class="stat-label">Chương học</span></div>
+                <div class="stat"><span class="stat-number">40+</span><span class="stat-label">Công cụ</span></div>
+                <div class="stat"><span class="stat-number">100%</span><span class="stat-label">Web focused</span></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== TOPIC CARDS ===== -->
+    <section class="section" id="topics">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">📚</div>
+                <h2>Chọn Chương Để Học</h2>
+                <p>Mỗi chủ đề có trang riêng đầy đủ chi tiết — học theo thứ tự hoặc theo nhu cầu</p>
+            </div>
+
+            <div class="topic-grid">
+                <a href="git.html" class="topic-card git">
+                    <span class="topic-icon">📦</span>
+                    <div class="topic-chapter">CHƯƠNG 2 · NỀN TẢNG</div>
+                    <h3>Git & Workflow</h3>
+                    <p>GitHub Flow, Git Flow, Conventional Commits, .gitignore, xử lý commit nhầm secrets.</p>
+                    <div class="topic-arrow">Học ngay →</div>
+                </a>
+
+                <a href="cicd.html" class="topic-card cicd">
+                    <span class="topic-icon">⚙️</span>
+                    <div class="topic-chapter">CHƯƠNG 3 · TỰ ĐỘNG HOÁ</div>
+                    <h3>CI/CD & GitHub Actions</h3>
+                    <p>Continuous Integration/Deployment, so sánh công cụ, YAML pipeline thực tế với GitHub Actions.</p>
+                    <div class="topic-arrow">Học ngay →</div>
+                </a>
+
+                <a href="jenkins.html" class="topic-card jenkins">
+                    <span class="topic-icon">🔴</span>
+                    <div class="topic-chapter">CHƯƠNG 3.5 · DEEP DIVE</div>
+                    <h3>Jenkins A → Z</h3>
+                    <p>Cài đặt, Jenkinsfile, Declarative vs Scripted, agent node, Shared Library, JCasC — chuẩn enterprise.</p>
+                    <div class="topic-arrow">Học ngay →</div>
+                </a>
+
+                <a href="docker.html" class="topic-card docker">
+                    <span class="topic-icon">🐳</span>
+                    <div class="topic-chapter">CHƯƠNG 4 · CONTAINERIZATION</div>
+                    <h3>Docker</h3>
+                    <p>Image, container, Dockerfile, multi-stage build, docker-compose — đóng gói app nhất quán.</p>
+                    <div class="topic-arrow">Học ngay →</div>
+                </a>
+
+                <a href="hosting.html" class="topic-card hosting">
+                    <span class="topic-icon">☁️</span>
+                    <div class="topic-chapter">CHƯƠNG 5 · HOSTING</div>
+                    <h3>Hosting</h3>
+                    <p>Static hosting (Vercel, Netlify), VPS, PaaS, Serverless — chọn đúng hosting cho app.</p>
+                    <div class="topic-arrow">Học ngay →</div>
+                </a>
+
+                <a href="cloud.html" class="topic-card cloud">
+                    <span class="topic-icon">⛅</span>
+                    <div class="topic-chapter">CHƯƠNG 6 · CLOUD</div>
+                    <h3>Cloud Platforms</h3>
+                    <p>AWS, Azure, GCP — Big 3 cloud, khi nào cần, so sánh dịch vụ core (compute, DB, storage).</p>
+                    <div class="topic-arrow">Học ngay →</div>
+                </a>
+
+                <a href="domain.html" class="topic-card domain">
+                    <span class="topic-icon">🌐</span>
+                    <div class="topic-chapter">CHƯƠNG 7 · DOMAIN</div>
+                    <h3>Domain & DNS</h3>
+                    <p>Mua domain, A/AAAA/CNAME/MX records, DNS propagation, trỏ domain về server.</p>
+                    <div class="topic-arrow">Học ngay →</div>
+                </a>
+
+                <a href="ssl.html" class="topic-card ssl">
+                    <span class="topic-icon">🔒</span>
+                    <div class="topic-chapter">CHƯƠNG 8 · SECURITY</div>
+                    <h3>SSL & Security</h3>
+                    <p>HTTPS, Let's Encrypt free cert, security headers (HSTS, CSP), CORS, rate limiting.</p>
+                    <div class="topic-arrow">Học ngay →</div>
+                </a>
+
+                <a href="monitoring.html" class="topic-card monitor">
+                    <span class="topic-icon">📊</span>
+                    <div class="topic-chapter">CHƯƠNG 9 · OBSERVABILITY</div>
+                    <h3>Monitoring & Logging</h3>
+                    <p>Application Insights, Sentry, Prometheus + Grafana, structured log, alerting.</p>
+                    <div class="topic-arrow">Học ngay →</div>
+                </a>
+
+                <a href="workflow.html" class="topic-card workflow">
+                    <span class="topic-icon">🔄</span>
+                    <div class="topic-chapter">CHƯƠNG 10 · WORKFLOW</div>
+                    <h3>Workflow Thực Tế</h3>
+                    <p>Ráp tất cả — một ngày làm việc chuẩn: code → PR → review → CI → staging → prod → monitor.</p>
+                    <div class="topic-arrow">Học ngay →</div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== BIG PICTURE ===== -->
+    <section class="section section-dark" id="overview">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🗺️</div>
+                <h2>Tổng Quan — Code Xong Rồi Làm Gì?</h2>
+                <p>Hiểu toàn bộ hành trình từ code trên máy bạn → website chạy trên internet cho người dùng thật</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>🔄 Hành Trình Deploy — Big Picture</h3>
+                <div class="pipeline-flow">
+                    <div class="pipeline-step">
+                        <div class="pipe-icon">💻</div>
+                        <div class="pipe-label">Code</div>
+                        <div class="pipe-desc">Viết code trên máy local</div>
+                    </div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-step">
+                        <div class="pipe-icon">📦</div>
+                        <div class="pipe-label">Git Push</div>
+                        <div class="pipe-desc">Đẩy code lên repo</div>
+                    </div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-step">
+                        <div class="pipe-icon">⚙️</div>
+                        <div class="pipe-label">CI/CD</div>
+                        <div class="pipe-desc">Tự động build + test</div>
+                    </div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-step">
+                        <div class="pipe-icon">🐳</div>
+                        <div class="pipe-label">Docker</div>
+                        <div class="pipe-desc">Đóng gói ứng dụng</div>
+                    </div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-step">
+                        <div class="pipe-icon">☁️</div>
+                        <div class="pipe-label">Deploy</div>
+                        <div class="pipe-desc">Đưa lên server/cloud</div>
+                    </div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-step">
+                        <div class="pipe-icon">🌐</div>
+                        <div class="pipe-label">Live</div>
+                        <div class="pipe-desc">User truy cập được</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🏗️ Các Môi Trường (Environments)</h3>
+                <p>Website không bao giờ deploy thẳng từ máy bạn lên production. Luôn có nhiều tầng.</p>
+                <div class="env-grid">
+                    <div class="env-card env-local">
+                        <div class="env-name">Local (Dev)</div>
+                        <div class="env-desc">Máy của bạn. Code, debug, test tại đây. Thoải mái phá.</div>
+                        <div class="env-tools">VS Code, localhost:3000, hot reload</div>
+                    </div>
+                    <div class="env-arrow">→</div>
+                    <div class="env-card env-dev">
+                        <div class="env-name">Development</div>
+                        <div class="env-desc">Server chung cho team dev. Integrate code từ nhiều người.</div>
+                        <div class="env-tools">dev.myapp.com, shared DB, feature flags</div>
+                    </div>
+                    <div class="env-arrow">→</div>
+                    <div class="env-card env-staging">
+                        <div class="env-name">Staging</div>
+                        <div class="env-desc">Bản sao y hệt production. QA test ở đây trước khi go live.</div>
+                        <div class="env-tools">staging.myapp.com, prod-like data, UAT</div>
+                    </div>
+                    <div class="env-arrow">→</div>
+                    <div class="env-card env-prod">
+                        <div class="env-name">Production</div>
+                        <div class="env-desc">User thật truy cập. Không được sai. Mọi thay đổi phải cẩn thận.</div>
+                        <div class="env-tools">myapp.com, real data, monitoring 24/7</div>
+                    </div>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Quy tắc vàng:</strong> KHÔNG BAO GIỜ test trên production. KHÔNG BAO GIỜ deploy trực tiếp lên production mà không qua staging. "Chỉ fix nhỏ thôi" = câu nói trước mọi sự cố.
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>📊 Frontend vs Backend — Deploy khác nhau</h3>
+                <div class="compare-grid">
+                    <div class="compare-card">
+                        <h4>🎨 Frontend (React, Vue, Angular, Next.js)</h4>
+                        <div class="compare-list">
+                            <div class="compare-item"><strong>Build output:</strong> HTML, CSS, JS tĩnh (static files)</div>
+                            <div class="compare-item"><strong>Deploy đơn giản:</strong> Upload static files lên CDN</div>
+                            <div class="compare-item"><strong>Hosting phổ biến:</strong> Vercel, Netlify, Cloudflare Pages, GitHub Pages</div>
+                            <div class="compare-item"><strong>SSR/SSG:</strong> Next.js, Nuxt → cần server hoặc serverless</div>
+                            <div class="compare-item"><strong>Thời gian deploy:</strong> 30 giây — 2 phút</div>
+                        </div>
+                    </div>
+                    <div class="compare-card">
+                        <h4>⚙️ Backend (.NET, Node.js, Go, Python)</h4>
+                        <div class="compare-list">
+                            <div class="compare-item"><strong>Build output:</strong> Binary/runtime cần server chạy liên tục</div>
+                            <div class="compare-item"><strong>Deploy phức tạp hơn:</strong> Cần server, database, environment config</div>
+                            <div class="compare-item"><strong>Hosting phổ biến:</strong> Azure, AWS, Railway, Render, VPS</div>
+                            <div class="compare-item"><strong>Docker:</strong> Gần như bắt buộc cho backend production</div>
+                            <div class="compare-item"><strong>Thời gian deploy:</strong> 2 — 10 phút (build + test + deploy)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Build & Deploy — Triển khai website từ A→Z cho web developer</p>
+            <p class="footer-note">Git, CI/CD, Jenkins, Docker, Hosting, Cloud, Domain, SSL, Monitoring — đầy đủ workflow thực tế</p>
+        </div>
+    </footer>
+
+    <script src="build.js"></script>
+</body>
+</html>

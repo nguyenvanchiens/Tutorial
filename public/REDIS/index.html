@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Redis Mastery — Từ Zero Đến Production</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">Redis<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html" class="active">Roadmap</a>
+      <a href="basics.html">Cơ Bản</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="production.html">Production</a>
+      <a href="interview.html">Phỏng Vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">REDIS 7.4 · IN-MEMORY DATABASE · 2026</div>
+  <h1>Làm chủ <span class="gradient">Redis</span> từ A → Z</h1>
+  <p class="hero-desc">In-memory key-value store nhanh nhất hành tinh. Cache, session, rate limiting, queue, leaderboard, pub/sub — tất cả trong 1 công cụ. Lộ trình có hệ thống, ví dụ C# &amp; Node.js thực chiến.</p>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-number">5</span><span class="stat-label">Cấp độ</span></div>
+    <div class="stat"><span class="stat-number">9</span><span class="stat-label">Data types</span></div>
+    <div class="stat"><span class="stat-number">10+</span><span class="stat-label">Patterns thực tế</span></div>
+    <div class="stat"><span class="stat-number">25+</span><span class="stat-label">Câu phỏng vấn</span></div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Redis là gì?</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>💡 Định nghĩa 30 giây</h3>
+        <p><strong>Redis</strong> (Remote Dictionary Server) là in-memory key-value store. Dữ liệu nằm trong RAM → đọc/ghi &lt;1ms. Hỗ trợ 9 kiểu dữ liệu (không chỉ string), có persistence, replication, cluster.</p>
+        <p style="margin-top:.5rem"><strong>Công dụng chính:</strong> cache (90% use case), session store, rate limit, queue, real-time counter, leaderboard, pub/sub, distributed lock.</p>
+      </div>
+      <div class="card">
+        <h3>⚡ Tại sao nhanh?</h3>
+        <ul>
+          <li>Dữ liệu trong <strong>RAM</strong>, không đọc disk</li>
+          <li><strong>Single-threaded</strong> cho command — không lock/context switch</li>
+          <li>Network I/O dùng <strong>epoll/kqueue</strong> (non-blocking)</li>
+          <li>Cấu trúc dữ liệu tối ưu sẵn (hash table, skiplist, radix tree)</li>
+          <li>~100k ops/s trên 1 instance rẻ tiền</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Khi nào dùng Redis?</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3 style="color: var(--success)">✅ Dùng khi</h3>
+        <ul>
+          <li><strong>Cache kết quả DB query</strong> — giảm 90% tải DB</li>
+          <li><strong>Session store</strong> — nhiều server share session</li>
+          <li><strong>Rate limiting</strong> — chặn spam API</li>
+          <li><strong>Queue đơn giản</strong> — task async cho worker</li>
+          <li><strong>Real-time counter</strong> — view count, like count</li>
+          <li><strong>Leaderboard</strong> — top N theo điểm, sorted set</li>
+          <li><strong>Pub/Sub</strong> — real-time notification đơn giản</li>
+          <li><strong>Distributed lock</strong> — đảm bảo chỉ 1 worker xử lý job</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="color: var(--danger)">❌ KHÔNG dùng khi</h3>
+        <ul>
+          <li><strong>Database chính</strong> — RAM mắc gấp 100 lần disk</li>
+          <li><strong>Lưu file/blob lớn</strong> — dùng S3/CDN</li>
+          <li><strong>Phân tích phức tạp</strong> — dùng Postgres/ClickHouse</li>
+          <li><strong>Full-text search</strong> — dùng Elasticsearch (hoặc RediSearch module riêng)</li>
+          <li><strong>Queue nặng, đảm bảo delivery</strong> — dùng RabbitMQ/Kafka</li>
+          <li><strong>Transaction phức tạp đa bước</strong> — Redis <code>MULTI/EXEC</code> hạn chế</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top:1rem">
+      <strong>Quy tắc vàng:</strong> Redis là <em>bổ trợ</em> cho DB chính, không thay thế. 95% use case thực tế: Postgres/SQL Server lưu dữ liệu gốc + Redis cache kết quả tra cứu nóng.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Lộ trình 5 cấp độ</h2>
+    <p class="section-sub">Mỗi cấp ~1-2 tuần nếu học 1h/ngày. Cấp sau giả định đã vững cấp trước.</p>
+
+    <div class="grid grid-3">
+      <div class="card level-card">
+        <span class="level-badge" style="background: linear-gradient(135deg,#667eea,#764ba2)">L0 · NEWBIE</span>
+        <h3>Chuẩn bị</h3>
+        <p style="color: var(--warn); font-size:.85rem; font-weight:600;">⏱ 3-5 ngày</p>
+        <ul>
+          <li>Biết khái niệm DB key-value</li>
+          <li>Biết về <strong>RAM vs Disk</strong> (tại sao RAM nhanh)</li>
+          <li>Dùng terminal cơ bản</li>
+          <li>Biết ít nhất 1 ngôn ngữ backend (C#, Node, Python)</li>
+        </ul>
+      </div>
+
+      <div class="card level-card">
+        <span class="level-badge" style="background: linear-gradient(135deg,#4facfe,#00f2fe)">L1 · BEGINNER</span>
+        <h3>Cơ bản</h3>
+        <p style="color: var(--warn); font-size:.85rem; font-weight:600;">⏱ 1 tuần</p>
+        <ul>
+          <li>Chạy Redis không cần cài (Upstash, Docker)</li>
+          <li>CLI: <code>SET/GET/DEL/EXISTS</code></li>
+          <li>TTL: <code>EXPIRE/TTL/PEXPIRE</code></li>
+          <li>4 kiểu chính: String, List, Hash, Set</li>
+          <li>Kết nối từ app .NET/Node.js</li>
+        </ul>
+        <p><a href="basics.html" style="color:var(--primary)">→ Trang Cơ Bản</a></p>
+      </div>
+
+      <div class="card level-card">
+        <span class="level-badge" style="background: linear-gradient(135deg,#43e97b,#38f9d7)">L2 · JUNIOR</span>
+        <h3>Data types nâng cao</h3>
+        <p style="color: var(--warn); font-size:.85rem; font-weight:600;">⏱ 1-2 tuần</p>
+        <ul>
+          <li>Sorted Set, Bitmap, HyperLogLog, Stream, Geo</li>
+          <li>Transaction: <code>MULTI/EXEC/WATCH</code></li>
+          <li>Pipelining — batch nhiều command</li>
+          <li><code>SCAN</code> thay <code>KEYS</code> (an toàn production)</li>
+          <li>Lua script cơ bản</li>
+        </ul>
+      </div>
+
+      <div class="card level-card">
+        <span class="level-badge" style="background: linear-gradient(135deg,#fa709a,#fee140)">L3 · MID-LEVEL</span>
+        <h3>Patterns thực chiến</h3>
+        <p style="color: var(--warn); font-size:.85rem; font-weight:600;">⏱ 2-3 tuần</p>
+        <ul>
+          <li>Cache-aside, Write-through, Write-behind</li>
+          <li>Rate limiting (token bucket, sliding window)</li>
+          <li>Distributed lock (Redlock algorithm)</li>
+          <li>Leaderboard &amp; real-time ranking</li>
+          <li>Pub/Sub + Stream cho event</li>
+          <li>Session store cho multi-instance app</li>
+        </ul>
+        <p><a href="patterns.html" style="color:var(--primary)">→ Trang Patterns</a></p>
+      </div>
+
+      <div class="card level-card">
+        <span class="level-badge" style="background: linear-gradient(135deg,#f093fb,#f5576c)">L4 · SENIOR</span>
+        <h3>Production &amp; Scale</h3>
+        <p style="color: var(--warn); font-size:.85rem; font-weight:600;">⏱ 3-4 tuần</p>
+        <ul>
+          <li>Persistence: RDB vs AOF</li>
+          <li>Replication master-replica</li>
+          <li>Sentinel HA, automatic failover</li>
+          <li>Redis Cluster — sharding</li>
+          <li>Eviction policies, memory tuning</li>
+          <li>Security: ACL, TLS, firewall</li>
+          <li>Monitoring: INFO, SLOWLOG, Redis Insight</li>
+        </ul>
+        <p><a href="production.html" style="color:var(--primary)">→ Trang Production</a></p>
+      </div>
+
+      <div class="card level-card">
+        <span class="level-badge" style="background: linear-gradient(135deg,#ffecd2,#fcb69f)">🎯 PHỎNG VẤN</span>
+        <h3>Ôn tập Q&amp;A</h3>
+        <p style="color: var(--warn); font-size:.85rem; font-weight:600;">⏱ Liên tục</p>
+        <ul>
+          <li>25+ câu hỏi Junior → Senior</li>
+          <li>System design với Redis</li>
+          <li>Tình huống thực tế: cache stampede, hot key, eviction trap</li>
+          <li>So sánh Redis vs Memcached vs DB</li>
+        </ul>
+        <p><a href="interview.html" style="color:var(--primary)">→ Trang Phỏng Vấn</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">⚡ Dùng Redis KHÔNG cần cài</h2>
+    <p class="section-sub">Giống Docker, Redis cài local có thể nặng máy. 4 cách dùng nhanh không cần install.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>🌐 1. try.redis.io — Playground web</h3>
+        <p><strong>URL:</strong> <code>try.redis.io</code></p>
+        <p>Terminal Redis ngay trên browser, có tutorial hướng dẫn từng bước. <strong>Zero setup</strong>, chỉ mở tab mới và gõ.</p>
+        <p style="color: var(--success); margin-top:.5rem">✅ Tuyệt cho học lệnh lần đầu</p>
+      </div>
+
+      <div class="card" style="border: 2px solid var(--primary)">
+        <h3>☁️ 2. Upstash — Serverless Redis <span style="color: var(--success); font-size:.75rem">KHUYÊN DÙNG</span></h3>
+        <p><strong>URL:</strong> <code>upstash.com</code></p>
+        <p>Free tier 10,000 commands/ngày, 256MB. Tạo DB trong 30 giây, lấy connection string, dùng REST API hoặc Redis protocol.</p>
+        <p style="color: var(--success); margin-top:.5rem">✅ Làm project thật mà không tốn byte RAM nào</p>
+      </div>
+
+      <div class="card">
+        <h3>☁️ 3. Redis Cloud — Free 30MB</h3>
+        <p><strong>URL:</strong> <code>redis.com/try-free</code></p>
+        <p>Của chính Redis Inc. — 30MB miễn phí vĩnh viễn, chạy trên AWS/GCP/Azure. Full Redis 7.4 với modules (RediSearch, JSON).</p>
+      </div>
+
+      <div class="card">
+        <h3>🐳 4. Docker one-liner</h3>
+        <p>Nếu đã có Docker / Podman:</p>
+        <pre class="code"><span class="cmd">docker run -d --name redis -p 6379:6379 redis:7</span>
+
+<span class="c"># Kết nối CLI trong container</span>
+<span class="cmd">docker exec -it redis redis-cli</span></pre>
+      </div>
+    </div>
+
+    <div class="tip" style="margin-top:1rem">
+      <strong>Khuyên dùng:</strong> bắt đầu bằng <strong>try.redis.io</strong> để học lệnh → dùng <strong>Upstash</strong> khi code project thật. Chỉ cài local khi thực sự cần dev offline.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Redis vs Memcached vs DB</h2>
+    <table class="cmp">
+      <tr>
+        <th></th>
+        <th>Redis</th>
+        <th>Memcached</th>
+        <th>Postgres (cache table)</th>
+      </tr>
+      <tr>
+        <td><strong>Data types</strong></td>
+        <td>9 kiểu: String, List, Hash, Set, Sorted Set, Stream, Bitmap, HyperLogLog, Geo</td>
+        <td>Chỉ string</td>
+        <td>Row với columns</td>
+      </tr>
+      <tr>
+        <td><strong>Persistence</strong></td>
+        <td>RDB snapshot + AOF log</td>
+        <td>Không (tắt máy = mất)</td>
+        <td>Đầy đủ (WAL)</td>
+      </tr>
+      <tr>
+        <td><strong>Tốc độ</strong></td>
+        <td>~100k ops/s</td>
+        <td>~200k ops/s (đơn giản hơn)</td>
+        <td>~10k ops/s</td>
+      </tr>
+      <tr>
+        <td><strong>Replication/HA</strong></td>
+        <td>Có (Sentinel, Cluster)</td>
+        <td>Hạn chế</td>
+        <td>Có (streaming replication)</td>
+      </tr>
+      <tr>
+        <td><strong>Pub/Sub, Stream</strong></td>
+        <td>Có sẵn</td>
+        <td>Không</td>
+        <td>NOTIFY/LISTEN cơ bản</td>
+      </tr>
+      <tr>
+        <td><strong>Khi chọn</strong></td>
+        <td>Cache + thêm nhiều tính năng</td>
+        <td>Cache <em>duy nhất</em>, string đơn giản</td>
+        <td>Dữ liệu chính</td>
+      </tr>
+    </table>
+    <div class="info-box">
+      <strong>Quyết định nhanh:</strong> 90% team chọn <strong>Redis</strong> — linh hoạt, đa năng, community lớn. Memcached chỉ thắng khi bạn thật sự chỉ cần cache string và cần squeeze performance cao nhất.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Checklist tự đánh giá</h2>
+    <div class="grid grid-3">
+      <div class="card">
+        <h4>✅ Beginner (L1)</h4>
+        <ul>
+          <li>Chạy Redis (Upstash hoặc Docker)</li>
+          <li>Dùng được <code>SET/GET/DEL</code></li>
+          <li>Set TTL bằng <code>EXPIRE</code></li>
+          <li>Phân biệt String/List/Hash/Set</li>
+          <li>Kết nối từ app backend đầu tiên</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>✅ Junior (L2)</h4>
+        <ul>
+          <li>Dùng Sorted Set cho leaderboard</li>
+          <li>Pipelining để tiết kiệm RTT</li>
+          <li>Dùng <code>SCAN</code> thay <code>KEYS</code></li>
+          <li>Viết Lua script đơn giản</li>
+          <li>Hiểu single-threaded model</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>✅ Mid-level (L3)</h4>
+        <ul>
+          <li>Implement cache-aside đúng</li>
+          <li>Rate limit bằng sliding window</li>
+          <li>Distributed lock với TTL</li>
+          <li>Dựng queue bằng List hoặc Stream</li>
+          <li>Xử lý cache stampede, hot key</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>✅ Senior (L4)</h4>
+        <ul>
+          <li>Chọn đúng persistence (RDB/AOF/cả hai)</li>
+          <li>Setup Sentinel cho HA</li>
+          <li>Phân shard với Cluster</li>
+          <li>Cấu hình <code>maxmemory</code> + eviction</li>
+          <li>Monitor SLOWLOG, latency</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>🎯 Dự án luyện</h4>
+        <ul>
+          <li>Cache API response trong Next.js/ASP.NET</li>
+          <li>Rate limit IP login (5 lần/phút)</li>
+          <li>Leaderboard game top 100</li>
+          <li>Session store cho app multi-server</li>
+          <li>Mini chat bằng Pub/Sub</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>📚 Nguồn học</h4>
+        <ul>
+          <li>redis.io/docs — chính chủ, rõ ràng</li>
+          <li>try.redis.io — tutorial tương tác</li>
+          <li>Redis University (miễn phí)</li>
+          <li>"Redis in Action" by Josiah Carlson</li>
+          <li>RedisConf talks trên YouTube</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Redis Mastery · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

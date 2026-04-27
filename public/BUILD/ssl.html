@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSL & Bảo Mật Deploy</title>
+    <link rel="stylesheet" href="build.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html">Build<span class="accent">&Deploy</span></a></div>
+            <div class="nav-links">
+                <a href="index.html">🗺️ Tổng quan</a>
+                <a href="git.html">📦 Git</a>
+                <a href="cicd.html">⚙️ CI/CD</a>
+                <a href="jenkins.html">🔴 Jenkins</a>
+                <a href="docker.html">🐳 Docker</a>
+                <a href="hosting.html">☁️ Hosting</a>
+                <a href="cloud.html">⛅ Cloud</a>
+                <a href="domain.html">🌐 Domain</a>
+                <a href="ssl.html" class="active">🔒 SSL</a>
+                <a href="monitoring.html">📊 Monitoring</a>
+                <a href="workflow.html">🔄 Workflow</a>
+            </div>
+            <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <header class="build-hero">
+        <div class="hero-content">
+            <div class="hero-badge">CHƯƠNG 8 · SECURITY</div>
+            <h1>SSL & <span class="gradient-text">Security</span></h1>
+            <p class="hero-desc">HTTPS, Let's Encrypt, security headers, những điều tuyệt đối không bỏ qua khi deploy.</p>
+        </div>
+    </header>
+
+    <!-- ===== SECTION 8: SSL & SECURITY ===== -->
+    <section class="section section-dark" id="ssl">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🔒</div>
+                <h2>8. SSL & Bảo Mật Deploy</h2>
+                <p>HTTPS không phải optional — Chrome đánh dấu HTTP là "Not Secure". SEO cũng bị phạt.</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>🔐 SSL/TLS — HTTPS Hoạt Động Thế Nào?</h3>
+                <div class="ssl-flow">
+                    <div class="ssl-step"><strong>1. Browser connect</strong> → server gửi SSL certificate</div>
+                    <div class="ssl-step"><strong>2. Browser verify</strong> → certificate hợp lệ? Đúng domain? Chưa hết hạn?</div>
+                    <div class="ssl-step"><strong>3. Handshake</strong> → tạo session key để mã hóa traffic</div>
+                    <div class="ssl-step"><strong>4. Encrypted</strong> → mọi data giữa browser ↔ server đều được mã hóa</div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>📋 Lấy SSL Certificate — Các Cách</h3>
+                <div class="tools-grid">
+                    <div class="tool-card tool-rec">
+                        <div class="tool-badge">⭐ MIỄN PHÍ</div>
+                        <h4>Let's Encrypt + Certbot</h4>
+                        <p>SSL miễn phí, tự động renew. Certbot cài trên server, auto renew mỗi 90 ngày.</p>
+<pre class="code-block"><span class="c-cmt"># Cài Certbot (Ubuntu)</span>
+<span class="c-cmd">sudo apt install certbot python3-certbot-nginx</span>
+<span class="c-cmd">sudo certbot --nginx -d myapp.com -d www.myapp.com</span>
+<span class="c-cmt"># Auto renew: certbot tự thêm cron job</span></pre>
+                    </div>
+                    <div class="tool-card tool-rec">
+                        <div class="tool-badge">⭐ ZERO CONFIG</div>
+                        <h4>Managed SSL (Vercel, Netlify, Cloudflare)</h4>
+                        <p>Tự động cấp + renew. Không cần làm gì. Add custom domain → SSL sẵn trong 30 giây.</p>
+                    </div>
+                    <div class="tool-card">
+                        <h4>Azure App Service Managed Certificate</h4>
+                        <p>Free SSL cho custom domain trên Azure. Auto renew. Zero setup.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🛡️ Security Checklist — Trước Khi Go Live</h3>
+                <div class="checklist-grid">
+                    <div class="check-item check-critical">
+                        <span class="check-icon">☠️</span>
+                        <div>
+                            <strong>HTTPS everywhere</strong>
+                            <p>Redirect HTTP → HTTPS. Không exception.</p>
+                        </div>
+                    </div>
+                    <div class="check-item check-critical">
+                        <span class="check-icon">☠️</span>
+                        <div>
+                            <strong>Secrets KHÔNG ở trong code</strong>
+                            <p>API keys, DB passwords → environment variables hoặc secret manager. KHÔNG hardcode.</p>
+                        </div>
+                    </div>
+                    <div class="check-item check-critical">
+                        <span class="check-icon">☠️</span>
+                        <div>
+                            <strong>Security headers</strong>
+                            <p>Thêm: <code>X-Content-Type-Options</code>, <code>X-Frame-Options</code>, <code>Content-Security-Policy</code>, <code>Strict-Transport-Security</code></p>
+                        </div>
+                    </div>
+                    <div class="check-item check-danger">
+                        <span class="check-icon">⚠️</span>
+                        <div>
+                            <strong>CORS cấu hình đúng</strong>
+                            <p>Không dùng <code>*</code> cho production. Chỉ allow domain cụ thể.</p>
+                        </div>
+                    </div>
+                    <div class="check-item check-danger">
+                        <span class="check-icon">⚠️</span>
+                        <div>
+                            <strong>Rate limiting</strong>
+                            <p>API phải có rate limit. Không có = DDoS dễ dàng.</p>
+                        </div>
+                    </div>
+                    <div class="check-item check-danger">
+                        <span class="check-icon">⚠️</span>
+                        <div>
+                            <strong>Error pages custom</strong>
+                            <p>Không để stack trace hiển thị cho user production. Dùng custom 404, 500 pages.</p>
+                        </div>
+                    </div>
+                    <div class="check-item check-info">
+                        <span class="check-icon">💡</span>
+                        <div>
+                            <strong>Dependency updates</strong>
+                            <p>Bật Dependabot / Renovate — auto tạo PR khi có security update.</p>
+                        </div>
+                    </div>
+                    <div class="check-item check-info">
+                        <span class="check-icon">💡</span>
+                        <div>
+                            <strong>Backup strategy</strong>
+                            <p>Database backup tự động, test restore định kỳ. "Backup chưa test restore = chưa có backup."</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="closing-box">
+                <div class="closing-nav">
+                    <a href="index.html" class="closing-btn">🗺️ Tổng quan</a>
+                    <a href="git.html" class="closing-btn">📦 Git</a>
+                    <a href="cicd.html" class="closing-btn">⚙️ CI/CD</a>
+                    <a href="jenkins.html" class="closing-btn">🔴 Jenkins</a>
+                    <a href="docker.html" class="closing-btn">🐳 Docker</a>
+                    <a href="hosting.html" class="closing-btn">☁️ Hosting</a>
+                    <a href="cloud.html" class="closing-btn">⛅ Cloud</a>
+                    <a href="domain.html" class="closing-btn">🌐 Domain</a>
+                    <a href="monitoring.html" class="closing-btn">📊 Monitoring</a>
+                    <a href="workflow.html" class="closing-btn">🔄 Workflow</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Build & Deploy — Triển khai website từ A→Z cho web developer</p>
+        </div>
+    </footer>
+
+    <script src="build.js"></script>
+</body>
+</html>

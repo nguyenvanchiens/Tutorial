@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>React Nâng Cao - Performance, Suspense, Error Boundary</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">React<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="basics.html">Cơ bản</a>
+      <a href="hooks.html">Hooks</a>
+      <a href="advanced.html" class="active">Nâng cao</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="ecosystem.html">Ecosystem</a>
+      <a href="interview.html">Phỏng vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">LEVEL 3 · MID-LEVEL</div>
+  <h1>React <span class="gradient">Nâng Cao</span></h1>
+  <p class="hero-desc">Reconciliation, Keys, Memoization đúng cách, Code Splitting, Suspense, Error Boundary, Portals, Concurrent Features. Bước ngoặt từ "biết dùng" sang "hiểu React".</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">1. Render Cycle &amp; Reconciliation</h2>
+    <p class="section-sub">Hiểu chính xác khi nào React render, render cái gì, và cách nó cập nhật DOM tối thiểu.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Khi nào component render?</h3>
+        <ul>
+          <li>State của nó thay đổi (<code>setState</code>)</li>
+          <li>Prop thay đổi (cha re-render truyền xuống)</li>
+          <li>Context mà nó consume thay đổi</li>
+          <li>Cha nó re-render (mặc định con cũng render, dù props y hệt)</li>
+        </ul>
+        <div class="info-box" style="margin-top:.75rem"><strong>Lưu ý:</strong> "cha render → con render" là mặc định. Tránh bằng <code>React.memo</code> hoặc cấu trúc lại cây.</div>
+      </div>
+
+      <div class="card">
+        <h3>Reconciliation — 2 pha</h3>
+        <ol style="padding-left:1.2rem;color:var(--muted)">
+          <li><strong>Render phase</strong>: chạy function component, tạo VDOM mới</li>
+          <li><strong>Commit phase</strong>: diff VDOM cũ/mới, patch DOM thật, chạy <code>useLayoutEffect</code> → paint → <code>useEffect</code></li>
+        </ol>
+        <p>Render phase phải <strong>pure</strong> — không side effect. Side effect đặt trong effect hooks hoặc event handlers.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:1.5rem;color:var(--primary)">Key thay đổi = component bị huỷ &amp; tạo lại</h3>
+    <pre class="code"><span class="c">// Đổi userId → Form unmount và mount mới → state bên trong reset</span>
+&lt;<span class="t">Form</span> key={userId} user={user} /&gt;
+
+<span class="c">// Hữu ích khi muốn force reset state mà không cần useEffect</span></pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">2. Tối ưu Performance</h2>
+
+    <h3 style="color:var(--primary);margin-bottom:.75rem">Nguyên tắc thứ tự</h3>
+    <ol class="steps">
+      <li><strong>Đo trước, tối ưu sau</strong> — dùng React DevTools Profiler. Đừng đoán.</li>
+      <li><strong>Fix rendering thừa</strong> — state đặt đúng nơi, tách component nhỏ, pass children thay vì prop.</li>
+      <li><strong>Memo hoá</strong> — <code>React.memo</code>, <code>useMemo</code>, <code>useCallback</code> (khi cần).</li>
+      <li><strong>Virtualize</strong> — list &gt;500 item dùng <code>react-window</code> / <code>@tanstack/react-virtual</code>.</li>
+      <li><strong>Code split</strong> — <code>lazy</code> + <code>Suspense</code> cho route/modal hiếm dùng.</li>
+    </ol>
+
+    <h3 style="color:var(--primary);margin:1.5rem 0 .75rem"><code>React.memo</code> — bỏ qua render nếu props không đổi</h3>
+    <pre class="code"><span class="k">const</span> Avatar = <span class="n">React.memo</span>(<span class="k">function</span> Avatar({ src, alt }) {
+  <span class="c">// chỉ render lại khi src hoặc alt đổi</span>
+  <span class="k">return</span> &lt;<span class="t">img</span> src={src} alt={alt} /&gt;;
+});
+
+<span class="c">// Custom compare (hiếm dùng)</span>
+<span class="n">React.memo</span>(Component, (prev, next) =&gt; {
+  <span class="k">return</span> prev.id === next.id;  <span class="c">// true = skip render</span>
+});</pre>
+
+    <div class="warn-box">
+      <strong>memo chỉ hiệu quả khi:</strong>
+      <ol style="padding-left:1.2rem;margin-top:.5rem">
+        <li>Props là primitive hoặc reference ổn định (wrap bằng <code>useMemo</code>/<code>useCallback</code> ở cha)</li>
+        <li>Component đó render tốn CPU</li>
+        <li>Cha re-render thường xuyên</li>
+      </ol>
+      Thiếu 1 trong 3 → memo thành gánh nặng, không lợi ích.
+    </div>
+
+    <h3 style="color:var(--primary);margin:1.5rem 0 .75rem">Pattern "pass children" để tránh render thừa</h3>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>❌ Con render mỗi khi cha render</h4>
+        <pre class="code"><span class="k">function</span> <span class="n">Parent</span>() {
+  <span class="k">const</span> [count, setCount] = useState(<span class="s">0</span>);
+  <span class="k">return</span> (
+    &lt;<span class="t">div</span>&gt;
+      &lt;<span class="t">button</span> onClick={() =&gt; setCount(c+<span class="s">1</span>)}&gt;+&lt;/<span class="t">button</span>&gt;
+      &lt;<span class="t">ExpensiveChild</span> /&gt;  <span class="c">// render thừa mỗi +</span>
+    &lt;/<span class="t">div</span>&gt;
+  );
+}</pre>
+      </div>
+      <div class="card">
+        <h4>✅ Đẩy state xuống / nâng lên</h4>
+        <pre class="code"><span class="k">function</span> <span class="n">Parent</span>({ children }) {
+  <span class="c">// Parent nhận children → không re-render chúng</span>
+  <span class="k">const</span> [count, setCount] = useState(<span class="s">0</span>);
+  <span class="k">return</span> (
+    &lt;<span class="t">div</span>&gt;
+      &lt;<span class="t">button</span> onClick={() =&gt; setCount(c+<span class="s">1</span>)}&gt;{count}&lt;/<span class="t">button</span>&gt;
+      {children}
+    &lt;/<span class="t">div</span>&gt;
+  );
+}
+
+&lt;<span class="t">Parent</span>&gt;
+  &lt;<span class="t">ExpensiveChild</span> /&gt;
+&lt;/<span class="t">Parent</span>&gt;</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">3. Code Splitting với <code>lazy</code> + <code>Suspense</code></h2>
+    <p class="section-sub">Chia bundle thành nhiều chunk nhỏ, load theo nhu cầu. Giảm initial load time đáng kể.</p>
+
+    <pre class="code"><span class="k">import</span> { lazy, Suspense } <span class="k">from</span> <span class="s">'react'</span>;
+
+<span class="c">// Không import trực tiếp</span>
+<span class="k">const</span> Dashboard = lazy(() =&gt; <span class="k">import</span>(<span class="s">'./Dashboard'</span>));
+<span class="k">const</span> Settings  = lazy(() =&gt; <span class="k">import</span>(<span class="s">'./Settings'</span>));
+
+<span class="k">function</span> <span class="n">App</span>() {
+  <span class="k">return</span> (
+    &lt;<span class="t">Suspense</span> fallback={&lt;<span class="t">Spinner</span> /&gt;}&gt;
+      &lt;<span class="t">Routes</span>&gt;
+        &lt;<span class="t">Route</span> path=<span class="s">"/"</span> element={&lt;<span class="t">Dashboard</span> /&gt;} /&gt;
+        &lt;<span class="t">Route</span> path=<span class="s">"/settings"</span> element={&lt;<span class="t">Settings</span> /&gt;} /&gt;
+      &lt;/<span class="t">Routes</span>&gt;
+    &lt;/<span class="t">Suspense</span>&gt;
+  );
+}</pre>
+
+    <div class="tip"><strong>Chỗ nên split:</strong> Route, Modal lớn, trình editor (Monaco), chart lib, admin-only panel. Prefetch bằng <code>onMouseEnter</code> để load khi user sắp click.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">4. Error Boundary</h2>
+    <p class="section-sub">Bắt lỗi trong cây con, hiển thị UI fallback thay vì sập cả app. <strong>Phải là class component</strong> (hooks chưa thay thế được).</p>
+
+    <pre class="code"><span class="k">class</span> ErrorBoundary <span class="k">extends</span> React.Component {
+  state = { hasError: <span class="k">false</span>, error: <span class="k">null</span> };
+
+  <span class="k">static</span> getDerivedStateFromError(error) {
+    <span class="k">return</span> { hasError: <span class="k">true</span>, error };
+  }
+
+  componentDidCatch(error, info) {
+    logToServer(error, info);  <span class="c">// Sentry, Datadog, …</span>
+  }
+
+  render() {
+    <span class="k">if</span> (<span class="k">this</span>.state.hasError) {
+      <span class="k">return</span> &lt;<span class="t">div</span>&gt;Có lỗi xảy ra. &lt;<span class="t">button</span> onClick={() =&gt; <span class="k">this</span>.setState({hasError: <span class="k">false</span>})}&gt;Thử lại&lt;/<span class="t">button</span>&gt;&lt;/<span class="t">div</span>&gt;;
+    }
+    <span class="k">return</span> <span class="k">this</span>.props.children;
+  }
+}
+
+<span class="c">// Dùng</span>
+&lt;<span class="t">ErrorBoundary</span>&gt;
+  &lt;<span class="t">App</span> /&gt;
+&lt;/<span class="t">ErrorBoundary</span>&gt;</pre>
+
+    <div class="danger-box">
+      <strong>Error Boundary KHÔNG bắt:</strong>
+      <ul style="padding-left:1.2rem;margin-top:.5rem">
+        <li>Lỗi trong event handler (dùng try/catch)</li>
+        <li>Lỗi async (Promise reject) — dùng <code>.catch()</code> hoặc react-error-boundary</li>
+        <li>Lỗi trong SSR</li>
+        <li>Lỗi trong chính boundary</li>
+      </ul>
+    </div>
+
+    <div class="info-box"><strong>Lib khuyên dùng:</strong> <code>react-error-boundary</code> — cung cấp hook <code>useErrorBoundary()</code> + fallback component API gọn hơn.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">5. Portals — Render ra ngoài cây DOM</h2>
+    <p class="section-sub">Render component vào DOM node khác (thường <code>document.body</code>) mà vẫn giữ React tree — event bubble theo React tree, không theo DOM.</p>
+
+    <pre class="code"><span class="k">import</span> { createPortal } <span class="k">from</span> <span class="s">'react-dom'</span>;
+
+<span class="k">function</span> <span class="n">Modal</span>({ open, onClose, children }) {
+  <span class="k">if</span> (!open) <span class="k">return</span> <span class="k">null</span>;
+
+  <span class="k">return</span> createPortal(
+    &lt;<span class="t">div</span> className=<span class="s">"modal-overlay"</span> onClick={onClose}&gt;
+      &lt;<span class="t">div</span> className=<span class="s">"modal"</span> onClick={e =&gt; e.stopPropagation()}&gt;
+        {children}
+      &lt;/<span class="t">div</span>&gt;
+    &lt;/<span class="t">div</span>&gt;,
+    document.body
+  );
+}</pre>
+
+    <div class="tip"><strong>Dùng cho:</strong> Modal, Tooltip, Toast, Dropdown — thứ cần thoát khỏi <code>overflow: hidden</code> hay <code>z-index</code> stacking của cha.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">6. Refs Forwarding &amp; <code>useImperativeHandle</code></h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4><code>forwardRef</code></h4>
+        <p>Cho phép cha truyền ref vào component con (mặc định ref không được coi như prop).</p>
+        <pre class="code"><span class="k">const</span> Input = forwardRef((props, ref) =&gt; (
+  &lt;<span class="t">input</span> ref={ref} {...props} /&gt;
+));
+
+<span class="c">// Ở cha</span>
+<span class="k">const</span> ref = useRef();
+&lt;<span class="t">Input</span> ref={ref} /&gt;;
+ref.current.focus();</pre>
+        <div class="info-box" style="margin-top:.5rem"><strong>React 19:</strong> ref giờ là prop thường, không cần <code>forwardRef</code> nữa.</div>
+      </div>
+
+      <div class="card">
+        <h4><code>useImperativeHandle</code></h4>
+        <p>Tùy biến API mà cha thấy qua ref — chỉ expose function cần thiết, ẩn DOM node thật.</p>
+        <pre class="code"><span class="k">const</span> FancyInput = forwardRef((props, ref) =&gt; {
+  <span class="k">const</span> inputRef = useRef();
+
+  useImperativeHandle(ref, () =&gt; ({
+    focus: () =&gt; inputRef.current.focus(),
+    clear: () =&gt; inputRef.current.value = <span class="s">''</span>,
+  }));
+
+  <span class="k">return</span> &lt;<span class="t">input</span> ref={inputRef} /&gt;;
+});</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">7. Concurrent Features (React 18+)</h2>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4><code>useTransition</code></h4>
+        <p>Chia update thành 2 loại: <em>urgent</em> (input, click) và <em>transition</em> (update UI nặng). React ưu tiên urgent, có thể huỷ/gián đoạn transition.</p>
+        <pre class="code"><span class="k">const</span> [isPending, startTransition] = useTransition();
+
+<span class="k">function</span> <span class="n">onType</span>(e) {
+  setQuery(e.target.value);  <span class="c">// urgent → input mượt</span>
+  startTransition(() =&gt; {
+    setResults(filter(bigList, e.target.value));  <span class="c">// có thể gián đoạn</span>
+  });
+}
+
+{isPending &amp;&amp; &lt;<span class="t">Spinner</span> /&gt;}</pre>
+      </div>
+
+      <div class="card">
+        <h4><code>useDeferredValue</code></h4>
+        <p>Biến giá trị thành "deferred version" — dùng cho Results chậm cập nhật, input nhanh.</p>
+        <pre class="code"><span class="k">const</span> query = useState(<span class="s">''</span>);
+<span class="k">const</span> deferredQuery = useDeferredValue(query);
+
+&lt;<span class="t">Input</span> value={query} onChange={setQuery} /&gt;
+&lt;<span class="t">Results</span> query={deferredQuery} /&gt;  <span class="c">// chậm hơn 1 nhịp, nhưng input mượt</span></pre>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top:1rem"><strong>React 19 mới:</strong> <code>useOptimistic</code>, <code>useActionState</code>, <code>useFormStatus</code> — cho Form Actions và Server Actions (xem <a href="ecosystem.html" style="color:var(--primary)">Ecosystem / Next.js</a>).</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">8. Virtualization cho list lớn</h2>
+    <p class="section-sub">Render 10,000 item = DOM ngạt thở. Chỉ render những item đang thấy trong viewport.</p>
+
+    <pre class="code"><span class="c">// Dùng @tanstack/react-virtual</span>
+<span class="k">import</span> { useVirtualizer } <span class="k">from</span> <span class="s">'@tanstack/react-virtual'</span>;
+
+<span class="k">function</span> <span class="n">BigList</span>({ items }) {
+  <span class="k">const</span> parentRef = useRef();
+
+  <span class="k">const</span> rowVirtualizer = useVirtualizer({
+    count: items.length,
+    getScrollElement: () =&gt; parentRef.current,
+    estimateSize: () =&gt; <span class="s">40</span>,
+    overscan: <span class="s">5</span>,
+  });
+
+  <span class="k">return</span> (
+    &lt;<span class="t">div</span> ref={parentRef} style={{ height: <span class="s">400</span>, overflow: <span class="s">'auto'</span> }}&gt;
+      &lt;<span class="t">div</span> style={{ height: rowVirtualizer.getTotalSize(), position: <span class="s">'relative'</span> }}&gt;
+        {rowVirtualizer.getVirtualItems().map(v =&gt; (
+          &lt;<span class="t">div</span> key={v.key} style={{ position: <span class="s">'absolute'</span>, top: v.start, height: v.size }}&gt;
+            {items[v.index].name}
+          &lt;/<span class="t">div</span>&gt;
+        ))}
+      &lt;/<span class="t">div</span>&gt;
+    &lt;/<span class="t">div</span>&gt;
+  );
+}</pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">9. Profiling &amp; Debug</h2>
+    <div class="grid grid-3">
+      <div class="card">
+        <h4>React DevTools Profiler</h4>
+        <ul>
+          <li>Record session → xem component nào render bao lâu</li>
+          <li>"Why did this render?" — flag nguyên nhân</li>
+          <li>Highlight updates khi render</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>StrictMode</h4>
+        <p>Trong dev, cố ý gọi effect/constructor <strong>2 lần</strong> để phát hiện side effect bẩn. KHÔNG phải bug — nó đang test bạn.</p>
+      </div>
+      <div class="card">
+        <h4>why-did-you-render</h4>
+        <p>Package log khi component re-render không cần thiết với lý do cụ thể. Dev-only.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">💡 Bài tập</h2>
+    <ol class="steps">
+      <li><strong>Profile 1 trang chậm</strong> — mở DevTools Profiler, tìm 1 component render thừa, fix bằng <code>memo</code> hoặc restructure.</li>
+      <li><strong>Route-based code split</strong> — chia app 5 route thành 5 chunk với <code>lazy</code> + <code>Suspense</code>.</li>
+      <li><strong>Global Error Boundary</strong> — bọc App, log lỗi ra console, có nút "Tải lại".</li>
+      <li><strong>Modal với Portal</strong> — click outside để đóng, ESC để đóng, focus trap bên trong.</li>
+      <li><strong>List 10,000 dòng</strong> — render tất cả vs virtualize, đo FPS bằng DevTools Performance tab.</li>
+    </ol>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>ReactJS Mastery · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kinh Nghiệm Sống Còn — .NET Developer</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="wisdom.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html" style="color:inherit;-webkit-text-fill-color:inherit;">.NET<span class="accent">Mastery</span></a></div>
+            <div class="nav-links">
+                <a href="index.html">Roadmap</a>
+                <a href="index.html#quiz">Kiểm tra</a>
+                <a href="wisdom.html" class="nav-active">Kinh nghiệm</a>
+                <a href="ai-era.html">AI Era</a>
+                <a href="roadmap-detail.html">Lộ trình A-Z</a>
+                <a href="skill-test.html">Phỏng vấn</a>
+                <a href="advice.html">Lời khuyên</a>
+                <a href="backend-path.html">Backend Path</a>
+            </div>
+            <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <header class="wisdom-hero">
+        <div class="hero-content">
+            <div class="hero-badge">BATTLE-TESTED WISDOM</div>
+            <h1>Kinh Nghiệm <span class="gradient-text">Sống Còn</span></h1>
+            <p class="hero-desc">Những bài học xương máu từ hàng nghìn giờ coding, debugging, và production incidents.<br>Đọc trước khi mắc sai lầm, không phải sau.</p>
+        </div>
+    </header>
+
+    <!-- TABLE OF CONTENTS -->
+    <div class="toc-bar">
+        <div class="container">
+            <div class="toc-links">
+                <a href="#csharp" class="toc-link">C# Language</a>
+                <a href="#dotnet-ecosystem" class="toc-link">Hệ sinh thái .NET</a>
+                <a href="#architecture" class="toc-link">Architecture</a>
+                <a href="#database" class="toc-link">Database</a>
+                <a href="#api" class="toc-link">API Design</a>
+                <a href="#performance" class="toc-link">Performance</a>
+                <a href="#career" class="toc-link">Career Path</a>
+                <a href="#team-lead" class="toc-link">Làm Lead</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== C# LANGUAGE ===== -->
+    <section id="csharp" class="section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-icon">⚡</span>
+                <h2>C# Language — Viết Code Đúng Cách</h2>
+                <p>C# rất mạnh, nhưng mạnh cũng đồng nghĩa với dễ dùng sai</p>
+            </div>
+
+            <div class="wisdom-card do">
+                <div class="wisdom-badge">NÊN LÀM</div>
+                <h3>Dùng C# features mới — đừng viết code kiểu C# 5 mãi</h3>
+                <div class="wisdom-body">
+                    <div class="wisdom-detail">
+                        <p>C# phát triển rất nhanh, mỗi version thêm features giúp code ngắn gọn, an toàn hơn. Nhiều dev mắc kẹt ở C# cũ vì "quen rồi".</p>
+                        <div class="code-compare">
+                            <div class="code-old">
+                                <span class="code-label">❌ Cách cũ (C# 7 trở về trước)</span>
+                                <pre><code>// Null check verbose
+if (user != null)
+{
+    if (user.Address != null)
+    {
+        var city = user.Address.City;
+    }
+}
+
+// String format
+var msg = string.Format("Hello {0}, age {1}", name, age);
+
+// Pattern matching không có
+if (obj is string)
+{
+    var s = (string)obj;
+}
+
+// Switch cũ
+switch (status)
+{
+    case "active": return true;
+    case "inactive": return false;
+    default: return false;
+}</code></pre>
+                            </div>
+                            <div class="code-new">
+                                <span class="code-label">✅ Cách mới (C# 10+)</span>
+                                <pre><code>// Null conditional + null coalescing
+var city = user?.Address?.City ?? "Unknown";
+
+// String interpolation
+var msg = $"Hello {name}, age {age}";
+
+// Pattern matching
+if (obj is string s)
+{
+    // s đã được cast
+}
+
+// Switch expression
+return status switch
+{
+    "active" => true,
+    "inactive" => false,
+    _ => false
+};</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="wisdom-versions">
+                        <h4>Features PHẢI biết theo version:</h4>
+                        <div class="version-grid">
+                            <div class="version-item">
+                                <span class="ver">C# 8</span>
+                                <span>Nullable reference types, using declarations, switch expressions, async streams</span>
+                            </div>
+                            <div class="version-item">
+                                <span class="ver">C# 9</span>
+                                <span>Records, init-only properties, top-level statements, pattern matching improvements</span>
+                            </div>
+                            <div class="version-item">
+                                <span class="ver">C# 10</span>
+                                <span>Global usings, file-scoped namespaces, record structs</span>
+                            </div>
+                            <div class="version-item">
+                                <span class="ver">C# 11</span>
+                                <span>Raw string literals, required members, list patterns</span>
+                            </div>
+                            <div class="version-item">
+                                <span class="ver">C# 12</span>
+                                <span>Primary constructors, collection expressions, alias any type</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wisdom-card dont">
+                <div class="wisdom-badge">ĐỪNG LÀM</div>
+                <h3>Đừng bỏ qua Nullable Reference Types</h3>
+                <div class="wisdom-body">
+                    <p>NullReferenceException là bug #1 mọi thời đại. C# 8+ có nullable reference types giúp compiler cảnh báo null từ lúc code.</p>
+                    <pre><code>// Bật nullable trong .csproj
+&lt;Nullable&gt;enable&lt;/Nullable&gt;
+
+// Compiler cảnh báo: "user" có thể null
+string GetName(User? user)
+{
+    return user.Name; // ⚠️ CS8602: Dereference of possibly null reference
+}
+
+// Fix: handle null explicitly
+string GetName(User? user)
+{
+    return user?.Name ?? "Anonymous";
+}
+
+// Non-nullable = contract: "parameter này KHÔNG BAO GIỜ null"
+string GetName(User user) // Caller phải đảm bảo không null
+{
+    return user.Name; // Safe — compiler enforce
+}</code></pre>
+                    <div class="wisdom-tip">
+                        <strong>💡 Tip:</strong> Bật nullable cho project MỚI ngay từ đầu. Project cũ bật dần per-file bằng <code>#nullable enable</code>.
+                    </div>
+                </div>
+            </div>
+
+            <div class="wisdom-card do">
+                <div class="wisdom-badge">NÊN LÀM</div>
+                <h3>Dùng record cho DTOs và Value Objects</h3>
+                <div class="wisdom-body">
+                    <pre><code>// ❌ Cũ: DTO class 30 dòng boilerplate
+public class UserDto
+{
+    public string Name { get; set; }
+    public string Email { get; set; }
+    // Equals, GetHashCode, ToString... manually?
+}
+
+// ✅ Mới: 1 dòng, có sẵn equality, ToString, deconstruction
+public record UserDto(string Name, string Email);
+
+// Immutable by default — tạo bản sao modify bằng "with"
+var updated = user with { Email = "new@email.com" };
+
+// Value equality — so sánh theo VALUE, không phải reference
+var a = new UserDto("An", "an@mail.com");
+var b = new UserDto("An", "an@mail.com");
+Console.WriteLine(a == b); // true! (class thì false)</code></pre>
+                    <div class="wisdom-tip">
+                        <strong>💡 Khi nào dùng:</strong> record cho DTO, API response, events, value objects. class cho entities có identity và mutable state.
+                    </div>
+                </div>
+            </div>
+
+            <div class="wisdom-card dont">
+                <div class="wisdom-badge">ĐỪNG LÀM</div>
+                <h3>Đừng throw Exception cho business logic</h3>
+                <div class="wisdom-body">
+                    <pre><code>// ❌ SAI: Exception cho flow control — chậm, khó handle
+public User GetUser(int id)
+{
+    var user = _repo.Find(id);
+    if (user == null)
+        throw new UserNotFoundException(id); // Exception = expensive!
+}
+
+// ✅ ĐÚNG: Result pattern — explicit success/failure
+public Result&lt;User&gt; GetUser(int id)
+{
+    var user = _repo.Find(id);
+    return user is null
+        ? Result&lt;User&gt;.Fail("User not found")
+        : Result&lt;User&gt;.Ok(user);
+}
+
+// Hoặc dùng OneOf library
+public OneOf&lt;User, NotFound&gt; GetUser(int id) { ... }
+
+// Caller handle explicitly — không bỏ sót
+var result = service.GetUser(1);
+return result.Match(
+    user => Ok(user),
+    error => NotFound(error.Message)
+);</code></pre>
+                    <div class="wisdom-rule">
+                        <strong>📏 Quy tắc:</strong> Exceptions cho EXCEPTIONAL situations (DB down, network fail). Business logic (not found, validation fail) → dùng Result pattern, FluentValidation.
+                    </div>
+                </div>
+            </div>
+
+            <div class="wisdom-card dont">
+                <div class="wisdom-badge">ĐỪNG LÀM</div>
+                <h3>Đừng dùng magic strings / magic numbers</h3>
+                <div class="wisdom-body">
+                    <pre><code>// ❌ Magic strings — typo = runtime bug
+if (user.Role == "Admni") { } // Typo! Không ai phát hiện
+if (order.Status == 3) { }     // 3 là gì?
+
+// ✅ Constants hoặc Enums
+public static class Roles
+{
+    public const string Admin = "Admin";
+    public const string User = "User";
+}
+
+public enum OrderStatus
+{
+    Pending = 1,
+    Processing = 2,
+    Completed = 3,
+    Cancelled = 4
+}
+
+if (user.Role == Roles.Admin) { }        // Compile-time check
+if (order.Status == OrderStatus.Completed) { } // Rõ ràng</code></pre>
+                </div>
+            </div>
+
+            <div class="wisdom-card insight">
+                <div class="wisdom-badge">INSIGHT</div>
+                <h3>LINQ: Mạnh nhưng dễ lạm dụng</h3>
+                <div class="wisdom-body">
+                    <pre><code>// ❌ LINQ chain quá dài = khó đọc, khó debug
+var result = users
+    .Where(u => u.IsActive)
+    .SelectMany(u => u.Orders.Where(o => o.Total > 100))
+    .GroupBy(o => o.Category)
+    .Select(g => new { g.Key, Total = g.Sum(o => o.Total) })
+    .OrderByDescending(x => x.Total)
+    .Take(10)
+    .ToList();
+// Debug cái này thế nào? Breakpoint ở đâu?
+
+// ✅ Tách ra, đặt tên rõ ràng
+var activeUsers = users.Where(u => u.IsActive);
+var bigOrders = activeUsers
+    .SelectMany(u => u.Orders)
+    .Where(o => o.Total > 100);
+var topCategories = bigOrders
+    .GroupBy(o => o.Category)
+    .Select(g => new CategorySummary(g.Key, g.Sum(o => o.Total)))
+    .OrderByDescending(x => x.Total)
+    .Take(10)
+    .ToList();
+
+// ⚠️ CẢNH BÁO: LINQ to Objects vs LINQ to Entities
+// In-memory: .ToList() rồi .Where() = filter trên C#
+// EF Core: .Where() rồi .ToList() = filter trên SQL (NHANH hơn nhiều!)
+var bad = _db.Users.ToList().Where(u => u.Age > 18);  // ❌ Load ALL rồi filter
+var good = _db.Users.Where(u => u.Age > 18).ToList(); // ✅ SQL WHERE</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== .NET ECOSYSTEM ===== -->
+    <section id="dotnet-ecosystem" class="section section-dark">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-icon">🌐</span>
+                <h2>Hệ Sinh Thái .NET — Bản Đồ Để Không Bị Lạc</h2>
+                <p>Hiểu rõ sự khác nhau giữa .NET Framework, .NET Core, và .NET (modern)</p>
+            </div>
+
+            <div class="wisdom-card insight">
+                <div class="wisdom-badge">BẮT BUỘC HIỂU</div>
+                <h3>Bản đồ .NET — Cái nào là cái nào?</h3>
+                <div class="wisdom-body">
+                    <div class="timeline">
+                        <div class="timeline-item dead">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>.NET Framework (1.0 → 4.8) <span class="tag tag-dead">ĐÃ CHẾT</span></h4>
+                                <p>Windows-only. Không có version mới. Chỉ security patches. <strong>ĐỪNG bắt đầu project mới với .NET Framework.</strong></p>
+                                <p>Nếu đang maintain project cũ → plan migration sang .NET 8+.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item dead">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>.NET Core (1.0 → 3.1) <span class="tag tag-dead">ĐÃ CHẾT</span></h4>
+                                <p>Cross-platform, nhưng đã merge vào .NET 5+. .NET Core 3.1 hết support.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item active">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>.NET 5, 6, 7, 8, 9... <span class="tag tag-active">ĐANG DÙNG</span></h4>
+                                <p>Tên chính thức bây giờ chỉ là ".NET". Cross-platform, high performance, unified platform.</p>
+                                <ul>
+                                    <li><strong>.NET 6</strong> — LTS, hết support 11/2024</li>
+                                    <li><strong>.NET 7</strong> — STS, đã hết support</li>
+                                    <li><strong>.NET 8</strong> — LTS ✅ <strong>NÊN DÙNG CHO PRODUCTION</strong></li>
+                                    <li><strong>.NET 9</strong> — STS, latest features, cho personal/non-critical projects</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="wisdom-rule">
+                        <strong>📏 Quy tắc chọn version:</strong> Production = LTS version (.NET 8). Side projects = latest (.NET 9). KHÔNG BAO GIỜ bắt đầu project mới với .NET Framework hoặc .NET Core 3.1.
+                    </div>
+                </div>
+            </div>
+
+            <div class="wisdom-card do">
+                <div class="wisdom-badge">NÊN LÀM</div>
+                <h3>Học theo thứ tự này — đừng nhảy lung tung</h3>
+                <div class="wisdom-body">
+                    <div class="learning-path">
+                        <div class="path-step">
+                            <span class="step-num">1</span>
+                            <div>
+                                <h4>C# Fundamentals (2-3 tuần)</h4>
+                                <p>OOP, Collections, LINQ, Async/Await, Generics, Exception Handling</p>
+                                <p class="step-note">⚠️ Đừng học hết mọi feature. Nắm vững cốt lõi rồi học thêm khi cần.</p>
+                            </div>
+                        </div>
+                        <div class="path-step">
+                            <span class="step-num">2</span>
+                            <div>
+                                <h4>ASP.NET Core Web API (2-3 tuần)</h4>
+                                <p>Controllers, Routing, Middleware, DI, Configuration, Logging</p>
+                                <p class="step-note">⚠️ Chỉ làm Web API trước. Đừng học Blazor, MVC, Razor Pages cùng lúc.</p>
+                            </div>
+                        </div>
+                        <div class="path-step">
+                            <span class="step-num">3</span>
+                            <div>
+                                <h4>Entity Framework Core + SQL (2-3 tuần)</h4>
+                                <p>DbContext, Migrations, LINQ to Entities, Relationships, Raw SQL</p>
+                                <p class="step-note">⚠️ PHẢI biết SQL thuần trước khi dùng EF Core. ORM che đi complexity.</p>
+                            </div>
+                        </div>
+                        <div class="path-step">
+                            <span class="step-num">4</span>
+                            <div>
+                                <h4>Authentication & Authorization (1-2 tuần)</h4>
+                                <p>JWT, Identity, Policies, Claims, OAuth 2.0 basics</p>
+                            </div>
+                        </div>
+                        <div class="path-step">
+                            <span class="step-num">5</span>
+                            <div>
+                                <h4>Testing (1-2 tuần)</h4>
+                                <p>xUnit, Moq, Integration Tests, WebApplicationFactory</p>
+                                <p class="step-note">⚠️ Nhiều người skip testing → đây là sai lầm lớn nhất. Test = confidence để refactor.</p>
+                            </div>
+                        </div>
+                        <div class="path-step">
+                            <span class="step-num">6</span>
+                            <div>
+                                <h4>Docker + CI/CD (1 tuần)</h4>
+                                <p>Dockerfile, docker-compose, GitHub Actions / Azure DevOps basics</p>
+                            </div>
+                        </div>
+                        <div class="path-step step-advanced">
+                            <span class="step-num">7+</span>
+                            <div>
+                                <h4>Advanced (khi cần)</h4>
+                                <p>Microservices, Message Queue, Redis, gRPC, DDD, Event Sourcing — học khi project thực sự cần, KHÔNG phải vì trending.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wisdom-card dont">
+                <div class="wisdom-badge">ĐỪNG LÀM</div>
+                <h3>Đừng mắc bẫy "Framework Tourism"</h3>
+                <div class="wisdom-body">
+                    <div class="trap-grid">
+                        <div class="trap-item">
+                            <span class="trap-icon">🪤</span>
+                            <h4>Bẫy 1: Học mọi thứ cùng lúc</h4>
+                            <p>"Tôi cần học Blazor + MAUI + Minimal API + gRPC + Microservices..."</p>
+                            <p class="trap-fix">→ <strong>Fix:</strong> Master 1 stack trước (Web API + EF Core). Mở rộng sau.</p>
+                        </div>
+                        <div class="trap-item">
+                            <span class="trap-icon">🪤</span>
+                            <h4>Bẫy 2: Chạy theo hype</h4>
+                            <p>"Team mình phải dùng Microservices vì Netflix dùng"</p>
+                            <p class="trap-fix">→ <strong>Fix:</strong> Netflix có 1000 engineers. Team bạn có 5. Monolith/Modular Monolith đủ cho 95% projects.</p>
+                        </div>
+                        <div class="trap-item">
+                            <span class="trap-icon">🪤</span>
+                            <h4>Bẫy 3: Over-engineering từ đầu</h4>
+                            <p>"Phải có CQRS + Event Sourcing + DDD ngay từ sprint 1"</p>
+                            <p class="trap-fix">→ <strong>Fix:</strong> Start simple (Clean Architecture + EF Core). Refactor khi complexity THỰC SỰ cần.</p>
+                        </div>
+                        <div class="trap-item">
+                            <span class="trap-icon">🪤</span>
+                            <h4>Bẫy 4: NuGet package cho mọi thứ</h4>
+                            <p>"Cần format date? Chắc có NuGet package cho việc đó"</p>
+                            <p class="trap-fix">→ <strong>Fix:</strong> BCL (Base Class Library) của .NET rất mạnh. Đọc docs trước khi install package.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wisdom-card insight">
+                <div class="wisdom-badge">MUST-KNOW</div>
+                <h3>NuGet Packages nên biết (và khi nào dùng)</h3>
+                <div class="wisdom-body">
+                    <div class="package-grid">
+                        <div class="pkg essential">
+                            <h4>🟢 Essential (hầu hết projects cần)</h4>
+                            <ul>
+                                <li><strong>Serilog</strong> — Structured logging (thay ILogger mặc định)</li>
+                                <li><strong>FluentValidation</strong> — Input validation clean hơn DataAnnotations</li>
+                                <li><strong>AutoMapper / Mapster</strong> — Object mapping (DTO ↔ Entity)</li>
+                                <li><strong>Polly</strong> — Retry, Circuit Breaker, Timeout policies</li>
+                                <li><strong>MediatR</strong> — Mediator pattern, CQRS</li>
+                                <li><strong>Swashbuckle</strong> — Swagger/OpenAPI docs</li>
+                            </ul>
+                        </div>
+                        <div class="pkg useful">
+                            <h4>🟡 Useful (tùy project)</h4>
+                            <ul>
+                                <li><strong>Hangfire / Quartz</strong> — Background job scheduling</li>
+                                <li><strong>MassTransit</strong> — Message bus abstraction (RabbitMQ, Kafka)</li>
+                                <li><strong>Scrutor</strong> — Assembly scanning cho DI</li>
+                                <li><strong>Bogus</strong> — Fake data generation cho testing</li>
+                                <li><strong>BenchmarkDotNet</strong> — Performance benchmarking</li>
+                                <li><strong>Dapper</strong> — Micro ORM khi EF Core quá heavy</li>
+                            </ul>
+                        </div>
+                        <div class="pkg caution">
+                            <h4>🔴 Cẩn thận khi dùng</h4>
+                            <ul>
+                                <li><strong>Packages không maintained</strong> — Check last update, GitHub stars, issues</li>
+                                <li><strong>Quá nhiều abstractions</strong> — Repository pattern on top of EF Core (which IS a repository) = abstraction over abstraction</li>
+                                <li><strong>Heavy frameworks</strong> — ABP Framework, Orchard Core... tốt nhưng learning curve cao, khó customize</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== ARCHITECTURE ===== -->
+    <section id="architecture" class="section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-icon">🏗️</span>
+                <h2>Architecture — Chọn Đúng Cho Đúng Bài Toán</h2>
+                <p>Không có architecture "tốt nhất", chỉ có architecture "phù hợp nhất"</p>
+            </div>
+
+            <div class="wisdom-card insight">
+                <div class="wisdom-badge">QUAN TRỌNG NHẤT</div>
+                <h3>Architecture Decision Matrix — Chọn gì cho project?</h3>
+                <div class="wisdom-body">
+                    <div class="arch-table-wrap">
+                        <table class="arch-table">
+                            <thead>
+                                <tr>
+                                    <th>Tiêu chí</th>
+                                    <th>Monolith</th>
+                                    <th>Modular Monolith</th>
+                                    <th>Microservices</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Team size</td>
+                                    <td>1-5 dev</td>
+                                    <td>5-15 dev</td>
+                                    <td>15+ dev, nhiều teams</td>
+                                </tr>
+                                <tr>
+                                    <td>Complexity</td>
+                                    <td>Low-Medium</td>
+                                    <td>Medium-High</td>
+                                    <td>Very High</td>
+                                </tr>
+                                <tr>
+                                    <td>Deploy</td>
+                                    <td>1 unit</td>
+                                    <td>1 unit (modular)</td>
+                                    <td>Independent per service</td>
+                                </tr>
+                                <tr>
+                                    <td>Scaling</td>
+                                    <td>Scale toàn bộ app</td>
+                                    <td>Scale toàn bộ, nhưng prepared to split</td>
+                                    <td>Scale từng service</td>
+                                </tr>
+                                <tr>
+                                    <td>Startup cost</td>
+                                    <td class="cell-good">Thấp</td>
+                                    <td class="cell-ok">Trung bình</td>
+                                    <td class="cell-bad">Rất cao</td>
+                                </tr>
+                                <tr>
+                                    <td>Khi nào chọn?</td>
+                                    <td>MVP, startup, prototype</td>
+                                    <td class="cell-good">95% projects 🏆</td>
+                                    <td>Khi ĐÃ có vấn đề scale thật sự</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="wisdom-rule">
+                        <strong>📏 Quy tắc vàng:</strong> Start with Modular Monolith. Tách thành Microservices KHI CẦN (và bạn sẽ biết khi nào cần vì bạn đang đau). Premature microservices = technical suicide cho team nhỏ.
+                    </div>
+                </div>
+            </div>
+
+            <div class="wisdom-card do">
+                <div class="wisdom-badge">NÊN LÀM</div>
+                <h3>Clean Architecture — Nhưng đừng cuồng tín</h3>
+                <div class="wisdom-body">
+                    <pre><code>// Structure đủ tốt cho 95% projects:
+src/
+├── MyApp.Api/              # Controllers, Middleware, Program.cs
+│   ├── Controllers/
+│   ├── Middleware/
+│   └── Program.cs
+├── MyApp.Application/      # Use cases, DTOs, Interfaces
+│   ├── Features/
+│   │   ├── Orders/
+│   │   │   ├── CreateOrder/
+│   │   │   │   ├── CreateOrderCommand.cs
+│   │   │   │   ├── CreateOrderHandler.cs
+│   │   │   │   └── CreateOrderValidator.cs
+│   │   │   └── GetOrders/
+│   │   │       ├── GetOrdersQuery.cs
+│   │   │       └── GetOrdersHandler.cs
+│   │   └── Users/
+│   ├── Common/
+│   └── Interfaces/
+├── MyApp.Domain/           # Entities, Value Objects, Domain Events
+│   ├── Entities/
+│   └── Enums/
+├── MyApp.Infrastructure/   # EF Core, External Services, Email
+│   ├── Data/
+│   ├── Services/
+│   └── Repositories/
+tests/
+├── MyApp.UnitTests/
+└── MyApp.IntegrationTests/</code></pre>
+                    <div class="wisdom-tip">
+                        <strong>💡 Key rules:</strong>
+                        <ul>
+                            <li>Domain KHÔNG reference bất kỳ project nào khác (independent)</li>
+                            <li>Application reference Domain (use cases biết domain)</li>
+                            <li>Infrastructure reference Application (implement interfaces)</li>
+                            <li>Api reference tất cả (composition root, DI wiring)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wisdom-card dont">
+                <div class="wisdom-badge">ĐỪNG LÀM</div>
+                <h3>Đừng tạo abstraction cho mọi thứ</h3>
+                <div class="wisdom-body">
+                    <pre><code>// ❌ Over-abstraction: IRepository<T> wrap EF Core (đã là Repository + UoW)
+public interface IRepository&lt;T&gt;
+{
+    Task&lt;T&gt; GetByIdAsync(int id);
+    Task&lt;List&lt;T&gt;&gt; GetAllAsync();
+    Task AddAsync(T entity);
+    // ... y hệt DbSet&lt;T&gt; methods
+}
+// Tại sao? EF Core DbContext ĐÃ LÀ Unit of Work + Repository.
+// Wrap thêm 1 layer = thêm code, không thêm value.
+
+// ✅ Approach thực tế hơn:
+// Option A: Inject DbContext trực tiếp vào Handler
+public class CreateOrderHandler
+{
+    private readonly AppDbContext _db;
+    public async Task Handle(CreateOrderCommand cmd, CancellationToken ct)
+    {
+        var order = new Order(cmd.ProductId, cmd.Quantity);
+        _db.Orders.Add(order);
+        await _db.SaveChangesAsync(ct);
+    }
+}
+
+// Option B: Repository CHỈ KHI có complex query logic cần reuse
+public class OrderRepository : IOrderRepository
+{
+    // Chỉ methods CỤ THỂ cho business, không phải CRUD generic
+    Task&lt;List&lt;Order&gt;&gt; GetPendingOrdersOlderThan(TimeSpan age);
+    Task&lt;OrderSummary&gt; GetMonthlySummary(int year, int month);
+}</code></pre>
+                    <div class="wisdom-rule">
+                        <strong>📏 Hỏi trước khi tạo abstraction:</strong> "Nếu bỏ layer này đi, code có dễ hiểu hơn không?" Nếu CÓ → đừng tạo.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== DATABASE ===== -->
+    <section id="database" class="section section-dark">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-icon">🗄️</span>
+                <h2>Database — 80% Performance Nằm Ở Đây</h2>
+                <p>Code xấu chậm 2x. Database query xấu chậm 1000x.</p>
+            </div>
+
+            <div class="wisdom-card dont">
+                <div class="wisdom-badge">SAI LẦM PHỔ BIẾN NHẤT</div>
+                <h3>Không biết EF Core sinh ra SQL gì</h3>
+                <div class="wisdom-body">
+                    <pre><code>// LUÔN BẬT SQL Logging trong Development!
+// Program.cs hoặc appsettings.Development.json:
+"Logging": {
+    "LogLevel": {
+        "Microsoft.EntityFrameworkCore.Database.Command": "Information"
+    }
+}
+
+// Giờ mỗi query EF Core chạy sẽ hiện trong console:
+// info: Executed DbCommand (3ms)
+//       SELECT [o].[Id], [o].[Total] FROM [Orders] AS [o]
+//       WHERE [o].[Status] = 1
+
+// ❌ Code trông vô hại nhưng sinh N+1:
+var orders = await _db.Orders.ToListAsync();
+foreach (var order in orders)
+{
+    Console.WriteLine(order.Customer.Name); // 💥 N queries!
+}
+
+// ✅ Fix: Include (Eager Loading)
+var orders = await _db.Orders
+    .Include(o => o.Customer)
+    .ToListAsync();
+// 1 query với JOIN
+
+// ✅ Fix tốt hơn: Select chỉ fields cần
+var orders = await _db.Orders
+    .Select(o => new OrderDto
+    {
+        Id = o.Id,
+        CustomerName = o.Customer.Name
+    })
+    .ToListAsync();
+// 1 query, chỉ SELECT columns cần</code></pre>
+                </div>
+            </div>
+
+            <div class="wisdom-card insight">
+                <div class="wisdom-badge">PHẢI NHỚ</div>
+                <h3>EF Core Pitfalls — Bẫy mà ai cũng mắc</h3>
+                <div class="wisdom-body">
+                    <div class="pitfall-list">
+                        <div class="pitfall">
+                            <h4>🕳️ Bẫy 1: Tracking queries khi chỉ đọc</h4>
+                            <pre><code>// ❌ Mặc định EF track entities — tốn memory, chậm
+var users = await _db.Users.ToListAsync();
+
+// ✅ Chỉ đọc? Dùng AsNoTracking
+var users = await _db.Users.AsNoTracking().ToListAsync();
+// Hoặc global: _db.ChangeTracker.QueryTrackingBehavior = NoTracking;</code></pre>
+                        </div>
+                        <div class="pitfall">
+                            <h4>🕳️ Bẫy 2: ToList() quá sớm</h4>
+                            <pre><code>// ❌ Load toàn bộ table rồi filter trên C#
+var result = _db.Users.ToList().Where(u => u.Age > 18);
+// SQL: SELECT * FROM Users (100K rows loaded!)
+
+// ✅ Filter trên SQL, chỉ load kết quả
+var result = _db.Users.Where(u => u.Age > 18).ToList();
+// SQL: SELECT * FROM Users WHERE Age > 18</code></pre>
+                        </div>
+                        <div class="pitfall">
+                            <h4>🕳️ Bẫy 3: SaveChanges trong loop</h4>
+                            <pre><code>// ❌ 1000 lần roundtrip đến DB
+foreach (var item in items)
+{
+    _db.Orders.Add(new Order(item));
+    await _db.SaveChangesAsync(); // 💥 1000 INSERT statements!
+}
+
+// ✅ Batch: 1 lần roundtrip
+foreach (var item in items)
+    _db.Orders.Add(new Order(item));
+await _db.SaveChangesAsync(); // 1 transaction, batch INSERT
+
+// ✅✅ .NET 7+: ExecuteUpdate/ExecuteDelete (bulk operations)
+await _db.Orders
+    .Where(o => o.Status == "expired")
+    .ExecuteDeleteAsync(); // 1 DELETE statement, no loading</code></pre>
+                        </div>
+                        <div class="pitfall">
+                            <h4>🕳️ Bẫy 4: Migration conflicts trong team</h4>
+                            <pre><code>// Khi 2 devs tạo migration cùng lúc → conflict ModelSnapshot
+// Fix: Convention trong team:
+// 1. Chỉ 1 người tạo migration tại 1 thời điểm
+// 2. Pull latest trước khi tạo migration
+// 3. Nếu conflict: xóa migration của mình, pull, tạo lại
+// 4. KHÔNG sửa migration đã pushed lên remote</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wisdom-card do">
+                <div class="wisdom-badge">NÊN LÀM</div>
+                <h3>Dapper + EF Core — Không phải chọn 1</h3>
+                <div class="wisdom-body">
+                    <pre><code>// EF Core: cho CRUD, relationships, migrations, change tracking
+// Dapper: cho complex queries, reports, khi cần MAX performance
+
+// Cả 2 dùng chung connection:
+public class OrderRepository
+{
+    private readonly AppDbContext _db;
+
+    // CRUD đơn giản → EF Core
+    public async Task AddAsync(Order order, CancellationToken ct)
+    {
+        _db.Orders.Add(order);
+        await _db.SaveChangesAsync(ct);
+    }
+
+    // Report phức tạp → Dapper (viết SQL thuần, nhanh hơn)
+    public async Task&lt;IEnumerable&lt;ReportDto&gt;&gt; GetMonthlyReport(int year)
+    {
+        var conn = _db.Database.GetDbConnection();
+        return await conn.QueryAsync&lt;ReportDto&gt;(
+            @"SELECT Category, SUM(Total) as Revenue,
+                     COUNT(*) as OrderCount
+              FROM Orders
+              WHERE YEAR(CreatedDate) = @Year
+              GROUP BY Category
+              ORDER BY Revenue DESC",
+            new { Year = year });
+    }
+}</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== API DESIGN ===== -->
+    <section id="api" class="section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-icon">🔌</span>
+                <h2>API Design — Viết API Mà Frontend Dev Yêu Quý</h2>
+                <p>API là contract. Design tốt = ít meeting, ít bug, ít drama.</p>
+            </div>
+
+            <div class="wisdom-card do">
+                <div class="wisdom-badge">BEST PRACTICE</div>
+                <h3>API Response Consistency — Luôn cùng 1 format</h3>
+                <div class="wisdom-body">
+                    <pre><code>// ❌ Mỗi API trả format khác nhau = Frontend phát điên
+// GET /users → [{ name: "An" }]
+// GET /orders → { data: [{ id: 1 }], total: 50 }
+// POST /users → { success: true, user: { ... } }
+// Error → { error: "Something wrong" } hoặc plain string
+
+// ✅ Consistent wrapper cho TẤT CẢ responses:
+public class ApiResponse&lt;T&gt;
+{
+    public bool Success { get; init; }
+    public T? Data { get; init; }
+    public string? Message { get; init; }
+    public List&lt;string&gt;? Errors { get; init; }
+}
+
+// Paged response:
+public class PagedResponse&lt;T&gt; : ApiResponse&lt;List&lt;T&gt;&gt;
+{
+    public int Page { get; init; }
+    public int PageSize { get; init; }
+    public int TotalCount { get; init; }
+    public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
+}
+
+// Mọi API:
+// Success → { success: true, data: { ... } }
+// Error   → { success: false, errors: ["..."], message: "..." }
+// Paged   → { success: true, data: [...], page: 1, totalCount: 100 }</code></pre>
+                </div>
+            </div>
+
+            <div class="wisdom-card dont">
+                <div class="wisdom-badge">ĐỪNG LÀM</div>
+                <h3>Đừng expose internal model ra API</h3>
+                <div class="wisdom-body">
+                    <pre><code>// ❌ Trả Entity trực tiếp → expose database schema, password hash, internal IDs
+[HttpGet("{id}")]
+public async Task&lt;User&gt; GetUser(int id) // 💥 Trả cả PasswordHash!
+    => await _db.Users.FindAsync(id);
+
+// ✅ Dùng DTO — chỉ expose data client cần
+public record UserResponse(int Id, string Name, string Email, DateTime JoinDate);
+
+[HttpGet("{id}")]
+public async Task&lt;ActionResult&lt;UserResponse&gt;&gt; GetUser(int id, CancellationToken ct)
+{
+    var user = await _db.Users
+        .Where(u => u.Id == id)
+        .Select(u => new UserResponse(u.Id, u.Name, u.Email, u.CreatedAt))
+        .FirstOrDefaultAsync(ct);
+
+    return user is null ? NotFound() : Ok(user);
+}
+
+// Tương tự cho INPUT — dùng Request DTO, KHÔNG dùng Entity
+public record CreateUserRequest(string Name, string Email, string Password);
+
+// → Mapping: Request DTO → Entity → Response DTO
+// KHÔNG BAO GIỜ: Entity vào, Entity ra</code></pre>
+                </div>
+            </div>
+
+            <div class="wisdom-card insight">
+                <div class="wisdom-badge">PRO TIP</div>
+                <h3>Global Exception Handler — Đừng để 500 trả stack trace</h3>
+                <div class="wisdom-body">
+                    <pre><code>// Middleware catch TẤT CẢ unhandled exceptions
+// .NET 8:
+app.UseExceptionHandler(options =>
+{
+    options.AllowStatusCode404Response = true;
+});
+app.UseStatusCodePages();
+
+// Custom ProblemDetails:
+builder.Services.AddProblemDetails(options =>
+{
+    options.CustomizeProblemDetails = ctx =>
+    {
+        ctx.ProblemDetails.Extensions["traceId"] =
+            ctx.HttpContext.TraceIdentifier;
+    };
+});
+
+// Production: KHÔNG BAO GIỜ trả stack trace, internal error details
+// → Log chi tiết vào Serilog/Seq
+// → Trả client: { status: 500, title: "An error occurred" }
+
+// Development: trả chi tiết để debug
+// app.UseDeveloperExceptionPage(); (mặc định trong Development)</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== PERFORMANCE ===== -->
+    <section id="performance" class="section section-dark">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-icon">🏎️</span>
+                <h2>Performance — Đo Trước Khi Optimize</h2>
+                <p>"Premature optimization is the root of all evil" — Donald Knuth</p>
+            </div>
+
+            <div class="wisdom-card insight">
+                <div class="wisdom-badge">NGUYÊN TẮC #1</div>
+                <h3>Đo trước. Optimize sau. Đo lại.</h3>
+                <div class="wisdom-body">
+                    <div class="perf-rules">
+                        <div class="perf-rule">
+                            <span class="perf-num">1</span>
+                            <div>
+                                <h4>KHÔNG optimize nếu không có vấn đề</h4>
+                                <p>API response 50ms? Đừng tốn 2 ngày giảm còn 30ms. Spend time đó viết tests.</p>
+                            </div>
+                        </div>
+                        <div class="perf-rule">
+                            <span class="perf-num">2</span>
+                            <div>
+                                <h4>Bottleneck 90% ở database, KHÔNG phải code C#</h4>
+                                <p>Trước khi optimize code → kiểm tra SQL queries. Thêm index >> refactor code.</p>
+                            </div>
+                        </div>
+                        <div class="perf-rule">
+                            <span class="perf-num">3</span>
+                            <div>
+                                <h4>Profile trước khi fix</h4>
+                                <p>dotTrace, BenchmarkDotNet, Application Insights, SQL Execution Plans. Đừng đoán.</p>
+                            </div>
+                        </div>
+                        <div class="perf-rule">
+                            <span class="perf-num">4</span>
+                            <div>
+                                <h4>Caching là vũ khí mạnh nhất... và nguy hiểm nhất</h4>
+                                <p>"There are only two hard things in CS: cache invalidation and naming things." Sai cache = stale data = bugs khó debug.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wisdom-card do">
+                <div class="wisdom-badge">QUICK WINS</div>
+                <h3>Những optimization dễ làm, impact lớn</h3>
+                <div class="wisdom-body">
+                    <pre><code>// 1. Response Compression (giảm 70% bandwidth)
+builder.Services.AddResponseCompression(options =>
+    options.EnableForHttps = true);
+
+// 2. Output Caching (.NET 7+)
+app.UseOutputCache();
+[OutputCache(Duration = 60)] // Cache response 60 giây
+public async Task&lt;IActionResult&gt; GetProducts() { }
+
+// 3. IHttpClientFactory (connection pooling)
+// ❌ new HttpClient() mỗi request = socket exhaustion
+// ✅ DI-injected, pooled, resilient
+builder.Services.AddHttpClient("github", c =>
+    c.BaseAddress = new Uri("https://api.github.com"));
+
+// 4. AsNoTracking cho read-only queries (đã nói ở trên)
+
+// 5. Pagination — KHÔNG BAO GIỜ trả toàn bộ data
+public async Task&lt;PagedResult&lt;T&gt;&gt; GetPagedAsync(int page, int size)
+{
+    var query = _db.Set&lt;T&gt;().AsNoTracking();
+    var total = await query.CountAsync();
+    var items = await query.Skip((page-1) * size).Take(size).ToListAsync();
+    return new PagedResult&lt;T&gt;(items, total, page, size);
+}
+
+// 6. StringBuilder cho string concatenation loop
+// ❌ string result = ""; for(...) result += item;  // O(n²) allocations
+// ✅ var sb = new StringBuilder(); for(...) sb.Append(item);</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CAREER PATH ===== -->
+    <section id="career" class="section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-icon">🚀</span>
+                <h2>Career Path — Từ Junior Đến Lead</h2>
+                <p>Kiến thức kỹ thuật chỉ là 1 phần. Mindset mới quyết định.</p>
+            </div>
+
+            <div class="wisdom-card insight">
+                <div class="wisdom-badge">MINDSET</div>
+                <h3>Mỗi level cần gì? (Thật sự, không phải JD)</h3>
+                <div class="wisdom-body">
+                    <div class="level-grid">
+                        <div class="level-card">
+                            <div class="level-header junior">Junior (0-2 năm)</div>
+                            <ul>
+                                <li>Viết code chạy được theo spec</li>
+                                <li>Biết dùng framework cơ bản</li>
+                                <li>Biết Google + Stack Overflow hiệu quả</li>
+                                <li>Cần người review code, hướng dẫn</li>
+                            </ul>
+                            <p class="level-focus"><strong>Focus:</strong> Viết nhiều code. Đọc nhiều code (của team). Hỏi nhiều. Đừng sợ sai.</p>
+                        </div>
+                        <div class="level-card">
+                            <div class="level-header mid">Mid (2-5 năm)</div>
+                            <ul>
+                                <li>Tự hoàn thành feature end-to-end</li>
+                                <li>Biết TẠI SAO dùng pattern/tool nào đó</li>
+                                <li>Review code cho junior</li>
+                                <li>Debug production issues</li>
+                                <li>Viết tests, CI/CD cơ bản</li>
+                            </ul>
+                            <p class="level-focus"><strong>Focus:</strong> Hiểu WHY, không chỉ HOW. Đọc source code libraries. Ownership.</p>
+                        </div>
+                        <div class="level-card">
+                            <div class="level-header senior">Senior (5+ năm)</div>
+                            <ul>
+                                <li>Design system/architecture</li>
+                                <li>Dự đoán vấn đề TRƯỚC khi xảy ra</li>
+                                <li>Mentor mid/junior developers</li>
+                                <li>Đưa ra technical decisions</li>
+                                <li>Biết trade-offs, không cuồng tín</li>
+                                <li>Nói "KHÔNG" khi cần</li>
+                            </ul>
+                            <p class="level-focus"><strong>Focus:</strong> Impact. Multiply team's output. Simplify complexity.</p>
+                        </div>
+                        <div class="level-card">
+                            <div class="level-header lead">Tech Lead</div>
+                            <ul>
+                                <li>50% code, 50% people/process</li>
+                                <li>Shield team khỏi noise bên ngoài</li>
+                                <li>Technical estimation + planning</li>
+                                <li>Hiring, 1-on-1, career development</li>
+                                <li>Architecture decisions + ADRs</li>
+                                <li>Production incidents: calm + systematic</li>
+                            </ul>
+                            <p class="level-focus"><strong>Focus:</strong> Team success > individual output. Your code IS the team's code quality.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wisdom-card dont">
+                <div class="wisdom-badge">ĐỪNG LÀM</div>
+                <h3>Những sai lầm career phổ biến</h3>
+                <div class="wisdom-body">
+                    <div class="mistake-list">
+                        <div class="mistake">
+                            <span class="mistake-num">1</span>
+                            <div>
+                                <h4>Chỉ biết 1 ngôn ngữ / framework</h4>
+                                <p>"Tôi chỉ biết .NET, tôi không quan tâm thứ khác." → Bạn sẽ thiếu perspective. Ít nhất đọc hiểu cách Node.js/Go/Java giải quyết cùng bài toán.</p>
+                            </div>
+                        </div>
+                        <div class="mistake">
+                            <span class="mistake-num">2</span>
+                            <div>
+                                <h4>Không viết blog / share kiến thức</h4>
+                                <p>Viết = cách tốt nhất để học sâu. Bạn nghĩ bạn hiểu cho đến khi phải giải thích cho người khác.</p>
+                            </div>
+                        </div>
+                        <div class="mistake">
+                            <span class="mistake-num">3</span>
+                            <div>
+                                <h4>Tránh code cũ / legacy</h4>
+                                <p>Maintain legacy code DẠY bạn nhiều hơn greenfield project. Bạn học: tại sao decisions cũ được đưa ra, consequences của bad code, cách refactor safely.</p>
+                            </div>
+                        </div>
+                        <div class="mistake">
+                            <span class="mistake-num">4</span>
+                            <div>
+                                <h4>Optimize cho lương thay vì learning</h4>
+                                <p>Nhảy việc 6 tháng/lần cho lương cao → kiến thức nông. Ở đủ lâu để THẤY hậu quả của decisions. 2-3 năm/công ty ở early career.</p>
+                            </div>
+                        </div>
+                        <div class="mistake">
+                            <span class="mistake-num">5</span>
+                            <div>
+                                <h4>Không đọc code người khác</h4>
+                                <p>Đọc source code ASP.NET Core trên GitHub. Đọc code team members. Đọc open source projects. Bạn sẽ học patterns mà tutorials không dạy.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== TEAM LEAD ===== -->
+    <section id="team-lead" class="section section-dark">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-icon">👑</span>
+                <h2>Làm Lead — Bài Học Sống Còn</h2>
+                <p>Chuyển từ "giỏi nhất team" sang "làm team giỏi nhất"</p>
+            </div>
+
+            <div class="wisdom-card insight">
+                <div class="wisdom-badge">MINDSET SHIFT</div>
+                <h3>Lead ≠ Dev giỏi nhất. Lead = người làm team giỏi lên.</h3>
+                <div class="wisdom-body">
+                    <div class="shift-grid">
+                        <div class="shift-item">
+                            <div class="shift-from">Dev: "Mình code nhanh nhất"</div>
+                            <div class="shift-arrow">→</div>
+                            <div class="shift-to">Lead: "Team ship nhanh nhất"</div>
+                        </div>
+                        <div class="shift-item">
+                            <div class="shift-from">Dev: "Mình fix bug này"</div>
+                            <div class="shift-arrow">→</div>
+                            <div class="shift-to">Lead: "Tại sao bug này xảy ra? Làm sao prevent?"</div>
+                        </div>
+                        <div class="shift-item">
+                            <div class="shift-from">Dev: "Code mình clean nhất"</div>
+                            <div class="shift-arrow">→</div>
+                            <div class="shift-to">Lead: "Coding standards cho team đã có chưa?"</div>
+                        </div>
+                        <div class="shift-item">
+                            <div class="shift-from">Dev: "Mình biết cách giải quyết"</div>
+                            <div class="shift-arrow">→</div>
+                            <div class="shift-to">Lead: "Ai trong team phù hợp nhất để giải quyết?"</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wisdom-card do">
+                <div class="wisdom-badge">NÊN LÀM</div>
+                <h3>Code Review — Cách review đúng</h3>
+                <div class="wisdom-body">
+                    <div class="review-rules">
+                        <div class="review-do">
+                            <h4>✅ NÊN</h4>
+                            <ul>
+                                <li>Focus vào <strong>logic & design</strong>, không nitpick formatting (dùng linter)</li>
+                                <li>Giải thích <strong>TẠI SAO</strong> suggest thay đổi, không chỉ nói "sai"</li>
+                                <li>Khen code tốt — "Nice approach!" tăng morale</li>
+                                <li>Dùng <strong>"Nit:"</strong> prefix cho minor suggestions (không block merge)</li>
+                                <li>Review trong < 24h — don't be bottleneck</li>
+                                <li>Dùng <strong>PR template</strong> với checklist</li>
+                            </ul>
+                        </div>
+                        <div class="review-dont">
+                            <h4>❌ ĐỪNG</h4>
+                            <ul>
+                                <li>"Sai rồi, sửa lại đi" — không giải thích</li>
+                                <li>Rewrite nguyên PR theo style mình — đó là gatekeeping</li>
+                                <li>Review 2000 lines trong 1 PR — yêu cầu split</li>
+                                <li>Comment mỉa mai / passive-aggressive</li>
+                                <li>Block merge vì style preference</li>
+                                <li>Để PR pending 3 ngày mới review</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wisdom-card do">
+                <div class="wisdom-badge">PHẢI LÀM</div>
+                <h3>Technical Standards — Set up NGAY khi nhận team</h3>
+                <div class="wisdom-body">
+                    <div class="standards-list">
+                        <div class="standard">
+                            <span class="std-num">1</span>
+                            <h4>.editorconfig + Code Analyzers</h4>
+                            <p>Enforce coding style tự động. Không ai tranh cãi tabs vs spaces nữa.</p>
+                        </div>
+                        <div class="standard">
+                            <span class="std-num">2</span>
+                            <h4>PR Template + Branch naming</h4>
+                            <p>feature/ABC-123-add-order-api, fix/ABC-456-null-exception. PR description phải có: What, Why, How to test.</p>
+                        </div>
+                        <div class="standard">
+                            <span class="std-num">3</span>
+                            <h4>CI Pipeline chạy tự động</h4>
+                            <p>Build → Tests → Code Analysis trên MỌI PR. Fail = không merge. Không exceptions.</p>
+                        </div>
+                        <div class="standard">
+                            <span class="std-num">4</span>
+                            <h4>Architecture Decision Records (ADRs)</h4>
+                            <p>Mỗi decision quan trọng: WHY chọn X over Y. 6 tháng sau không ai nhớ tại sao chọn RabbitMQ thay vì Kafka.</p>
+                        </div>
+                        <div class="standard">
+                            <span class="std-num">5</span>
+                            <h4>Documentation = code comments + README + ADR</h4>
+                            <p>KHÔNG viết novel. Chỉ document: WHY (không phải WHAT), architecture overview, onboarding guide, API docs (Swagger).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wisdom-card insight">
+                <div class="wisdom-badge">SỰ THẬT</div>
+                <h3>Production Incident — 2h sáng, server down</h3>
+                <div class="wisdom-body">
+                    <div class="incident-timeline">
+                        <div class="incident-step">
+                            <span class="inc-time">00:00</span>
+                            <div>
+                                <h4>Alert fires → Stay calm</h4>
+                                <p>Panic = sai lầm thêm. Hít thở. Mở runbook. Communicate: "Tôi đang xem, update 15 phút."</p>
+                            </div>
+                        </div>
+                        <div class="incident-step">
+                            <span class="inc-time">00:05</span>
+                            <div>
+                                <h4>Triage: Impact? Scope?</h4>
+                                <p>Bao nhiêu users affected? Partial hay total outage? Revenue impact?</p>
+                            </div>
+                        </div>
+                        <div class="incident-step">
+                            <span class="inc-time">00:15</span>
+                            <div>
+                                <h4>Mitigate first, root cause later</h4>
+                                <p>Rollback deploy? Scale up? Toggle feature flag? FIX SYMPTOMS TRƯỚC. Tìm root cause KHI ĐÃ STABLE.</p>
+                            </div>
+                        </div>
+                        <div class="incident-step">
+                            <span class="inc-time">Next day</span>
+                            <div>
+                                <h4>Blameless Post-mortem</h4>
+                                <p>Timeline + Root cause + Action items. KHÔNG blame cá nhân. "Hệ thống cho phép deploy broken code" chứ không phải "An deploy sai".</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="wisdom-rule">
+                        <strong>📏 Rule of thumb:</strong> Nếu 1 người có thể gây sập hệ thống → đó là lỗi của HỆ THỐNG (thiếu review, thiếu tests, thiếu safeguards), không phải lỗi của NGƯỜI.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p class="footer-quote">"Kinh nghiệm là thứ bạn nhận được ngay SAU KHI bạn cần nó." — Nhưng bạn vừa đọc kinh nghiệm của người khác, nên bạn có nó TRƯỚC.</p>
+            <p style="margin-top:16px;"><a href="index.html">← Quay lại Roadmap</a></p>
+        </div>
+    </footer>
+    <script src="nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Claude Code Cơ Bản — Setup, First Session, CLAUDE.md</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">Claude<span class="accent">Code</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="basics.html" class="active">Cơ Bản</a>
+      <a href="commands.html">Commands</a>
+      <a href="customize.html">Customize</a>
+      <a href="integrations.html">Integrations</a>
+      <a href="tips.html">Tips & FAQ</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">LEVEL 1 · BEGINNER</div>
+  <h1>Claude Code <span class="gradient">Cơ Bản</span></h1>
+  <p class="hero-desc">Cài đặt, login, prompt đầu tiên, permission modes, hiểu output của Claude, và cách dùng <code>CLAUDE.md</code> để dạy Claude về project của bạn.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">1. Cài đặt Claude Code CLI</h2>
+
+    <h3 style="color: var(--primary); margin-bottom:.5rem">Yêu cầu</h3>
+    <ul style="color: var(--muted); padding-left:1.3rem; margin-bottom:1rem">
+      <li><strong>Node.js 18+</strong> — kiểm tra <code>node --version</code></li>
+      <li>Tài khoản <a href="https://claude.ai" target="_blank" style="color:var(--primary)">Claude.ai</a> (Free / Pro / Max)</li>
+      <li>Windows 10+, macOS, hoặc Linux</li>
+    </ul>
+
+    <h3 style="color: var(--primary); margin: 1rem 0 .5rem">Cài 1 lệnh</h3>
+    <pre class="code"><span class="c"># Cài global qua npm</span>
+npm install -g @anthropic-ai/claude-code
+
+<span class="c"># Kiểm tra</span>
+claude --version</pre>
+
+    <h3 style="color: var(--primary); margin: 1rem 0 .5rem">Lần chạy đầu tiên</h3>
+    <div class="terminal">
+<span class="prompt">$</span> <span class="cmd">cd</span> my-project
+<span class="prompt">$</span> <span class="cmd">claude</span>
+<span class="comment"># Browser mở, login bằng tài khoản Claude.ai</span>
+<span class="comment"># Sau khi auth xong, quay lại terminal → session bắt đầu</span>
+
+<span class="asst">Welcome to Claude Code! I'm running in d:/my-project</span>
+<span class="user">You:</span> _
+    </div>
+
+    <div class="tip"><strong>Tip:</strong> Claude chỉ hoạt động với file <strong>trong thư mục bạn đang <code>cd</code></strong>. Muốn Claude xử lý project khác → cd vào đó rồi gõ <code>claude</code>. Không cần mở IDE.</div>
+
+    <h3 style="color: var(--primary); margin: 1.5rem 0 .5rem">Nếu gặp lỗi cài đặt</h3>
+    <table class="cmp">
+      <tr><th>Lỗi</th><th>Nguyên nhân</th><th>Cách fix</th></tr>
+      <tr><td><code>EACCES</code> khi <code>npm i -g</code></td><td>Permission Windows/Linux</td><td>Dùng <code>sudo</code> (Linux) hoặc PowerShell admin (Windows). Tốt hơn: cài <code>nvm</code> để không cần sudo.</td></tr>
+      <tr><td><code>claude: command not found</code></td><td>PATH chưa có global bin</td><td><code>npm config get prefix</code> → thêm <code>/bin</code> vào PATH</td></tr>
+      <tr><td>Browser không mở khi login</td><td>Firewall / no display (SSH)</td><td>Gõ <code>claude --help</code> để xem option login qua URL copy-paste</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">2. Prompt đầu tiên — Tập gõ có chủ đích</h2>
+    <p class="section-sub">Claude Code hiểu tiếng Việt tốt. Prompt càng <em>cụ thể</em>, kết quả càng đúng.</p>
+
+    <div class="grid grid-2">
+      <div class="do-dont dont">
+        <h4>❌ Prompt yếu</h4>
+        <pre class="code"><span class="c"># Quá mơ hồ</span>
+fix the bug
+
+<span class="c"># Không nói file/hành vi</span>
+make the login better
+
+<span class="c"># Thiếu context</span>
+optimize performance</pre>
+        <p>Claude sẽ phải hỏi lại, hoặc đoán sai.</p>
+      </div>
+
+      <div class="do-dont do">
+        <h4>✅ Prompt chất lượng</h4>
+        <pre class="code"><span class="c"># Cụ thể file, triệu chứng, expected</span>
+In src/auth/login.ts, the password
+validation regex rejects valid emails
+containing '+'. Fix it and add a test.
+
+<span class="c"># Có context</span>
+Review src/components/Sidebar.jsx.
+I suspect the re-render happens every
+keystroke — profile it and propose fix.</pre>
+      </div>
+    </div>
+
+    <h3 style="color: var(--primary); margin-top: 1.5rem">Công thức prompt tốt</h3>
+    <div class="card">
+      <ol style="padding-left: 1.3rem; color: var(--muted)">
+        <li><strong>Context</strong> — đang ở đâu trong codebase, tình huống</li>
+        <li><strong>Goal</strong> — muốn Claude làm gì</li>
+        <li><strong>Constraint</strong> — giới hạn (không được đổi API, giữ backward-compat…)</li>
+        <li><strong>Verification</strong> — cách check đã xong (test pass, output đúng…)</li>
+      </ol>
+      <pre class="code" style="margin-top:.75rem"><span class="c">// Ví dụ gộp đủ 4 yếu tố</span>
+Context: File src/api/user.ts có hàm fetchUser() đang
+  block UI khi API chậm.
+Goal: Convert thành async + add loading state.
+Constraint: Không đổi signature export, không break
+  file nào import nó.
+Verify: Chạy npm test, tất cả 42 test phải pass.</pre>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">3. Permission Modes — Ai cho phép Claude chạy lệnh?</h2>
+    <p class="section-sub">Claude không tự ý chạy bất kỳ lệnh nào. Bạn kiểm soát bằng 3 chế độ.</p>
+
+    <div class="grid grid-3">
+      <div class="card">
+        <h4>🔒 Ask (mặc định)</h4>
+        <p style="color: var(--muted)">Claude hỏi trước mọi tool call quan trọng (ghi file, chạy shell, git).</p>
+        <ul>
+          <li>An toàn nhất</li>
+          <li>Chậm — mỗi thao tác 1 dialog</li>
+          <li><strong>Dùng khi:</strong> lần đầu, repo quan trọng</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>✅ Accept Edits</h4>
+        <p style="color: var(--muted)">Tự động accept edit file trong workspace. Shell command vẫn hỏi.</p>
+        <ul>
+          <li>Cân bằng tốt</li>
+          <li>Flow mượt</li>
+          <li><strong>Dùng khi:</strong> task rõ, đã review plan</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>⚡ YOLO / Bypass</h4>
+        <p style="color: var(--muted)">Claude chạy mọi thứ không hỏi. <strong>Dùng khi bạn thực sự tin task</strong>.</p>
+        <ul>
+          <li>Nhanh nhất</li>
+          <li>Nguy hiểm nếu task sai</li>
+          <li><strong>Dùng khi:</strong> container disposable, sandbox, CI</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="color: var(--primary); margin-top: 1.5rem">Đổi mode giữa session</h3>
+    <pre class="code"><span class="c"># Khi đang trong session, gõ:</span>
+<span class="cmd">Shift + Tab</span> → cycle qua các mode
+<span class="c"># Hoặc gõ lệnh</span>
+/permissions</pre>
+
+    <div class="danger-box">
+      <strong>⚠️ YOLO mode:</strong> tuyệt đối KHÔNG dùng trong repo có secret/key thật. Claude có thể (vô tình) chạy <code>rm -rf</code> hoặc commit key. Dùng trong Docker container / worktree riêng.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">4. Đọc output Claude đúng cách</h2>
+    <p class="section-sub">Claude trình bày theo cấu trúc cố định. Học đọc chúng sẽ giúp bạn can thiệp đúng lúc.</p>
+
+    <div class="terminal">
+<span class="user">You:</span> Add a "Remember me" checkbox to the login form.
+
+<span class="asst">Claude:</span> I'll plan the changes first.                           <span class="comment">← (1) Claude nói intent</span>
+
+<span class="comment">● Read(src/pages/Login.tsx)</span>                                 <span class="comment">← (2) Tool call</span>
+  ⎿  Read 87 lines
+
+<span class="comment">● Read(src/store/authStore.ts)</span>
+  ⎿  Read 45 lines
+
+<span class="asst">Plan:</span>                                                         <span class="comment">← (3) Kế hoạch</span>
+ 1. Add `rememberMe` field to Login form state
+ 2. Persist to localStorage when checked
+ 3. Restore on next page load via authStore init
+ 4. Add unit test for persist/restore
+
+<span class="comment">● Edit(src/pages/Login.tsx)</span>                                 <span class="comment">← (4) Edit</span>
+  ⎿  Updated 12 lines
+
+<span class="comment">● Bash(npm test)</span>                                            <span class="comment">← (5) Verify</span>
+  ⎿  5 passed, 0 failed
+
+<span class="ret">✓ Done.</span> Added checkbox + persistence + test. Review diff?      <span class="comment">← (6) Summary</span>
+    </div>
+
+    <h3 style="color: var(--primary); margin-top: 1.5rem">Các "tín hiệu" cần chú ý</h3>
+    <ul style="color: var(--muted); padding-left: 1.3rem">
+      <li><strong><code>● Read(...)</code></strong> — Claude đang đọc file. Nếu đọc quá nhiều file không liên quan → interrupt, prompt cụ thể hơn.</li>
+      <li><strong><code>● Bash(...)</code></strong> — Claude đang chạy shell. Đọc lệnh trước khi accept!</li>
+      <li><strong><code>⎿</code></strong> — output tóm tắt của tool call</li>
+      <li><strong>Plan:</strong> — Claude đang đề xuất plan, bạn có thể chỉnh (plan mode)</li>
+      <li><strong><code>✓ Done</code></strong> — claim là xong. Luôn verify bằng <code>git diff</code> hoặc chạy test.</li>
+    </ul>
+
+    <div class="info-box">
+      <strong>Khi nào interrupt Claude?</strong> Bấm <kbd>Esc</kbd>. Nên interrupt khi:
+      <ul style="padding-left:1.3rem; margin-top:.3rem">
+        <li>Claude đọc file không liên quan lặp lại</li>
+        <li>Plan sai hướng ngay từ đầu</li>
+        <li>Chạy lệnh shell đáng ngờ</li>
+        <li>Loop tìm file mãi không ra</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">5. CLAUDE.md — Dạy Claude về project của bạn</h2>
+    <p class="section-sub">File cấu hình quan trọng nhất. Đặt ở root repo. Claude đọc tự động mỗi session.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>🎯 CLAUDE.md làm gì?</h3>
+        <ul>
+          <li>Mô tả project: tên, stack, cấu trúc</li>
+          <li>Commands: <code>npm run dev</code>, <code>npm test</code>, build</li>
+          <li>Conventions: naming, folder structure, code style</li>
+          <li>Gotchas: "file X đừng động, có bug đang fix ngoài Claude"</li>
+          <li>Business context: workflow, stakeholders</li>
+        </ul>
+        <p><strong>Kết quả:</strong> Claude đoán đúng hơn, đỡ phải explore lại mỗi lần.</p>
+      </div>
+
+      <div class="card">
+        <h3>📏 Nguyên tắc viết</h3>
+        <ul>
+          <li><strong>Ngắn gọn</strong> — 100-300 dòng là đủ. Trên 500 dòng là quá tải context.</li>
+          <li><strong>Actionable</strong> — "chạy <code>npm run lint</code> trước commit" tốt hơn "hãy follow quality standards"</li>
+          <li><strong>Cập nhật</strong> — đổi architecture → update CLAUDE.md</li>
+          <li><strong>Không lặp</strong> — thứ Claude đọc được từ <code>package.json</code> thì không cần ghi</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="color: var(--primary); margin-top: 1.5rem">Template CLAUDE.md đầy đủ</h3>
+    <pre class="code"><span class="c"># CLAUDE.md</span>
+
+This file provides guidance to Claude Code when working with this repo.
+
+<span class="c">## Project Overview</span>
+
+MyApp — SaaS e-commerce cho thị trường VN. Next.js frontend +
+Express backend + Postgres. Đang ở giai đoạn beta, traffic ~10k/ngày.
+
+<span class="c">## Commands</span>
+
+- `npm run dev` — start Next.js + Express concurrently
+- `npm test` — Vitest (unit) + Playwright (E2E)
+- `npm run db:migrate` — run Prisma migrations
+- `npm run build` — production build
+
+<span class="c">## Architecture</span>
+
+- **Frontend:** Next.js 15 App Router, Tailwind, shadcn/ui, Zustand
+- **Backend:** Express + Prisma, PostgreSQL, Redis session
+- **Auth:** NextAuth with Google + email OTP
+- **Folder:** feature-based (src/features/auth, src/features/cart)
+
+<span class="c">## Code Conventions</span>
+
+- TypeScript strict mode — no `any` unless có comment giải thích
+- Test naming: `describe('ComponentName', ...)` matches file
+- Commit: conventional (feat/fix/refactor/docs/chore)
+- PR: 1 feature / PR, phải có test
+
+<span class="c">## Gotchas</span>
+
+- `src/legacy/` — code cũ đang migrate sang src/features/. ĐỪNG touch.
+- File `.env.production.example` phải sync với vault Vercel.
+- Không dùng <code>Math.random()</code> cho ID — dùng <code>nanoid()</code>.
+
+<span class="c">## Team workflow</span>
+
+- Issues tracked in Linear (team ECOMM-*)
+- Staging: deploy từ branch `develop` tự động
+- Production: chỉ merge `main` sau QA pass trên staging</pre>
+
+    <div class="tip">
+      <strong>Pro tip:</strong> chạy <code>/init</code> lần đầu — Claude sẽ tự phân tích repo và đề xuất 1 <code>CLAUDE.md</code> khởi điểm. Bạn edit lại cho chuẩn.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">6. CLAUDE.md phân cấp — project + user + team</h2>
+    <p class="section-sub">Có 3 level <code>CLAUDE.md</code>, Claude đọc cả ba và merge context.</p>
+
+    <table class="cmp">
+      <tr>
+        <th>File</th>
+        <th>Vị trí</th>
+        <th>Commit?</th>
+        <th>Dùng cho</th>
+      </tr>
+      <tr>
+        <td><strong>Project</strong></td>
+        <td><code>./CLAUDE.md</code> (root repo)</td>
+        <td>✅ Commit</td>
+        <td>Thông tin project, chia sẻ cả team</td>
+      </tr>
+      <tr>
+        <td><strong>User global</strong></td>
+        <td><code>~/.claude/CLAUDE.md</code></td>
+        <td>❌ Không</td>
+        <td>Thói quen cá nhân áp dụng mọi project</td>
+      </tr>
+      <tr>
+        <td><strong>Project local</strong></td>
+        <td><code>./CLAUDE.local.md</code></td>
+        <td>❌ Không (gitignore)</td>
+        <td>Ghi chú cá nhân trong project này</td>
+      </tr>
+    </table>
+
+    <h3 style="color: var(--primary); margin-top: 1rem">Ví dụ user global</h3>
+    <pre class="code"><span class="c"># ~/.claude/CLAUDE.md</span>
+
+<span class="c">## My preferences</span>
+
+- Tôi thích code ngắn gọn, ít comment thừa
+- Prefer TypeScript over JavaScript
+- Hỏi confirm trước khi chạy `git push --force`
+- Không giải thích dài dòng sau khi xong task,
+  chỉ liệt kê file đã sửa
+- Tiếng Việt cho giải thích, code comment tiếng Anh</pre>
+
+    <p style="color: var(--muted); margin-top:.75rem">File này tồn tại trên <em>máy của bạn</em>, áp dụng cho mọi project. Đồng nghiệp sẽ có file khác hoàn toàn.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">💡 Bài tập</h2>
+    <ol class="steps">
+      <li><strong>Cài Claude Code</strong> — cài CLI hoặc mở claude.ai/code. Login xong.</li>
+      <li><strong>First session</strong> — trong bất kỳ repo nào, chạy <code>claude</code>, hỏi "Summarize this project in 3 sentences".</li>
+      <li><strong>Tạo CLAUDE.md</strong> — gõ <code>/init</code>, Claude gen xong đọc lại và sửa cho phù hợp.</li>
+      <li><strong>Mini task đầu tiên</strong> — yêu cầu Claude thêm comment JSDoc cho 1 function bất kỳ. Quan sát flow tool call.</li>
+      <li><strong>Thử permission mode</strong> — Shift+Tab để cycle. Cảm nhận khác biệt.</li>
+      <li><strong>Interrupt Claude</strong> — trong task dài, bấm <kbd>Esc</kbd> lúc Claude đang làm, quan sát Claude dừng đúng chỗ.</li>
+    </ol>
+
+    <div class="tip" style="margin-top:1rem"><strong>Sẵn sàng lên L2?</strong> Khi bạn đã prompt tự nhiên, biết đọc plan, dùng thoả hiệp mode → chuyển qua <a href="commands.html" style="color:var(--primary)">Commands</a> để học slash commands built-in.</div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Claude Code Mastery · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

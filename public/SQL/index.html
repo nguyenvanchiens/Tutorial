@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Mastery 80/20 — Nắm Chắc 20% Sống Còn Của SQL</title>
+    <link rel="stylesheet" href="sql.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><a href="../BE/index.html">SQL<span class="accent">Mastery</span></a></div>
+            <div class="nav-links">
+                <a href="#select">SELECT</a>
+                <a href="#join">JOIN</a>
+                <a href="#groupby">GROUP BY</a>
+                <a href="#subquery">Subquery & CTE</a>
+                <a href="#crud">INSERT/UPDATE/DELETE</a>
+                <a href="#index">Index & Performance</a>
+                <a href="#transaction">Transaction</a>
+                <a href="#design">Thiết kế DB</a>
+                <a href="#deadly">Sai lầm chết người</a>
+                <a href="#survival">Sống còn & Nâng cao</a>
+            </div>
+            <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <header class="sql-hero">
+        <div class="hero-content">
+            <div class="hero-badge">SQL 80/20 — NẮM 20% KIẾN THỨC, GIẢI QUYẾT 80% CÔNG VIỆC</div>
+            <h1>SQL <span class="gradient-text">Mastery</span></h1>
+            <p class="hero-desc">Không cần biết hết SQL — chỉ cần nắm chắc 20% cốt lõi để xử lý 80% công việc thực tế.<br>Mỗi phần đều có ví dụ cụ thể, giải thích tiếng Việt, và cảnh báo sai lầm phổ biến.</p>
+            <div class="hero-stats">
+                <div class="stat"><span class="stat-number">10</span><span class="stat-label">Chủ đề cốt lõi</span></div>
+                <div class="stat"><span class="stat-number">60+</span><span class="stat-label">Ví dụ SQL</span></div>
+                <div class="stat"><span class="stat-number">80%</span><span class="stat-label">Công việc thực tế</span></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- TOC -->
+    <div class="toc-bar">
+        <div class="container">
+            <div class="toc-links">
+                <a href="#select" class="toc-link">1. SELECT</a>
+                <a href="#join" class="toc-link">2. JOIN</a>
+                <a href="#groupby" class="toc-link">3. GROUP BY</a>
+                <a href="#subquery" class="toc-link">4. Subquery & CTE</a>
+                <a href="#crud" class="toc-link">5. CRUD</a>
+                <a href="#index" class="toc-link">6. Index</a>
+                <a href="#transaction" class="toc-link">7. Transaction</a>
+                <a href="#design" class="toc-link">8. Thiết kế DB</a>
+                <a href="#deadly" class="toc-link">9. Sai lầm</a>
+                <a href="#survival" class="toc-link">10. Sống còn</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- SAMPLE DATABASE - Giới thiệu DB mẫu dùng xuyên suốt -->
+    <section class="section" id="sample-db">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🗃️</div>
+                <h2>Database Mẫu — Dùng Xuyên Suốt Bài Học</h2>
+                <p>Mọi ví dụ SQL trong trang này đều dùng database mẫu bên dưới. Hãy hình dung bạn đang quản lý hệ thống e-commerce.</p>
+            </div>
+
+            <div class="db-schema">
+                <div class="db-table">
+                    <div class="db-table-header">👤 Users</div>
+                    <div class="db-table-body">
+                        <code>id</code> INT PK<br>
+                        <code>name</code> NVARCHAR(100)<br>
+                        <code>email</code> NVARCHAR(200) UNIQUE<br>
+                        <code>city</code> NVARCHAR(50)<br>
+                        <code>created_at</code> DATETIME<br>
+                        <code>is_active</code> BIT
+                    </div>
+                </div>
+                <div class="db-table">
+                    <div class="db-table-header">📦 Products</div>
+                    <div class="db-table-body">
+                        <code>id</code> INT PK<br>
+                        <code>name</code> NVARCHAR(200)<br>
+                        <code>category_id</code> INT FK<br>
+                        <code>price</code> DECIMAL(10,2)<br>
+                        <code>stock</code> INT<br>
+                        <code>created_at</code> DATETIME
+                    </div>
+                </div>
+                <div class="db-table">
+                    <div class="db-table-header">🛒 Orders</div>
+                    <div class="db-table-body">
+                        <code>id</code> INT PK<br>
+                        <code>user_id</code> INT FK → Users<br>
+                        <code>total</code> DECIMAL(10,2)<br>
+                        <code>status</code> NVARCHAR(20)<br>
+                        <code>created_at</code> DATETIME
+                    </div>
+                </div>
+                <div class="db-table">
+                    <div class="db-table-header">📋 OrderItems</div>
+                    <div class="db-table-body">
+                        <code>id</code> INT PK<br>
+                        <code>order_id</code> INT FK → Orders<br>
+                        <code>product_id</code> INT FK → Products<br>
+                        <code>quantity</code> INT<br>
+                        <code>unit_price</code> DECIMAL(10,2)
+                    </div>
+                </div>
+                <div class="db-table">
+                    <div class="db-table-header">🏷️ Categories</div>
+                    <div class="db-table-body">
+                        <code>id</code> INT PK<br>
+                        <code>name</code> NVARCHAR(100)<br>
+                        <code>parent_id</code> INT FK → self
+                    </div>
+                </div>
+            </div>
+
+            <div class="db-relations">
+                <strong>Quan hệ:</strong> Users 1→N Orders → Orders 1→N OrderItems ← Products N→1 Categories
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== SECTION 1: SELECT ===== -->
+    <section class="section section-dark" id="select">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🔍</div>
+                <h2>1. SELECT — Nền Tảng Của Mọi Thứ</h2>
+                <p>90% công việc hàng ngày với SQL là SELECT. Nắm chắc phần này = xong nửa SQL.</p>
+            </div>
+
+            <!-- Thứ tự thực thi -->
+            <div class="sql-concept">
+                <h3>⚡ THỨ TỰ THỰC THI SQL — Quan trọng nhất!</h3>
+                <p>SQL KHÔNG chạy theo thứ tự bạn viết. Hiểu thứ tự thực thi giúp bạn debug mọi lỗi.</p>
+                <div class="sql-execution-order">
+                    <div class="exec-step"><span class="exec-num">1</span><code>FROM</code> <span>Chọn bảng nào</span></div>
+                    <div class="exec-step"><span class="exec-num">2</span><code>JOIN</code> <span>Nối bảng nào</span></div>
+                    <div class="exec-step"><span class="exec-num">3</span><code>WHERE</code> <span>Lọc hàng nào (TRƯỚC group)</span></div>
+                    <div class="exec-step"><span class="exec-num">4</span><code>GROUP BY</code> <span>Nhóm theo cột nào</span></div>
+                    <div class="exec-step"><span class="exec-num">5</span><code>HAVING</code> <span>Lọc nhóm nào (SAU group)</span></div>
+                    <div class="exec-step"><span class="exec-num">6</span><code>SELECT</code> <span>Lấy cột nào</span></div>
+                    <div class="exec-step"><span class="exec-num">7</span><code>DISTINCT</code> <span>Loại trùng</span></div>
+                    <div class="exec-step"><span class="exec-num">8</span><code>ORDER BY</code> <span>Sắp xếp</span></div>
+                    <div class="exec-step"><span class="exec-num">9</span><code>OFFSET/FETCH</code> <span>Phân trang</span></div>
+                </div>
+                <div class="sql-warning">
+                    <strong>⚠️ Vì sao quan trọng:</strong> Bạn KHÔNG THỂ dùng alias đặt ở SELECT trong WHERE — vì WHERE chạy TRƯỚC SELECT. Đây là lỗi #1 của người mới.
+                </div>
+            </div>
+
+            <!-- SELECT cơ bản -->
+            <div class="sql-concept">
+                <h3>📝 SELECT cơ bản</h3>
+                <div class="sql-block">
+                    <div class="sql-label">Lấy tất cả users ở Hà Nội, sắp xếp theo ngày tạo mới nhất</div>
+<pre class="sql-code"><span class="kw">SELECT</span> id, name, email, created_at
+<span class="kw">FROM</span> Users
+<span class="kw">WHERE</span> city = <span class="str">N'Hà Nội'</span>
+  <span class="kw">AND</span> is_active = <span class="num">1</span>
+<span class="kw">ORDER BY</span> created_at <span class="kw">DESC</span>;</pre>
+                </div>
+
+                <div class="sql-explain">
+                    <div class="explain-line"><code>SELECT id, name...</code> — Liệt kê CỤ THỂ cột cần. <strong>KHÔNG BAO GIỜ dùng SELECT *</strong> trong production.</div>
+                    <div class="explain-line"><code>N'Hà Nội'</code> — Prefix N cho Unicode (tiếng Việt). Không có N → sai dữ liệu.</div>
+                    <div class="explain-line"><code>ORDER BY ... DESC</code> — DESC = giảm dần (mới nhất trước). Mặc định ASC = tăng dần.</div>
+                </div>
+            </div>
+
+            <!-- WHERE operators -->
+            <div class="sql-concept">
+                <h3>🎯 WHERE — Tất cả các toán tử bạn cần</h3>
+                <div class="sql-operators-grid">
+                    <div class="sql-op-card">
+                        <h4>So sánh cơ bản</h4>
+<pre class="sql-code"><span class="cm">-- Bằng</span>
+<span class="kw">WHERE</span> status = <span class="str">'completed'</span>
+
+<span class="cm">-- Khác</span>
+<span class="kw">WHERE</span> status != <span class="str">'cancelled'</span>
+<span class="cm">-- hoặc: WHERE status &lt;&gt; 'cancelled'</span>
+
+<span class="cm">-- Lớn hơn, nhỏ hơn</span>
+<span class="kw">WHERE</span> price &gt;= <span class="num">100</span> <span class="kw">AND</span> price &lt; <span class="num">500</span></pre>
+                    </div>
+
+                    <div class="sql-op-card">
+                        <h4>BETWEEN — Khoảng</h4>
+<pre class="sql-code"><span class="cm">-- Đơn hàng trong tháng 3/2026</span>
+<span class="kw">WHERE</span> created_at <span class="kw">BETWEEN</span>
+    <span class="str">'2026-03-01'</span> <span class="kw">AND</span> <span class="str">'2026-03-31'</span>
+
+<span class="cm">-- ⚠️ BETWEEN bao gồm CẢ HAI đầu</span>
+<span class="cm">-- Với DATETIME: '2026-03-31' = 00:00:00</span>
+<span class="cm">-- → mất data ngày 31! Dùng &lt; '2026-04-01'</span></pre>
+                    </div>
+
+                    <div class="sql-op-card">
+                        <h4>IN — Nhiều giá trị</h4>
+<pre class="sql-code"><span class="cm">-- Thay vì OR dài dòng:</span>
+<span class="kw">WHERE</span> city <span class="kw">IN</span> (<span class="str">N'Hà Nội'</span>, <span class="str">N'HCM'</span>, <span class="str">N'Đà Nẵng'</span>)
+
+<span class="cm">-- NOT IN: loại trừ</span>
+<span class="kw">WHERE</span> status <span class="kw">NOT IN</span> (<span class="str">'cancelled'</span>, <span class="str">'refunded'</span>)
+
+<span class="cm">-- ⚠️ Nếu IN chứa NULL → NOT IN sai!</span></pre>
+                    </div>
+
+                    <div class="sql-op-card">
+                        <h4>LIKE — Tìm kiếm pattern</h4>
+<pre class="sql-code"><span class="cm">-- Tên bắt đầu bằng "Nguyễn"</span>
+<span class="kw">WHERE</span> name <span class="kw">LIKE</span> <span class="str">N'Nguyễn%'</span>
+
+<span class="cm">-- Email chứa "gmail"</span>
+<span class="kw">WHERE</span> email <span class="kw">LIKE</span> <span class="str">'%gmail%'</span>
+
+<span class="cm">-- _ = 1 ký tự bất kỳ</span>
+<span class="kw">WHERE</span> code <span class="kw">LIKE</span> <span class="str">'A_B'</span> <span class="cm">-- A1B, A2B...</span>
+
+<span class="cm">-- ⚠️ '%abc' = KHÔNG dùng index → chậm!</span></pre>
+                    </div>
+
+                    <div class="sql-op-card">
+                        <h4>IS NULL — Kiểm tra NULL</h4>
+<pre class="sql-code"><span class="cm">-- NULL không thể so sánh bằng =</span>
+<span class="kw">WHERE</span> phone <span class="kw">IS NULL</span>      <span class="cm">-- ✅ Đúng</span>
+<span class="kw">WHERE</span> phone = <span class="kw">NULL</span>       <span class="cm">-- ❌ LUÔN false!</span>
+
+<span class="cm">-- Có giá trị (không null)</span>
+<span class="kw">WHERE</span> phone <span class="kw">IS NOT NULL</span>
+
+<span class="cm">-- COALESCE: giá trị mặc định nếu NULL</span>
+<span class="kw">SELECT</span> <span class="fn">COALESCE</span>(phone, <span class="str">'Chưa có'</span>)</pre>
+                    </div>
+
+                    <div class="sql-op-card">
+                        <h4>AND / OR — Kết hợp điều kiện</h4>
+<pre class="sql-code"><span class="cm">-- AND ưu tiên hơn OR!</span>
+<span class="cm">-- Ý bạn: (A OR B) AND C</span>
+<span class="cm">-- SQL hiểu: A OR (B AND C) ← SAI!</span>
+
+<span class="cm">-- ✅ Luôn dùng ngoặc cho rõ ràng:</span>
+<span class="kw">WHERE</span> (city = <span class="str">N'HCM'</span> <span class="kw">OR</span> city = <span class="str">N'HN'</span>)
+  <span class="kw">AND</span> is_active = <span class="num">1</span></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="sql-concept">
+                <h3>📄 Phân trang — OFFSET / FETCH</h3>
+                <div class="sql-block">
+                    <div class="sql-label">Lấy trang 3, mỗi trang 20 bản ghi (SQL Server)</div>
+<pre class="sql-code"><span class="kw">SELECT</span> id, name, email
+<span class="kw">FROM</span> Users
+<span class="kw">ORDER BY</span> created_at <span class="kw">DESC</span>
+<span class="kw">OFFSET</span> <span class="num">40</span> <span class="kw">ROWS</span>           <span class="cm">-- Bỏ qua 40 bản ghi đầu (page 1 + 2)</span>
+<span class="kw">FETCH NEXT</span> <span class="num">20</span> <span class="kw">ROWS ONLY</span>;  <span class="cm">-- Lấy 20 bản ghi tiếp theo</span></pre>
+                </div>
+
+                <div class="sql-warning">
+                    <strong>⚠️ OFFSET lớn = CHẬM!</strong> OFFSET 10000 = DB phải scan 10000 rows rồi bỏ. Với bảng lớn, dùng <strong>Keyset Pagination</strong>:<br>
+                    <code>WHERE id > @lastId ORDER BY id FETCH NEXT 20 ROWS ONLY</code> — Nhanh gấp 100x.
+                </div>
+            </div>
+
+            <!-- DISTINCT & TOP -->
+            <div class="sql-concept">
+                <h3>🔄 DISTINCT & TOP</h3>
+                <div class="sql-two-col">
+                    <div class="sql-block">
+                        <div class="sql-label">DISTINCT — Loại bỏ trùng lặp</div>
+<pre class="sql-code"><span class="cm">-- Danh sách thành phố (không trùng)</span>
+<span class="kw">SELECT DISTINCT</span> city
+<span class="kw">FROM</span> Users
+<span class="kw">WHERE</span> city <span class="kw">IS NOT NULL</span>
+<span class="kw">ORDER BY</span> city;</pre>
+                    </div>
+                    <div class="sql-block">
+                        <div class="sql-label">TOP — Lấy N bản ghi đầu</div>
+<pre class="sql-code"><span class="cm">-- 10 sản phẩm đắt nhất</span>
+<span class="kw">SELECT TOP</span> <span class="num">10</span> name, price
+<span class="kw">FROM</span> Products
+<span class="kw">ORDER BY</span> price <span class="kw">DESC</span>;
+
+<span class="cm">-- MySQL/PostgreSQL dùng LIMIT 10</span></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CASE WHEN -->
+            <div class="sql-concept">
+                <h3>🔀 CASE WHEN — If/Else trong SQL</h3>
+                <div class="sql-block">
+                    <div class="sql-label">Phân loại đơn hàng theo giá trị</div>
+<pre class="sql-code"><span class="kw">SELECT</span>
+    id,
+    total,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> total &gt;= <span class="num">10000000</span> <span class="kw">THEN</span> <span class="str">N'VIP'</span>
+        <span class="kw">WHEN</span> total &gt;= <span class="num">1000000</span>  <span class="kw">THEN</span> <span class="str">N'Lớn'</span>
+        <span class="kw">WHEN</span> total &gt;= <span class="num">100000</span>   <span class="kw">THEN</span> <span class="str">N'Trung bình'</span>
+        <span class="kw">ELSE</span> <span class="str">N'Nhỏ'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> order_tier          <span class="cm">-- AS = đặt tên alias cho cột</span>
+<span class="kw">FROM</span> Orders
+<span class="kw">WHERE</span> status = <span class="str">'completed'</span>;</pre>
+                </div>
+                <div class="sql-tip">
+                    <strong>💡 Mẹo:</strong> CASE WHEN dùng được ở SELECT, WHERE, ORDER BY, và cả GROUP BY. Rất linh hoạt — thay thế cho việc tính toán ở application layer.
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== SECTION 2: JOIN ===== -->
+    <section class="section" id="join">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🔗</div>
+                <h2>2. JOIN — Nối Bảng, Kỹ Năng #1</h2>
+                <p>Hầu hết query thực tế đều cần JOIN. Hiểu sai JOIN = data sai = bug nghiêm trọng.</p>
+            </div>
+
+            <!-- JOIN Visual -->
+            <div class="sql-concept">
+                <h3>📊 4 loại JOIN — So sánh trực quan</h3>
+                <div class="join-visual-grid">
+                    <div class="join-card join-inner">
+                        <h4>INNER JOIN</h4>
+                        <div class="join-diagram">
+                            <div class="join-circle left"></div>
+                            <div class="join-circle right"></div>
+                            <div class="join-highlight inner"></div>
+                        </div>
+                        <p><strong>Chỉ lấy rows khớp ở CẢ HAI bảng.</strong> Không khớp = bỏ.</p>
+                        <div class="join-use">Dùng khi: chỉ muốn data có đầy đủ ở 2 bên</div>
+                    </div>
+                    <div class="join-card join-left">
+                        <h4>LEFT JOIN</h4>
+                        <div class="join-diagram">
+                            <div class="join-circle left active"></div>
+                            <div class="join-circle right"></div>
+                            <div class="join-highlight left-h"></div>
+                        </div>
+                        <p><strong>Lấy TẤT CẢ rows bảng trái</strong> + rows khớp bảng phải. Không khớp → NULL.</p>
+                        <div class="join-use">Dùng khi: muốn giữ tất cả bảng trái dù bảng phải không có</div>
+                    </div>
+                    <div class="join-card join-right">
+                        <h4>RIGHT JOIN</h4>
+                        <div class="join-diagram">
+                            <div class="join-circle left"></div>
+                            <div class="join-circle right active"></div>
+                            <div class="join-highlight right-h"></div>
+                        </div>
+                        <p><strong>Lấy TẤT CẢ rows bảng phải</strong> + rows khớp bảng trái. Ít dùng — viết ngược LEFT JOIN.</p>
+                        <div class="join-use">Dùng khi: hiếm — thường đổi thứ tự thành LEFT JOIN cho dễ đọc</div>
+                    </div>
+                    <div class="join-card join-full">
+                        <h4>FULL OUTER JOIN</h4>
+                        <div class="join-diagram">
+                            <div class="join-circle left active"></div>
+                            <div class="join-circle right active"></div>
+                            <div class="join-highlight full"></div>
+                        </div>
+                        <p><strong>Lấy TẤT CẢ rows CẢ HAI bảng.</strong> Không khớp bên nào → NULL bên đó.</p>
+                        <div class="join-use">Dùng khi: so sánh 2 dataset, tìm orphan records</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INNER JOIN example -->
+            <div class="sql-concept">
+                <h3>📝 INNER JOIN — Trường hợp phổ biến nhất</h3>
+                <div class="sql-block">
+                    <div class="sql-label">Lấy đơn hàng kèm tên khách hàng</div>
+<pre class="sql-code"><span class="kw">SELECT</span>
+    o.id        <span class="kw">AS</span> order_id,
+    u.name      <span class="kw">AS</span> customer_name,
+    o.total,
+    o.status,
+    o.created_at
+<span class="kw">FROM</span> Orders o                          <span class="cm">-- o = alias cho bảng Orders</span>
+<span class="kw">INNER JOIN</span> Users u <span class="kw">ON</span> o.user_id = u.id  <span class="cm">-- Nối: Orders.user_id = Users.id</span>
+<span class="kw">WHERE</span> o.status = <span class="str">'completed'</span>
+<span class="kw">ORDER BY</span> o.created_at <span class="kw">DESC</span>;</pre>
+                </div>
+                <div class="sql-explain">
+                    <div class="explain-line"><code>FROM Orders o</code> — <code>o</code> là alias (tên ngắn) cho bảng Orders. Giúp viết ngắn gọn.</div>
+                    <div class="explain-line"><code>ON o.user_id = u.id</code> — Điều kiện nối: cột nào ở bảng này liên kết với cột nào ở bảng kia.</div>
+                    <div class="explain-line"><code>o.total</code> — Khi JOIN, PHẢI ghi rõ <code>alias.column</code> nếu 2 bảng có cùng tên cột.</div>
+                </div>
+            </div>
+
+            <!-- LEFT JOIN example -->
+            <div class="sql-concept">
+                <h3>📝 LEFT JOIN — Giữ tất cả bảng trái</h3>
+                <div class="sql-block">
+                    <div class="sql-label">Tất cả users + số đơn hàng (kể cả user chưa mua gì)</div>
+<pre class="sql-code"><span class="kw">SELECT</span>
+    u.id,
+    u.name,
+    <span class="fn">COUNT</span>(o.id) <span class="kw">AS</span> total_orders    <span class="cm">-- COUNT(o.id): chỉ đếm khi o.id NOT NULL</span>
+<span class="kw">FROM</span> Users u
+<span class="kw">LEFT JOIN</span> Orders o <span class="kw">ON</span> u.id = o.user_id
+<span class="kw">GROUP BY</span> u.id, u.name                 <span class="cm">-- Nhóm theo user</span>
+<span class="kw">ORDER BY</span> total_orders <span class="kw">DESC</span>;</pre>
+                </div>
+                <div class="sql-explain">
+                    <div class="explain-line"><strong>LEFT JOIN</strong> → User chưa có đơn nào vẫn xuất hiện, với <code>total_orders = 0</code>.</div>
+                    <div class="explain-line">Nếu dùng <strong>INNER JOIN</strong> → User chưa mua gì sẽ bị MẤT khỏi kết quả!</div>
+                    <div class="explain-line"><code>COUNT(o.id)</code> thay vì <code>COUNT(*)</code> — COUNT(*) đếm cả rows NULL = sai!</div>
+                </div>
+            </div>
+
+            <!-- Multi JOIN -->
+            <div class="sql-concept">
+                <h3>📝 Multi JOIN — Nối 3+ bảng</h3>
+                <div class="sql-block">
+                    <div class="sql-label">Chi tiết đơn hàng: user + product + category</div>
+<pre class="sql-code"><span class="kw">SELECT</span>
+    u.name       <span class="kw">AS</span> customer,
+    p.name       <span class="kw">AS</span> product,
+    c.name       <span class="kw">AS</span> category,
+    oi.quantity,
+    oi.unit_price,
+    (oi.quantity * oi.unit_price) <span class="kw">AS</span> line_total
+<span class="kw">FROM</span> OrderItems oi
+<span class="kw">INNER JOIN</span> Orders o    <span class="kw">ON</span> oi.order_id = o.id
+<span class="kw">INNER JOIN</span> Users u     <span class="kw">ON</span> o.user_id = u.id
+<span class="kw">INNER JOIN</span> Products p  <span class="kw">ON</span> oi.product_id = p.id
+<span class="kw">LEFT JOIN</span>  Categories c <span class="kw">ON</span> p.category_id = c.id  <span class="cm">-- LEFT: product có thể chưa có category</span>
+<span class="kw">WHERE</span> o.created_at &gt;= <span class="str">'2026-01-01'</span>
+<span class="kw">ORDER BY</span> o.created_at <span class="kw">DESC</span>, oi.id;</pre>
+                </div>
+                <div class="sql-tip">
+                    <strong>💡 Mẹo đọc multi JOIN:</strong> Đọc từ FROM xuống — mỗi JOIN = "kết nối thêm 1 bảng". Luôn bắt đầu từ bảng "trung tâm" (ở đây là OrderItems vì nó FK đến cả Orders và Products).
+                </div>
+            </div>
+
+            <!-- Self JOIN -->
+            <div class="sql-concept">
+                <h3>📝 Self JOIN — Bảng nối với chính nó</h3>
+                <div class="sql-block">
+                    <div class="sql-label">Category cha-con (parent_id → id)</div>
+<pre class="sql-code"><span class="kw">SELECT</span>
+    child.name  <span class="kw">AS</span> sub_category,
+    parent.name <span class="kw">AS</span> parent_category
+<span class="kw">FROM</span> Categories child
+<span class="kw">LEFT JOIN</span> Categories parent <span class="kw">ON</span> child.parent_id = parent.id
+<span class="kw">ORDER BY</span> parent.name, child.name;</pre>
+                </div>
+            </div>
+
+            <div class="sql-warning">
+                <strong>⚠️ JOIN TRAP — Sai lầm kinh điển:</strong><br>
+                • <strong>Quên ON condition</strong> → CROSS JOIN → hàng triệu rows (mọi combo)!<br>
+                • <strong>JOIN sai cột</strong> → data nhân bản sai. Luôn kiểm tra COUNT trước và sau JOIN.<br>
+                • <strong>JOIN tạo duplicate</strong> → Nếu bảng phải có nhiều rows khớp 1 row bảng trái → kết quả nhân lên. Cần GROUP BY hoặc DISTINCT.
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== SECTION 3: GROUP BY ===== -->
+    <section class="section section-dark" id="groupby">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">📊</div>
+                <h2>3. GROUP BY & Aggregate — Thống Kê Dữ Liệu</h2>
+                <p>Đếm, tính tổng, tính trung bình — mọi báo cáo đều bắt đầu từ GROUP BY</p>
+            </div>
+
+            <!-- Aggregate Functions -->
+            <div class="sql-concept">
+                <h3>🔢 5 Hàm Aggregate Bắt Buộc</h3>
+                <div class="agg-grid">
+                    <div class="agg-card">
+                        <div class="agg-name">COUNT()</div>
+                        <div class="agg-desc">Đếm số hàng</div>
+<pre class="sql-code"><span class="cm">-- Đếm tất cả orders</span>
+<span class="kw">SELECT</span> <span class="fn">COUNT</span>(*) <span class="kw">FROM</span> Orders;
+
+<span class="cm">-- Đếm orders có email (bỏ NULL)</span>
+<span class="kw">SELECT</span> <span class="fn">COUNT</span>(email) <span class="kw">FROM</span> Users;
+
+<span class="cm">-- Đếm city khác nhau</span>
+<span class="kw">SELECT</span> <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> city) <span class="kw">FROM</span> Users;</pre>
+                    </div>
+                    <div class="agg-card">
+                        <div class="agg-name">SUM()</div>
+                        <div class="agg-desc">Tính tổng</div>
+<pre class="sql-code"><span class="cm">-- Tổng doanh thu</span>
+<span class="kw">SELECT</span> <span class="fn">SUM</span>(total)
+<span class="kw">FROM</span> Orders
+<span class="kw">WHERE</span> status = <span class="str">'completed'</span>;
+
+<span class="cm">-- ⚠️ SUM(NULL) = NULL, không phải 0</span>
+<span class="cm">-- Dùng: COALESCE(SUM(total), 0)</span></pre>
+                    </div>
+                    <div class="agg-card">
+                        <div class="agg-name">AVG()</div>
+                        <div class="agg-desc">Trung bình</div>
+<pre class="sql-code"><span class="cm">-- Giá trị đơn hàng trung bình</span>
+<span class="kw">SELECT</span> <span class="fn">AVG</span>(total) <span class="kw">AS</span> avg_order
+<span class="kw">FROM</span> Orders
+<span class="kw">WHERE</span> status = <span class="str">'completed'</span>;
+
+<span class="cm">-- ⚠️ AVG bỏ qua NULL!</span>
+<span class="cm">-- 10 + NULL + 20 → AVG = 15 (2 rows)</span></pre>
+                    </div>
+                    <div class="agg-card">
+                        <div class="agg-name">MIN() / MAX()</div>
+                        <div class="agg-desc">Nhỏ nhất / Lớn nhất</div>
+<pre class="sql-code"><span class="cm">-- Giá rẻ nhất và đắt nhất</span>
+<span class="kw">SELECT</span>
+    <span class="fn">MIN</span>(price) <span class="kw">AS</span> cheapest,
+    <span class="fn">MAX</span>(price) <span class="kw">AS</span> most_expensive
+<span class="kw">FROM</span> Products;
+
+<span class="cm">-- Cũng dùng được cho DATE, VARCHAR</span></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GROUP BY Examples -->
+            <div class="sql-concept">
+                <h3>📝 GROUP BY — Ví dụ thực tế</h3>
+
+                <div class="sql-block">
+                    <div class="sql-label">Doanh thu theo tháng</div>
+<pre class="sql-code"><span class="kw">SELECT</span>
+    <span class="fn">YEAR</span>(created_at)  <span class="kw">AS</span> [year],
+    <span class="fn">MONTH</span>(created_at) <span class="kw">AS</span> [month],
+    <span class="fn">COUNT</span>(*)          <span class="kw">AS</span> total_orders,
+    <span class="fn">SUM</span>(total)        <span class="kw">AS</span> revenue,
+    <span class="fn">AVG</span>(total)        <span class="kw">AS</span> avg_order_value
+<span class="kw">FROM</span> Orders
+<span class="kw">WHERE</span> status = <span class="str">'completed'</span>
+<span class="kw">GROUP BY</span> <span class="fn">YEAR</span>(created_at), <span class="fn">MONTH</span>(created_at)
+<span class="kw">ORDER BY</span> [year] <span class="kw">DESC</span>, [month] <span class="kw">DESC</span>;</pre>
+                </div>
+
+                <div class="sql-block">
+                    <div class="sql-label">Top 5 sản phẩm bán chạy nhất</div>
+<pre class="sql-code"><span class="kw">SELECT TOP</span> <span class="num">5</span>
+    p.name,
+    <span class="fn">SUM</span>(oi.quantity)              <span class="kw">AS</span> total_sold,
+    <span class="fn">SUM</span>(oi.quantity * oi.unit_price) <span class="kw">AS</span> total_revenue
+<span class="kw">FROM</span> OrderItems oi
+<span class="kw">INNER JOIN</span> Products p <span class="kw">ON</span> oi.product_id = p.id
+<span class="kw">GROUP BY</span> p.id, p.name            <span class="cm">-- Nhóm theo product</span>
+<span class="kw">ORDER BY</span> total_sold <span class="kw">DESC</span>;</pre>
+                </div>
+            </div>
+
+            <!-- HAVING -->
+            <div class="sql-concept">
+                <h3>🔍 HAVING — WHERE cho nhóm</h3>
+                <p><strong>WHERE lọc rows TRƯỚC khi nhóm. HAVING lọc nhóm SAU khi nhóm.</strong></p>
+                <div class="sql-block">
+                    <div class="sql-label">Khách hàng mua trên 5 đơn, tổng trên 1 triệu</div>
+<pre class="sql-code"><span class="kw">SELECT</span>
+    u.name,
+    <span class="fn">COUNT</span>(o.id)  <span class="kw">AS</span> total_orders,
+    <span class="fn">SUM</span>(o.total) <span class="kw">AS</span> total_spent
+<span class="kw">FROM</span> Users u
+<span class="kw">INNER JOIN</span> Orders o <span class="kw">ON</span> u.id = o.user_id
+<span class="kw">WHERE</span> o.status = <span class="str">'completed'</span>       <span class="cm">-- WHERE: lọc rows trước khi nhóm</span>
+<span class="kw">GROUP BY</span> u.id, u.name
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(o.id) &gt; <span class="num">5</span>            <span class="cm">-- HAVING: lọc nhóm sau khi nhóm</span>
+   <span class="kw">AND</span> <span class="fn">SUM</span>(o.total) &gt; <span class="num">1000000</span>
+<span class="kw">ORDER BY</span> total_spent <span class="kw">DESC</span>;</pre>
+                </div>
+
+                <div class="sql-warning">
+                    <strong>⚠️ Quy tắc GROUP BY:</strong> Mọi cột trong SELECT mà KHÔNG phải aggregate function → BẮT BUỘC phải có trong GROUP BY. Vi phạm = lỗi syntax hoặc data sai.
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== SECTION 4: SUBQUERY & CTE ===== -->
+    <section class="section" id="subquery">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🧩</div>
+                <h2>4. Subquery, CTE & Window Functions</h2>
+                <p>Khi 1 câu SELECT không đủ — nâng cấp lên query phức tạp mà vẫn dễ đọc</p>
+            </div>
+
+            <!-- Subquery -->
+            <div class="sql-concept">
+                <h3>📝 Subquery — Query lồng trong query</h3>
+                <div class="sql-two-col">
+                    <div class="sql-block">
+                        <div class="sql-label">Subquery trong WHERE</div>
+<pre class="sql-code"><span class="cm">-- Sản phẩm có giá cao hơn trung bình</span>
+<span class="kw">SELECT</span> name, price
+<span class="kw">FROM</span> Products
+<span class="kw">WHERE</span> price &gt; (
+    <span class="kw">SELECT</span> <span class="fn">AVG</span>(price) <span class="kw">FROM</span> Products
+);
+
+<span class="cm">-- Users đã từng mua hàng</span>
+<span class="kw">SELECT</span> name, email
+<span class="kw">FROM</span> Users
+<span class="kw">WHERE</span> id <span class="kw">IN</span> (
+    <span class="kw">SELECT DISTINCT</span> user_id <span class="kw">FROM</span> Orders
+);</pre>
+                    </div>
+                    <div class="sql-block">
+                        <div class="sql-label">Subquery trong FROM (Derived Table)</div>
+<pre class="sql-code"><span class="cm">-- Thống kê user theo "tier" đơn hàng</span>
+<span class="kw">SELECT</span>
+    tier,
+    <span class="fn">COUNT</span>(*) <span class="kw">AS</span> user_count
+<span class="kw">FROM</span> (
+    <span class="kw">SELECT</span>
+        user_id,
+        <span class="kw">CASE</span>
+            <span class="kw">WHEN</span> <span class="fn">SUM</span>(total) &gt;= <span class="num">5000000</span> <span class="kw">THEN</span> <span class="str">'VIP'</span>
+            <span class="kw">WHEN</span> <span class="fn">SUM</span>(total) &gt;= <span class="num">1000000</span> <span class="kw">THEN</span> <span class="str">'Gold'</span>
+            <span class="kw">ELSE</span> <span class="str">'Normal'</span>
+        <span class="kw">END</span> <span class="kw">AS</span> tier
+    <span class="kw">FROM</span> Orders
+    <span class="kw">GROUP BY</span> user_id
+) <span class="kw">AS</span> UserTiers            <span class="cm">-- BẮT BUỘC đặt alias</span>
+<span class="kw">GROUP BY</span> tier;</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTE -->
+            <div class="sql-concept">
+                <h3>📝 CTE (Common Table Expression) — Query rõ ràng hơn</h3>
+                <p>CTE = "đặt tên" cho subquery, đặt ở đầu với <code>WITH</code>. Dễ đọc hơn subquery lồng nhau.</p>
+                <div class="sql-block">
+                    <div class="sql-label">Cùng bài toán trên nhưng viết bằng CTE</div>
+<pre class="sql-code"><span class="cm">-- CTE: dễ đọc, dễ debug, reuse được</span>
+<span class="kw">WITH</span> UserSpending <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        user_id,
+        <span class="fn">SUM</span>(total) <span class="kw">AS</span> total_spent,
+        <span class="fn">COUNT</span>(*)   <span class="kw">AS</span> order_count
+    <span class="kw">FROM</span> Orders
+    <span class="kw">WHERE</span> status = <span class="str">'completed'</span>
+    <span class="kw">GROUP BY</span> user_id
+),
+UserTiers <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        user_id,
+        total_spent,
+        order_count,
+        <span class="kw">CASE</span>
+            <span class="kw">WHEN</span> total_spent &gt;= <span class="num">5000000</span> <span class="kw">THEN</span> <span class="str">'VIP'</span>
+            <span class="kw">WHEN</span> total_spent &gt;= <span class="num">1000000</span> <span class="kw">THEN</span> <span class="str">'Gold'</span>
+            <span class="kw">ELSE</span> <span class="str">'Normal'</span>
+        <span class="kw">END</span> <span class="kw">AS</span> tier
+    <span class="kw">FROM</span> UserSpending
+)
+<span class="kw">SELECT</span>
+    u.name,
+    ut.tier,
+    ut.total_spent,
+    ut.order_count
+<span class="kw">FROM</span> UserTiers ut
+<span class="kw">INNER JOIN</span> Users u <span class="kw">ON</span> ut.user_id = u.id
+<span class="kw">ORDER BY</span> ut.total_spent <span class="kw">DESC</span>;</pre>
+                </div>
+                <div class="sql-tip">
+                    <strong>💡 Khi nào dùng CTE thay Subquery:</strong> Query dài > 15 dòng, cần reuse subquery, hoặc cần đặt tên cho từng "bước" logic. CTE giống viết code có comment — rõ ý đồ hơn.
+                </div>
+            </div>
+
+            <!-- Window Functions -->
+            <div class="sql-concept">
+                <h3>🪟 Window Functions — Tính toán KHÔNG mất chi tiết</h3>
+                <p>GROUP BY gộp rows lại. Window Functions tính toán <strong>mà giữ nguyên từng row</strong> — rất mạnh cho ranking, running total, so sánh.</p>
+                <div class="sql-block">
+                    <div class="sql-label">ROW_NUMBER — Đánh số thứ tự</div>
+<pre class="sql-code"><span class="cm">-- Xếp hạng sản phẩm bán chạy nhất TRONG MỖI category</span>
+<span class="kw">SELECT</span>
+    p.name,
+    c.name <span class="kw">AS</span> category,
+    <span class="fn">SUM</span>(oi.quantity) <span class="kw">AS</span> total_sold,
+    <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+        <span class="kw">PARTITION BY</span> c.id        <span class="cm">-- Chia nhóm theo category</span>
+        <span class="kw">ORDER BY</span> <span class="fn">SUM</span>(oi.quantity) <span class="kw">DESC</span>  <span class="cm">-- Sắp xếp trong nhóm</span>
+    ) <span class="kw">AS</span> rank_in_category
+<span class="kw">FROM</span> OrderItems oi
+<span class="kw">INNER JOIN</span> Products p  <span class="kw">ON</span> oi.product_id = p.id
+<span class="kw">INNER JOIN</span> Categories c <span class="kw">ON</span> p.category_id = c.id
+<span class="kw">GROUP BY</span> p.id, p.name, c.id, c.name;</pre>
+                </div>
+
+                <div class="sql-block">
+                    <div class="sql-label">Running Total — Doanh thu lũy kế</div>
+<pre class="sql-code"><span class="kw">SELECT</span>
+    created_at,
+    total,
+    <span class="fn">SUM</span>(total) <span class="kw">OVER</span> (
+        <span class="kw">ORDER BY</span> created_at
+        <span class="kw">ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</span>
+    ) <span class="kw">AS</span> running_total
+<span class="kw">FROM</span> Orders
+<span class="kw">WHERE</span> status = <span class="str">'completed'</span>;</pre>
+                </div>
+
+                <div class="sql-block">
+                    <div class="sql-label">LAG / LEAD — So sánh với row trước/sau</div>
+<pre class="sql-code"><span class="cm">-- Doanh thu tháng này vs tháng trước</span>
+<span class="kw">WITH</span> MonthlyRevenue <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        <span class="fn">FORMAT</span>(created_at, <span class="str">'yyyy-MM'</span>) <span class="kw">AS</span> month,
+        <span class="fn">SUM</span>(total) <span class="kw">AS</span> revenue
+    <span class="kw">FROM</span> Orders <span class="kw">WHERE</span> status = <span class="str">'completed'</span>
+    <span class="kw">GROUP BY</span> <span class="fn">FORMAT</span>(created_at, <span class="str">'yyyy-MM'</span>)
+)
+<span class="kw">SELECT</span>
+    month,
+    revenue,
+    <span class="fn">LAG</span>(revenue) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> month) <span class="kw">AS</span> prev_month,
+    revenue - <span class="fn">LAG</span>(revenue) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> month) <span class="kw">AS</span> growth
+<span class="kw">FROM</span> MonthlyRevenue;</pre>
+                </div>
+            </div>
+
+            <!-- EXISTS -->
+            <div class="sql-concept">
+                <h3>📝 EXISTS — Kiểm tra "có tồn tại không?"</h3>
+                <div class="sql-two-col">
+                    <div class="sql-block">
+                        <div class="sql-label">✅ EXISTS (nhanh hơn IN cho dataset lớn)</div>
+<pre class="sql-code"><span class="cm">-- Users ĐÃ mua hàng</span>
+<span class="kw">SELECT</span> u.name
+<span class="kw">FROM</span> Users u
+<span class="kw">WHERE EXISTS</span> (
+    <span class="kw">SELECT</span> <span class="num">1</span> <span class="kw">FROM</span> Orders o
+    <span class="kw">WHERE</span> o.user_id = u.id
+);</pre>
+                    </div>
+                    <div class="sql-block">
+                        <div class="sql-label">NOT EXISTS — Users CHƯA mua gì</div>
+<pre class="sql-code"><span class="cm">-- Users CHƯA có đơn hàng nào</span>
+<span class="kw">SELECT</span> u.name, u.email
+<span class="kw">FROM</span> Users u
+<span class="kw">WHERE NOT EXISTS</span> (
+    <span class="kw">SELECT</span> <span class="num">1</span> <span class="kw">FROM</span> Orders o
+    <span class="kw">WHERE</span> o.user_id = u.id
+);</pre>
+                    </div>
+                </div>
+                <div class="sql-tip">
+                    <strong>💡 EXISTS vs IN:</strong> EXISTS dừng ngay khi tìm thấy 1 match → nhanh hơn khi subquery trả về nhiều rows. IN phải load toàn bộ list → chậm hơn với dataset lớn. <strong>Rule: EXISTS cho performance.</strong>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== SECTION 5: INSERT/UPDATE/DELETE ===== -->
+    <section class="section section-dark" id="crud">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">✏️</div>
+                <h2>5. INSERT / UPDATE / DELETE — Thao Tác Dữ Liệu</h2>
+                <p>Đọc data dễ, SỬA data mới nguy hiểm. 1 câu UPDATE sai = mất data thật.</p>
+            </div>
+
+            <div class="sql-concept">
+                <h3>📝 INSERT — Thêm dữ liệu</h3>
+                <div class="sql-two-col">
+                    <div class="sql-block">
+                        <div class="sql-label">Insert 1 row</div>
+<pre class="sql-code"><span class="kw">INSERT INTO</span> Users (name, email, city, is_active)
+<span class="kw">VALUES</span> (<span class="str">N'Nguyễn Văn A'</span>, <span class="str">'a@email.com'</span>,
+        <span class="str">N'Hà Nội'</span>, <span class="num">1</span>);
+
+<span class="cm">-- Lấy ID vừa insert (SQL Server)</span>
+<span class="kw">SELECT</span> <span class="fn">SCOPE_IDENTITY</span>() <span class="kw">AS</span> new_id;</pre>
+                    </div>
+                    <div class="sql-block">
+                        <div class="sql-label">Insert nhiều rows + Insert từ SELECT</div>
+<pre class="sql-code"><span class="cm">-- Nhiều rows 1 lần (nhanh hơn insert từng cái)</span>
+<span class="kw">INSERT INTO</span> Products (name, price, stock)
+<span class="kw">VALUES</span>
+    (<span class="str">N'Laptop'</span>, <span class="num">15000000</span>, <span class="num">50</span>),
+    (<span class="str">N'Mouse'</span>,  <span class="num">200000</span>,   <span class="num">200</span>),
+    (<span class="str">N'Keyboard'</span>, <span class="num">500000</span>, <span class="num">100</span>);
+
+<span class="cm">-- Insert từ query khác</span>
+<span class="kw">INSERT INTO</span> VipUsers (user_id, total_spent)
+<span class="kw">SELECT</span> user_id, <span class="fn">SUM</span>(total)
+<span class="kw">FROM</span> Orders
+<span class="kw">GROUP BY</span> user_id
+<span class="kw">HAVING</span> <span class="fn">SUM</span>(total) &gt; <span class="num">5000000</span>;</pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sql-concept">
+                <h3>📝 UPDATE — Cập nhật dữ liệu</h3>
+                <div class="sql-block">
+                    <div class="sql-label">Update cơ bản + Update với JOIN</div>
+<pre class="sql-code"><span class="cm">-- ✅ LUÔN có WHERE khi UPDATE!</span>
+<span class="kw">UPDATE</span> Users
+<span class="kw">SET</span> city = <span class="str">N'TP.HCM'</span>,
+    is_active = <span class="num">0</span>
+<span class="kw">WHERE</span> id = <span class="num">42</span>;
+
+<span class="cm">-- Update với JOIN: giảm giá 10% cho sản phẩm category "Clearance"</span>
+<span class="kw">UPDATE</span> p
+<span class="kw">SET</span> p.price = p.price * <span class="num">0.9</span>
+<span class="kw">FROM</span> Products p
+<span class="kw">INNER JOIN</span> Categories c <span class="kw">ON</span> p.category_id = c.id
+<span class="kw">WHERE</span> c.name = <span class="str">'Clearance'</span>;</pre>
+                </div>
+
+                <div class="sql-warning">
+                    <strong>☠️ CẢNH BÁO TỐI QUAN TRỌNG:</strong><br>
+                    <code>UPDATE Users SET is_active = 0;</code> ← <strong>KHÔNG CÓ WHERE = CẬP NHẬT TOÀN BỘ BẢNG!</strong><br>
+                    Trước khi UPDATE: <strong>luôn chạy SELECT với cùng WHERE trước</strong> để kiểm tra sẽ ảnh hưởng bao nhiêu rows.
+                </div>
+            </div>
+
+            <div class="sql-concept">
+                <h3>📝 DELETE — Xóa dữ liệu</h3>
+                <div class="sql-block">
+<pre class="sql-code"><span class="cm">-- ✅ LUÔN có WHERE!</span>
+<span class="kw">DELETE FROM</span> Orders
+<span class="kw">WHERE</span> status = <span class="str">'cancelled'</span>
+  <span class="kw">AND</span> created_at &lt; <span class="str">'2025-01-01'</span>;
+
+<span class="cm">-- ⚠️ DELETE FROM Orders; ← XÓA TOÀN BỘ! Không undo được!</span>
+
+<span class="cm">-- Soft Delete (khuyến khích): không xóa thật, chỉ đánh dấu</span>
+<span class="kw">UPDATE</span> Users
+<span class="kw">SET</span> is_active = <span class="num">0</span>, deleted_at = <span class="fn">GETDATE</span>()
+<span class="kw">WHERE</span> id = <span class="num">42</span>;</pre>
+                </div>
+                <div class="sql-tip">
+                    <strong>💡 Best Practice:</strong> Trong production, hầu như KHÔNG BAO GIỜ dùng DELETE thật. Luôn dùng <strong>Soft Delete</strong> (thêm cột <code>is_deleted</code> hoặc <code>deleted_at</code>). Data đã xóa = không thể recover nếu không có backup.
+                </div>
+            </div>
+
+            <!-- MERGE / UPSERT -->
+            <div class="sql-concept">
+                <h3>📝 MERGE — Upsert (Insert hoặc Update)</h3>
+                <div class="sql-block">
+                    <div class="sql-label">Nếu tồn tại → update, chưa có → insert</div>
+<pre class="sql-code"><span class="kw">MERGE INTO</span> Products <span class="kw">AS</span> target
+<span class="kw">USING</span> (
+    <span class="kw">VALUES</span> (<span class="str">'SKU-001'</span>, <span class="str">N'Laptop Pro'</span>, <span class="num">20000000</span>, <span class="num">30</span>)
+) <span class="kw">AS</span> source (sku, name, price, stock)
+<span class="kw">ON</span> target.sku = source.sku
+<span class="kw">WHEN MATCHED THEN</span>
+    <span class="kw">UPDATE SET</span> price = source.price, stock = source.stock
+<span class="kw">WHEN NOT MATCHED THEN</span>
+    <span class="kw">INSERT</span> (sku, name, price, stock)
+    <span class="kw">VALUES</span> (source.sku, source.name, source.price, source.stock);</pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== SECTION 6: INDEX & PERFORMANCE ===== -->
+    <section class="section" id="index">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">⚡</div>
+                <h2>6. Index & Performance — Query Nhanh Gấp 100x</h2>
+                <p>Query chạy 10 giây vs 10ms — khác biệt là INDEX. Hiểu index = hiểu performance.</p>
+            </div>
+
+            <!-- Index là gì -->
+            <div class="sql-concept">
+                <h3>🔑 Index là gì? — Giải thích đơn giản</h3>
+                <div class="index-analogy">
+                    <div class="analogy-box">
+                        <h4>📖 Không có Index = Đọc sách từ đầu đến cuối</h4>
+                        <p>Tìm từ "SQL" trong sách 500 trang → lật từng trang, đọc từng dòng. <strong>Full Table Scan = đọc toàn bộ bảng.</strong></p>
+                    </div>
+                    <div class="analogy-box good">
+                        <h4>📇 Có Index = Mở phần mục lục (Index) ở cuối sách</h4>
+                        <p>Tra "SQL" → mục lục chỉ: trang 42, 156, 301 → nhảy thẳng tới. <strong>Index Seek = nhảy thẳng đến row cần.</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Types of Index -->
+            <div class="sql-concept">
+                <h3>📊 Các loại Index</h3>
+                <div class="index-types-grid">
+                    <div class="index-card">
+                        <h4>Clustered Index</h4>
+                        <p><strong>= Thứ tự vật lý của data trên disk.</strong> Mỗi bảng chỉ có 1. Thường là Primary Key.</p>
+<pre class="sql-code"><span class="cm">-- Tự tạo khi đặt PRIMARY KEY</span>
+<span class="kw">CREATE TABLE</span> Users (
+    id <span class="kw">INT PRIMARY KEY</span>,  <span class="cm">-- = Clustered Index</span>
+    ...
+);</pre>
+                        <div class="index-note">Giống sách xếp theo thứ tự ABC — data SẮP XẾP theo key này</div>
+                    </div>
+                    <div class="index-card">
+                        <h4>Non-Clustered Index</h4>
+                        <p><strong>= Bảng phụ chỉ đường đến data gốc.</strong> Có thể tạo nhiều cái. Dùng cho cột WHERE, JOIN, ORDER BY.</p>
+<pre class="sql-code"><span class="cm">-- Tạo index cho cột thường xuyên tìm kiếm</span>
+<span class="kw">CREATE INDEX</span> IX_Users_Email
+<span class="kw">ON</span> Users (email);
+
+<span class="cm">-- Composite: index nhiều cột</span>
+<span class="kw">CREATE INDEX</span> IX_Orders_Status_Date
+<span class="kw">ON</span> Orders (status, created_at <span class="kw">DESC</span>);</pre>
+                        <div class="index-note">Giống mục lục cuối sách — bản đồ chỉ trang nào chứa data cần</div>
+                    </div>
+                    <div class="index-card">
+                        <h4>Covering Index (INCLUDE)</h4>
+                        <p><strong>Index kèm thêm cột data</strong> → query không cần quay lại bảng gốc. Cực nhanh.</p>
+<pre class="sql-code"><span class="cm">-- Index cho email + include name, city</span>
+<span class="kw">CREATE INDEX</span> IX_Users_Email_Cover
+<span class="kw">ON</span> Users (email)
+<span class="kw">INCLUDE</span> (name, city);
+
+<span class="cm">-- Query này dùng index 100%, không đọc bảng</span>
+<span class="kw">SELECT</span> name, city <span class="kw">FROM</span> Users
+<span class="kw">WHERE</span> email = <span class="str">'a@email.com'</span>;</pre>
+                        <div class="index-note">Giống mục lục có tóm tắt nội dung — không cần mở trang</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Khi nào tạo index -->
+            <div class="sql-concept">
+                <h3>✅ Khi nào TẠO index / ❌ Khi nào KHÔNG</h3>
+                <div class="sql-two-col">
+                    <div class="do-box">
+                        <h4>✅ NÊN tạo index cho:</h4>
+                        <ul>
+                            <li>Cột trong <strong>WHERE</strong> dùng thường xuyên</li>
+                            <li>Cột trong <strong>JOIN ... ON</strong> (Foreign Key)</li>
+                            <li>Cột trong <strong>ORDER BY</strong></li>
+                            <li>Cột có <strong>UNIQUE constraint</strong></li>
+                            <li>Cột dùng trong <strong>GROUP BY</strong></li>
+                        </ul>
+                    </div>
+                    <div class="dont-box">
+                        <h4>❌ KHÔNG nên tạo index cho:</h4>
+                        <ul>
+                            <li>Bảng <strong>nhỏ</strong> (< 1000 rows) — scan nhanh hơn</li>
+                            <li>Cột <strong>ít unique</strong> (VD: is_active chỉ có 0/1)</li>
+                            <li>Bảng <strong>INSERT/UPDATE nhiều</strong> — index chậm ghi</li>
+                            <li>Cột dùng <strong>LIKE '%abc'</strong> — index không giúp</li>
+                            <li><strong>Quá nhiều index</strong> — mỗi INSERT phải update TẤT CẢ index</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXPLAIN -->
+            <div class="sql-concept">
+                <h3>🔍 Execution Plan — "X-ray" cho query</h3>
+                <div class="sql-block">
+                    <div class="sql-label">Xem query chạy thế nào (SQL Server)</div>
+<pre class="sql-code"><span class="cm">-- Bật hiển thị Execution Plan</span>
+<span class="kw">SET STATISTICS IO ON</span>;
+<span class="kw">SET STATISTICS TIME ON</span>;
+
+<span class="cm">-- Hoặc: Ctrl+L trong SSMS = Estimated Plan</span>
+<span class="cm">-- Hoặc: Ctrl+M trong SSMS = Actual Plan</span>
+
+<span class="cm">-- Tìm trong plan:</span>
+<span class="cm">-- ✅ Index Seek = tốt (nhảy thẳng)</span>
+<span class="cm">-- ⚠️ Index Scan = OK (đọc toàn bộ index)</span>
+<span class="cm">-- ❌ Table Scan = tệ (đọc toàn bộ bảng)</span>
+<span class="cm">-- ❌ Key Lookup = phải quay lại bảng (cần INCLUDE)</span></pre>
+                </div>
+
+                <div class="sql-tip">
+                    <strong>💡 Quy trình tối ưu query:</strong><br>
+                    1. Chạy query, ghi nhận thời gian<br>
+                    2. Xem Execution Plan → tìm Table Scan, Key Lookup<br>
+                    3. Tạo index phù hợp<br>
+                    4. Chạy lại → so sánh. Nếu chưa đủ → bước 2.
+                </div>
+            </div>
+
+            <!-- Anti-patterns -->
+            <div class="sql-concept">
+                <h3>💀 5 Query Pattern GiẾT Index</h3>
+                <div class="index-killers">
+                    <div class="killer-card">
+                        <h4>❌ 1. Function trên cột WHERE</h4>
+<pre class="sql-code"><span class="cm">-- ❌ YEAR() bọc cột → index vô dụng</span>
+<span class="kw">WHERE</span> <span class="fn">YEAR</span>(created_at) = <span class="num">2026</span>
+
+<span class="cm">-- ✅ So sánh khoảng → dùng index</span>
+<span class="kw">WHERE</span> created_at &gt;= <span class="str">'2026-01-01'</span>
+  <span class="kw">AND</span> created_at &lt;  <span class="str">'2027-01-01'</span></pre>
+                    </div>
+                    <div class="killer-card">
+                        <h4>❌ 2. LIKE bắt đầu bằng %</h4>
+<pre class="sql-code"><span class="cm">-- ❌ %abc = scan toàn bộ</span>
+<span class="kw">WHERE</span> name <span class="kw">LIKE</span> <span class="str">'%nguyen'</span>
+
+<span class="cm">-- ✅ abc% = dùng index</span>
+<span class="kw">WHERE</span> name <span class="kw">LIKE</span> <span class="str">'nguyen%'</span>
+
+<span class="cm">-- Full-text search cho tìm kiếm phức tạp</span></pre>
+                    </div>
+                    <div class="killer-card">
+                        <h4>❌ 3. Implicit Conversion</h4>
+<pre class="sql-code"><span class="cm">-- ❌ Column là VARCHAR, so với INT</span>
+<span class="kw">WHERE</span> phone = <span class="num">0901234567</span>
+<span class="cm">-- SQL convert TOÀN BỘ phone → INT để so!</span>
+
+<span class="cm">-- ✅ Đúng type</span>
+<span class="kw">WHERE</span> phone = <span class="str">'0901234567'</span></pre>
+                    </div>
+                    <div class="killer-card">
+                        <h4>❌ 4. OR trên khác cột</h4>
+<pre class="sql-code"><span class="cm">-- ❌ OR = scan cả 2 index hoặc table</span>
+<span class="kw">WHERE</span> name = <span class="str">'A'</span> <span class="kw">OR</span> email = <span class="str">'a@b.com'</span>
+
+<span class="cm">-- ✅ Tách thành UNION</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> Users <span class="kw">WHERE</span> name = <span class="str">'A'</span>
+<span class="kw">UNION</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> Users <span class="kw">WHERE</span> email = <span class="str">'a@b.com'</span></pre>
+                    </div>
+                    <div class="killer-card">
+                        <h4>❌ 5. SELECT *</h4>
+<pre class="sql-code"><span class="cm">-- ❌ Lấy TẤT CẢ cột → luôn đọc bảng</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> Orders;
+
+<span class="cm">-- ✅ Chỉ lấy cột cần → dùng covering index</span>
+<span class="kw">SELECT</span> id, status, total
+<span class="kw">FROM</span> Orders;</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== SECTION 7: TRANSACTION ===== -->
+    <section class="section section-dark" id="transaction">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🔒</div>
+                <h2>7. Transaction & ACID — Đảm Bảo Dữ Liệu Luôn Đúng</h2>
+                <p>Chuyển tiền mà trừ bên A rồi không cộng bên B = mất tiền. Transaction ngăn chặn điều đó.</p>
+            </div>
+
+            <!-- ACID -->
+            <div class="sql-concept">
+                <h3>🔐 ACID — 4 Tính Chất Sống Còn</h3>
+                <div class="acid-grid">
+                    <div class="acid-card acid-a">
+                        <h4>A — Atomicity</h4>
+                        <p><strong>Tất cả hoặc không gì cả.</strong> 5 câu SQL trong 1 transaction → hoặc TẤT CẢ thành công, hoặc ROLLBACK hết. Không bao giờ "chạy được nửa".</p>
+                        <div class="acid-example">VD: Chuyển tiền: trừ A + cộng B. Nếu cộng B lỗi → trừ A cũng rollback.</div>
+                    </div>
+                    <div class="acid-card acid-c">
+                        <h4>C — Consistency</h4>
+                        <p><strong>Data luôn hợp lệ.</strong> Transaction đưa DB từ trạng thái hợp lệ này → trạng thái hợp lệ khác. Constraints, triggers đảm bảo điều này.</p>
+                        <div class="acid-example">VD: Balance không bao giờ âm → CHECK(balance >= 0)</div>
+                    </div>
+                    <div class="acid-card acid-i">
+                        <h4>I — Isolation</h4>
+                        <p><strong>Transaction này không thấy data "dở dang" của transaction khác.</strong> 2 người chuyển tiền cùng lúc → không "thấy" nhau.</p>
+                        <div class="acid-example">VD: A đang update giá → B query không thấy giá "nửa cũ nửa mới"</div>
+                    </div>
+                    <div class="acid-card acid-d">
+                        <h4>D — Durability</h4>
+                        <p><strong>Commit rồi = không mất.</strong> Dù server crash, mất điện → data đã commit vẫn còn. Ghi vào disk, không chỉ RAM.</p>
+                        <div class="acid-example">VD: "Đặt hàng thành công" hiện ra → order phải tồn tại dù server restart</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transaction syntax -->
+            <div class="sql-concept">
+                <h3>📝 Transaction — Cú pháp thực tế</h3>
+                <div class="sql-block">
+                    <div class="sql-label">Chuyển tiền: trừ A, cộng B, ghi log — tất cả hoặc không gì</div>
+<pre class="sql-code"><span class="kw">BEGIN TRANSACTION</span>;
+<span class="kw">BEGIN TRY</span>
+    <span class="cm">-- Trừ tiền người gửi</span>
+    <span class="kw">UPDATE</span> Accounts
+    <span class="kw">SET</span> balance = balance - <span class="num">1000000</span>
+    <span class="kw">WHERE</span> id = <span class="num">1</span> <span class="kw">AND</span> balance &gt;= <span class="num">1000000</span>;  <span class="cm">-- Check đủ tiền</span>
+
+    <span class="kw">IF</span> <span class="fn">@@ROWCOUNT</span> = <span class="num">0</span>                        <span class="cm">-- Không update được = không đủ tiền</span>
+        <span class="kw">THROW</span> <span class="num">50001</span>, <span class="str">'Insufficient balance'</span>, <span class="num">1</span>;
+
+    <span class="cm">-- Cộng tiền người nhận</span>
+    <span class="kw">UPDATE</span> Accounts
+    <span class="kw">SET</span> balance = balance + <span class="num">1000000</span>
+    <span class="kw">WHERE</span> id = <span class="num">2</span>;
+
+    <span class="cm">-- Ghi log giao dịch</span>
+    <span class="kw">INSERT INTO</span> TransactionLog (from_id, to_id, amount, created_at)
+    <span class="kw">VALUES</span> (<span class="num">1</span>, <span class="num">2</span>, <span class="num">1000000</span>, <span class="fn">GETDATE</span>());
+
+    <span class="kw">COMMIT</span>;                                  <span class="cm">-- ✅ Tất cả OK → lưu vĩnh viễn</span>
+<span class="kw">END TRY</span>
+<span class="kw">BEGIN CATCH</span>
+    <span class="kw">ROLLBACK</span>;                                 <span class="cm">-- ❌ Có lỗi → hoàn tác TẤT CẢ</span>
+    <span class="kw">THROW</span>;                                    <span class="cm">-- Re-throw lỗi để app biết</span>
+<span class="kw">END CATCH</span>;</pre>
+                </div>
+            </div>
+
+            <!-- Isolation Levels -->
+            <div class="sql-concept">
+                <h3>🔒 Isolation Levels — 4 mức độ cách ly</h3>
+                <div class="isolation-table">
+                    <div class="iso-header">
+                        <div class="iso-cell head">Level</div>
+                        <div class="iso-cell head">Dirty Read</div>
+                        <div class="iso-cell head">Non-Repeatable</div>
+                        <div class="iso-cell head">Phantom</div>
+                        <div class="iso-cell head">Performance</div>
+                    </div>
+                    <div class="iso-row">
+                        <div class="iso-cell name">READ UNCOMMITTED</div>
+                        <div class="iso-cell bad">Có thể</div>
+                        <div class="iso-cell bad">Có thể</div>
+                        <div class="iso-cell bad">Có thể</div>
+                        <div class="iso-cell">Nhanh nhất</div>
+                    </div>
+                    <div class="iso-row highlight">
+                        <div class="iso-cell name">READ COMMITTED ⭐</div>
+                        <div class="iso-cell good">Chặn</div>
+                        <div class="iso-cell bad">Có thể</div>
+                        <div class="iso-cell bad">Có thể</div>
+                        <div class="iso-cell">Mặc định SQL Server</div>
+                    </div>
+                    <div class="iso-row">
+                        <div class="iso-cell name">REPEATABLE READ</div>
+                        <div class="iso-cell good">Chặn</div>
+                        <div class="iso-cell good">Chặn</div>
+                        <div class="iso-cell bad">Có thể</div>
+                        <div class="iso-cell">Chậm hơn</div>
+                    </div>
+                    <div class="iso-row">
+                        <div class="iso-cell name">SERIALIZABLE</div>
+                        <div class="iso-cell good">Chặn</div>
+                        <div class="iso-cell good">Chặn</div>
+                        <div class="iso-cell good">Chặn</div>
+                        <div class="iso-cell">Chậm nhất</div>
+                    </div>
+                </div>
+                <div class="sql-explain">
+                    <div class="explain-line"><strong>Dirty Read:</strong> Đọc data mà transaction khác chưa commit (có thể rollback → data sai)</div>
+                    <div class="explain-line"><strong>Non-Repeatable Read:</strong> Đọc 2 lần cùng row → giá trị khác nhau (bị update giữa chừng)</div>
+                    <div class="explain-line"><strong>Phantom Read:</strong> Đọc 2 lần cùng query → số rows khác nhau (bị insert/delete giữa chừng)</div>
+                </div>
+                <div class="sql-tip">
+                    <strong>💡 Thực tế:</strong> 95% trường hợp dùng <strong>READ COMMITTED</strong> (mặc định) là đủ. Chỉ nâng level khi xử lý tiền, inventory, hoặc business-critical operations.
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== SECTION 8: DATABASE DESIGN ===== -->
+    <section class="section" id="design">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🏗️</div>
+                <h2>8. Thiết Kế Database — Đúng Từ Đầu, Đỡ Đau Về Sau</h2>
+                <p>Schema sai → mọi query đều khó, mọi feature đều chậm, mọi bug đều khó fix</p>
+            </div>
+
+            <!-- Constraints -->
+            <div class="sql-concept">
+                <h3>🔐 Constraints — Quy tắc bảo vệ data</h3>
+                <div class="sql-block">
+                    <div class="sql-label">Tất cả constraints bạn cần biết</div>
+<pre class="sql-code"><span class="kw">CREATE TABLE</span> Products (
+    id          <span class="kw">INT IDENTITY</span>(<span class="num">1</span>,<span class="num">1</span>) <span class="kw">PRIMARY KEY</span>,  <span class="cm">-- PK: unique + not null + auto increment</span>
+    sku         <span class="kw">NVARCHAR</span>(<span class="num">50</span>)  <span class="kw">NOT NULL UNIQUE</span>,      <span class="cm">-- UNIQUE: không trùng</span>
+    name        <span class="kw">NVARCHAR</span>(<span class="num">200</span>) <span class="kw">NOT NULL</span>,              <span class="cm">-- NOT NULL: bắt buộc</span>
+    price       <span class="kw">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>) <span class="kw">NOT NULL</span>
+                <span class="kw">CHECK</span>(price &gt; <span class="num">0</span>),                     <span class="cm">-- CHECK: điều kiện</span>
+    stock       <span class="kw">INT NOT NULL DEFAULT</span> <span class="num">0</span>
+                <span class="kw">CHECK</span>(stock &gt;= <span class="num">0</span>),                    <span class="cm">-- DEFAULT + CHECK</span>
+    category_id <span class="kw">INT NULL</span>,
+    created_at  <span class="kw">DATETIME NOT NULL DEFAULT</span> <span class="fn">GETDATE</span>(),
+
+    <span class="cm">-- FOREIGN KEY: liên kết với bảng khác</span>
+    <span class="kw">CONSTRAINT</span> FK_Products_Category
+        <span class="kw">FOREIGN KEY</span> (category_id)
+        <span class="kw">REFERENCES</span> Categories(id)
+        <span class="kw">ON DELETE SET NULL</span>               <span class="cm">-- Xóa category → product.category_id = NULL</span>
+        <span class="kw">ON UPDATE CASCADE</span>                <span class="cm">-- Update category.id → tự cập nhật FK</span>
+);</pre>
+                </div>
+            </div>
+
+            <!-- Normalization -->
+            <div class="sql-concept">
+                <h3>📐 Normalization — 3 Dạng Chuẩn (đủ dùng)</h3>
+                <div class="norm-grid">
+                    <div class="norm-card">
+                        <h4>1NF — Mỗi ô chỉ 1 giá trị</h4>
+                        <div class="norm-bad">❌ Sai: <code>tags = "react,vue,angular"</code></div>
+                        <div class="norm-good">✅ Đúng: Tách thành bảng ProductTags (product_id, tag)</div>
+                        <p><strong>Quy tắc:</strong> Không lưu list/array trong 1 cột. Mỗi ô = 1 giá trị atomic.</p>
+                    </div>
+                    <div class="norm-card">
+                        <h4>2NF — Mọi cột phụ thuộc TOÀN BỘ PK</h4>
+                        <div class="norm-bad">❌ Sai: OrderItems có <code>product_name</code> (chỉ phụ thuộc product_id, không phụ thuộc order_id)</div>
+                        <div class="norm-good">✅ Đúng: Lấy product_name bằng JOIN, không lưu trùng</div>
+                        <p><strong>Quy tắc:</strong> Nếu dùng composite PK, mọi cột phải phụ thuộc CẢ composite, không chỉ 1 phần.</p>
+                    </div>
+                    <div class="norm-card">
+                        <h4>3NF — Không có phụ thuộc bắc cầu</h4>
+                        <div class="norm-bad">❌ Sai: Users có <code>city</code> + <code>city_province</code> (province phụ thuộc city, không phụ thuộc user)</div>
+                        <div class="norm-good">✅ Đúng: Tách bảng Cities (id, name, province)</div>
+                        <p><strong>Quy tắc:</strong> A → B → C thì C không nên ở cùng bảng với A. Tách B ra bảng riêng.</p>
+                    </div>
+                </div>
+
+                <div class="sql-tip">
+                    <strong>💡 Thực tế:</strong> Normalize đến 3NF là đủ 99% trường hợp. Đôi khi <strong>cố tình denormalize</strong> (lưu trùng) cho performance — nhưng phải biết trade-off: data inconsistency risk.
+                </div>
+            </div>
+
+            <!-- Naming -->
+            <div class="sql-concept">
+                <h3>📋 Quy Ước Đặt Tên — Consistency > Creativity</h3>
+                <div class="naming-grid">
+                    <div class="naming-rule">
+                        <strong>Bảng:</strong> PascalCase, số nhiều — <code>Users</code>, <code>OrderItems</code>, <code>Categories</code>
+                    </div>
+                    <div class="naming-rule">
+                        <strong>Cột:</strong> snake_case — <code>created_at</code>, <code>user_id</code>, <code>is_active</code>
+                    </div>
+                    <div class="naming-rule">
+                        <strong>PK:</strong> luôn là <code>id</code> — đơn giản, nhất quán
+                    </div>
+                    <div class="naming-rule">
+                        <strong>FK:</strong> <code>{bảng_số_ít}_id</code> — <code>user_id</code>, <code>category_id</code>, <code>order_id</code>
+                    </div>
+                    <div class="naming-rule">
+                        <strong>Boolean:</strong> prefix <code>is_</code> hoặc <code>has_</code> — <code>is_active</code>, <code>has_email</code>
+                    </div>
+                    <div class="naming-rule">
+                        <strong>Date:</strong> suffix <code>_at</code> — <code>created_at</code>, <code>updated_at</code>, <code>deleted_at</code>
+                    </div>
+                    <div class="naming-rule">
+                        <strong>Index:</strong> <code>IX_{Bảng}_{Cột}</code> — <code>IX_Users_Email</code>
+                    </div>
+                    <div class="naming-rule">
+                        <strong>FK Constraint:</strong> <code>FK_{Bảng}_{BảngRef}</code> — <code>FK_Orders_Users</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== SECTION 9: SAI LẦM CHẾT NGƯỜI ===== -->
+    <section class="section section-dark" id="deadly">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">☠️</div>
+                <h2>9. Sai Lầm Chết Người — Mỗi Cái Từng Xảy Ra Thật</h2>
+                <p>Không ai nói cho bạn cho đến khi production sập lúc 3h sáng</p>
+            </div>
+
+            <div class="deadly-grid">
+                <div class="deadly-card">
+                    <div class="deadly-num">01</div>
+                    <h3>SELECT * trong production</h3>
+                    <p>Bảng 50 cột, bạn chỉ cần 3 cột → <strong>SELECT * đọc gấp 15x data cần thiết</strong>. Network bandwidth, memory, CPU đều bị lãng phí. Covering index vô dụng.</p>
+                    <div class="deadly-fix"><strong>Fix:</strong> LUÔN liệt kê cụ thể cột cần: <code>SELECT id, name, email</code></div>
+                </div>
+
+                <div class="deadly-card">
+                    <div class="deadly-num">02</div>
+                    <h3>UPDATE / DELETE không có WHERE</h3>
+                    <p><code>UPDATE Users SET is_active = 0;</code> ← <strong>Toàn bộ user bị deactivate.</strong> Không undo được nếu không có backup.</p>
+                    <div class="deadly-fix"><strong>Fix:</strong> Chạy <code>SELECT COUNT(*) ... WHERE ...</code> trước MỌI UPDATE/DELETE. Confirm số rows đúng.</div>
+                </div>
+
+                <div class="deadly-card">
+                    <div class="deadly-num">03</div>
+                    <h3>N+1 Query — Kẻ giết performance thầm lặng</h3>
+                    <p>Lấy 100 orders → mỗi order query user → <strong>101 queries thay vì 1!</strong> Ở dev thì nhanh, production 10K records thì chết.</p>
+                    <div class="deadly-fix"><strong>Fix:</strong> Dùng JOIN thay vì query trong vòng lặp. Trong EF Core: <code>.Include(o => o.User)</code></div>
+                </div>
+
+                <div class="deadly-card">
+                    <div class="deadly-num">04</div>
+                    <h3>Không có Index trên Foreign Key</h3>
+                    <p>FK tự tạo constraint nhưng <strong>KHÔNG tự tạo index!</strong> JOIN mà FK không có index = full table scan bảng con mỗi lần JOIN.</p>
+                    <div class="deadly-fix"><strong>Fix:</strong> Tạo index cho MỌI Foreign Key column. <code>CREATE INDEX IX_Orders_UserId ON Orders(user_id);</code></div>
+                </div>
+
+                <div class="deadly-card">
+                    <div class="deadly-num">05</div>
+                    <h3>Dùng FLOAT cho tiền</h3>
+                    <p><code>FLOAT 0.1 + 0.2 = 0.30000000000000004</code> ← <strong>Sai số floating point.</strong> Tính tiền sai 1 đồng x 1 triệu giao dịch = sai 1 triệu đồng.</p>
+                    <div class="deadly-fix"><strong>Fix:</strong> Dùng <code>DECIMAL(10,2)</code> cho tiền. LUÔN. Không exception.</div>
+                </div>
+
+                <div class="deadly-card">
+                    <div class="deadly-num">06</div>
+                    <h3>NULL trong IN / NOT IN</h3>
+                    <p><code>WHERE id NOT IN (1, 2, NULL)</code> = <strong>LUÔN trả về 0 rows!</strong> Vì NULL so sánh với bất kỳ gì = UNKNOWN = FALSE.</p>
+                    <div class="deadly-fix"><strong>Fix:</strong> Dùng <code>NOT EXISTS</code> thay <code>NOT IN</code> khi subquery có thể trả về NULL.</div>
+                </div>
+
+                <div class="deadly-card">
+                    <div class="deadly-num">07</div>
+                    <h3>Không backup trước migration</h3>
+                    <p>DROP COLUMN, thay đổi data type, delete data — <strong>không thể undo.</strong> "Chắc không sao đâu" = câu nói trước mọi thảm họa.</p>
+                    <div class="deadly-fix"><strong>Fix:</strong> BACKUP DATABASE trước MỌI migration trên production. Không exception. Tự động hóa.</div>
+                </div>
+
+                <div class="deadly-card">
+                    <div class="deadly-num">08</div>
+                    <h3>Query trong vòng lặp application</h3>
+                    <p><code>foreach(var id in ids) { db.Query("SELECT * WHERE id = @id"); }</code> ← 1000 IDs = 1000 round-trips đến DB.</p>
+                    <div class="deadly-fix"><strong>Fix:</strong> Batch: <code>WHERE id IN (@id1, @id2, ...)</code> hoặc dùng Table-Valued Parameter.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== SECTION 10: LỜI KHUYÊN SỐNG CÒN + NÂNG CAO ===== -->
+    <section class="section" id="survival">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🔥</div>
+                <h2>10. Lời Khuyên Sống Còn & Con Đường Nâng Cao</h2>
+                <p>Những bài học xương máu từ production thật + lộ trình để đi từ "biết SQL" lên "giỏi SQL"</p>
+            </div>
+
+            <!-- === SURVIVAL ADVICE === -->
+            <div class="sql-concept">
+                <h3>☠️ LỜI KHUYÊN SỐNG CÒN — Khắc Cốt Ghi Tâm</h3>
+                <p>Không phải kiến thức — đây là <strong>bài học máu</strong> mà dev nào cũng phải trả giá ít nhất 1 lần.</p>
+
+                <div class="survival-grid">
+                    <!-- 1 -->
+                    <div class="survival-card severity-critical">
+                        <div class="survival-severity">☠️ CRITICAL</div>
+                        <h4>Luôn chạy SELECT trước UPDATE/DELETE</h4>
+                        <div class="survival-story">"Tôi chạy <code>UPDATE Users SET role = 'user'</code> lúc 2h sáng — quên WHERE. 50,000 users mất role admin. Backup cuối cùng là 12 tiếng trước."</div>
+                        <div class="survival-rule">
+                            <strong>Quy tắc:</strong> Trước MỌI UPDATE/DELETE → viết SELECT với cùng WHERE trước. Xác nhận số rows. Rồi mới đổi thành UPDATE. <strong>Không exception.</strong>
+                        </div>
+                        <div class="survival-checklist">
+                            <div>✓ Viết SELECT ... WHERE ...</div>
+                            <div>✓ Kiểm tra COUNT — đúng số rows mong đợi?</div>
+                            <div>✓ Đổi SELECT → UPDATE/DELETE</div>
+                            <div>✓ Wrap trong BEGIN TRAN ... ROLLBACK trước khi COMMIT</div>
+                        </div>
+                    </div>
+
+                    <!-- 2 -->
+                    <div class="survival-card severity-critical">
+                        <div class="survival-severity">☠️ CRITICAL</div>
+                        <h4>KHÔNG chạy script trực tiếp trên Production</h4>
+                        <div class="survival-story">"Dev mới connect nhầm prod thay vì staging. Chạy script seed data → 100K records rác vào bảng Orders. Mất 4 tiếng cleanup."</div>
+                        <div class="survival-rule">
+                            <strong>Quy tắc:</strong> Luôn kiểm tra <code>SELECT @@SERVERNAME, DB_NAME()</code> trước khi chạy BẤT CỨ THỨ GÌ. Tốt hơn: dùng <strong>color-coded connection</strong> trong SSMS (đỏ = prod).
+                        </div>
+                    </div>
+
+                    <!-- 3 -->
+                    <div class="survival-card severity-critical">
+                        <div class="survival-severity">☠️ CRITICAL</div>
+                        <h4>Backup TRƯỚC migration — Không có ngoại lệ</h4>
+                        <div class="survival-story">"ALTER TABLE DROP COLUMN trên bảng 10 triệu rows. Cột hóa ra vẫn có service đang dùng. Không có backup. 2 ngày restore từ log shipping."</div>
+                        <div class="survival-rule">
+                            <strong>Quy tắc:</strong> Trước MỌI DDL trên production:<br>
+                            1. <code>BACKUP DATABASE</code><br>
+                            2. Test script trên staging trước<br>
+                            3. Có rollback script sẵn<br>
+                            4. Chạy ngoài giờ peak
+                        </div>
+                    </div>
+
+                    <!-- 4 -->
+                    <div class="survival-card severity-danger">
+                        <div class="survival-severity">⚠️ DANGER</div>
+                        <h4>Transaction phải có timeout</h4>
+                        <div class="survival-story">"Long-running transaction lock bảng Orders 45 phút. Toàn bộ checkout trên website bị treo. Revenue mất ~200 triệu."</div>
+                        <div class="survival-rule">
+                            <strong>Quy tắc:</strong> Mọi transaction phải ngắn nhất có thể. Không bao giờ để transaction mở chờ user input. Set <code>SET LOCK_TIMEOUT 30000;</code> (30 giây max). Monitor bằng <code>sp_who2</code> hoặc <code>sys.dm_tran_active_transactions</code>.
+                        </div>
+                    </div>
+
+                    <!-- 5 -->
+                    <div class="survival-card severity-danger">
+                        <div class="survival-severity">⚠️ DANGER</div>
+                        <h4>Deadlock — 2 transaction chờ nhau mãi mãi</h4>
+                        <div class="survival-story">"API endpoint A lock row 1 rồi cần row 2. API endpoint B lock row 2 rồi cần row 1. Cả 2 chờ nhau → timeout → 500 error hàng loạt."</div>
+                        <div class="survival-rule">
+                            <strong>Quy tắc:</strong> Luôn access bảng/rows theo <strong>cùng thứ tự</strong> trong mọi transaction. Giữ transaction ngắn. Dùng <code>WITH (NOLOCK)</code> cho read-only reports (chấp nhận dirty read). Monitor: <code>sys.dm_tran_locks</code>.
+                        </div>
+                    </div>
+
+                    <!-- 6 -->
+                    <div class="survival-card severity-danger">
+                        <div class="survival-severity">⚠️ DANGER</div>
+                        <h4>KHÔNG dùng dynamic SQL trực tiếp</h4>
+                        <div class="survival-story">"<code>WHERE name = '" + userInput + "'"</code> → SQL Injection. Hacker drop toàn bộ database. Thật sự xảy ra, không phải chuyện đùa."</div>
+                        <div class="survival-rule">
+                            <strong>Quy tắc:</strong> LUÔN dùng parameterized queries. <code>WHERE name = @name</code>. Không bao giờ nối string user input vào SQL. Trong .NET: dùng <code>SqlParameter</code> hoặc Dapper/EF Core — chúng auto parameterize.
+                        </div>
+                    </div>
+
+                    <!-- 7 -->
+                    <div class="survival-card severity-danger">
+                        <div class="survival-severity">⚠️ DANGER</div>
+                        <h4>Pagination: OFFSET lớn = Chậm kinh hoàng</h4>
+                        <div class="survival-story">"API phân trang OFFSET 500000 FETCH 20 — mỗi request DB scan 500K rows rồi bỏ. CPU 100%. API timeout."</div>
+                        <div class="survival-rule">
+                            <strong>Quy tắc:</strong> Bảng > 100K rows → dùng <strong>Keyset Pagination</strong>:<br>
+                            <code>WHERE id > @lastId ORDER BY id FETCH NEXT 20 ROWS ONLY</code><br>
+                            Nhanh gấp 100-1000x so với OFFSET lớn.
+                        </div>
+                    </div>
+
+                    <!-- 8 -->
+                    <div class="survival-card severity-warning">
+                        <div class="survival-severity">💡 IMPORTANT</div>
+                        <h4>Log mọi thay đổi data quan trọng</h4>
+                        <div class="survival-story">"Ai đó update giá sản phẩm từ 100K thành 100. Không biết ai, khi nào, từ đâu. Không có audit log."</div>
+                        <div class="survival-rule">
+                            <strong>Quy tắc:</strong> Bảng quan trọng (Users, Orders, Products) → tạo <strong>Audit Table</strong> hoặc dùng <strong>Temporal Table</strong> (SQL Server 2016+). Ghi lại: ai, khi nào, thay đổi gì, giá trị cũ/mới.
+                        </div>
+                    </div>
+
+                    <!-- 9 -->
+                    <div class="survival-card severity-warning">
+                        <div class="survival-severity">💡 IMPORTANT</div>
+                        <h4>Index không phải thuốc thần — quá nhiều index = chậm write</h4>
+                        <div class="survival-story">"Thêm 15 index cho bảng Orders. SELECT nhanh lên. Nhưng INSERT từ 5ms → 200ms. Checkout timeout."</div>
+                        <div class="survival-rule">
+                            <strong>Quy tắc:</strong> Mỗi INSERT/UPDATE phải cập nhật TẤT CẢ index. Bảng write-heavy → max 4-5 index. Review index usage: <code>sys.dm_db_index_usage_stats</code> → xóa index không ai dùng.
+                        </div>
+                    </div>
+
+                    <!-- 10 -->
+                    <div class="survival-card severity-warning">
+                        <div class="survival-severity">💡 IMPORTANT</div>
+                        <h4>Stored Procedure: lợi và hại</h4>
+                        <div class="survival-story">"3000 dòng stored procedure không ai dám sửa vì không có version control, không test được, không biết logic đúng hay sai."</div>
+                        <div class="survival-rule">
+                            <strong>Quy tắc:</strong> SP phù hợp cho batch jobs, report phức tạp. Nhưng <strong>business logic chính</strong> nên ở application code (C#, Go...) — dễ test, dễ debug, có source control. SP > 100 dòng → refactor hoặc chuyển lên app.
+                        </div>
+                    </div>
+
+                    <!-- 11 -->
+                    <div class="survival-card severity-info">
+                        <div class="survival-severity">📘 GOOD TO KNOW</div>
+                        <h4>NOLOCK không phải "miễn phí"</h4>
+                        <div class="survival-rule">
+                            <code>SELECT * FROM Orders WITH (NOLOCK)</code> — đọc nhanh hơn nhưng <strong>có thể đọc data đang bị update dở</strong> (dirty read). Chỉ dùng cho báo cáo, thống kê — <strong>KHÔNG BAO GIỜ</strong> dùng cho tính tiền, inventory, xử lý đơn hàng.
+                        </div>
+                    </div>
+
+                    <!-- 12 -->
+                    <div class="survival-card severity-info">
+                        <div class="survival-severity">📘 GOOD TO KNOW</div>
+                        <h4>Connection Pool — hiểu để không bị leak</h4>
+                        <div class="survival-rule">
+                            App mở 1 connection → dùng → trả lại pool. Nếu code quên <code>Close()/Dispose()</code> → connection leak → pool cạn → <strong>app không connect được DB</strong>. Trong C#: luôn dùng <code>using var conn = new SqlConnection(...);</code> — auto dispose.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- === CON ĐƯỜNG NÂNG CAO === -->
+            <div class="sql-concept">
+                <h3>🚀 CON ĐƯỜNG NÂNG CAO — Từ "Biết SQL" Lên "Giỏi SQL"</h3>
+                <p>Bạn đã nắm 80% sống còn ở 9 phần trên. Đây là roadmap để chinh phục 20% còn lại và trở thành database expert.</p>
+
+                <div class="levelup-grid">
+                    <!-- Level 1 -->
+                    <div class="levelup-card level-1">
+                        <div class="levelup-header">
+                            <span class="levelup-badge">LEVEL 1</span>
+                            <h4>Thành Thạo Cơ Bản</h4>
+                            <span class="levelup-time">1-3 tháng</span>
+                        </div>
+                        <div class="levelup-body">
+                            <div class="levelup-skills">
+                                <div class="levelup-skill done">✅ SELECT, WHERE, ORDER BY, JOIN</div>
+                                <div class="levelup-skill done">✅ GROUP BY, HAVING, Aggregate</div>
+                                <div class="levelup-skill done">✅ INSERT, UPDATE, DELETE an toàn</div>
+                                <div class="levelup-skill done">✅ Subquery, CTE cơ bản</div>
+                                <div class="levelup-skill done">✅ Tạo index cơ bản</div>
+                            </div>
+                            <div class="levelup-practice">
+                                <strong>Luyện tập:</strong> Giải 50 bài trên LeetCode SQL / HackerRank SQL. Viết query cho dự án thật.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Level 2 -->
+                    <div class="levelup-card level-2">
+                        <div class="levelup-header">
+                            <span class="levelup-badge">LEVEL 2</span>
+                            <h4>Intermediate — Query Phức Tạp</h4>
+                            <span class="levelup-time">3-6 tháng</span>
+                        </div>
+                        <div class="levelup-body">
+                            <div class="levelup-skills">
+                                <div class="levelup-skill">📌 Window Functions nâng cao (RANK, DENSE_RANK, NTILE, PERCENT_RANK)</div>
+                                <div class="levelup-skill">📌 Recursive CTE (duyệt tree, hierarchy)</div>
+                                <div class="levelup-skill">📌 PIVOT / UNPIVOT — chuyển rows ↔ columns</div>
+                                <div class="levelup-skill">📌 Dynamic SQL an toàn (sp_executesql)</div>
+                                <div class="levelup-skill">📌 Temp Tables vs Table Variables vs CTE — khi nào dùng cái nào</div>
+                                <div class="levelup-skill">📌 CROSS APPLY / OUTER APPLY</div>
+                            </div>
+                            <div class="levelup-example">
+                                <strong>Ví dụ thực tế:</strong>
+<pre class="sql-code"><span class="cm">-- Recursive CTE: tìm tất cả sub-category</span>
+<span class="kw">WITH</span> CategoryTree <span class="kw">AS</span> (
+    <span class="cm">-- Anchor: category gốc</span>
+    <span class="kw">SELECT</span> id, name, parent_id, <span class="num">0</span> <span class="kw">AS</span> level
+    <span class="kw">FROM</span> Categories <span class="kw">WHERE</span> parent_id <span class="kw">IS NULL</span>
+    <span class="kw">UNION ALL</span>
+    <span class="cm">-- Recursive: tìm con</span>
+    <span class="kw">SELECT</span> c.id, c.name, c.parent_id, ct.level + <span class="num">1</span>
+    <span class="kw">FROM</span> Categories c
+    <span class="kw">INNER JOIN</span> CategoryTree ct <span class="kw">ON</span> c.parent_id = ct.id
+)
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> CategoryTree <span class="kw">ORDER BY</span> level, name;</pre>
+                            </div>
+                            <div class="levelup-practice">
+                                <strong>Luyện tập:</strong> Viết report phức tạp cho dự án thật. So sánh performance giữa các cách viết query khác nhau.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Level 3 -->
+                    <div class="levelup-card level-3">
+                        <div class="levelup-header">
+                            <span class="levelup-badge">LEVEL 3</span>
+                            <h4>Advanced — Performance & Architecture</h4>
+                            <span class="levelup-time">6-12 tháng</span>
+                        </div>
+                        <div class="levelup-body">
+                            <div class="levelup-skills">
+                                <div class="levelup-skill">🔥 Execution Plan chuyên sâu (cardinality estimation, cost analysis)</div>
+                                <div class="levelup-skill">🔥 Index strategy cho workload cụ thể (OLTP vs OLAP)</div>
+                                <div class="levelup-skill">🔥 Partitioning — chia bảng lớn thành phần nhỏ</div>
+                                <div class="levelup-skill">🔥 Columnstore Index — cho analytics/reporting</div>
+                                <div class="levelup-skill">🔥 Query Store — theo dõi performance qua thời gian</div>
+                                <div class="levelup-skill">🔥 Temporal Tables — lịch sử thay đổi data tự động</div>
+                                <div class="levelup-skill">🔥 Database sharding / replication concepts</div>
+                            </div>
+                            <div class="levelup-example">
+                                <strong>Ví dụ thực tế:</strong>
+<pre class="sql-code"><span class="cm">-- Partitioning: chia bảng Orders theo năm</span>
+<span class="kw">CREATE PARTITION FUNCTION</span> PF_OrderDate (<span class="kw">DATETIME</span>)
+<span class="kw">AS RANGE RIGHT FOR VALUES</span> (
+    <span class="str">'2024-01-01'</span>, <span class="str">'2025-01-01'</span>, <span class="str">'2026-01-01'</span>
+);
+
+<span class="cm">-- Query chỉ scan partition 2026 → cực nhanh</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> Orders
+<span class="kw">WHERE</span> created_at &gt;= <span class="str">'2026-01-01'</span>
+  <span class="kw">AND</span> created_at &lt;  <span class="str">'2027-01-01'</span>;</pre>
+                            </div>
+                            <div class="levelup-practice">
+                                <strong>Luyện tập:</strong> Optimize query thật trên bảng >1 triệu rows. Đọc execution plan cho mọi query quan trọng.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Level 4 -->
+                    <div class="levelup-card level-4">
+                        <div class="levelup-header">
+                            <span class="levelup-badge">LEVEL 4</span>
+                            <h4>Expert — DBA Mindset</h4>
+                            <span class="levelup-time">1-2 năm+</span>
+                        </div>
+                        <div class="levelup-body">
+                            <div class="levelup-skills">
+                                <div class="levelup-skill">💎 Backup & Recovery strategy (Full, Differential, Log, Point-in-time)</div>
+                                <div class="levelup-skill">💎 High Availability (Always On, Failover Cluster, Log Shipping)</div>
+                                <div class="levelup-skill">💎 Security hardening (Row-Level Security, Dynamic Data Masking, TDE)</div>
+                                <div class="levelup-skill">💎 Performance tuning hệ thống (memory, TempDB, wait stats)</div>
+                                <div class="levelup-skill">💎 Migration strategy cho bảng tỷ rows (zero-downtime)</div>
+                                <div class="levelup-skill">💎 Distributed database (CAP theorem, eventual consistency)</div>
+                                <div class="levelup-skill">💎 Chọn DB đúng cho bài toán: SQL vs NoSQL vs NewSQL</div>
+                            </div>
+                            <div class="levelup-practice">
+                                <strong>Luyện tập:</strong> Quản lý DB production thật. Xử lý incident. Đọc sách: <em>"SQL Server Internals"</em>, <em>"Designing Data-Intensive Applications"</em> (Martin Kleppmann).
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- === MẸO THỰC CHIẾN === -->
+            <div class="sql-concept">
+                <h3>⚡ MẸO THỰC CHIẾN — Áp Dụng Ngay</h3>
+                <div class="protips-grid">
+                    <div class="protip-card">
+                        <div class="protip-num">01</div>
+                        <h4>Viết query từ FROM lên SELECT</h4>
+                        <p>Đừng viết SELECT trước — bạn chưa biết data từ đâu. Bắt đầu từ <strong>FROM → JOIN → WHERE → GROUP BY → SELECT</strong>. Logic hơn, ít lỗi hơn.</p>
+                    </div>
+                    <div class="protip-card">
+                        <div class="protip-num">02</div>
+                        <h4>Alias MỌI THỨ khi JOIN</h4>
+                        <p>Luôn dùng alias: <code>FROM Users u</code>, <code>JOIN Orders o</code>. Query 3+ bảng mà không alias = không ai đọc được kể cả bạn tuần sau.</p>
+                    </div>
+                    <div class="protip-card">
+                        <div class="protip-num">03</div>
+                        <h4>Format SQL cho dễ đọc</h4>
+                        <p>Mỗi clause xuống 1 dòng. Indent sub-conditions. SQL không quan tâm whitespace — nhưng <strong>đồng đội quan tâm</strong>. Dùng extension như <strong>Poor SQL</strong> hoặc <strong>SQL Prompt</strong>.</p>
+                    </div>
+                    <div class="protip-card">
+                        <div class="protip-num">04</div>
+                        <h4>Comment mọi query phức tạp</h4>
+                        <p>Query > 10 dòng → thêm comment giải thích <strong>WHY</strong>, không phải WHAT. Tương lai bạn sẽ cảm ơn hiện tại bạn.<br><code>-- Lấy top 5 sản phẩm bán chạy nhất Q1 2026 cho báo cáo marketing</code></p>
+                    </div>
+                    <div class="protip-card">
+                        <div class="protip-num">05</div>
+                        <h4>Test với data edge cases</h4>
+                        <p>Query chạy đúng với 10 rows ≠ chạy đúng với production. Test với: <strong>NULL values, empty strings, duplicate data, 0 rows, 1 triệu rows</strong>.</p>
+                    </div>
+                    <div class="protip-card">
+                        <div class="protip-num">06</div>
+                        <h4>Dùng BEGIN TRAN + ROLLBACK để test</h4>
+                        <p>Muốn test UPDATE/DELETE trên production mà không sợ?<br><code>BEGIN TRAN → chạy query → SELECT kiểm tra → ROLLBACK</code><br>Nếu OK → chạy lại với COMMIT.</p>
+                    </div>
+                    <div class="protip-card">
+                        <div class="protip-num">07</div>
+                        <h4>Học cách đọc Execution Plan</h4>
+                        <p>Kỹ năng #1 để tối ưu SQL. Đọc từ phải sang trái, từ trên xuống dưới. Tìm: <strong>Table Scan → thêm index</strong>, <strong>Key Lookup → thêm INCLUDE</strong>, <strong>Sort cost cao → đã có index cho ORDER BY chưa?</strong></p>
+                    </div>
+                    <div class="protip-card">
+                        <div class="protip-num">08</div>
+                        <h4>EF Core ≠ không cần biết SQL</h4>
+                        <p>ORM sinh SQL cho bạn — nhưng <strong>SQL tệ vẫn tệ dù ORM sinh</strong>. Luôn check SQL mà EF Core tạo ra: <code>.ToQueryString()</code> hoặc SQL Profiler. N+1 query hay xảy ra nhất ở đây.</p>
+                    </div>
+                    <div class="protip-card">
+                        <div class="protip-num">09</div>
+                        <h4>Biết khi nào KHÔNG dùng SQL</h4>
+                        <p>Full-text search → <strong>Elasticsearch</strong>. Cache hot data → <strong>Redis</strong>. Real-time analytics → <strong>ClickHouse</strong>. Time series → <strong>TimescaleDB</strong>. Document store → <strong>MongoDB</strong>. Đừng ép SQL làm mọi thứ.</p>
+                    </div>
+                    <div class="protip-card">
+                        <div class="protip-num">10</div>
+                        <h4>Monitoring là MUST — không phải NICE-TO-HAVE</h4>
+                        <p>Setup alert cho: <strong>query > 5 giây</strong>, <strong>deadlock</strong>, <strong>connection pool > 80%</strong>, <strong>disk > 85%</strong>. Biết vấn đề trước khi user report = chuyên nghiệp.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- === TÀI NGUYÊN HỌC === -->
+            <div class="sql-concept">
+                <h3>📚 TÀI NGUYÊN HỌC SQL — Từ Zero Đến Hero</h3>
+                <div class="resource-grid">
+                    <div class="resource-card resource-practice">
+                        <h4>🏋️ Luyện Tập</h4>
+                        <div class="resource-list">
+                            <div class="resource-item"><strong>LeetCode SQL 50</strong> — 50 bài từ easy → hard, chuẩn phỏng vấn</div>
+                            <div class="resource-item"><strong>HackerRank SQL</strong> — Bài tập có lời giải, phân loại theo topic</div>
+                            <div class="resource-item"><strong>SQLZoo</strong> — Tutorial tương tác, chạy SQL trực tiếp trên browser</div>
+                            <div class="resource-item"><strong>DataLemur</strong> — SQL cho data interview, bài thực tế từ FAANG</div>
+                        </div>
+                    </div>
+                    <div class="resource-card resource-book">
+                        <h4>📖 Sách</h4>
+                        <div class="resource-list">
+                            <div class="resource-item"><strong>SQL in 10 Minutes</strong> (Ben Forta) — Nhập môn nhanh, ngắn gọn</div>
+                            <div class="resource-item"><strong>T-SQL Fundamentals</strong> (Itzik Ben-Gan) — Nền tảng SQL Server chắc</div>
+                            <div class="resource-item"><strong>SQL Performance Explained</strong> (Markus Winand) — Index + optimization bible</div>
+                            <div class="resource-item"><strong>Designing Data-Intensive Applications</strong> (Kleppmann) — Database architecture, distributed systems</div>
+                        </div>
+                    </div>
+                    <div class="resource-card resource-tool">
+                        <h4>🛠️ Tools</h4>
+                        <div class="resource-list">
+                            <div class="resource-item"><strong>SSMS</strong> — SQL Server Management Studio, IDE chính cho SQL Server</div>
+                            <div class="resource-item"><strong>Azure Data Studio</strong> — Nhẹ hơn SSMS, cross-platform, có Jupyter notebook</div>
+                            <div class="resource-item"><strong>DBeaver</strong> — Free, hỗ trợ mọi DB (PostgreSQL, MySQL, SQL Server...)</div>
+                            <div class="resource-item"><strong>use-the-index-luke.com</strong> — Website giải thích index cực hay, miễn phí</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- CLOSING -->
+    <section class="section section-dark">
+        <div class="container">
+            <div class="closing-box">
+                <div class="closing-quote">
+                    "SQL không khó — nhưng SQL sai thì rất đau.<br>
+                    Nắm chắc 10 phần trên, bạn đã xử lý được 80% mọi thứ liên quan database.<br>
+                    Còn lại 20%? Sẽ đến tự nhiên khi bạn gặp bài toán thực tế."
+                </div>
+                <div class="closing-nav">
+                    <a href="../BE/index.html" class="closing-btn">📋 Roadmap .NET</a>
+                    <a href="../BE/advice.html" class="closing-btn">💡 Lời khuyên sự nghiệp</a>
+                    <a href="../NEWS/index.html" class="closing-btn">📰 Dev News</a>
+                    <a href="../AI/index.html" class="closing-btn">🤖 AI Hub</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>SQL Mastery 80/20 — Nắm chắc nền tảng, giải quyết mọi thứ</p>
+            <p class="footer-note">Tập trung vào 20% kiến thức SQL sống còn cho backend developer</p>
+        </div>
+    </footer>
+
+    <script src="sql.js"></script>
+</body>
+</html>

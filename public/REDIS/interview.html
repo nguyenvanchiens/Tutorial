@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Redis Phỏng Vấn — 30+ Câu Hỏi Junior → Senior</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  .qa { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 10px; padding: 1.1rem 1.3rem; margin-bottom: 1rem; }
+  .qa .q { color: var(--primary); font-weight: 700; font-size: 1.02rem; margin-bottom: .55rem; }
+  .qa .a { color: var(--text); font-size: .95rem; }
+  .qa .a p { margin-bottom: .55rem; }
+  .qa .a ul { padding-left: 1.3rem; margin: .3rem 0; color: var(--muted); }
+  .lvl-tag { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: .7rem; font-weight: 700; margin-right: .5rem; letter-spacing: 1px; }
+  .lvl-jr { background: rgba(67,233,123,.15); color: var(--success); }
+  .lvl-mid { background: rgba(243,156,18,.15); color: var(--warn); }
+  .lvl-sr { background: rgba(245,87,108,.15); color: var(--accent); }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">Redis<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="basics.html">Cơ Bản</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="production.html">Production</a>
+      <a href="interview.html" class="active">Phỏng Vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">30+ CÂU HỎI · JUNIOR → SENIOR</div>
+  <h1>Phỏng vấn <span class="gradient">Redis</span></h1>
+  <p class="hero-desc">Câu hỏi thường gặp ở phỏng vấn .NET/Backend có Redis. Đáp án ngắn nhưng đầy đủ ý. Đọc xong tự nói lại bằng lời mình.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🟢 Junior (L1-L2)</h2>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-jr">JR</span>1. Redis là gì? Khác gì với DB truyền thống?</div>
+      <div class="a">
+        <p>Redis là <strong>in-memory key-value store</strong> mã nguồn mở. Dữ liệu nằm chủ yếu trong RAM → đọc/ghi &lt;1ms. Hỗ trợ 9 data types, persistence (RDB/AOF), replication, pub/sub, cluster.</p>
+        <p><strong>Khác DB SQL:</strong> không có schema, không query SQL, không transaction phức tạp. Nhanh gấp 10-100 lần, nhưng không thay thế DB chính — dùng để bổ trợ (cache, session, queue).</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-jr">JR</span>2. Tại sao Redis nhanh?</div>
+      <div class="a">
+        <ul>
+          <li>Data trong RAM (không disk I/O)</li>
+          <li>Single-threaded cho command — không lock/context switch</li>
+          <li>Network I/O non-blocking (epoll)</li>
+          <li>Cấu trúc dữ liệu viết riêng, tối ưu (hash table, skiplist)</li>
+          <li>Protocol RESP đơn giản, parse nhanh</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-jr">JR</span>3. Kể tên các data types Redis?</div>
+      <div class="a">
+        <p>9 kiểu: <strong>String, List, Hash, Set, Sorted Set, Stream, Bitmap, HyperLogLog, Geo</strong>. Ngoài ra còn module: RedisJSON, RediSearch, RedisTimeSeries, RedisBloom.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-jr">JR</span>4. Khi nào dùng Hash thay vì String JSON?</div>
+      <div class="a">
+        <ul>
+          <li>Hash: khi cần đọc/ghi <strong>từng field riêng lẻ</strong> (vd: <code>HINCRBY user:5 age 1</code>)</li>
+          <li>Hash: tiết kiệm RAM hơn JSON string cho object nhỏ (&lt;100 field) vì Redis nén tự động</li>
+          <li>String JSON: khi luôn đọc/ghi toàn object, hoặc có nested phức tạp mà ORM app-side dễ map</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-jr">JR</span>5. TTL là gì? Cách set?</div>
+      <div class="a">
+        <p>TTL (Time To Live) = thời gian sống của key. Hết TTL, Redis tự xoá. Cách set:</p>
+        <pre class="code"><span class="cmd">SET</span> key val <span class="cmd">EX</span> <span class="s">60</span>       <span class="c"># 60 giây ngay khi SET</span>
+<span class="cmd">SET</span> key val <span class="cmd">PX</span> <span class="s">60000</span>    <span class="c"># millisecond</span>
+<span class="cmd">EXPIRE</span> key <span class="s">60</span>           <span class="c"># cho key đã tồn tại</span>
+<span class="cmd">PERSIST</span> key             <span class="c"># gỡ TTL</span>
+<span class="cmd">TTL</span> key                 <span class="c"># xem còn bao lâu</span></pre>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-jr">JR</span>6. Redis có thread-safe không? Nhiều client cùng <code>INCR</code> 1 key có race condition?</div>
+      <div class="a">
+        <p>Redis xử lý command <strong>single-threaded</strong>. 1000 client cùng gọi <code>INCR</code> → Redis xếp hàng, chạy tuần tự. Kết quả đúng, không race condition. Đây là lý do <code>INCR</code> dùng cho counter rất an toàn.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-jr">JR</span>7. Dùng Redis làm cache thường xuyên — nói 1 ví dụ cụ thể.</div>
+      <div class="a">
+        <p>Ví dụ: API <code>GET /users/5</code>. Thay vì query DB mỗi lần:</p>
+        <ol style="padding-left:1.3rem">
+          <li>Check <code>GET user:5</code> từ Redis</li>
+          <li>Có → return JSON</li>
+          <li>Không → query DB, <code>SET user:5 {...} EX 300</code> (TTL 5 phút), return</li>
+        </ol>
+        <p>Khi update user → <code>DEL user:5</code> để tránh stale. Đây là pattern <strong>cache-aside</strong>.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-jr">JR</span>8. <code>SCAN</code> khác <code>KEYS</code> thế nào? Dùng cái nào?</div>
+      <div class="a">
+        <ul>
+          <li><code>KEYS pattern</code>: trả về TẤT CẢ match trong 1 call. Với 1M key → block Redis vài giây. <strong>Cấm dùng production.</strong></li>
+          <li><code>SCAN cursor MATCH pattern COUNT 100</code>: cursor-based, trả từng batch. An toàn vì Redis vẫn phục vụ request khác giữa các batch.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-jr">JR</span>9. Pipeline và MULTI/EXEC khác nhau?</div>
+      <div class="a">
+        <ul>
+          <li><strong>Pipeline</strong>: gửi nhiều command không đợi reply → giảm round-trip. Các command <em>không</em> chạy atomic, client khác có thể xen vào giữa.</li>
+          <li><strong>MULTI/EXEC</strong>: transaction — các command queue, chạy tuần tự không bị xen. Cũng có lợi ích giảm round-trip giống pipeline.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-jr">JR</span>10. Persistence trong Redis có những option nào?</div>
+      <div class="a">
+        <ul>
+          <li><strong>RDB</strong>: snapshot toàn dataset ra file theo định kỳ. Nhỏ gọn, restart nhanh, mất data giữa 2 snapshot.</li>
+          <li><strong>AOF</strong>: append log mọi write. Mất tối đa 1s data, file lớn, restart chậm hơn.</li>
+          <li><strong>Cả hai</strong> (khuyên production): RDB cho backup + AOF cho safety.</li>
+          <li><strong>No persistence</strong>: khi Redis chỉ làm cache thuần, mất không sao.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🟠 Middle (L3)</h2>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>11. Cache Stampede là gì? Cách xử lý?</div>
+      <div class="a">
+        <p>Khi cache hết TTL và nhiều request cùng miss đồng thời → tất cả query DB → DB overload.</p>
+        <p><strong>Giải pháp:</strong></p>
+        <ul>
+          <li><strong>Single-flight lock</strong>: chỉ 1 request được query DB, số còn lại đợi rồi đọc cache</li>
+          <li><strong>Probabilistic early refresh</strong>: random refresh cache trước khi TTL hết</li>
+          <li><strong>Stale-while-revalidate</strong>: serve stale data, refresh nền</li>
+          <li><strong>Pre-warm</strong>: cron job refresh key nóng trước khi hết TTL</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>12. Hot key là gì? Tác hại và cách xử lý?</div>
+      <div class="a">
+        <p>1 key bị truy cập nhiều hơn các key khác đáng kể. Ví dụ: <code>page:home</code> 10k req/s, trong khi các page khác vài req/s.</p>
+        <p><strong>Tác hại:</strong> single-thread Redis → hot key bão hoà CPU. Trong Cluster, key chỉ nằm 1 shard → shard đó kẹt, shard khác nhàn.</p>
+        <p><strong>Giải pháp:</strong></p>
+        <ul>
+          <li>Client-side LRU cache (caffeine/memory-cache) — giảm hit Redis</li>
+          <li>Shard hot key bằng suffix random: <code>page:home:0</code>, <code>page:home:1</code>, ..., <code>page:home:9</code>, client random 1 trong 10</li>
+          <li>Read replica → scale đọc</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>13. Distributed lock với Redis — viết pseudo code.</div>
+      <div class="a">
+        <pre class="code"><span class="c">// Acquire</span>
+<span class="k">const</span> token = uuid();
+<span class="k">const</span> ok = <span class="k">await</span> redis.set(lockKey, token, <span class="s">'NX'</span>, <span class="s">'EX'</span>, <span class="s">30</span>);
+<span class="k">if</span> (!ok) <span class="k">throw</span> <span class="s">'busy'</span>;
+
+<span class="k">try</span> {
+    <span class="k">await</span> doWork();
+} <span class="k">finally</span> {
+    <span class="c">// Release — chỉ xoá nếu token vẫn là của mình (Lua atomic)</span>
+    <span class="k">await</span> redis.eval(`
+      if redis.call('GET', KEYS[1]) == ARGV[1]
+        then return redis.call('DEL', KEYS[1])
+        else return 0 end
+    `, <span class="s">1</span>, lockKey, token);
+}</pre>
+        <p><strong>Tại sao SET NX EX:</strong> <code>NX</code> để atomic acquire, <code>EX</code> để auto-release nếu process chết. <strong>Tại sao check token:</strong> tránh xoá nhầm lock của worker khác nếu job của mình quá TTL.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>14. Pub/Sub vs Stream — chọn khi nào?</div>
+      <div class="a">
+        <ul>
+          <li><strong>Pub/Sub</strong>: fire-and-forget, subscriber offline lúc publish = mất message. Dùng cho: notification real-time, presence, broadcast nhẹ.</li>
+          <li><strong>Stream</strong>: persistent log, consumer group, ack/retry. Giống Kafka mini. Dùng cho: queue jobs, event sourcing, cần đảm bảo delivery.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>15. Leaderboard top 100 — dùng gì?</div>
+      <div class="a">
+        <p>Sorted Set. <code>ZADD lb &lt;score&gt; &lt;user&gt;</code> để add/update, <code>ZREVRANGE lb 0 99 WITHSCORES</code> để lấy top 100 (tất cả O(log N)). Rank của 1 user: <code>ZREVRANK lb &lt;user&gt;</code>.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>16. Rate limit sliding window bằng Sorted Set — ý tưởng?</div>
+      <div class="a">
+        <ol style="padding-left:1.3rem">
+          <li>Với mỗi request: <code>ZADD rate:{user} &lt;now_ms&gt; &lt;now_ms:random&gt;</code></li>
+          <li>Xoá entry cũ: <code>ZREMRANGEBYSCORE rate:{user} 0 (now - window)</code></li>
+          <li>Đếm: <code>ZCARD rate:{user}</code></li>
+          <li>Nếu &gt; limit → reject</li>
+          <li><code>EXPIRE</code> key để auto-clean</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>17. Tại sao không nên dùng <code>FLUSHDB</code> trên production?</div>
+      <div class="a">
+        <p>Xoá toàn bộ DB, không thu hồi được. Với dataset lớn, thao tác này chặn Redis vài giây/phút. Khuyên: rename lệnh <code>FLUSHDB</code> thành empty hoặc tên bí mật trong <code>redis.conf</code>.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>18. Redis có hỗ trợ transaction ACID đầy đủ không?</div>
+      <div class="a">
+        <p><strong>Không đầy đủ:</strong></p>
+        <ul>
+          <li><strong>Atomicity</strong>: có — tất cả command trong MULTI/EXEC chạy liên tục, không bị xen.</li>
+          <li><strong>Consistency</strong>: có ở mức state được giữ hợp lệ.</li>
+          <li><strong>Isolation</strong>: có — single-threaded.</li>
+          <li><strong>Durability</strong>: tuỳ persistence. AOF <code>always</code> mới thật sự durable.</li>
+        </ul>
+        <p><strong>Khác DB SQL:</strong> <em>không có rollback nếu 1 lệnh fail logic</em>. Nếu <code>INCR</code> 1 key không phải số → lệnh đó fail nhưng các lệnh còn lại trong tx vẫn chạy.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>19. WATCH dùng để làm gì?</div>
+      <div class="a">
+        <p><strong>Optimistic locking</strong>: <code>WATCH key</code> → nếu key đó bị thay đổi bởi client khác giữa WATCH và EXEC, transaction bị huỷ (EXEC trả nil). Dùng cho: check-and-set patterns, ví dụ trừ số dư tài khoản chỉ khi số dư &ge; amount.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-mid">MID</span>20. Eviction policy — khi nào dùng cái nào?</div>
+      <div class="a">
+        <ul>
+          <li><code>noeviction</code>: Redis là source of truth, không được mất data (session quan trọng).</li>
+          <li><code>allkeys-lru</code>: cache thuần — default tốt nhất.</li>
+          <li><code>allkeys-lfu</code>: cache với access pattern skew rõ (1 số key cực nóng, số còn lại nguội hẳn).</li>
+          <li><code>volatile-lru/ttl</code>: mix cache + persistent — chỉ evict key có TTL.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🔴 Senior (L4)</h2>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>21. Sentinel và Cluster khác nhau thế nào?</div>
+      <div class="a">
+        <ul>
+          <li><strong>Sentinel</strong>: giải quyết <em>HA</em> — 1 master + N replica, sentinel tự failover khi master chết. Data vẫn nằm trên 1 master duy nhất (không shard).</li>
+          <li><strong>Cluster</strong>: giải quyết <em>scale ngang</em> — chia keyspace thành 16384 slot trên nhiều master, mỗi master có replica. Vừa HA vừa scale.</li>
+        </ul>
+        <p>Hầu hết app không cần Cluster — 1 master mạnh + Sentinel là đủ. Chỉ cần Cluster khi RAM &gt;100GB hoặc throughput &gt;100k ops/s.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>22. Cluster có những giới hạn gì?</div>
+      <div class="a">
+        <ul>
+          <li>Multi-key command chỉ chạy nếu các key <strong>cùng slot</strong>. Dùng hash tag: <code>user:{5}:profile</code> và <code>user:{5}:sessions</code> cùng slot.</li>
+          <li>MULTI/EXEC chỉ trong cùng slot.</li>
+          <li>Chỉ DB 0 (không dùng được <code>SELECT 1</code>).</li>
+          <li>Pub/Sub broadcast qua tất cả node → tốn bandwidth.</li>
+          <li>Resharding (thêm/xoá node) phức tạp hơn.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>23. Làm sao debug Redis chậm?</div>
+      <div class="a">
+        <ol style="padding-left:1.3rem">
+          <li><code>SLOWLOG GET 100</code> — lệnh &gt;10ms gần nhất.</li>
+          <li><code>LATENCY LATEST</code>, <code>LATENCY HISTORY event</code> — latency spike.</li>
+          <li><code>INFO commandstats</code> — lệnh gọi nhiều nhất, avg time.</li>
+          <li><code>MONITOR</code> ngắn 5-10s để xem realtime (cẩn thận perf).</li>
+          <li><code>CLIENT LIST</code> — client nào ngủ lâu, blocked.</li>
+          <li>Network RTT từ app server.</li>
+          <li>CPU/memory máy Redis — có bị swap không?</li>
+        </ol>
+        <p>90% case chậm = <code>KEYS</code>, hot key, object lớn, hoặc round-trip không pipeline.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>24. Cache invalidation strategy — so sánh</div>
+      <div class="a">
+        <ul>
+          <li><strong>TTL-only</strong>: chấp nhận stale ≤ TTL. Đơn giản nhất, ưu tiên availability.</li>
+          <li><strong>Write-through</strong>: write app → DB + Redis cùng lúc. Cache luôn mới nhưng mọi write tốn 2 hop.</li>
+          <li><strong>Write-around + DEL</strong>: write → DB, xoá cache, lần đọc kế refresh. Đơn giản, phổ biến.</li>
+          <li><strong>Write-behind</strong>: write → Redis, worker flush sang DB async. Nhanh nhất nhưng nguy hiểm (mất data nếu crash).</li>
+          <li><strong>Event-driven (CDC)</strong>: DB publish event → worker invalidate cache. Ổn định nhất, phức tạp setup.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>25. Thiết kế cache cho hệ thống 10M user</div>
+      <div class="a">
+        <p>Nhiều tầng:</p>
+        <ul>
+          <li><strong>L1 — In-process cache</strong> (Caffeine/MemoryCache): TTL 10-30s, giảm 90% hit Redis.</li>
+          <li><strong>L2 — Redis</strong>: TTL phút → giờ, xử lý đa instance app.</li>
+          <li><strong>L3 — CDN</strong>: cho public GET (product page). TTL phút-ngày.</li>
+          <li><strong>DB read replica</strong>: phòng khi cache miss burst.</li>
+        </ul>
+        <p>Invalidation: DB → emit event → worker <code>DEL</code> cache, app-local cache TTL ngắn tự tan.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>26. Redis memory usage đột nhiên tăng cao — debug ra sao?</div>
+      <div class="a">
+        <ol style="padding-left:1.3rem">
+          <li><code>INFO memory</code> — <code>used_memory</code>, <code>rss</code>, fragmentation ratio.</li>
+          <li><code>redis-cli --bigkeys</code> — tìm key to nhất mỗi type.</li>
+          <li><code>MEMORY USAGE key</code> — bytes của 1 key cụ thể.</li>
+          <li><code>SCAN MATCH prefix:* COUNT 100</code> + <code>MEMORY USAGE</code> — tổng theo prefix.</li>
+          <li>Kiểm tra client nào đang write bất thường (<code>CLIENT LIST</code>, app log).</li>
+          <li>Eviction counter tăng? (<code>info stats</code> → <code>evicted_keys</code>)</li>
+        </ol>
+        <p>Cause phổ biến: không set TTL, lưu object khổng lồ, leak key (mỗi request tạo key mới mà không xoá).</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>27. Lua script — khi nào dùng? Ưu/nhược?</div>
+      <div class="a">
+        <p><strong>Dùng khi:</strong> cần nhiều lệnh chạy atomic mà MULTI/EXEC không đủ (có điều kiện logic), vd rate limit token bucket (check + update trong 1 đơn vị atomic).</p>
+        <p><strong>Ưu:</strong> atomic, giảm round-trip, chạy server-side.</p>
+        <p><strong>Nhược:</strong> block Redis (vì single-thread) → script dài = gây latency spike; không gọi command blocking (BRPOP); khó debug.</p>
+        <p><strong>Best practice:</strong> script ngắn, không có loop vô hạn, cache bằng <code>EVALSHA</code> thay vì gửi script mỗi lần.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>28. Redis vs Memcached — khi nào chọn Memcached?</div>
+      <div class="a">
+        <p>Memcached chỉ thắng khi:</p>
+        <ul>
+          <li>Cache <strong>duy nhất</strong> string đơn giản, không cần data type khác</li>
+          <li>Workload write-heavy đơn giản, cần squeeze performance (Memcached multi-thread)</li>
+          <li>Không cần persistence, replication</li>
+        </ul>
+        <p>Còn lại Redis thắng: nhiều data types, persistence, pub/sub, scripting, ecosystem. 90% team chọn Redis.</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>29. Trong microservice, mỗi service nên có Redis riêng hay dùng chung?</div>
+      <div class="a">
+        <p><strong>Tuỳ ngữ cảnh:</strong></p>
+        <ul>
+          <li><strong>Redis riêng / service</strong>: isolation tốt, 1 service có bug không ảnh hưởng service khác, scale độc lập. Trade-off: vận hành nhiều cluster.</li>
+          <li><strong>Shared Redis</strong>: đơn giản, ít overhead. Trade-off: noisy neighbor, 1 service ăn hết RAM thì các service khác bị ảnh hưởng.</li>
+        </ul>
+        <p>Best practice: dùng <strong>namespace</strong> (prefix key) + <strong>ACL</strong> để limit từng service. Shared Redis với namespace là đủ cho hầu hết team vừa. Chỉ tách riêng khi 1 service có workload đặc biệt (vd: rate limit cho API gateway).</p>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="lvl-tag lvl-sr">SR</span>30. Tình huống: cache hit ratio đột nhiên tụt từ 95% xuống 40%. Hướng điều tra?</div>
+      <div class="a">
+        <ol style="padding-left:1.3rem">
+          <li>Có deploy code mới? Query pattern đổi → key cache khác cũ → miss tăng.</li>
+          <li>Có <code>FLUSHDB</code> hoặc restart Redis không có AOF?</li>
+          <li>Eviction — <code>INFO stats</code> → <code>evicted_keys</code> tăng vọt? Memory đầy?</li>
+          <li>TTL set sai — key đang expire quá nhanh? <code>SCAN</code> vài key xem TTL.</li>
+          <li>Traffic pattern mới — user mới nhiều, cold start → cache chưa warm up.</li>
+          <li>Bug code: <code>DEL</code> không đúng chỗ, hoặc key format đổi giữa write và read.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🧠 System Design với Redis</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>SD-1: Thiết kế URL shortener (bit.ly)</h4>
+        <p>Redis lưu mapping <code>short_code → long_url</code> (string), counter atomic cho <code>INCR counter:clicks:{code}</code>. DB chính (Postgres) lưu lịch sử/user. Cache-aside khi lookup.</p>
+      </div>
+      <div class="card">
+        <h4>SD-2: Online status / "Active users in last 5 min"</h4>
+        <p>Sorted Set <code>ZADD online now user_id</code>. Cron xoá cũ: <code>ZREMRANGEBYSCORE online 0 (now-300s)</code>. Count: <code>ZCARD online</code>. Hoặc dùng HyperLogLog cho số xấp xỉ.</p>
+      </div>
+      <div class="card">
+        <h4>SD-3: Chat app real-time</h4>
+        <p>Pub/Sub: channel <code>room:{id}</code>. Persist lịch sử: Stream <code>XADD room:{id}</code>. Presence: Set. Read receipt: Hash.</p>
+      </div>
+      <div class="card">
+        <h4>SD-4: Rate limit API gateway</h4>
+        <p>Sliding window Sorted Set hoặc Lua token bucket. Key theo user/IP/endpoint. Global limit + per-user limit riêng.</p>
+      </div>
+      <div class="card">
+        <h4>SD-5: Auction sniper (trả giá cuối cùng thắng)</h4>
+        <p><code>WATCH auction:{id}:highest</code>, <code>MULTI</code>, check bid &gt; current, <code>SET</code>, <code>EXEC</code>. Lock không cần vì atomic qua WATCH.</p>
+      </div>
+      <div class="card">
+        <h4>SD-6: Newsfeed cache</h4>
+        <p>Feed của user = List <code>feed:{user_id}</code> chứa post IDs, <code>LPUSH</code> khi có post mới từ following, <code>LTRIM feed:{user_id} 0 999</code> giữ 1000 gần nhất. Client lấy 20 bằng <code>LRANGE 0 19</code>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🎯 Tips phỏng vấn</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>Khi được hỏi lý thuyết</h4>
+        <ul>
+          <li>Trả lời định nghĩa → ví dụ cụ thể → trade-off</li>
+          <li>Nhắc đến data type phù hợp khi giải scenario</li>
+          <li>Luôn nhắc đến "single-threaded" — nó giải thích nhiều thứ</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Khi thiết kế hệ thống</h4>
+        <ul>
+          <li>Đừng mọi thứ bỏ vào Redis — nhắc nó là cache/bổ trợ</li>
+          <li>Nêu invalidation strategy</li>
+          <li>Nêu TTL cụ thể, không nói "cache forever"</li>
+          <li>Nêu cách failover/disaster recovery</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Warning signs trong interview</h4>
+        <ul>
+          <li>Interviewer hỏi "dùng Redis làm DB chính" — điểm gài, trả lời tại sao <em>không</em></li>
+          <li>Hỏi tại sao Redis nhanh hơn DB — nhắc RAM, single-thread, data structure tối ưu</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Câu hỏi "rất kinh điển" gặp ở Vietnam</h4>
+        <ul>
+          <li>Cache stampede + cách giải</li>
+          <li>Distributed lock có an toàn?</li>
+          <li>KEYS vs SCAN</li>
+          <li>RDB vs AOF</li>
+          <li>Sentinel vs Cluster</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Redis Mastery · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

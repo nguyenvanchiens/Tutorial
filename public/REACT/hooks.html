@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>React Hooks - useState, useEffect, useRef, Custom Hooks</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">React<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="basics.html">Cơ bản</a>
+      <a href="hooks.html" class="active">Hooks</a>
+      <a href="advanced.html">Nâng cao</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="ecosystem.html">Ecosystem</a>
+      <a href="interview.html">Phỏng vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">LEVEL 2 · JUNIOR</div>
+  <h1>React <span class="gradient">Hooks</span></h1>
+  <p class="hero-desc">Hooks là cách "inject" state &amp; side effect vào function component. Nắm vững 8 hooks cốt lõi, bạn viết được 99% app React.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Quy tắc vàng của Hooks</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>1. Chỉ gọi ở top-level</h3>
+        <p><strong>Không</strong> gọi hook trong <code>if</code>, <code>for</code>, sau <code>return</code>, hay function lồng. React dựa vào <em>thứ tự gọi hook</em> để map state — đổi thứ tự = loạn state.</p>
+        <pre class="code"><span class="c">// SAI</span>
+<span class="k">if</span> (condition) {
+  <span class="k">const</span> [x, setX] = <span class="n">useState</span>(<span class="s">0</span>);
+}
+
+<span class="c">// ĐÚNG</span>
+<span class="k">const</span> [x, setX] = <span class="n">useState</span>(<span class="s">0</span>);
+<span class="k">if</span> (condition) { <span class="c">/* dùng x */</span> }</pre>
+      </div>
+      <div class="card">
+        <h3>2. Chỉ gọi trong Component hoặc Custom Hook</h3>
+        <p>Không gọi hooks trong function thường, class, hay event handler. Custom hook phải bắt đầu bằng <code>use</code> để ESLint nhận biết.</p>
+        <div class="tip"><strong>Cài ESLint plugin:</strong> <code>eslint-plugin-react-hooks</code> tự bắt vi phạm. Đừng bao giờ disable nó.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">1. <code>useState</code> — State cục bộ</h2>
+    <p class="section-sub">Đã học ở trang <a href="basics.html" style="color:var(--primary)">Cơ bản</a>. Ở đây đi sâu các pattern ít người biết.</p>
+
+    <pre class="code"><span class="c">// ❌ Khởi tạo nặng chạy MỖI LẦN render</span>
+<span class="k">const</span> [data, setData] = <span class="n">useState</span>(computeExpensive());
+
+<span class="c">// ✅ Lazy initial — chỉ chạy 1 lần</span>
+<span class="k">const</span> [data, setData] = <span class="n">useState</span>(() =&gt; computeExpensive());
+
+<span class="c">// ✅ Batching: React 18+ gộp nhiều setState trong cùng tick</span>
+<span class="k">function</span> <span class="n">handle</span>() {
+  setA(<span class="s">1</span>);
+  setB(<span class="s">2</span>);  <span class="c">// chỉ 1 lần render cho cả 2</span>
+  setC(<span class="s">3</span>);
+}
+
+<span class="c">// ✅ State reset bằng key (pattern hay gặp)</span>
+&lt;<span class="t">Form</span> key={userId} /&gt;  <span class="c">// đổi userId → Form remount, state reset</span></pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">2. <code>useEffect</code> — Side Effect</h2>
+    <p class="section-sub">Side effect = mọi thứ <strong>không phải tính toán thuần</strong>: fetch API, subscribe, timer, thao tác DOM, log analytics.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>3 dạng deps array</h4>
+        <pre class="code"><span class="c">// Không truyền — chạy MỖI render</span>
+<span class="n">useEffect</span>(() =&gt; {
+  console.log(<span class="s">'every render'</span>);
+});
+
+<span class="c">// Array rỗng — chạy 1 lần (mount)</span>
+<span class="n">useEffect</span>(() =&gt; {
+  console.log(<span class="s">'mount only'</span>);
+}, []);
+
+<span class="c">// Có deps — chạy khi deps đổi</span>
+<span class="n">useEffect</span>(() =&gt; {
+  fetchUser(id);
+}, [id]);</pre>
+      </div>
+
+      <div class="card">
+        <h4>Cleanup</h4>
+        <pre class="code"><span class="n">useEffect</span>(() =&gt; {
+  <span class="k">const</span> timer = setInterval(tick, <span class="s">1000</span>);
+
+  <span class="c">// cleanup chạy khi:</span>
+  <span class="c">// - deps đổi (trước lần chạy kế)</span>
+  <span class="c">// - component unmount</span>
+  <span class="k">return</span> () =&gt; clearInterval(timer);
+}, []);</pre>
+        <div class="danger-box" style="margin-top:.5rem"><strong>Luôn cleanup:</strong> timer, subscribe, WebSocket, event listener, AbortController. Không cleanup = memory leak + bug race condition.</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:1.5rem;color:var(--primary)">Fetch data đúng cách (chống race condition)</h3>
+    <pre class="code"><span class="n">useEffect</span>(() =&gt; {
+  <span class="k">const</span> ctrl = <span class="k">new</span> AbortController();
+
+  fetch(`/api/user/${id}`, { signal: ctrl.signal })
+    .then(r =&gt; r.json())
+    .then(setUser)
+    .catch(err =&gt; {
+      <span class="k">if</span> (err.name !== <span class="s">'AbortError'</span>) setError(err);
+    });
+
+  <span class="k">return</span> () =&gt; ctrl.abort();
+}, [id]);</pre>
+
+    <div class="warn-box"><strong>Tại sao?</strong> User đổi <code>id</code> nhanh: request 1 có thể về SAU request 2 → set state sai. AbortController huỷ request cũ khi deps đổi.</div>
+
+    <h3 style="margin-top:1.5rem;color:var(--primary)">Khi nào KHÔNG cần useEffect?</h3>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>❌ Tính toán derived state</h4>
+        <pre class="code"><span class="c">// SAI — dùng effect để sync state phụ thuộc</span>
+<span class="k">const</span> [list, setList] = useState([]);
+<span class="k">const</span> [filtered, setFiltered] = useState([]);
+<span class="n">useEffect</span>(() =&gt; {
+  setFiltered(list.filter(x =&gt; x.active));
+}, [list]);
+
+<span class="c">// ĐÚNG — tính trực tiếp trong render</span>
+<span class="k">const</span> filtered = list.filter(x =&gt; x.active);</pre>
+      </div>
+      <div class="card">
+        <h4>❌ Phản ứng với event</h4>
+        <pre class="code"><span class="c">// SAI</span>
+<span class="n">useEffect</span>(() =&gt; {
+  <span class="k">if</span> (submitted) sendAnalytics();
+}, [submitted]);
+
+<span class="c">// ĐÚNG — đặt vào chính event handler</span>
+<span class="k">const</span> handleSubmit = () =&gt; {
+  setSubmitted(<span class="k">true</span>);
+  sendAnalytics();
+};</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">3. <code>useRef</code> — Giữ giá trị không trigger render</h2>
+    <p class="section-sub">2 công dụng chính: (1) tham chiếu tới DOM element, (2) giữ giá trị mutable xuyên các lần render mà không re-render.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>Tham chiếu DOM</h4>
+        <pre class="code"><span class="k">function</span> <span class="n">AutoFocus</span>() {
+  <span class="k">const</span> inputRef = <span class="n">useRef</span>(<span class="k">null</span>);
+
+  <span class="n">useEffect</span>(() =&gt; {
+    inputRef.current.focus();
+  }, []);
+
+  <span class="k">return</span> &lt;<span class="t">input</span> ref={inputRef} /&gt;;
+}</pre>
+      </div>
+      <div class="card">
+        <h4>Giữ giá trị mutable</h4>
+        <pre class="code"><span class="k">function</span> <span class="n">Timer</span>() {
+  <span class="k">const</span> intervalRef = <span class="n">useRef</span>(<span class="k">null</span>);
+
+  <span class="k">const</span> start = () =&gt; {
+    intervalRef.current = setInterval(tick, <span class="s">1000</span>);
+  };
+  <span class="k">const</span> stop = () =&gt; {
+    clearInterval(intervalRef.current);
+  };
+  <span class="c">// intervalRef tồn tại qua nhiều render</span>
+  <span class="c">// mà KHÔNG làm component re-render khi gán</span>
+}</pre>
+      </div>
+    </div>
+
+    <div class="info-box"><strong>Quy tắc:</strong> đừng đọc/ghi <code>ref.current</code> trong render (lifecycle chưa chắc ổn). Làm trong event handler hoặc useEffect.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">4. <code>useMemo</code> &amp; <code>useCallback</code> — Memoization</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4><code>useMemo</code> — cache giá trị</h4>
+        <pre class="code"><span class="k">const</span> sorted = <span class="n">useMemo</span>(() =&gt; {
+  <span class="k">return</span> items.slice().sort(compareFn);
+}, [items]);
+<span class="c">// Chỉ tính lại khi items đổi</span></pre>
+      </div>
+      <div class="card">
+        <h4><code>useCallback</code> — cache function</h4>
+        <pre class="code"><span class="k">const</span> handleDel = <span class="n">useCallback</span>((id) =&gt; {
+  setItems(prev =&gt; prev.filter(x =&gt; x.id !== id));
+}, []);
+<span class="c">// Tương đương useMemo(() =&gt; fn, deps)</span></pre>
+      </div>
+    </div>
+
+    <div class="danger-box"><strong>KHÔNG dùng để "tối ưu cho chắc".</strong> Memoization bản thân tốn RAM + CPU so sánh deps. Chỉ dùng khi:
+      <ul style="margin-top:.5rem;padding-left:1.5rem">
+        <li>Tính toán thực sự nặng (sort list 10k+, parse…)</li>
+        <li>Truyền prop xuống component đã <code>React.memo</code></li>
+        <li>Dùng làm dep cho <code>useEffect</code> và cần stable reference</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">5. <code>useContext</code> — Chia sẻ state xuyên cây</h2>
+    <p class="section-sub">Giải quyết <em>prop drilling</em>: khi prop phải xuyên qua nhiều tầng chỉ để đến component sâu.</p>
+
+    <pre class="code"><span class="c">// 1. Tạo context</span>
+<span class="k">const</span> ThemeContext = createContext(<span class="s">'light'</span>);
+
+<span class="c">// 2. Cung cấp giá trị</span>
+<span class="k">function</span> <span class="n">App</span>() {
+  <span class="k">const</span> [theme, setTheme] = useState(<span class="s">'dark'</span>);
+  <span class="k">return</span> (
+    &lt;<span class="t">ThemeContext.Provider</span> value={{ theme, setTheme }}&gt;
+      &lt;<span class="t">Page</span> /&gt;
+    &lt;/<span class="t">ThemeContext.Provider</span>&gt;
+  );
+}
+
+<span class="c">// 3. Đọc ở component sâu</span>
+<span class="k">function</span> <span class="n">Button</span>() {
+  <span class="k">const</span> { theme } = <span class="n">useContext</span>(ThemeContext);
+  <span class="k">return</span> &lt;<span class="t">button</span> className={theme}&gt;Click&lt;/<span class="t">button</span>&gt;;
+}</pre>
+
+    <div class="warn-box"><strong>Bẫy hiệu năng:</strong> mọi consumer của Context re-render khi <code>value</code> đổi. Nếu truyền object mới mỗi render → toàn cây re-render. Giải pháp: <code>useMemo</code> cho value, hoặc tách Context ra theo từng mối quan tâm.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">6. <code>useReducer</code> — State phức tạp</h2>
+    <p class="section-sub">Khi state có nhiều field liên quan, nhiều cách update — reducer sạch hơn nhiều useState.</p>
+
+    <pre class="code"><span class="k">function</span> <span class="n">reducer</span>(state, action) {
+  <span class="k">switch</span> (action.type) {
+    <span class="k">case</span> <span class="s">'add'</span>:    <span class="k">return</span> { ...state, list: [...state.list, action.item] };
+    <span class="k">case</span> <span class="s">'remove'</span>: <span class="k">return</span> { ...state, list: state.list.filter(x =&gt; x.id !== action.id) };
+    <span class="k">case</span> <span class="s">'clear'</span>:  <span class="k">return</span> { ...state, list: [] };
+    <span class="k">default</span>: <span class="k">throw new</span> Error(<span class="s">'Unknown: '</span> + action.type);
+  }
+}
+
+<span class="k">function</span> <span class="n">Cart</span>() {
+  <span class="k">const</span> [state, dispatch] = <span class="n">useReducer</span>(reducer, { list: [] });
+
+  <span class="k">return</span> &lt;<span class="t">button</span> onClick={() =&gt; dispatch({ type: <span class="s">'add'</span>, item })}&gt;+&lt;/<span class="t">button</span>&gt;;
+}</pre>
+
+    <div class="tip"><strong>Khi nào dùng reducer?</strong> &gt;3 useState liên quan, logic update chạy trùng lặp, hoặc cần test reducer riêng. Reducer là <em>pure function</em> → test dễ.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">7. Các hook khác cần biết</h2>
+    <div class="grid grid-3">
+      <div class="card">
+        <h4><code>useId</code></h4>
+        <p>Sinh id duy nhất, cùng ID ở SSR &amp; client. Dùng cho <code>htmlFor</code>, <code>aria-describedby</code>.</p>
+        <pre class="code"><span class="k">const</span> id = <span class="n">useId</span>();
+&lt;<span class="t">label</span> htmlFor={id}&gt;Email&lt;/<span class="t">label</span>&gt;
+&lt;<span class="t">input</span> id={id} /&gt;</pre>
+      </div>
+      <div class="card">
+        <h4><code>useLayoutEffect</code></h4>
+        <p>Giống <code>useEffect</code> nhưng chạy <strong>đồng bộ</strong> sau DOM mutation, trước browser paint. Dùng khi cần đo kích thước DOM để tránh flash.</p>
+      </div>
+      <div class="card">
+        <h4><code>useSyncExternalStore</code></h4>
+        <p>Subscribe vào external store (redux-like) an toàn với concurrent rendering. Dùng khi viết state library.</p>
+      </div>
+      <div class="card">
+        <h4><code>useDeferredValue</code> (React 18+)</h4>
+        <p>Deferred render phần nặng, giữ input mượt. Dùng cho tìm kiếm instant.</p>
+        <pre class="code"><span class="k">const</span> deferred = <span class="n">useDeferredValue</span>(query);
+&lt;<span class="t">Results</span> query={deferred} /&gt;</pre>
+      </div>
+      <div class="card">
+        <h4><code>useTransition</code> (React 18+)</h4>
+        <p>Đánh dấu update là "không khẩn cấp" để React ưu tiên input.</p>
+        <pre class="code"><span class="k">const</span> [pending, startTransition] = <span class="n">useTransition</span>();
+<span class="n">startTransition</span>(() =&gt; setTab(<span class="s">'slow'</span>));</pre>
+      </div>
+      <div class="card">
+        <h4><code>useOptimistic</code> (React 19)</h4>
+        <p>Hiển thị state "lạc quan" trước khi server xác nhận. Tuyệt cho form mutation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">8. Custom Hooks — Tái sử dụng logic</h2>
+    <p class="section-sub">Custom hook = function gọi hooks khác, bắt đầu bằng <code>use</code>. Giúp tách logic khỏi component.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4><code>useLocalStorage</code></h4>
+        <pre class="code"><span class="k">function</span> <span class="n">useLocalStorage</span>(key, initial) {
+  <span class="k">const</span> [value, setValue] = useState(() =&gt; {
+    <span class="k">const</span> raw = localStorage.getItem(key);
+    <span class="k">return</span> raw ? JSON.parse(raw) : initial;
+  });
+
+  <span class="n">useEffect</span>(() =&gt; {
+    localStorage.setItem(key, JSON.stringify(value));
+  }, [key, value]);
+
+  <span class="k">return</span> [value, setValue];
+}
+
+<span class="c">// Dùng</span>
+<span class="k">const</span> [theme, setTheme] = useLocalStorage(<span class="s">'theme'</span>, <span class="s">'dark'</span>);</pre>
+      </div>
+
+      <div class="card">
+        <h4><code>useDebounce</code></h4>
+        <pre class="code"><span class="k">function</span> <span class="n">useDebounce</span>(value, delay = <span class="s">500</span>) {
+  <span class="k">const</span> [debounced, setDebounced] = useState(value);
+
+  <span class="n">useEffect</span>(() =&gt; {
+    <span class="k">const</span> id = setTimeout(() =&gt; setDebounced(value), delay);
+    <span class="k">return</span> () =&gt; clearTimeout(id);
+  }, [value, delay]);
+
+  <span class="k">return</span> debounced;
+}
+
+<span class="c">// Dùng</span>
+<span class="k">const</span> debouncedQuery = useDebounce(query, <span class="s">300</span>);
+<span class="n">useEffect</span>(() =&gt; { fetchResults(debouncedQuery); }, [debouncedQuery]);</pre>
+      </div>
+
+      <div class="card">
+        <h4><code>useFetch</code></h4>
+        <pre class="code"><span class="k">function</span> <span class="n">useFetch</span>(url) {
+  <span class="k">const</span> [data, setData] = useState(<span class="k">null</span>);
+  <span class="k">const</span> [loading, setLoading] = useState(<span class="k">true</span>);
+  <span class="k">const</span> [error, setError] = useState(<span class="k">null</span>);
+
+  <span class="n">useEffect</span>(() =&gt; {
+    <span class="k">const</span> ctrl = <span class="k">new</span> AbortController();
+    setLoading(<span class="k">true</span>);
+
+    fetch(url, { signal: ctrl.signal })
+      .then(r =&gt; r.json())
+      .then(setData)
+      .catch(e =&gt; e.name !== <span class="s">'AbortError'</span> &amp;&amp; setError(e))
+      .finally(() =&gt; setLoading(<span class="k">false</span>));
+
+    <span class="k">return</span> () =&gt; ctrl.abort();
+  }, [url]);
+
+  <span class="k">return</span> { data, loading, error };
+}</pre>
+      </div>
+
+      <div class="card">
+        <h4><code>usePrevious</code></h4>
+        <pre class="code"><span class="k">function</span> <span class="n">usePrevious</span>(value) {
+  <span class="k">const</span> ref = useRef();
+  <span class="n">useEffect</span>(() =&gt; { ref.current = value; }, [value]);
+  <span class="k">return</span> ref.current;
+}
+
+<span class="c">// Dùng</span>
+<span class="k">const</span> prev = usePrevious(count);
+&lt;<span class="t">p</span>&gt;Trước: {prev}, giờ: {count}&lt;/<span class="t">p</span>&gt;</pre>
+      </div>
+
+      <div class="card">
+        <h4><code>useMediaQuery</code></h4>
+        <pre class="code"><span class="k">function</span> <span class="n">useMediaQuery</span>(query) {
+  <span class="k">const</span> [matches, setMatches] = useState(
+    () =&gt; window.matchMedia(query).matches
+  );
+
+  <span class="n">useEffect</span>(() =&gt; {
+    <span class="k">const</span> mq = window.matchMedia(query);
+    <span class="k">const</span> h = (e) =&gt; setMatches(e.matches);
+    mq.addEventListener(<span class="s">'change'</span>, h);
+    <span class="k">return</span> () =&gt; mq.removeEventListener(<span class="s">'change'</span>, h);
+  }, [query]);
+
+  <span class="k">return</span> matches;
+}</pre>
+      </div>
+
+      <div class="card">
+        <h4><code>useOnClickOutside</code></h4>
+        <pre class="code"><span class="k">function</span> <span class="n">useOnClickOutside</span>(ref, handler) {
+  <span class="n">useEffect</span>(() =&gt; {
+    <span class="k">const</span> listener = (e) =&gt; {
+      <span class="k">if</span> (ref.current &amp;&amp; !ref.current.contains(e.target)) {
+        handler(e);
+      }
+    };
+    document.addEventListener(<span class="s">'mousedown'</span>, listener);
+    <span class="k">return</span> () =&gt; document.removeEventListener(<span class="s">'mousedown'</span>, listener);
+  }, [ref, handler]);
+}</pre>
+      </div>
+    </div>
+
+    <div class="tip" style="margin-top:1rem"><strong>Quy tắc đặt custom hook:</strong> chỉ tách thành hook khi logic thực sự được <em>tái dùng nhiều nơi</em> hoặc khi component quá dài. Đừng over-abstract.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">💡 Bài tập</h2>
+    <ol class="steps">
+      <li><strong>Viết <code>useToggle</code></strong> — trả về <code>[value, toggle]</code>. Thử nghiệm Dark mode switch.</li>
+      <li><strong>Search với debounce</strong> — input → fetch <code>/api/search?q=</code> sau 300ms dừng gõ. Kèm AbortController.</li>
+      <li><strong>Reducer cho TodoApp</strong> — viết reducer xử lý: add, toggle, delete, clearDone, setFilter.</li>
+      <li><strong>Theme Context</strong> — 1 Provider quản light/dark, <code>useTheme()</code> hook để đổi. Nhớ memo value.</li>
+      <li><strong>Infinite scroll</strong> — custom hook <code>useInfiniteScroll</code> dùng IntersectionObserver, load thêm khi cuộn tới cuối.</li>
+    </ol>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>ReactJS Mastery · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

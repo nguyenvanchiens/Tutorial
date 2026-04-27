@@ -1,0 +1,2181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code Masterclass - Từ Zero đến Production</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #0a0a0f;
+            --surface: #12121a;
+            --surface2: #1a1a2e;
+            --surface3: #16162a;
+            --border: #2a2a3e;
+            --text: #e0e0e8;
+            --text-dim: #8888a0;
+            --accent: #c084fc;
+            --accent2: #818cf8;
+            --accent3: #34d399;
+            --accent4: #fb923c;
+            --accent5: #f472b6;
+            --accent6: #38bdf8;
+            --code-bg: #0d0d15;
+            --red: #ef4444;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.8;
+            scroll-behavior: smooth;
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 800px; height: 800px;
+            background: radial-gradient(circle, rgba(192,132,252,0.12), transparent 70%);
+            top: -200px; left: 50%; transform: translateX(-50%);
+            pointer-events: none;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(52,211,153,0.08), transparent 70%);
+            bottom: -200px; right: -100px;
+            pointer-events: none;
+        }
+        .hero-badge {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1.4rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            color: var(--accent);
+            margin-bottom: 2rem;
+        }
+        .hero h1 {
+            font-size: clamp(2.2rem, 6vw, 4.2rem);
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #c084fc, #818cf8, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-sub {
+            font-size: 1.25rem;
+            color: var(--text-dim);
+            max-width: 680px;
+            margin-bottom: 1rem;
+        }
+        .hero-desc {
+            font-size: 1rem;
+            color: var(--text-dim);
+            max-width: 600px;
+            margin-bottom: 2.5rem;
+            opacity: 0.7;
+        }
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #fff;
+            padding: 0.9rem 2.2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .hero-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(192,132,252,0.3);
+        }
+        .hero-stats {
+            display: flex;
+            gap: 3rem;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .hero-stat {
+            text-align: center;
+        }
+        .hero-stat-num {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+        .hero-stat-label {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        /* ===== TOC BAR ===== */
+        .toc-bar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0.5rem 0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .toc-bar::-webkit-scrollbar { height: 3px; }
+        .toc-bar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        .toc-links {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0 1.5rem;
+            white-space: nowrap;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .toc-link {
+            padding: 0.5rem 1rem;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.85rem;
+            border-radius: 999px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .toc-link:hover {
+            color: var(--text);
+            background: var(--surface2);
+        }
+        .toc-link.active {
+            color: #000;
+            background: var(--accent4);
+            font-weight: 600;
+        }
+
+        /* ===== MAIN ===== */
+        .main-content {
+            max-width: 880px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 6rem;
+        }
+
+        /* ===== SECTIONS ===== */
+        .section {
+            margin-bottom: 5rem;
+            scroll-margin-top: 2rem;
+        }
+        .section-number {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.25rem 0.85rem;
+            border-radius: 999px;
+            margin-bottom: 0.75rem;
+        }
+        .section h2 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+            color: #fff;
+        }
+        .section .subtitle {
+            color: var(--text-dim);
+            font-size: 1.05rem;
+            margin-bottom: 2rem;
+        }
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #fff;
+            margin: 2.5rem 0 0.75rem;
+            padding-bottom: 0.3rem;
+            border-bottom: 1px solid var(--border);
+        }
+        h4 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin: 1.5rem 0 0.5rem;
+        }
+        p { margin-bottom: 1rem; }
+
+        /* ===== CODE ===== */
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            overflow-x: auto;
+            margin: 1rem 0 1.5rem;
+            font-size: 0.87rem;
+            line-height: 1.7;
+            position: relative;
+        }
+        pre code {
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+            color: var(--text);
+        }
+        code {
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            background: var(--surface2);
+            padding: 0.15rem 0.45rem;
+            border-radius: 5px;
+            font-size: 0.87em;
+            color: var(--accent3);
+        }
+        pre code { background: none; padding: 0; }
+        .code-label {
+            position: absolute; top: 0; right: 0;
+            background: var(--surface2);
+            color: var(--text-dim);
+            font-size: 0.7rem;
+            padding: 0.2rem 0.8rem;
+            border-radius: 0 12px 0 8px;
+            font-family: monospace;
+        }
+
+        /* ===== CARDS ===== */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.5rem;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+        .card-icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
+        .card h4 { margin: 0 0 0.5rem; color: #fff; font-size: 1rem; }
+        .card p { color: var(--text-dim); font-size: 0.9rem; margin: 0; }
+
+        /* ===== INFO BOXES ===== */
+        .info-box {
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid;
+        }
+        .info-box.tip { background: rgba(52,211,153,0.08); border-color: var(--accent3); }
+        .info-box.warning { background: rgba(251,146,60,0.08); border-color: var(--accent4); }
+        .info-box.note { background: rgba(129,140,248,0.08); border-color: var(--accent2); }
+        .info-box.important { background: rgba(244,114,182,0.08); border-color: var(--accent5); }
+        .info-box.insight { background: rgba(56,189,248,0.08); border-color: var(--accent6); }
+        .info-box-title {
+            font-weight: 700; font-size: 0.8rem;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+        .tip .info-box-title { color: var(--accent3); }
+        .warning .info-box-title { color: var(--accent4); }
+        .note .info-box-title { color: var(--accent2); }
+        .important .info-box-title { color: var(--accent5); }
+        .insight .info-box-title { color: var(--accent6); }
+
+        /* ===== STEPS ===== */
+        .steps {
+            counter-reset: step;
+            list-style: none;
+            padding: 0;
+        }
+        .steps li {
+            counter-increment: step;
+            position: relative;
+            padding: 1rem 0 1rem 3.5rem;
+            border-left: 2px solid var(--border);
+            margin-left: 1rem;
+        }
+        .steps li:last-child { border-left-color: transparent; }
+        .steps li::before {
+            content: counter(step);
+            position: absolute;
+            left: -14px; top: 1rem;
+            width: 28px; height: 28px;
+            background: var(--accent);
+            color: #fff; font-weight: 700; font-size: 0.8rem;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .steps li strong { color: #fff; display: block; margin-bottom: 0.3rem; }
+
+        /* ===== TABLE ===== */
+        table {
+            width: 100%; border-collapse: collapse;
+            margin: 1rem 0 1.5rem; font-size: 0.9rem;
+        }
+        th, td { padding: 0.7rem 1rem; border: 1px solid var(--border); text-align: left; }
+        th {
+            background: var(--surface2); color: var(--accent);
+            font-weight: 600; font-size: 0.78rem;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        td { background: var(--surface); }
+
+        /* ===== COMPARE ===== */
+        .compare {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 1rem; margin: 1.5rem 0;
+        }
+        .compare-col {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 12px; padding: 1.25rem;
+        }
+        .compare-col.good { border-top: 3px solid var(--accent3); }
+        .compare-col.bad { border-top: 3px solid var(--red); }
+        .compare-col h4 { margin: 0 0 0.75rem; font-size: 0.9rem; }
+        .compare-col.good h4 { color: var(--accent3); }
+        .compare-col.bad h4 { color: var(--red); }
+
+        /* ===== DIAGRAM ===== */
+        .diagram {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 14px; padding: 2rem;
+            margin: 1.5rem 0; text-align: center;
+            font-family: monospace; line-height: 1.5;
+            overflow-x: auto; white-space: pre;
+            font-size: 0.85rem; color: var(--accent);
+        }
+
+        /* ===== FLOW ===== */
+        .flow-row {
+            display: flex; align-items: center; gap: 0.75rem;
+            flex-wrap: wrap; margin: 1.5rem 0;
+        }
+        .flow-item {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 10px; padding: 0.6rem 1.2rem;
+            font-size: 0.9rem; white-space: nowrap;
+        }
+        .flow-arrow { color: var(--accent); font-size: 1.2rem; }
+
+        /* ===== TREE ===== */
+        .tree {
+            background: var(--code-bg); border: 1px solid var(--border);
+            border-radius: 12px; padding: 1.5rem;
+            font-family: monospace; font-size: 0.88rem;
+            line-height: 1.8; margin: 1rem 0 1.5rem;
+            overflow-x: auto;
+        }
+        .tree .folder { color: var(--accent4); font-weight: 600; }
+        .tree .file { color: var(--text-dim); }
+        .tree .highlight { color: var(--accent3); font-weight: 600; }
+        .tree .desc { color: var(--accent); font-style: italic; }
+
+        /* ===== PRICING ===== */
+        .pricing-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem; margin: 1.5rem 0;
+        }
+        .pricing-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 14px; padding: 1.5rem; text-align: center;
+            transition: border-color 0.2s;
+        }
+        .pricing-card.featured {
+            border-color: var(--accent);
+            background: var(--surface3);
+            position: relative;
+        }
+        .pricing-card.featured::before {
+            content: 'Phổ biến nhất';
+            position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+            background: var(--accent); color: #fff;
+            padding: 0.2rem 1rem; border-radius: 999px;
+            font-size: 0.72rem; font-weight: 700;
+        }
+        .pricing-name { font-weight: 700; color: #fff; margin-bottom: 0.5rem; }
+        .pricing-price {
+            font-size: 1.8rem; font-weight: 800;
+            color: var(--accent); margin-bottom: 0.5rem;
+        }
+        .pricing-price span { font-size: 0.85rem; font-weight: 400; color: var(--text-dim); }
+        .pricing-features {
+            list-style: none; padding: 0;
+            font-size: 0.85rem; color: var(--text-dim);
+            text-align: left; margin-top: 1rem;
+        }
+        .pricing-features li {
+            padding: 0.3rem 0;
+            padding-left: 1.2rem;
+            position: relative;
+        }
+        .pricing-features li::before {
+            content: '✓'; position: absolute; left: 0;
+            color: var(--accent3); font-weight: 700;
+        }
+
+        ul, ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+        li { margin-bottom: 0.4rem; }
+
+        .hl { color: var(--accent); font-weight: 600; }
+        .hl2 { color: var(--accent3); font-weight: 600; }
+        .hl3 { color: var(--accent4); font-weight: 600; }
+
+        /* ===== FOOTER ===== */
+        footer {
+            text-align: center; padding: 3rem 1rem;
+            color: var(--text-dim); font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+        }
+        footer a { color: var(--accent); text-decoration: none; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 640px) {
+            .compare { grid-template-columns: 1fr; }
+            .card-grid { grid-template-columns: 1fr; }
+            .pricing-grid { grid-template-columns: 1fr; }
+            .main-content { padding: 1.5rem 1rem 4rem; }
+            .hero-stats { gap: 1.5rem; }
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+<!-- ===== TOC BAR ===== -->
+<nav class="toc-bar">
+    <div class="toc-links">
+        <a href="#why-claude" class="toc-link">1. Tổng quan</a>
+        <a href="#bai4" class="toc-link">2. Build App</a>
+        <a href="#bai5" class="toc-link">3. .claude</a>
+        <a href="#bai6" class="toc-link">4. Context</a>
+        <a href="#bai7" class="toc-link">5. Commands</a>
+        <a href="#bai8" class="toc-link">6. MCP</a>
+        <a href="#bai9" class="toc-link">7. Hooks</a>
+        <a href="#bai10" class="toc-link">8. Agents</a>
+        <a href="#multi-instance" class="toc-link">9. Multi Instance</a>
+        <a href="#token-optimize" class="toc-link">10. Token</a>
+        <a href="#deploy" class="toc-link">11. Deploy</a>
+        <a href="#pricing" class="toc-link">12. Pricing</a>
+        <a href="#roadmap" class="toc-link">13. Lộ trình</a>
+    </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+    <div class="hero-badge">Masterclass 2026 &middot; Dành cho mọi cấp độ</div>
+    <h1>Claude Code Masterclass<br>Từ Zero Đến Production</h1>
+    <p class="hero-sub">Biến ý tưởng thành sản phẩm thực tế chỉ bằng ngôn ngữ tự nhiên.<br>Không cần kinh nghiệm lập trình trước.</p>
+    <p class="hero-desc">Khoá học đầy đủ nhất về Claude Code - AI coding agent mạnh nhất hiện nay từ Anthropic.</p>
+    <a href="#why-claude" class="hero-cta">Bắt đầu khám phá &#8595;</a>
+    <div class="hero-stats">
+        <div class="hero-stat">
+            <div class="hero-stat-num">10</div>
+            <div class="hero-stat-label">Bài giảng chuyên sâu</div>
+        </div>
+        <div class="hero-stat">
+            <div class="hero-stat-num">50+</div>
+            <div class="hero-stat-label">Ví dụ thực tế</div>
+        </div>
+        <div class="hero-stat">
+            <div class="hero-stat-num">0→1</div>
+            <div class="hero-stat-label">Từ người mới đến pro</div>
+        </div>
+    </div>
+</section>
+
+<div class="main-content">
+
+<!-- ============================================================ -->
+<!-- TẠI SAO CLAUDE CODE -->
+<!-- ============================================================ -->
+<section class="section" id="why-claude">
+    <span class="section-number">Giới thiệu</span>
+    <h2>Tại Sao Claude Code?</h2>
+    <p class="subtitle">Không chỉ là chatbot - đây là đồng nghiệp AI ngồi cạnh bạn, hiểu toàn bộ project, và tự tay viết code.</p>
+
+    <h3>Vấn đề hiện tại của hầu hết developer</h3>
+    <div class="card-grid">
+        <div class="card">
+            <div class="card-icon">&#x23F0;</div>
+            <h4>80% thời gian = việc lặp lại</h4>
+            <p>Viết boilerplate, config, tests, fix bug nhỏ... Những việc tốn thời gian nhưng không cần sáng tạo.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">&#x1F4CB;</div>
+            <h4>Copy-paste từ ChatGPT</h4>
+            <p>Copy code từ chatbot → paste → sửa lỗi → copy lại → paste lại. Vòng lặp mệt mỏi.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">&#x1F4A1;</div>
+            <h4>AI không hiểu project</h4>
+            <p>Chatbot chỉ thấy 1 đoạn code bạn paste, không hiểu toàn bộ kiến trúc, dependencies, conventions.</p>
+        </div>
+    </div>
+
+    <h3>Claude Code giải quyết tất cả</h3>
+    <div class="compare">
+        <div class="compare-col bad">
+            <h4>Chatbot thông thường</h4>
+            <p style="font-size:0.9rem">
+                Bạn paste code → AI trả lời → Bạn copy → Paste vào editor → Chạy → Lỗi → Lại paste vào chat → Vòng lặp...
+            </p>
+        </div>
+        <div class="compare-col good">
+            <h4>Claude Code</h4>
+            <p style="font-size:0.9rem">
+                Bạn mô tả → Claude tự đọc codebase → Tự viết code → Tự chạy test → Tự sửa lỗi → Done.
+            </p>
+        </div>
+    </div>
+
+    <div class="info-box insight">
+        <div class="info-box-title">Dành cho người chưa biết code</div>
+        <p style="margin:0">Claude Code <strong>không yêu cầu bạn biết lập trình</strong>. Bạn chỉ cần mô tả ý tưởng bằng tiếng Việt hoặc tiếng Anh. Claude sẽ lo toàn bộ phần kỹ thuật: tạo file, viết code, cài thư viện, chạy thử, sửa lỗi. Bạn chỉ cần nói <strong>"tôi muốn gì"</strong>.</p>
+    </div>
+
+    <h3>Claude Code có thể làm gì?</h3>
+    <table>
+        <tr>
+            <th>Khả năng</th>
+            <th>Mô tả</th>
+            <th>Chatbot thường</th>
+        </tr>
+        <tr>
+            <td><strong>Đọc toàn bộ codebase</strong></td>
+            <td>Hiểu hàng trăm file, cấu trúc thư mục, dependencies</td>
+            <td>Chỉ thấy đoạn bạn paste</td>
+        </tr>
+        <tr>
+            <td><strong>Viết & sửa file</strong></td>
+            <td>Tự tạo file mới, sửa file có sẵn trực tiếp</td>
+            <td>Chỉ show code, bạn tự copy</td>
+        </tr>
+        <tr>
+            <td><strong>Chạy terminal</strong></td>
+            <td>npm install, git commit, chạy tests, deploy...</td>
+            <td>Không thể</td>
+        </tr>
+        <tr>
+            <td><strong>Tự sửa lỗi</strong></td>
+            <td>Chạy → thấy lỗi → tự phân tích → sửa → chạy lại</td>
+            <td>Bạn phải paste lỗi vào chat</td>
+        </tr>
+        <tr>
+            <td><strong>Multi-step tasks</strong></td>
+            <td>Thực hiện 10-20 bước liên tiếp tự động</td>
+            <td>1 câu hỏi = 1 trả lời</td>
+        </tr>
+        <tr>
+            <td><strong>Kết nối dịch vụ ngoài</strong></td>
+            <td>GitHub, database, Slack, email qua MCP</td>
+            <td>Không thể</td>
+        </tr>
+    </table>
+</section>
+
+<!-- ============================================================ -->
+<!-- BÀI 4: BUILD WEB APP + VERIFICATION LOOP -->
+<!-- ============================================================ -->
+<section class="section" id="bai4">
+    <span class="section-number">Bài 4</span>
+    <h2>Build Web App Đầu Tiên</h2>
+    <p class="subtitle">CLAUDE.md, Verification Loop, và xây dựng website thực tế trong ~15 phút.</p>
+
+    <h3>Bước 1: Tạo CLAUDE.md - "Bộ não" của project</h3>
+    <p>
+        Trước khi code bất kỳ thứ gì, hãy tạo file <code>CLAUDE.md</code> ở gốc project.
+        Đây là file <span class="hl">quan trọng nhất</span> - mỗi khi Claude Code bắt đầu, nó đọc file này đầu tiên.
+    </p>
+
+    <div class="info-box important">
+        <div class="info-box-title">Tại sao cần CLAUDE.md?</div>
+        <p style="margin:0">Không có CLAUDE.md = Claude phải "đoán" về project mỗi lần. Có CLAUDE.md = Claude hiểu ngay lập tức, làm đúng từ lần đầu. Giống như bạn viết tài liệu onboarding cho nhân viên mới: càng rõ, nhân viên càng làm tốt.</p>
+    </div>
+
+    <pre><code><span class="code-label">CLAUDE.md</span># Dự Án: TaskFlow - Quản Lý Công Việc
+
+## Tổng quan
+Ứng dụng web quản lý công việc cho team nhỏ.
+
+## Tech Stack
+- Frontend: React 18 + TypeScript + Tailwind CSS
+- Backend: Node.js + Express + Prisma ORM
+- Database: PostgreSQL
+
+## Cách chạy
+npm run dev          # Frontend (port 3000)
+npm run server:dev   # Backend (port 8080)
+npm test             # Chạy tests
+
+## Quy tắc QUAN TRỌNG
+- Dùng functional components, KHÔNG class components
+- Tất cả components phải có TypeScript types
+- Mỗi API endpoint phải có error handling
+- KHÔNG commit file .env
+- KHÔNG dùng "any" type trong TypeScript</code></pre>
+
+    <h4>3 cấp độ CLAUDE.md</h4>
+    <table>
+        <tr>
+            <th>Vị trí</th>
+            <th>Phạm vi</th>
+            <th>Ví dụ</th>
+        </tr>
+        <tr>
+            <td><code>~/.claude/CLAUDE.md</code></td>
+            <td>Tất cả project</td>
+            <td>"Tôi thích code ngắn gọn, luôn dùng TypeScript"</td>
+        </tr>
+        <tr>
+            <td><code>./CLAUDE.md</code></td>
+            <td>Project hiện tại</td>
+            <td>Tech stack, quy tắc code, cách chạy</td>
+        </tr>
+        <tr>
+            <td><code>./src/CLAUDE.md</code></td>
+            <td>Chỉ thư mục đó</td>
+            <td>"Components ở đây phải dùng Tailwind"</td>
+        </tr>
+    </table>
+
+    <h3>Bước 2: Build app bằng cách "nói chuyện"</h3>
+    <pre><code><span class="code-label">Nói với Claude</span>> Tạo cho tôi một ứng dụng To-Do List:
+  - React + TypeScript
+  - Thêm, xoá, đánh dấu hoàn thành task
+  - Lưu vào localStorage
+  - Giao diện đẹp, dark theme, responsive
+  - Có animation khi thêm/xoá</code></pre>
+
+    <div class="flow-row">
+        <div class="flow-item">Claude đọc CLAUDE.md</div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-item">Tạo project</div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-item">Viết code</div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-item">Chạy thử</div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-item">Tự sửa lỗi</div>
+    </div>
+
+    <h3>Bước 3: Verification Loop - Vòng lặp kiểm tra</h3>
+    <p>
+        Đây là khái niệm <span class="hl">cực kỳ quan trọng</span>. Verification Loop là quy trình
+        Claude Code tự động kiểm tra và sửa lỗi cho đến khi mọi thứ hoạt động hoàn hảo.
+    </p>
+
+    <div class="diagram">
+    ┌─────────────┐     ┌──────────────┐     ┌──────────────┐
+    │  Claude      │────▶│  Chạy code   │────▶│  Có lỗi?     │
+    │  viết code   │     │  / tests     │     │              │
+    └─────────────┘     └──────────────┘     └──────┬───────┘
+          ▲                                         │
+          │              ┌──────────────┐      Có   │  Không
+          │              │              │◀──────┘    │
+          └──────────────│  Phân tích   │            ▼
+                         │  & sửa lỗi   │     ┌──────────┐
+                         └──────────────┘     │  DONE!   │
+                                              └──────────┘
+    </div>
+
+    <h4>Ví dụ Verification Loop trong thực tế:</h4>
+    <pre><code><span class="code-label">Những gì Claude tự động làm</span>1. Viết component TodoList.tsx
+2. Chạy: npm run build
+3. Lỗi: "Property 'completed' does not exist on type..."
+4. Phân tích: Thiếu type definition
+5. Sửa: Thêm interface Todo { id: number; title: string; completed: boolean; }
+6. Chạy lại: npm run build
+7. Lỗi: "Cannot find module './TodoItem'"
+8. Sửa: Tạo file TodoItem.tsx
+9. Chạy lại: npm run build ✓ Success!
+10. Chạy: npm test ✓ All tests passed!</code></pre>
+
+    <div class="info-box tip">
+        <div class="info-box-title">Bạn không cần can thiệp!</div>
+        <p style="margin:0">Toàn bộ vòng lặp này Claude tự làm. Bạn chỉ cần ngồi xem. Nếu sau 3-4 lần thử mà vẫn lỗi, Claude sẽ hỏi bạn. Nhưng 90% trường hợp, nó tự giải quyết được.</p>
+    </div>
+
+    <h3>Bước 4: Chỉnh sửa bằng ngôn ngữ tự nhiên</h3>
+    <pre><code><span class="code-label">Các câu bạn có thể nói</span>> Đổi màu nền thành xanh dương đậm hơn
+> Thêm chức năng filter: tất cả / đang làm / đã xong
+> Button xoá quá nhỏ, tăng kích thước lên
+> Thêm chế độ dark/light toggle
+> Export danh sách todo ra file CSV</code></pre>
+</section>
+
+<!-- ============================================================ -->
+<!-- BÀI 5: .CLAUDE DIRECTORY -->
+<!-- ============================================================ -->
+<section class="section" id="bai5">
+    <span class="section-number">Bài 5</span>
+    <h2>.claude Directory - Kho Vũ Khí Bí Mật</h2>
+    <p class="subtitle">Rules, Memory, Agents, Skills - mà 98% người dùng bỏ qua.</p>
+
+    <h3>Thư mục .claude là gì?</h3>
+    <p>
+        Ngoài file <code>CLAUDE.md</code>, còn có một <span class="hl">thư mục ẩn</span> cực kỳ mạnh mẽ: <code>.claude/</code>.
+        Đây là nơi bạn cấu hình toàn bộ hành vi, khả năng, và "tính cách" của Claude Code cho project.
+    </p>
+
+    <div class="tree">
+<span class="folder">.claude/</span>
+├── <span class="highlight">settings.json</span>      <span class="desc">← Cấu hình chính: hooks, MCP, permissions</span>
+├── <span class="folder">commands/</span>           <span class="desc">← Slash commands tự tạo</span>
+│   ├── <span class="file">deploy.md</span>
+│   ├── <span class="file">review-pr.md</span>
+│   └── <span class="file">generate-tests.md</span>
+└── <span class="folder">agents/</span>             <span class="desc">← Agent templates tự tạo</span>
+    ├── <span class="file">code-reviewer.md</span>
+    └── <span class="file">test-writer.md</span>
+    </div>
+
+    <h3>1. Rules - Quy tắc bất di bất dịch</h3>
+    <p>
+        Rules là những <span class="hl">quy tắc mà Claude PHẢI tuân theo</span>, khác với CLAUDE.md (là hướng dẫn chung).
+        Rules được đặt trong <code>settings.json</code>:
+    </p>
+
+    <pre><code><span class="code-label">.claude/settings.json</span>{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Edit",
+      "Write"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(git push --force)"
+    ]
+  }
+}</code></pre>
+
+    <div class="info-box warning">
+        <div class="info-box-title">Quy tắc Allow/Deny</div>
+        <p style="margin:0">
+            <strong>Allow:</strong> Các tool Claude được tự động dùng không cần hỏi.<br>
+            <strong>Deny:</strong> Các lệnh bị CẤM tuyệt đối. Dù bạn có yêu cầu, Claude cũng không được chạy.
+            Ví dụ: cấm <code>rm -rf</code>, cấm <code>git push --force</code>.
+        </p>
+    </div>
+
+    <h3>2. Memory - Bộ nhớ dài hạn</h3>
+    <p>
+        Claude Code có hệ thống <span class="hl">memory</span> - nhớ thông tin qua các phiên làm việc khác nhau.
+        Khác với context (ngắn hạn, mất khi /clear), memory tồn tại vĩnh viễn.
+    </p>
+
+    <h4>Các loại memory:</h4>
+    <table>
+        <tr>
+            <th>Loại</th>
+            <th>Lưu gì?</th>
+            <th>Ví dụ</th>
+        </tr>
+        <tr>
+            <td><strong>User</strong></td>
+            <td>Thông tin về bạn</td>
+            <td>"Tôi là frontend developer, thích Tailwind CSS"</td>
+        </tr>
+        <tr>
+            <td><strong>Feedback</strong></td>
+            <td>Những gì bạn sửa Claude</td>
+            <td>"Đừng thêm comments thừa vào code"</td>
+        </tr>
+        <tr>
+            <td><strong>Project</strong></td>
+            <td>Tình trạng project</td>
+            <td>"Đang freeze code, chỉ fix bug critical"</td>
+        </tr>
+        <tr>
+            <td><strong>Reference</strong></td>
+            <td>Nơi tìm thông tin</td>
+            <td>"Bugs được track trên Linear project INGEST"</td>
+        </tr>
+    </table>
+
+    <pre><code><span class="code-label">Cách sử dụng Memory</span># Yêu cầu Claude nhớ:
+> Nhớ rằng: tôi thích code ngắn gọn, không thêm comments thừa,
+  và luôn dùng arrow functions thay cho function declarations.
+
+# Claude sẽ tạo file memory và nhớ cho các phiên sau.
+# Lần sau bạn mở Claude Code, nó đã biết sở thích của bạn.</code></pre>
+
+    <h3>3. Skills - Kỹ năng đặc biệt</h3>
+    <p>
+        Skills là các <span class="hl">khả năng mở rộng</span> của Claude Code. Một số skills có sẵn,
+        một số bạn có thể tự tạo:
+    </p>
+
+    <div class="card-grid">
+        <div class="card">
+            <div class="card-icon">&#x1F4E6;</div>
+            <h4>/commit</h4>
+            <p>Tự phân tích changes và tạo commit message chuẩn</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">&#x1F50D;</div>
+            <h4>/review</h4>
+            <p>Review code, tìm bug, gợi ý cải thiện</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">&#x1F4C4;</div>
+            <h4>/simplify</h4>
+            <p>Tối ưu code: gọn hơn, nhanh hơn, sạch hơn</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">&#x1F527;</div>
+            <h4>/claude-api</h4>
+            <p>Tạo app dùng Claude API với prompt caching</p>
+        </div>
+    </div>
+
+    <h3>4. Custom Agents - Tạo agent riêng</h3>
+    <pre><code><span class="code-label">.claude/agents/security-reviewer.md</span>---
+name: Security Reviewer
+description: Kiểm tra bảo mật cho code
+---
+
+Bạn là chuyên gia bảo mật. Khi được gọi, hãy:
+
+1. Quét code tìm lỗ hổng OWASP Top 10:
+   - SQL Injection
+   - XSS (Cross-Site Scripting)
+   - CSRF
+   - Broken Authentication
+   - Sensitive Data Exposure
+
+2. Kiểm tra:
+   - Có hardcode secrets không?
+   - Input validation đã đủ chưa?
+   - API endpoints có rate limiting không?
+
+3. Cho điểm bảo mật: A/B/C/D/F
+4. Liệt kê cụ thể từng lỗ hổng và cách sửa</code></pre>
+
+    <div class="info-box tip">
+        <div class="info-box-title">Tại sao 98% bỏ qua?</div>
+        <p style="margin:0">Hầu hết người dùng chỉ biết gõ chat với Claude Code. Nhưng <strong>sức mạnh thực sự</strong> nằm ở thư mục <code>.claude/</code>. Khi bạn cấu hình đúng: Rules bảo vệ code, Memory nhớ sở thích, Skills mở rộng khả năng, Agents chuyên biệt hoá - Claude Code trở thành một <strong>team AI hoàn chỉnh</strong>, không chỉ là 1 chatbot.</p>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- BÀI 6: CONTEXT MANAGEMENT + PLAN MODE -->
+<!-- ============================================================ -->
+<section class="section" id="bai6">
+    <span class="section-number">Bài 6</span>
+    <h2>Context Management + Plan Mode</h2>
+    <p class="subtitle">Làm chủ "bộ nhớ" của Claude và lên kế hoạch trước khi build.</p>
+
+    <h3>Phần 1: Context Management</h3>
+
+    <h4>Context Window là gì?</h4>
+    <p>
+        Context window là <span class="hl">bộ nhớ ngắn hạn</span> của Claude - chứa TẤT CẢ thông tin
+        trong phiên làm việc hiện tại. Giống như bàn làm việc: càng nhiều giấy tờ, càng khó tìm thứ cần.
+    </p>
+
+    <div class="diagram">
+    ┌──────────── Context Window (200K tokens) ──────────────┐
+    │                                                         │
+    │  CLAUDE.md + System prompt        ~5,000 tokens         │
+    │  Lịch sử hội thoại               ~20,000 tokens        │
+    │  File đã đọc                     ~50,000 tokens         │
+    │  Kết quả lệnh đã chạy           ~10,000 tokens         │
+    │  ────────────────────────────────────────                │
+    │  Còn lại cho phần trả lời        ~115,000 tokens        │
+    │                                                         │
+    └─────────────────────────────────────────────────────────┘
+
+    1 token ≈ 3/4 từ tiếng Anh
+    1 từ tiếng Việt ≈ 2-4 tokens
+    1 file 100 dòng ≈ 1,000-2,000 tokens
+    </div>
+
+    <h4>Khi context đầy, chuyện gì xảy ra?</h4>
+    <ul>
+        <li>Claude bắt đầu <strong>"quên"</strong> những gì nói trước đó</li>
+        <li>Phản hồi <strong>chậm hơn</strong> và có thể <strong>kém chính xác</strong></li>
+        <li>Tốn <strong>nhiều tiền hơn</strong> (nhiều token = nhiều chi phí)</li>
+    </ul>
+
+    <h4>3 công cụ quản lý context</h4>
+    <table>
+        <tr>
+            <th>Lệnh</th>
+            <th>Tác dụng</th>
+            <th>Khi nào dùng</th>
+        </tr>
+        <tr>
+            <td><code>/compact</code></td>
+            <td>Nén lịch sử lại, giữ thông tin quan trọng</td>
+            <td>Mỗi 30-45 phút, hoặc khi Claude bắt đầu quên</td>
+        </tr>
+        <tr>
+            <td><code>/clear</code></td>
+            <td>Xoá sạch toàn bộ context, bắt đầu mới</td>
+            <td>Khi chuyển sang task hoàn toàn khác</td>
+        </tr>
+        <tr>
+            <td><code>CLAUDE.md</code></td>
+            <td>Thông tin tồn tại vĩnh viễn qua các phiên</td>
+            <td>Quy tắc, cấu trúc, cách chạy project</td>
+        </tr>
+    </table>
+
+    <pre><code><span class="code-label">Mẹo dùng /compact thông minh</span># Khi compact, nói cho Claude biết cần giữ gì:
+> /compact Giữ lại: đang làm feature search, đã xong phần UI
+  ở file SearchBar.tsx, còn lại phần API integration với endpoint
+  GET /api/search?q=keyword
+
+# Claude sẽ tóm tắt mọi thứ nhưng giữ nguyên thông tin bạn chỉ định</code></pre>
+
+    <h3>Phần 2: Plan Mode - Lên kế hoạch trước khi code</h3>
+    <p>
+        Plan Mode là tính năng cho phép Claude <span class="hl">suy nghĩ và lên kế hoạch</span>
+        trước khi bắt tay vào code. Thay vì nhảy vào viết code ngay, Claude sẽ:
+    </p>
+
+    <ol class="steps">
+        <li>
+            <strong>Phân tích yêu cầu</strong>
+            Hiểu bạn muốn gì, xác định scope, liệt kê assumptions
+        </li>
+        <li>
+            <strong>Khảo sát codebase</strong>
+            Đọc code hiện có, hiểu kiến trúc, tìm file liên quan
+        </li>
+        <li>
+            <strong>Đề xuất kế hoạch</strong>
+            Trình bày plan chi tiết: thay đổi gì, ở đâu, theo thứ tự nào
+        </li>
+        <li>
+            <strong>Chờ bạn duyệt</strong>
+            Bạn xem plan, góp ý, điều chỉnh. Chỉ khi bạn đồng ý, Claude mới bắt đầu code
+        </li>
+    </ol>
+
+    <h4>Cách bật Plan Mode:</h4>
+    <pre><code><span class="code-label">Nói với Claude</span># Cách 1: Yêu cầu lên plan
+> Lên kế hoạch chi tiết để thêm hệ thống authentication
+  vào app này. CHƯA code gì cả, chỉ plan thôi.
+
+# Cách 2: Dùng shift+tab để vào Plan Mode
+# (Trong VS Code, nhấn Shift+Tab trước khi gửi message)
+
+# Cách 3: Nói rõ ràng
+> /plan Refactor hệ thống payment từ Stripe sang Paddle</code></pre>
+
+    <h4>Ví dụ Plan Mode output:</h4>
+    <pre><code><span class="code-label">Claude trả lời</span>## Kế hoạch: Thêm Authentication
+
+### Phân tích hiện tại:
+- App chưa có auth, tất cả routes đều public
+- Đang dùng Express backend, React frontend
+- Database: PostgreSQL với Prisma ORM
+
+### Đề xuất approach:
+Session-based auth (phù hợp với app nhỏ hơn JWT)
+
+### Các bước thực hiện:
+
+**Bước 1: Database** (ước tính ~50 dòng code)
+- Tạo migration: bảng users (email, password_hash, created_at)
+- Tạo migration: bảng sessions (token, user_id, expires_at)
+
+**Bước 2: Backend** (ước tính ~150 dòng code)
+- POST /auth/register - đăng ký
+- POST /auth/login - đăng nhập
+- POST /auth/logout - đăng xuất
+- Middleware: requireAuth cho protected routes
+
+**Bước 3: Frontend** (ước tính ~200 dòng code)
+- Trang Login / Register
+- AuthContext cho state management
+- ProtectedRoute component
+- Cập nhật Navbar hiển thị user info
+
+**Bước 4: Tests** (ước tính ~100 dòng code)
+- Unit tests cho auth middleware
+- Integration tests cho auth API
+- E2E test cho login flow
+
+### Rủi ro & lưu ý:
+- Cần hash password với bcrypt (KHÔNG lưu plaintext)
+- Session token phải random, đủ dài (256-bit)
+- Cần rate limiting cho login endpoint
+
+Bạn đồng ý với plan này không? Tôi sẽ bắt đầu từ Bước 1.</code></pre>
+
+    <div class="info-box insight">
+        <div class="info-box-title">Tại sao Plan Mode quan trọng?</div>
+        <p style="margin:0">
+            Không có plan → Claude code xong → bạn không hài lòng → phải làm lại → tốn gấp 2-3 lần token và thời gian.
+            Có plan → bạn duyệt trước → điều chỉnh sớm → Claude code 1 lần đúng → tiết kiệm 50-70% thời gian.
+            <strong>Với mọi task phức tạp (>30 phút), hãy luôn dùng Plan Mode.</strong>
+        </p>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- BÀI 7: SLASH COMMANDS -->
+<!-- ============================================================ -->
+<section class="section" id="bai7">
+    <span class="section-number">Bài 7</span>
+    <h2>Slash Commands</h2>
+    <p class="subtitle">4 nhóm lệnh, 3 lệnh dùng hằng ngày - tăng tốc workflow gấp 5 lần.</p>
+
+    <h3>Slash Commands là gì?</h3>
+    <p>
+        Slash Commands là các <span class="hl">lệnh tắt bắt đầu bằng /</span> để thực hiện nhanh các tác vụ phổ biến.
+        Thay vì gõ cả đoạn dài mỗi lần, bạn chỉ cần gõ 1 lệnh ngắn.
+    </p>
+
+    <h3>Nhóm 1: Quản lý phiên làm việc</h3>
+    <table>
+        <tr>
+            <th>Lệnh</th>
+            <th>Chức năng</th>
+            <th>Ví dụ khi nào dùng</th>
+        </tr>
+        <tr>
+            <td><code>/clear</code></td>
+            <td>Xoá toàn bộ context, bắt đầu mới</td>
+            <td>Chuyển sang task mới hoàn toàn</td>
+        </tr>
+        <tr>
+            <td><code>/compact</code></td>
+            <td>Nén lịch sử, giữ thông tin quan trọng</td>
+            <td>Mỗi 30 phút hoặc khi context lớn</td>
+        </tr>
+        <tr>
+            <td><code>/help</code></td>
+            <td>Hiển thị hướng dẫn sử dụng</td>
+            <td>Quên cách dùng tính năng nào đó</td>
+        </tr>
+    </table>
+
+    <h3>Nhóm 2: Git & Code</h3>
+    <table>
+        <tr>
+            <th>Lệnh</th>
+            <th>Chức năng</th>
+            <th>Ví dụ khi nào dùng</th>
+        </tr>
+        <tr>
+            <td><code>/commit</code></td>
+            <td>Tự phân tích changes → tạo commit message chuẩn</td>
+            <td>Mỗi khi hoàn thành 1 feature/fix</td>
+        </tr>
+        <tr>
+            <td><code>/review</code></td>
+            <td>Review code, tìm bugs, gợi ý cải thiện</td>
+            <td>Trước khi tạo PR hoặc merge</td>
+        </tr>
+        <tr>
+            <td><code>/simplify</code></td>
+            <td>Tối ưu code: gọn, nhanh, sạch hơn</td>
+            <td>Sau khi code xong, muốn polish</td>
+        </tr>
+    </table>
+
+    <h3>Nhóm 3: Chế độ làm việc</h3>
+    <table>
+        <tr>
+            <th>Lệnh</th>
+            <th>Chức năng</th>
+            <th>Ví dụ khi nào dùng</th>
+        </tr>
+        <tr>
+            <td><code>/fast</code></td>
+            <td>Toggle chế độ nhanh (Sonnet thay Opus)</td>
+            <td>Task đơn giản, cần tốc độ</td>
+        </tr>
+        <tr>
+            <td><code>/loop</code></td>
+            <td>Chạy lặp đi lặp lại 1 tác vụ</td>
+            <td>Theo dõi build, polling status</td>
+        </tr>
+    </table>
+
+    <h3>Nhóm 4: Custom Commands - Bạn tự tạo</h3>
+    <p>Đây là nhóm <span class="hl">mạnh nhất</span>. Bạn tạo file <code>.md</code> trong <code>.claude/commands/</code>:</p>
+
+    <pre><code><span class="code-label">.claude/commands/deploy.md</span># Lệnh deploy toàn bộ ứng dụng
+
+Thực hiện đúng quy trình sau, KHÔNG được bỏ bước:
+
+1. **Kiểm tra code:**
+   - `npx tsc --noEmit` → phải 0 errors
+   - `npm run lint` → phải 0 warnings
+   - `npm test` → phải all passed
+
+2. **Build production:**
+   - `npm run build`
+   - Kiểm tra output size hợp lý (<5MB)
+
+3. **Git:**
+   - Tạo commit với message mô tả changes
+   - Push lên remote
+
+4. **Báo cáo:**
+   - Liệt kê những gì đã thay đổi
+   - Ghi chú nếu có breaking changes</code></pre>
+
+    <pre><code><span class="code-label">.claude/commands/morning-standup.md</span># Báo cáo buổi sáng
+
+Phân tích project và tạo báo cáo standup:
+
+1. `git log --oneline --since="yesterday"` → việc đã làm hôm qua
+2. Đọc TODO comments trong code → việc cần làm hôm nay
+3. `npm test` → có test nào fail không?
+4. `git status` → có file nào chưa commit?
+
+Trình bày theo format:
+- ✅ Hôm qua đã làm: ...
+- 📋 Hôm nay sẽ làm: ...
+- ⚠️ Blockers/Issues: ...</code></pre>
+
+    <p>Sử dụng: <code>/project:deploy</code> hoặc <code>/project:morning-standup</code></p>
+
+    <h3>3 lệnh dùng hằng ngày (PHẢI NHỚ)</h3>
+    <div class="card-grid">
+        <div class="card" style="border-top: 3px solid var(--accent3);">
+            <div class="card-icon">&#x1F4BE;</div>
+            <h4>/commit</h4>
+            <p>Dùng mỗi khi xong 1 task. Claude tự phân tích diff, viết commit message rõ ràng, đúng convention.</p>
+        </div>
+        <div class="card" style="border-top: 3px solid var(--accent4);">
+            <div class="card-icon">&#x1F4E6;</div>
+            <h4>/compact</h4>
+            <p>Dùng mỗi 30 phút. Nén context, giữ thông tin quan trọng, giải phóng "bộ nhớ" cho Claude.</p>
+        </div>
+        <div class="card" style="border-top: 3px solid var(--accent5);">
+            <div class="card-icon">&#x26A1;</div>
+            <h4>/fast</h4>
+            <p>Toggle khi task đơn giản. Nhanh hơn, rẻ hơn. Toggle lại khi cần suy nghĩ phức tạp.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- BÀI 8: MCP TOOLS -->
+<!-- ============================================================ -->
+<section class="section" id="bai8">
+    <span class="section-number">Bài 8</span>
+    <h2>MCP Tools - Kết Nối Với Thế Giới Bên Ngoài</h2>
+    <p class="subtitle">Email, browser, database, GitHub, Slack - Claude Code làm được tất cả qua MCP.</p>
+
+    <h3>MCP là gì?</h3>
+    <p>
+        MCP (Model Context Protocol) là <span class="hl">giao thức chuẩn</span> cho phép Claude Code
+        kết nối với bất kỳ dịch vụ bên ngoài nào. Giống như cổng USB cho AI - cắm vào là dùng được.
+    </p>
+
+    <div class="diagram">
+                        Claude Code
+                            │
+       ┌────────────────────┼────────────────────┐
+       ▼          ▼         ▼         ▼          ▼
+    Database   GitHub    Slack     Email     Browser
+       │          │         │         │          │
+       ▼          ▼         ▼         ▼          ▼
+   PostgreSQL  Issues    Channels  Gmail     Web pages
+   MongoDB     PRs      Messages  Outlook   Screenshots
+   SQLite      Actions  Threads              Automation
+    </div>
+
+    <h3>Tại sao MCP thay đổi mọi thứ?</h3>
+    <p>
+        Mặc định Claude Code chỉ có thể đọc file và chạy terminal. Với MCP, nó trở thành
+        <span class="hl">trung tâm điều khiển</span> kết nối mọi công cụ bạn dùng hàng ngày:
+    </p>
+
+    <h3>Cách cài đặt MCP Servers</h3>
+    <pre><code><span class="code-label">.claude/settings.json</span>{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "ghp_your_token_here"
+      }
+    },
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "env": {
+        "DATABASE_URL": "postgresql://user:pass@localhost:5432/mydb"
+      }
+    },
+    "slack": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-slack"],
+      "env": {
+        "SLACK_TOKEN": "xoxb-your-token"
+      }
+    },
+    "browser": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-server-puppeteer"]
+    },
+    "gmail": {
+      "command": "npx",
+      "args": ["-y", "mcp-server-gmail"],
+      "env": {
+        "GMAIL_CREDENTIALS": "./credentials.json"
+      }
+    }
+  }
+}</code></pre>
+
+    <h3>Ví dụ thực tế từng MCP Server</h3>
+
+    <h4>GitHub - Quản lý code & issues</h4>
+    <pre><code><span class="code-label">Nói với Claude</span>> Xem 5 issues mới nhất, tìm cái nào critical
+> Tạo PR cho branch hiện tại, title: "feat: add search functionality"
+> Comment vào PR #42: "LGTM, đã review xong"
+> Xem CI status của commit mới nhất</code></pre>
+
+    <h4>Database - Truy vấn trực tiếp</h4>
+    <pre><code><span class="code-label">Nói với Claude</span>> Có bao nhiêu users đăng ký trong 7 ngày qua?
+> Tìm tất cả orders có status = 'failed' trong tháng này
+> Tạo báo cáo doanh thu theo tháng, từ tháng 1 đến nay
+> Kiểm tra có user nào bị duplicate email không?</code></pre>
+
+    <h4>Browser - Duyệt web & screenshot</h4>
+    <pre><code><span class="code-label">Nói với Claude</span>> Mở localhost:3000 và chụp screenshot trang chủ
+> Kiểm tra responsive: chụp screenshot ở 375px, 768px, và 1440px
+> Mở trang đăng nhập, thử fill form với test data
+> Kiểm tra xem trang có lỗi console không</code></pre>
+
+    <h4>Email - Gửi thông báo</h4>
+    <pre><code><span class="code-label">Nói với Claude</span>> Gửi email cho team@company.com:
+  Subject: "Deploy v2.1 thành công"
+  Body: Liệt kê các thay đổi chính từ git log
+
+> Đọc 5 email mới nhất từ inbox và tóm tắt</code></pre>
+
+    <h4>Slack - Cập nhật team</h4>
+    <pre><code><span class="code-label">Nói với Claude</span>> Gửi tin nhắn lên #dev-updates:
+  "🚀 Deploy v2.1 thành công! Changes: search feature, bug fixes"
+
+> Đọc 10 tin nhắn mới nhất trong #bugs và tóm tắt</code></pre>
+
+    <div class="info-box tip">
+        <div class="info-box-title">Tìm thêm MCP Servers</div>
+        <p style="margin:0">
+            Cộng đồng đã tạo <strong>hàng trăm MCP servers</strong>: Notion, Google Sheets, Jira, Figma,
+            AWS, Vercel, Supabase... Tìm tại <strong>github.com/modelcontextprotocol/servers</strong>.
+            Bạn cũng có thể tự tạo MCP server cho API nội bộ công ty!
+        </p>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- BÀI 9: HOOKS -->
+<!-- ============================================================ -->
+<section class="section" id="bai9">
+    <span class="section-number">Bài 9</span>
+    <h2>Hooks - Tự Động Hoá Hành Vi</h2>
+    <p class="subtitle">Tự động hoá hành vi trước/sau mỗi hành động của Claude - không cần nhắc nhở.</p>
+
+    <h3>Hooks là gì?</h3>
+    <p>
+        Hooks là các <span class="hl">lệnh shell tự động chạy</span> khi Claude thực hiện 1 hành động.
+        Giống như "quy tắc tự động" - <strong>khi X xảy ra → tự động làm Y</strong>.
+    </p>
+
+    <div class="diagram">
+    Bạn yêu cầu Claude sửa file
+            │
+            ▼
+    ┌─── PreToolUse Hook ───┐
+    │ Kiểm tra: file này có │
+    │ nằm trong danh sách   │──── Từ chối? → CHẶN hành động
+    │ cấm sửa không?        │
+    └───────────┬────────────┘
+                │ OK
+                ▼
+    ┌─── Claude sửa file ───┐
+    │    (Edit/Write)        │
+    └───────────┬────────────┘
+                │
+                ▼
+    ┌─── PostToolUse Hook ──┐
+    │ Tự động:               │
+    │ - Format code (Prettier)│
+    │ - Lint check (ESLint)  │
+    │ - Type check (tsc)     │
+    └────────────────────────┘
+    </div>
+
+    <h3>4 loại Hooks</h3>
+    <table>
+        <tr>
+            <th>Hook</th>
+            <th>Khi nào chạy?</th>
+            <th>Use case phổ biến</th>
+        </tr>
+        <tr>
+            <td><code>PreToolUse</code></td>
+            <td><strong>TRƯỚC</strong> khi Claude dùng tool</td>
+            <td>Chặn sửa file .env, chặn xoá file quan trọng</td>
+        </tr>
+        <tr>
+            <td><code>PostToolUse</code></td>
+            <td><strong>SAU</strong> khi Claude dùng tool</td>
+            <td>Auto format, auto lint, auto type-check</td>
+        </tr>
+        <tr>
+            <td><code>Notification</code></td>
+            <td>Khi Claude gửi thông báo</td>
+            <td>Gửi alert qua Slack, push notification</td>
+        </tr>
+        <tr>
+            <td><code>Stop</code></td>
+            <td>Khi Claude hoàn thành task</td>
+            <td>Chạy full test suite, build kiểm tra</td>
+        </tr>
+    </table>
+
+    <h3>Ví dụ thực tế: Bộ Hooks hoàn chỉnh</h3>
+    <pre><code><span class="code-label">.claude/settings.json</span>{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "command": "echo \"$CLAUDE_FILE_PATH\" | grep -qE '\\.(env|key|pem|secret)' && echo 'BLOCK: Không được sửa file chứa secrets!' && exit 1 || exit 0"
+      },
+      {
+        "matcher": "Bash",
+        "command": "echo \"$CLAUDE_COMMAND\" | grep -q 'rm -rf' && echo 'BLOCK: Lệnh nguy hiểm!' && exit 1 || exit 0"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "command": "npx prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null; npx eslint --fix \"$CLAUDE_FILE_PATH\" 2>/dev/null; exit 0"
+      }
+    ],
+    "Stop": [
+      {
+        "command": "npm test -- --passWithNoTests 2>&1 | tail -10"
+      }
+    ]
+  }
+}</code></pre>
+
+    <h4>Giải thích từng hook:</h4>
+    <div class="card-grid">
+        <div class="card">
+            <div class="card-icon">&#x1F6E1;&#xFE0F;</div>
+            <h4>PreToolUse #1: Bảo vệ secrets</h4>
+            <p>Nếu Claude muốn sửa file .env, .key, .pem → <strong>CHẶN ngay</strong>. Không cho sửa dù bạn yêu cầu.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">&#x26D4;</div>
+            <h4>PreToolUse #2: Chặn lệnh nguy hiểm</h4>
+            <p>Nếu Claude chạy <code>rm -rf</code> → <strong>CHẶN ngay</strong>. Bảo vệ bạn khỏi mất dữ liệu.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">&#x2728;</div>
+            <h4>PostToolUse: Auto format</h4>
+            <p>Mỗi khi Claude sửa file → tự động chạy Prettier + ESLint. Code luôn đẹp, luôn chuẩn.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">&#x1F9EA;</div>
+            <h4>Stop: Auto test</h4>
+            <p>Mỗi khi Claude hoàn thành task → tự động chạy tests. Biết ngay có gì bị hỏng.</p>
+        </div>
+    </div>
+
+    <div class="info-box insight">
+        <div class="info-box-title">Hooks = An toàn + Chất lượng tự động</div>
+        <p style="margin:0">
+            Bạn không cần nhắc "format code đi", "chạy test đi" mỗi lần.
+            Hooks làm tự động. Bạn cũng không cần lo Claude sửa nhầm file quan trọng.
+            <strong>Setup 1 lần, yên tâm mãi mãi.</strong>
+        </p>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- BÀI 10: SUB-AGENTS & AGENT TEAMS -->
+<!-- ============================================================ -->
+<section class="section" id="bai10">
+    <span class="section-number">Bài 10</span>
+    <h2>Sub-agents & Agent Teams</h2>
+    <p class="subtitle">Orchestrate đội ngũ AI làm việc song song - từ 1 Claude thành cả team.</p>
+
+    <h3>Từ 1 Agent thành 1 Team</h3>
+    <p>
+        Khi task phức tạp, 1 Claude không đủ. Giải pháp: tạo <span class="hl">đội ngũ agents chuyên biệt</span>,
+        mỗi agent giỏi 1 việc, phối hợp nhau như một team thực sự.
+    </p>
+
+    <div class="diagram">
+                    Bạn: "Refactor hệ thống auth"
+                              │
+                              ▼
+                    ┌─── Main Agent ───┐
+                    │  (Orchestrator)   │
+                    │  Phân tích task   │
+                    │  Chia nhỏ công    │
+                    │  việc & phân công │
+                    └────────┬─────────┘
+              ┌──────────────┼──────────────┐
+              ▼              ▼              ▼
+    ┌─── Researcher ──┐ ┌── Coder ───┐ ┌── Tester ───┐
+    │ Quét codebase    │ │ Viết code  │ │ Viết tests  │
+    │ Tìm tất cả JWT  │ │ Session    │ │ Unit tests  │
+    │ code, endpoints  │ │ auth mới   │ │ Integration │
+    │ liên quan        │ │            │ │ E2E tests   │
+    └────────┬─────────┘ └─────┬──────┘ └──────┬──────┘
+              │                │               │
+              └────────────────┼───────────────┘
+                              ▼
+                    ┌─── Main Agent ───┐
+                    │  Tổng hợp kết    │
+                    │  quả, review,    │
+                    │  merge tất cả    │
+                    └──────────────────┘
+    </div>
+
+    <h3>Khi nào Claude tạo sub-agents?</h3>
+    <ul>
+        <li><strong>Tìm kiếm rộng:</strong> Cần quét nhiều file/thư mục cùng lúc</li>
+        <li><strong>Nhiệm vụ độc lập:</strong> Nhiều việc có thể làm song song</li>
+        <li><strong>Phân tích sâu:</strong> Cần xem xét nhiều khía cạnh (performance, security, UX...)</li>
+        <li><strong>Task lớn:</strong> Bài toán có thể chia thành 3-5 phần riêng biệt</li>
+    </ul>
+
+    <h3>Orchestration Patterns</h3>
+    <p>Có 3 cách phổ biến để tổ chức agent teams:</p>
+
+    <h4>Pattern 1: Fan-out / Fan-in (Phổ biến nhất)</h4>
+    <pre><code><span class="code-label">Mô hình</span>Main Agent
+    ├──▶ Agent A (làm phần 1) ──┐
+    ├──▶ Agent B (làm phần 2) ──┼──▶ Main Agent tổng hợp
+    └──▶ Agent C (làm phần 3) ──┘
+
+Ví dụ: "Review security cho toàn bộ app"
+    ├──▶ Agent A: Kiểm tra SQL injection
+    ├──▶ Agent B: Kiểm tra XSS
+    └──▶ Agent C: Kiểm tra authentication bypass</code></pre>
+
+    <h4>Pattern 2: Pipeline (Tuần tự)</h4>
+    <pre><code><span class="code-label">Mô hình</span>Agent A ──▶ Agent B ──▶ Agent C ──▶ Done
+(Research)   (Code)      (Test)
+
+Ví dụ: "Thêm tính năng search"
+Agent A: Nghiên cứu codebase, tìm pattern phù hợp
+    ↓
+Agent B: Viết code search dựa trên kết quả Agent A
+    ↓
+Agent C: Viết tests cho code Agent B vừa viết</code></pre>
+
+    <h4>Pattern 3: Supervisor (Giám sát)</h4>
+    <pre><code><span class="code-label">Mô hình</span>Supervisor Agent (giám sát liên tục)
+    ├── Worker Agent 1 (code)
+    ├── Worker Agent 2 (code)
+    └── Review Agent (kiểm tra output)
+
+Supervisor phân việc → Workers làm → Review kiểm tra
+    → Nếu fail → quay lại Worker sửa</code></pre>
+
+    <h3>Tạo Agent Teams với Claude Code SDK</h3>
+    <pre><code><span class="code-label">agent-team.ts</span>import Anthropic from "@anthropic-ai/sdk";
+
+const anthropic = new Anthropic();
+
+// Định nghĩa các agent chuyên biệt
+const agents = {
+  researcher: {
+    system: `Bạn là researcher. Nhiệm vụ: quét codebase,
+    tìm patterns, liệt kê files liên quan. Trả lời bằng JSON.`,
+    model: "claude-haiku-4-5-20251001"  // Nhanh, rẻ, đủ cho search
+  },
+  coder: {
+    system: `Bạn là senior developer. Viết code sạch,
+    có TypeScript types, error handling đầy đủ.`,
+    model: "claude-sonnet-4-6"  // Cân bằng tốc độ & chất lượng
+  },
+  reviewer: {
+    system: `Bạn là code reviewer khắt khe. Kiểm tra:
+    bugs, performance, security, readability. Cho điểm 1-10.`,
+    model: "claude-opus-4-6"  // Thông minh nhất cho review sâu
+  }
+};
+
+// Chạy team song song
+async function runTeam(task: string) {
+  // Bước 1: Researcher quét codebase
+  const research = await callAgent("researcher", task);
+
+  // Bước 2: Coder + Tester làm song song
+  const [code, tests] = await Promise.all([
+    callAgent("coder", `Dựa trên research:\n${research}\n\nViết code cho: ${task}`),
+    callAgent("coder", `Viết tests cho: ${task}`)
+  ]);
+
+  // Bước 3: Reviewer kiểm tra tất cả
+  const review = await callAgent("reviewer",
+    `Review code:\n${code}\n\nTests:\n${tests}`
+  );
+
+  return { research, code, tests, review };
+}</code></pre>
+
+    <div class="info-box tip">
+        <div class="info-box-title">Cho người mới: Bạn không cần code SDK!</div>
+        <p style="margin:0">
+            Claude Code <strong>tự động tạo sub-agents</strong> khi cần. Bạn chỉ cần mô tả task phức tạp,
+            Claude sẽ tự chia nhỏ và phân công. Phần SDK ở trên là cho developer muốn <strong>tuỳ chỉnh sâu</strong>
+            và xây dựng hệ thống automation riêng.
+        </p>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- BONUS: MULTI INSTANCE -->
+<!-- ============================================================ -->
+<section class="section" id="multi-instance">
+    <span class="section-number">Bonus</span>
+    <h2>Multi Claude Instances + Git Worktrees</h2>
+    <p class="subtitle">Chạy 2-5 Claude cùng lúc, mỗi cái làm 1 việc riêng - tăng tốc gấp bội.</p>
+
+    <h3>Ý tưởng chính</h3>
+    <p>
+        Git Worktrees cho phép bạn <span class="hl">mở nhiều bản sao của repo cùng lúc</span>,
+        mỗi bản ở 1 branch khác nhau. Kết hợp với Claude Code → nhiều AI làm song song.
+    </p>
+
+    <div class="diagram">
+    my-project/            (main - bạn đang test)
+    my-project-frontend/   (Claude #1 - làm giao diện)
+    my-project-backend/    (Claude #2 - làm API)
+    my-project-tests/      (Claude #3 - viết tests)
+         │                       │                │
+         ▼                       ▼                ▼
+    Song song, cách ly, không xung đột!
+    </div>
+
+    <h4>Setup nhanh:</h4>
+    <pre><code><span class="code-label">Terminal</span># Tạo worktrees
+git worktree add ../project-frontend feature/frontend
+git worktree add ../project-backend feature/backend
+
+# Terminal 1: Claude làm frontend
+cd ../project-frontend && claude
+> Xây dựng toàn bộ giao diện React
+
+# Terminal 2: Claude làm backend (song song!)
+cd ../project-backend && claude
+> Xây dựng REST API với Express
+
+# Hoặc dùng flag --worktree (tự động):
+claude --worktree "Tạo tính năng search"
+claude --worktree "Fix TypeScript errors"</code></pre>
+
+    <div class="compare">
+        <div class="compare-col good">
+            <h4>Nên làm song song</h4>
+            <p style="font-size:0.9rem">Frontend vs Backend<br>Feature A vs Feature B<br>Code vs Tests<br>Docs vs Implementation</p>
+        </div>
+        <div class="compare-col bad">
+            <h4>KHÔNG nên song song</h4>
+            <p style="font-size:0.9rem">2 features sửa cùng 1 file<br>Code phụ thuộc nhau<br>DB migration + code dùng DB đó</p>
+        </div>
+    </div>
+
+    <h3>Agent Teams vs Git Worktrees - Khi nào dùng cái nào?</h3>
+    <p>
+        Đây là câu hỏi <span class="hl">rất nhiều người nhầm lẫn</span>. Hai công cụ này phục vụ mục đích khác nhau:
+    </p>
+
+    <div class="compare">
+        <div class="compare-col" style="border-top: 3px solid var(--accent);">
+            <h4 style="color: var(--accent);">Dùng Agent Teams khi:</h4>
+            <ul style="font-size:0.9rem; color: var(--text-dim); padding-left: 1.2rem;">
+                <li>Task <strong>hoàn toàn độc lập về file</strong> - như build 3 website khác nhau từ đầu</li>
+                <li>Không quan tâm đến <strong>lịch sử code</strong> (Git history)</li>
+                <li>Muốn <strong>nhanh</strong>, không cần setup Git</li>
+                <li>Mỗi agent làm xong → giao kết quả → không cần merge</li>
+            </ul>
+        </div>
+        <div class="compare-col" style="border-top: 3px solid var(--accent3);">
+            <h4 style="color: var(--accent3);">Dùng Git Worktrees khi:</h4>
+            <ul style="font-size:0.9rem; color: var(--text-dim); padding-left: 1.2rem;">
+                <li>Nhiều agents cùng làm việc trên <strong>MỘT project có sẵn</strong></li>
+                <li>Tasks có thể <strong>share file</strong> (navigation, CSS chung, utils...)</li>
+                <li>Bạn dùng GitHub và cần <strong>track lịch sử thay đổi rõ ràng</strong></li>
+                <li>Làm việc nhóm - cần <strong>tách biệt để tránh ghi đè nhau</strong></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="info-box insight">
+        <div class="info-box-title">Quy tắc đơn giản để chọn</div>
+        <p style="margin:0">
+            <strong>Agent Teams</strong> = Nhiều project riêng, không liên quan → mỗi agent 1 thế giới riêng.<br>
+            <strong>Git Worktrees</strong> = 1 project, nhiều nhánh song song → cùng codebase, khác branch.<br><br>
+            Ví dụ: Bạn cần build landing page + API + mobile app cùng lúc? → <strong>Agent Teams</strong>.<br>
+            Bạn cần thêm feature search + fix bug login + viết tests cho 1 app? → <strong>Git Worktrees</strong>.
+        </p>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- BONUS: TỐI ƯU TOKEN -->
+<!-- ============================================================ -->
+<section class="section" id="token-optimize">
+    <span class="section-number">Bonus</span>
+    <h2>Tối Ưu Token & Chi Phí</h2>
+    <p class="subtitle">Làm nhiều hơn, tốn ít hơn - kỹ thuật quản lý token cho project lớn.</p>
+
+    <h3>5 kỹ thuật tối ưu</h3>
+
+    <h4>1. CLAUDE.md thay vì nhắc đi nhắc lại</h4>
+    <div class="compare">
+        <div class="compare-col bad">
+            <h4>Tốn token</h4>
+            <p style="font-size:0.9rem">Mỗi lần: "Nhớ dùng TypeScript, PascalCase, không any..."</p>
+        </div>
+        <div class="compare-col good">
+            <h4>Tiết kiệm</h4>
+            <p style="font-size:0.9rem">Viết 1 lần trong CLAUDE.md → Claude tự đọc mỗi phiên</p>
+        </div>
+    </div>
+
+    <h4>2. /compact mỗi 30 phút</h4>
+    <p>Nén context, giữ thông tin cần, giải phóng không gian. Chỉ định rõ cần giữ gì.</p>
+
+    <h4>3. Cụ thể thay vì mơ hồ</h4>
+    <div class="compare">
+        <div class="compare-col bad">
+            <h4>Mơ hồ (Claude đọc 100+ files)</h4>
+            <pre><code>> Kiểm tra toàn bộ project
+  và tìm lỗi</code></pre>
+        </div>
+        <div class="compare-col good">
+            <h4>Cụ thể (Claude đọc 1 file)</h4>
+            <pre><code>> Sửa lỗi "Cannot read
+  property" ở file
+  src/utils/auth.ts:45</code></pre>
+        </div>
+    </div>
+
+    <h4>4. Chia nhỏ thành nhiều phiên</h4>
+    <p>1 phiên = 1-2 features. Xong → <code>/clear</code> → phiên mới. Không nhồi 10 features vào 1 phiên.</p>
+
+    <h4>5. Dùng đúng model cho đúng việc</h4>
+    <table>
+        <tr>
+            <th>Loại task</th>
+            <th>Model</th>
+            <th>Lý do</th>
+        </tr>
+        <tr>
+            <td>Code phức tạp, kiến trúc, plan</td>
+            <td><strong>Opus</strong> (mặc định)</td>
+            <td>Thông minh nhất, suy nghĩ sâu</td>
+        </tr>
+        <tr>
+            <td>Edit nhỏ, refactor, viết tests</td>
+            <td><strong>Sonnet</strong> (<code>/fast</code>)</td>
+            <td>Nhanh gấp 3, rẻ hơn, đủ tốt</td>
+        </tr>
+        <tr>
+            <td>Tìm kiếm, đọc code, trả lời nhanh</td>
+            <td><strong>Haiku</strong></td>
+            <td>Cực nhanh, cực rẻ, ideal cho search</td>
+        </tr>
+    </table>
+</section>
+
+<!-- ============================================================ -->
+<!-- DEPLOY LÊN MODAL -->
+<!-- ============================================================ -->
+<section class="section" id="deploy">
+    <span class="section-number">Bonus</span>
+    <h2>Deploy API Lên Cloud (Modal)</h2>
+    <p class="subtitle">Publish skills, API, AI agents lên internet chỉ với 1 lệnh - không cần DevOps.</p>
+
+    <h3>Modal là gì?</h3>
+    <p>
+        <span class="hl">Modal</span> là nền tảng cloud cho phép bạn deploy code lên server cực kỳ đơn giản.
+        Không cần setup Docker, Kubernetes, hay bất kỳ thứ gì phức tạp. Đặc biệt phù hợp cho:
+    </p>
+    <div class="card-grid">
+        <div class="card">
+            <div class="card-icon">&#x1F680;</div>
+            <h4>REST API</h4>
+            <p>Deploy backend API (FastAPI, Flask) với HTTPS, auto-scaling có sẵn</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">&#x1F9E0;</div>
+            <h4>AI/ML Models</h4>
+            <p>Chạy model AI trên GPU cloud, không cần mua hardware</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">&#x23F0;</div>
+            <h4>Cron Jobs</h4>
+            <p>Script chạy định kỳ: scraping, báo cáo, backup...</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">&#x26A1;</div>
+            <h4>Serverless Functions</h4>
+            <p>Chạy theo yêu cầu, chỉ trả tiền khi có request</p>
+        </div>
+    </div>
+
+    <h3>Bước 1: Cài đặt Modal</h3>
+    <pre><code><span class="code-label">Terminal</span># Cài đặt Modal CLI
+pip install modal
+
+# Đăng nhập (mở trình duyệt để xác thực)
+modal setup
+
+# Kiểm tra đã xong
+modal --version</code></pre>
+
+    <h3>Bước 2: Nhờ Claude Code tạo API</h3>
+    <pre><code><span class="code-label">Nói với Claude</span>> Tạo một REST API cho ứng dụng Todo, deploy lên Modal.
+  Yêu cầu:
+  - Python FastAPI
+  - Endpoints: GET /todos, POST /todos, PUT /todos/{id}, DELETE /todos/{id}
+  - Lưu dữ liệu trong SQLite (persistent với Modal Volume)
+  - Có CORS cho frontend
+  - Có input validation với Pydantic
+  - Sẵn sàng deploy lên Modal</code></pre>
+
+    <h4>Claude sẽ tạo cho bạn:</h4>
+    <pre><code><span class="code-label">app.py</span>import modal
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import sqlite3
+
+# ===== Modal Setup =====
+app = modal.App("todo-api")
+volume = modal.Volume.from_name("todo-data", create_if_missing=True)
+image = modal.Image.debian_slim().pip_install("fastapi", "uvicorn")
+
+# ===== FastAPI Setup =====
+web_app = FastAPI(title="Todo API", version="1.0")
+web_app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ===== Models =====
+class TodoCreate(BaseModel):
+    title: str
+    description: str = ""
+
+class TodoUpdate(BaseModel):
+    title: str = None
+    completed: bool = None
+
+# ===== Database =====
+def get_db():
+    conn = sqlite3.connect("/data/todos.db")
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS todos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT DEFAULT '',
+            completed BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    return conn
+
+# ===== Endpoints =====
+@web_app.get("/todos")
+async def list_todos():
+    db = get_db()
+    todos = db.execute("SELECT * FROM todos ORDER BY created_at DESC").fetchall()
+    return [{"id": t[0], "title": t[1], "description": t[2],
+             "completed": bool(t[3]), "created_at": t[4]} for t in todos]
+
+@web_app.post("/todos")
+async def create_todo(todo: TodoCreate):
+    db = get_db()
+    cursor = db.execute(
+        "INSERT INTO todos (title, description) VALUES (?, ?)",
+        (todo.title, todo.description)
+    )
+    db.commit()
+    return {"id": cursor.lastrowid, "title": todo.title, "completed": False}
+
+@web_app.put("/todos/{todo_id}")
+async def update_todo(todo_id: int, todo: TodoUpdate):
+    db = get_db()
+    updates = []
+    values = []
+    if todo.title is not None:
+        updates.append("title = ?")
+        values.append(todo.title)
+    if todo.completed is not None:
+        updates.append("completed = ?")
+        values.append(todo.completed)
+    if not updates:
+        raise HTTPException(400, "Không có gì để cập nhật")
+    values.append(todo_id)
+    db.execute(f"UPDATE todos SET {', '.join(updates)} WHERE id = ?", values)
+    db.commit()
+    return {"updated": True}
+
+@web_app.delete("/todos/{todo_id}")
+async def delete_todo(todo_id: int):
+    db = get_db()
+    db.execute("DELETE FROM todos WHERE id = ?", (todo_id,))
+    db.commit()
+    return {"deleted": True}
+
+# ===== Deploy lên Modal =====
+@app.function(image=image, volumes={"/data": volume})
+@modal.asgi_app()
+def api():
+    return web_app</code></pre>
+
+    <h3>Bước 3: Test ở local → Deploy lên cloud</h3>
+    <pre><code><span class="code-label">Terminal</span># Test ở local trước (mở http://localhost:8000/docs để xem API docs)
+modal serve app.py
+
+# Mọi thứ ok? Deploy lên cloud chỉ 1 lệnh!
+modal deploy app.py
+
+# Output:
+# ✓ Created todo-api
+# ✓ https://your-name--todo-api.modal.run
+#
+# API của bạn đã LIVE trên internet! 🎉</code></pre>
+
+    <div class="info-box tip">
+        <div class="info-box-title">Chuyện gì xảy ra khi deploy?</div>
+        <p style="margin:0">
+            Modal tự động lo tất cả: <strong>HTTPS</strong> (bảo mật), <strong>domain name</strong> (URL đẹp),
+            <strong>auto-scaling</strong> (nhiều người dùng → tự tăng server), <strong>zero khi không dùng</strong>
+            (không request = không tốn tiền). Bạn chỉ cần viết code Python, mọi thứ khác Modal lo.
+        </p>
+    </div>
+
+    <h3>Publish AI Skills / Agents lên Modal</h3>
+    <p>
+        Không chỉ REST API - bạn có thể publish <span class="hl">bất kỳ "skill" nào</span> lên Modal:
+    </p>
+
+    <h4>Ví dụ 1: Deploy AI Agent tóm tắt văn bản</h4>
+    <pre><code><span class="code-label">summarizer.py</span>import modal
+from fastapi import FastAPI
+import anthropic
+
+app = modal.App("ai-summarizer")
+image = modal.Image.debian_slim().pip_install("fastapi", "anthropic", "uvicorn")
+
+web_app = FastAPI()
+
+@web_app.post("/summarize")
+async def summarize(text: str, language: str = "vi"):
+    client = anthropic.Anthropic()
+    message = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=1024,
+        messages=[{
+            "role": "user",
+            "content": f"Tóm tắt văn bản sau bằng tiếng {'Việt' if language == 'vi' else 'Anh'},"
+                       f" ngắn gọn trong 3-5 câu:\n\n{text}"
+        }]
+    )
+    return {"summary": message.content[0].text}
+
+@app.function(
+    image=image,
+    secrets=[modal.Secret.from_name("anthropic-api-key")]
+)
+@modal.asgi_app()
+def api():
+    return web_app</code></pre>
+
+    <h4>Ví dụ 2: Deploy Cron Job - Báo cáo tự động hàng ngày</h4>
+    <pre><code><span class="code-label">daily-report.py</span>import modal
+
+app = modal.App("daily-report")
+image = modal.Image.debian_slim().pip_install("requests", "anthropic")
+
+# Chạy tự động lúc 9h sáng mỗi ngày (giờ Việt Nam = UTC+7)
+@app.function(
+    image=image,
+    schedule=modal.Cron("0 2 * * *"),  # 2:00 UTC = 9:00 VN
+    secrets=[modal.Secret.from_name("slack-webhook")]
+)
+def daily_report():
+    import requests, os
+
+    # Thu thập dữ liệu
+    # ... logic đọc database, API metrics, git log...
+
+    report = "📊 Báo cáo ngày hôm nay:\n"
+    report += "- Users mới: 42\n"
+    report += "- Revenue: $1,250\n"
+    report += "- Bugs open: 3\n"
+
+    # Gửi qua Slack
+    requests.post(
+        os.environ["SLACK_WEBHOOK_URL"],
+        json={"text": report}
+    )</code></pre>
+
+    <h4>Ví dụ 3: Deploy Code Review Bot</h4>
+    <pre><code><span class="code-label">code-reviewer.py</span>import modal
+from fastapi import FastAPI
+import anthropic
+
+app = modal.App("code-reviewer")
+image = modal.Image.debian_slim().pip_install("fastapi", "anthropic", "uvicorn")
+
+web_app = FastAPI()
+
+@web_app.post("/review")
+async def review_code(code: str, language: str = "python"):
+    client = anthropic.Anthropic()
+    message = client.messages.create(
+        model="claude-opus-4-6",
+        max_tokens=4096,
+        system="""Bạn là senior code reviewer. Kiểm tra:
+        1. Bugs & logic errors
+        2. Security vulnerabilities (OWASP Top 10)
+        3. Performance issues
+        4. Code readability & best practices
+        5. Missing error handling
+        Cho điểm 1-10 và giải thích chi tiết bằng tiếng Việt.""",
+        messages=[{
+            "role": "user",
+            "content": f"Review {language} code này:\n```{language}\n{code}\n```"
+        }]
+    )
+    return {"review": message.content[0].text}
+
+@app.function(
+    image=image,
+    secrets=[modal.Secret.from_name("anthropic-api-key")]
+)
+@modal.asgi_app()
+def api():
+    return web_app</code></pre>
+
+    <h3>Tổng hợp: Những gì bạn có thể publish</h3>
+    <table>
+        <tr>
+            <th>Loại</th>
+            <th>Ví dụ</th>
+            <th>Lệnh deploy</th>
+        </tr>
+        <tr>
+            <td>REST API</td>
+            <td>Todo app, E-commerce, Blog API</td>
+            <td><code>modal deploy app.py</code></td>
+        </tr>
+        <tr>
+            <td>AI Agent / Skill</td>
+            <td>Tóm tắt, dịch thuật, code review</td>
+            <td><code>modal deploy agent.py</code></td>
+        </tr>
+        <tr>
+            <td>Cron Job</td>
+            <td>Báo cáo hàng ngày, backup, monitoring</td>
+            <td><code>modal deploy cron.py</code></td>
+        </tr>
+        <tr>
+            <td>AI Pipeline</td>
+            <td>OCR → Dịch → Tóm tắt → Gửi email</td>
+            <td><code>modal deploy pipeline.py</code></td>
+        </tr>
+        <tr>
+            <td>GPU Workload</td>
+            <td>Fine-tune model, image generation</td>
+            <td><code>modal deploy gpu-task.py</code></td>
+        </tr>
+    </table>
+
+    <div class="info-box insight">
+        <div class="info-box-title">Workflow hoàn chỉnh với Claude Code + Modal</div>
+        <p style="margin:0">
+            <strong>1.</strong> Nói với Claude Code: "Tạo API/Agent/Skill cho tôi" →
+            <strong>2.</strong> Claude viết code + test →
+            <strong>3.</strong> <code>modal serve</code> test local →
+            <strong>4.</strong> <code>modal deploy</code> lên cloud →
+            <strong>5.</strong> Chia sẻ URL cho team/khách hàng.<br><br>
+            Từ ý tưởng → sản phẩm live trên internet, <strong>tất cả chỉ bằng ngôn ngữ tự nhiên + 1 lệnh deploy</strong>.
+        </p>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- GÓI DỊCH VỤ -->
+<!-- ============================================================ -->
+<section class="section" id="pricing">
+    <span class="section-number">Tham khảo</span>
+    <h2>Các Gói Dịch Vụ Claude</h2>
+    <p class="subtitle">Chọn gói phù hợp với nhu cầu của bạn.</p>
+
+    <div class="pricing-grid">
+        <div class="pricing-card">
+            <div class="pricing-name">Free</div>
+            <div class="pricing-price">$0<span>/tháng</span></div>
+            <ul class="pricing-features">
+                <li>Dùng thử Claude.ai</li>
+                <li>Giới hạn số tin nhắn/ngày</li>
+                <li>Không có Claude Code</li>
+                <li>Model: Sonnet</li>
+            </ul>
+        </div>
+        <div class="pricing-card featured">
+            <div class="pricing-name">Pro</div>
+            <div class="pricing-price">$20<span>/tháng</span></div>
+            <ul class="pricing-features">
+                <li>Claude Code đầy đủ</li>
+                <li>Truy cập Opus, Sonnet, Haiku</li>
+                <li>Giới hạn usage cao hơn</li>
+                <li>Priority access khi cao tải</li>
+                <li>Phù hợp cá nhân & freelancer</li>
+            </ul>
+        </div>
+        <div class="pricing-card">
+            <div class="pricing-name">Max</div>
+            <div class="pricing-price">$100<span>/tháng</span></div>
+            <ul class="pricing-features">
+                <li>Mọi thứ trong Pro</li>
+                <li>Usage gấp 20x so với Pro</li>
+                <li>Ưu tiên cao nhất</li>
+                <li>Chạy nhiều instances song song</li>
+                <li>Ideal cho professional dev</li>
+            </ul>
+        </div>
+        <div class="pricing-card">
+            <div class="pricing-name">API (Pay-per-use)</div>
+            <div class="pricing-price">Theo token</div>
+            <ul class="pricing-features">
+                <li>Opus: $15/1M input tokens</li>
+                <li>Sonnet: $3/1M input tokens</li>
+                <li>Haiku: $0.80/1M input tokens</li>
+                <li>Linh hoạt, chỉ trả khi dùng</li>
+                <li>Cho ứng dụng production</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="info-box insight">
+        <div class="info-box-title">Khuyến nghị cho người mới</div>
+        <p style="margin:0">
+            Bắt đầu với <strong>gói Pro ($20/tháng)</strong>. Đủ để học và làm project cá nhân.
+            Khi bạn dùng Claude Code hàng ngày cho công việc và cần chạy nhiều instances song song,
+            nâng lên <strong>Max ($100/tháng)</strong>. Với team/công ty, dùng <strong>API</strong> để tích hợp vào sản phẩm.
+        </p>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- LỘ TRÌNH -->
+<!-- ============================================================ -->
+<section class="section" id="roadmap">
+    <span class="section-number">Tổng Kết</span>
+    <h2>Lộ Trình Từ Zero Đến Pro</h2>
+    <p class="subtitle">Từng bước một, không vội - mỗi tuần thêm 1 skill mới.</p>
+
+    <ol class="steps">
+        <li>
+            <strong>Tuần 1-2: Làm quen</strong>
+            Cài đặt Claude Code + VS Code. Tạo app đầu tiên bằng cách "nói chuyện". Học cách mô tả yêu cầu rõ ràng. <em>(Bài 4)</em>
+        </li>
+        <li>
+            <strong>Tuần 3-4: Nền tảng vững chắc</strong>
+            Tạo CLAUDE.md cho project. Cấu hình .claude/ directory: rules, memory, skills. <em>(Bài 5)</em>
+        </li>
+        <li>
+            <strong>Tháng 2: Làm việc hiệu quả</strong>
+            Master context management + Plan Mode. Thuộc 3 lệnh hằng ngày (/commit, /compact, /fast). Tạo custom slash commands cho team. <em>(Bài 6-7)</em>
+        </li>
+        <li>
+            <strong>Tháng 3: Mở rộng khả năng</strong>
+            Kết nối MCP (GitHub, database, Slack...). Setup hooks bảo vệ code + auto format. <em>(Bài 8-9)</em>
+        </li>
+        <li>
+            <strong>Tháng 4: Power user</strong>
+            Dùng sub-agents cho task phức tạp. Chạy multi-instance + worktrees. Tối ưu token usage. <em>(Bài 10 + Bonus)</em>
+        </li>
+        <li>
+            <strong>Tháng 5+: Automation Master</strong>
+            Xây hệ thống tự động hoá hoàn chỉnh. Bạn chỉ cần suy nghĩ sáng tạo, Claude Code lo phần còn lại. Mỗi khi làm 1 việc lần thứ 2 → tự động hoá nó.
+        </li>
+    </ol>
+
+    <div class="info-box important">
+        <div class="info-box-title">Thông điệp cuối cùng</div>
+        <p style="margin:0">
+            Claude Code không chỉ là tool - nó là <strong>cách làm việc mới</strong>.
+            Thay vì bạn viết từng dòng code, bạn trở thành <strong>kiến trúc sư</strong> - mô tả ý tưởng,
+            lên kế hoạch, review kết quả. AI lo phần execution.
+            <br><br>
+            Người biết dùng Claude Code sẽ <strong>làm được gấp 5-10 lần</strong> so với người không dùng.
+            Không phải vì họ giỏi hơn, mà vì họ biết cách <strong>uỷ quyền đúng việc cho AI</strong>.
+        </p>
+    </div>
+</section>
+
+</div>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+    <p><strong>Claude Code Masterclass</strong> - Từ Zero đến Production</p>
+    <p style="margin-top:0.5rem;">Powered by <a href="https://anthropic.com" target="_blank">Anthropic</a> &middot; Claude Code 2026</p>
+    <p style="margin-top:0.5rem; opacity:0.5">Tài liệu này dành cho mục đích đào tạo và giới thiệu nội bộ.</p>
+</footer>
+
+<script>
+    const sections = document.querySelectorAll('.section');
+    const tocLinks = document.querySelectorAll('.toc-link');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                tocLinks.forEach(link => {
+                    const isActive = link.getAttribute('href') === '#' + entry.target.id;
+                    link.classList.toggle('active', isActive);
+                    if (isActive) link.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+                });
+            }
+        });
+    }, { threshold: 0.15 });
+    sections.forEach(section => observer.observe(section));
+</script>
+
+</body>
+</html>

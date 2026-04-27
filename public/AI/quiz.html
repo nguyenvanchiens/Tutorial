@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trắc Nghiệm Claude Code — 100 Câu Hỏi</title>
+<style>
+  :root {
+    --primary: #667eea;
+    --accent: #f5576c;
+    --bg: #0f1117;
+    --card: #1a1d2e;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --border: #2d3148;
+    --success: #43e97b;
+    --warn: #f39c12;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; padding: 2rem; }
+
+  .hero { text-align: center; margin-bottom: 2rem; }
+  .hero h1 { font-size: 2.2rem; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero p { color: var(--muted); margin-top: .5rem; font-size: 1.05rem; }
+
+  .scoreboard { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; position: sticky; top: 0; z-index: 100; }
+  .score-item { text-align: center; }
+  .score-item .num { font-size: 1.8rem; font-weight: 700; }
+  .score-item .lbl { font-size: .75rem; color: var(--muted); }
+  .score-item.correct .num { color: var(--success); }
+  .score-item.wrong .num { color: var(--accent); }
+  .score-item.total .num { color: var(--primary); }
+  .progress-bar-wrap { flex: 1; min-width: 200px; }
+  .progress-bar-bg { background: #2d3148; border-radius: 8px; height: 10px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; border-radius: 8px; background: linear-gradient(90deg, var(--primary), var(--success)); transition: width .3s; }
+  .progress-text { font-size: .75rem; color: var(--muted); margin-top: 4px; text-align: center; }
+  .btn-reset { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 8px 16px; cursor: pointer; font-size: .85rem; margin-left: auto; }
+  .btn-reset:hover { opacity: .85; }
+
+  .filter-bar { display: flex; gap: 6px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .filter-btn { background: var(--card); border: 1px solid var(--border); color: var(--muted); border-radius: 6px; padding: 6px 14px; cursor: pointer; font-size: .82rem; transition: all .2s; }
+  .filter-btn:hover { border-color: var(--primary); color: var(--text); }
+  .filter-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+  .q-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; transition: border-color .3s; }
+  .q-card.answered-correct { border-color: var(--success); }
+  .q-card.answered-wrong { border-color: var(--accent); }
+  .q-header { display: flex; align-items: center; gap: 10px; margin-bottom: .75rem; }
+  .q-num { background: var(--primary); color: #fff; min-width: 2rem; height: 2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .8rem; font-weight: 700; flex-shrink: 0; }
+  .q-card.answered-correct .q-num { background: var(--success); }
+  .q-card.answered-wrong .q-num { background: var(--accent); }
+  .q-tag { font-size: .65rem; padding: 2px 8px; border-radius: 10px; background: #2d3148; color: var(--muted); }
+  .q-tag.basic { background: rgba(67,233,123,.12); color: var(--success); }
+  .q-tag.medium { background: rgba(243,156,18,.12); color: var(--warn); }
+  .q-tag.hard { background: rgba(245,87,108,.12); color: var(--accent); }
+  .q-text { font-size: .95rem; margin-bottom: .75rem; }
+  .q-text code { background: #2d3148; padding: 1px 5px; border-radius: 3px; font-size: .88rem; color: #f8d06b; }
+
+  .q-options { display: flex; flex-direction: column; gap: 6px; }
+  .q-opt { background: #252736; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: .88rem; color: var(--muted); transition: all .2s; display: flex; align-items: center; gap: 8px; }
+  .q-opt:hover:not(.disabled) { border-color: var(--primary); color: var(--text); }
+  .q-opt .letter { background: #2d3148; min-width: 1.6rem; height: 1.6rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .75rem; font-weight: 600; flex-shrink: 0; }
+  .q-opt.correct { border-color: var(--success); background: rgba(67,233,123,.08); color: var(--text); }
+  .q-opt.correct .letter { background: var(--success); color: #fff; }
+  .q-opt.wrong { border-color: var(--accent); background: rgba(245,87,108,.08); color: var(--text); }
+  .q-opt.wrong .letter { background: var(--accent); color: #fff; }
+  .q-opt.disabled { cursor: default; opacity: .7; }
+  .q-opt.disabled.correct { opacity: 1; }
+
+  .q-explain { margin-top: .75rem; padding: 10px 14px; background: rgba(102,126,234,.06); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; font-size: .85rem; color: var(--muted); display: none; }
+  .q-explain.show { display: block; }
+  .q-explain strong { color: var(--success); }
+
+  @media (max-width: 600px) {
+    body { padding: 1rem; }
+    .hero h1 { font-size: 1.5rem; }
+    .scoreboard { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Trắc Nghiệm Claude Code</h1>
+  <p>100 câu hỏi giúp bạn nắm vững kiến thức Claude Code từ cơ bản đến nâng cao — chọn đáp án và xem giải thích ngay!</p>
+</div>
+
+<div class="scoreboard" id="scoreboard">
+  <div class="score-item correct"><div class="num" id="sc-correct">0</div><div class="lbl">Đúng</div></div>
+  <div class="score-item wrong"><div class="num" id="sc-wrong">0</div><div class="lbl">Sai</div></div>
+  <div class="score-item total"><div class="num" id="sc-total">0</div><div class="lbl">/ 100</div></div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="sc-bar" style="width:0%"></div></div>
+    <div class="progress-text" id="sc-pct">0% hoàn thành</div>
+  </div>
+  <button class="btn-reset" onclick="resetAll()">Làm lại</button>
+</div>
+
+<div class="filter-bar" id="filterBar">
+  <button class="filter-btn active" data-cat="all">Tất cả (100)</button>
+  <button class="filter-btn" data-cat="basic">Cơ bản & Setup</button>
+  <button class="filter-btn" data-cat="prompt">Prompt & Kỹ thuật</button>
+  <button class="filter-btn" data-cat="plan">Plan Mode</button>
+  <button class="filter-btn" data-cat="memory">CLAUDE.md & Memory</button>
+  <button class="filter-btn" data-cat="skill">Skill & Workflow</button>
+  <button class="filter-btn" data-cat="git">Git & Debug</button>
+  <button class="filter-btn" data-cat="token">Token & Chi phí</button>
+  <button class="filter-btn" data-cat="advanced">MCP & Nâng cao</button>
+</div>
+
+<div id="quizContainer"></div>
+
+<script>
+const QUESTIONS = [
+  // ===== CƠ BẢN & SETUP (1-12) =====
+  { q: "Claude AI được phát triển bởi công ty nào?", opts: ["OpenAI", "Anthropic", "Google DeepMind", "Meta AI"], ans: 1, cat: "basic", diff: "basic", explain: "Claude là mô hình AI do <strong>Anthropic</strong> phát triển. Anthropic được thành lập bởi các cựu thành viên OpenAI, tập trung vào AI an toàn." },
+  { q: "Đâu là điểm khác biệt chính của Claude so với ChatGPT?", opts: ["Claude miễn phí hoàn toàn", "Claude tập trung vào tính an toàn (Constitutional AI) và context window lớn", "Claude chỉ hỗ trợ tiếng Anh", "Claude không thể viết code"], ans: 1, cat: "basic", diff: "basic", explain: "Anthropic phát triển Claude với triết lý <strong>Constitutional AI</strong> — AI tự kiểm duyệt hành vi dựa trên bộ nguyên tắc, và có context window rất lớn (lên đến 200K token)." },
+  { q: "Trong các model Claude, model nào nhanh nhất và rẻ nhất?", opts: ["Claude Opus", "Claude Sonnet", "Claude Haiku", "Claude Pro"], ans: 2, cat: "basic", diff: "basic", explain: "<strong>Haiku</strong> là model nhẹ, nhanh, rẻ nhất — phù hợp cho các tác vụ đơn giản. Sonnet cân bằng giữa tốc độ và chất lượng. Opus mạnh nhất nhưng chậm và đắt nhất." },
+  { q: "Claude Opus phù hợp cho loại tác vụ nào?", opts: ["Chat đơn giản hàng ngày", "Tác vụ phức tạp: phân tích code lớn, viết tài liệu dài, suy luận nhiều bước", "Chỉ dịch thuật", "Chỉ tóm tắt văn bản ngắn"], ans: 1, cat: "basic", diff: "basic", explain: "<strong>Opus</strong> là model mạnh nhất của Claude, phù hợp cho các tác vụ cần suy luận phức tạp, phân tích code lớn, và tạo nội dung chất lượng cao." },
+  { q: "Claude Code CLI được cài đặt bằng lệnh nào?", opts: ["<code>pip install claude</code>", "<code>npm install -g @anthropic-ai/claude-code</code>", "<code>brew install claude-code</code>", "<code>apt-get install claude</code>"], ans: 1, cat: "basic", diff: "basic", explain: "Claude Code là CLI tool chính thức của Anthropic, cài qua <strong>npm</strong>. Sau khi cài, gõ <code>claude</code> trong terminal để bắt đầu." },
+  { q: "Để mở Claude Code trong terminal, bạn gõ lệnh gì?", opts: ["<code>claude-code start</code>", "<code>anthropic</code>", "<code>claude</code>", "<code>cc</code>"], ans: 2, cat: "basic", diff: "basic", explain: "Sau khi cài đặt, chỉ cần gõ <code>claude</code> trong terminal tại thư mục project để bắt đầu phiên làm việc." },
+  { q: "Gói Claude Pro có giới hạn gì so với gói Max?", opts: ["Pro không thể dùng Opus", "Pro có giới hạn số lượng message thấp hơn đáng kể so với Max", "Pro không hỗ trợ code", "Pro và Max giống nhau hoàn toàn"], ans: 1, cat: "basic", diff: "medium", explain: "Gói <strong>Pro</strong> ($20/tháng) có giới hạn message thấp hơn. Gói <strong>Max</strong> ($100-200/tháng) cho phép sử dụng nhiều hơn đáng kể, đặc biệt với Opus." },
+  { q: "Claude Code có thể được sử dụng trong IDE nào?", opts: ["Chỉ VS Code", "Chỉ IntelliJ", "VS Code, và bất kỳ terminal nào trong IDE", "Chỉ hoạt động ngoài IDE"], ans: 2, cat: "basic", diff: "basic", explain: "Claude Code là CLI tool nên chạy được trong <strong>bất kỳ terminal nào</strong> — bao gồm terminal tích hợp trong VS Code, IntelliJ, hoặc terminal độc lập." },
+  { q: "So sánh Claude Code với GitHub Copilot, đâu là khác biệt chính?", opts: ["Copilot mạnh hơn Claude ở mọi khía cạnh", "Claude Code hoạt động ở cấp project (đọc nhiều file, chạy lệnh), Copilot chủ yếu ở cấp dòng/file", "Claude Code chỉ hỗ trợ Python", "Không có khác biệt đáng kể"], ans: 1, cat: "basic", diff: "medium", explain: "Claude Code hoạt động như một <strong>agentic coding assistant</strong> — có thể đọc toàn bộ codebase, chạy terminal command, tạo/sửa nhiều file. Copilot chủ yếu gợi ý code inline." },
+  { q: "Gemini của Google khác Claude ở điểm nào?", opts: ["Gemini miễn phí hoàn toàn, Claude luôn tính phí", "Gemini tích hợp sâu với hệ sinh thái Google, Claude tập trung vào coding và an toàn AI", "Gemini không thể viết code", "Claude và Gemini do cùng một công ty phát triển"], ans: 1, cat: "basic", diff: "medium", explain: "Gemini tích hợp mạnh với Google Search, Workspace. Claude nổi bật về <strong>coding, phân tích dài, và an toàn AI</strong>." },
+  { q: "Khi lần đầu chạy <code>claude</code> trong terminal, bước nào cần thực hiện?", opts: ["Tạo file config thủ công", "Đăng nhập/xác thực tài khoản Anthropic", "Cài thêm Python", "Không cần bước nào, dùng ngay"], ans: 1, cat: "basic", diff: "basic", explain: "Lần đầu chạy Claude Code, bạn cần <strong>đăng nhập tài khoản Anthropic</strong> (hoặc cung cấp API key) để xác thực." },
+  { q: "Claude Sonnet phù hợp nhất cho trường hợp nào?", opts: ["Chỉ dùng cho chatbot đơn giản", "Cân bằng giữa chất lượng và tốc độ — phù hợp cho phần lớn tác vụ coding hàng ngày", "Chỉ dùng cho phân tích hình ảnh", "Chỉ dùng cho dịch thuật"], ans: 1, cat: "basic", diff: "basic", explain: "<strong>Sonnet</strong> là lựa chọn cân bằng nhất — đủ mạnh cho coding, phân tích, nhưng nhanh và rẻ hơn Opus. Phù hợp cho công việc hàng ngày." },
+
+  // ===== PROMPT & KỸ THUẬT (13-28) =====
+  { q: "Nguyên tắc quan trọng nhất khi viết prompt cho Claude Code là gì?", opts: ["Viết càng dài càng tốt", "Rõ ràng, cụ thể về yêu cầu và ngữ cảnh", "Dùng nhiều emoji", "Viết bằng tiếng Anh luôn cho chính xác"], ans: 1, cat: "prompt", diff: "basic", explain: "Prompt tốt cần <strong>rõ ràng và cụ thể</strong>: mô tả rõ input, output mong muốn, ràng buộc. AI không đọc được ý bạn — phải nói rõ." },
+  { q: "Kỹ thuật \"step by step\" (chain of thought) giúp Claude như thế nào?", opts: ["Chạy nhanh hơn", "Giúp Claude suy luận từng bước, giảm lỗi ở các tác vụ phức tạp", "Giảm chi phí token", "Không có tác dụng gì"], ans: 1, cat: "prompt", diff: "basic", explain: "Yêu cầu Claude <strong>\"suy nghĩ từng bước\"</strong> giúp mô hình phân tích vấn đề tuần tự, giảm thiểu bỏ sót logic ở các bài toán nhiều bước." },
+  { q: "Tại sao cần cung cấp context (ngữ cảnh) khi prompt cho Claude Code?", opts: ["Để tăng chi phí", "Vì Claude không biết gì về project của bạn — context giúp AI hiểu đúng yêu cầu", "Context không quan trọng", "Chỉ để AI trả lời dài hơn"], ans: 1, cat: "prompt", diff: "basic", explain: "Claude Code cần context để hiểu <strong>tech stack, cấu trúc project, convention</strong> của bạn. Không có context → AI sẽ đoán và có thể sai." },
+  { q: "Copy/Paste code vào Claude Code và Inline Edit khác nhau thế nào?", opts: ["Hoàn toàn giống nhau", "Copy/Paste phù hợp khi hỏi về đoạn code cụ thể, Inline Edit để AI sửa trực tiếp trong file", "Inline Edit luôn tốt hơn", "Copy/Paste luôn tốt hơn"], ans: 1, cat: "prompt", diff: "medium", explain: "Copy/Paste phù hợp khi bạn muốn <strong>hỏi, giải thích, hoặc review</strong> đoạn code. Inline Edit phù hợp khi muốn Claude <strong>sửa trực tiếp file</strong> trong project." },
+  { q: "Tư duy đúng khi làm việc với AI là gì?", opts: ["Để AI làm tất cả, không cần review", "Bạn là kiến trúc sư (architect), AI là thợ xây (builder) — bạn ra quyết định, AI thực thi", "AI luôn đúng, không cần kiểm tra", "Chỉ dùng AI cho việc đơn giản"], ans: 1, cat: "prompt", diff: "basic", explain: "Tư duy đúng: <strong>bạn là người ra quyết định</strong> (thiết kế, kiến trúc, review). AI là công cụ hỗ trợ thực thi — luôn cần kiểm tra kết quả." },
+  { q: "AI \"hallucination\" (ảo giác) nghĩa là gì?", opts: ["AI bị lỗi phần cứng", "AI tự tin đưa ra thông tin sai hoặc bịa đặt nhưng trông rất thuyết phục", "AI từ chối trả lời", "AI trả lời quá chậm"], ans: 1, cat: "prompt", diff: "basic", explain: "<strong>Hallucination</strong> là khi AI tạo ra thông tin không chính xác nhưng trình bày rất tự tin. Đây là lý do luôn cần <strong>review và verify</strong> output của AI." },
+  { q: "Kỹ thuật \"Divide and Conquer\" áp dụng vào prompt Claude Code như thế nào?", opts: ["Chia task lớn thành nhiều task nhỏ, rõ ràng, giao cho AI từng phần", "Gửi tất cả yêu cầu trong một prompt duy nhất", "Chỉ dùng cho thuật toán, không áp dụng cho AI", "Để AI tự chia nhỏ vấn đề"], ans: 0, cat: "prompt", diff: "medium", explain: "Task lớn và phức tạp nên <strong>chia nhỏ</strong>: tạo component → viết logic → thêm styling → viết test. Mỗi bước Claude sẽ xử lý chính xác hơn." },
+  { q: "Tại sao cần review code mà AI tạo ra?", opts: ["Không cần, AI luôn đúng", "Vì AI dựa trên xác suất — có thể tạo code chạy được nhưng không tối ưu, thiếu edge case, hoặc sai logic", "Chỉ review khi code bị lỗi", "Chỉ review code quan trọng"], ans: 1, cat: "prompt", diff: "basic", explain: "AI hoạt động dựa trên <strong>xác suất</strong>, không hiểu nghiệp vụ sâu. Code AI tạo ra có thể: thiếu validation, sai business logic, chưa handle edge case, hoặc dùng pattern không phù hợp." },
+  { q: "\"Chạy được\" khác \"Chất lượng\" như thế nào khi đánh giá code AI?", opts: ["Giống nhau, chạy được là đủ", "Code chạy được chưa chắc đã tối ưu, bảo trì được, đúng convention, và handle đủ edge case", "Code AI luôn chất lượng cao", "Không cần quan tâm chất lượng"], ans: 1, cat: "prompt", diff: "medium", explain: "Code <strong>chạy được ≠ chất lượng</strong>: cần kiểm tra naming convention, error handling, performance, security, maintainability, và business logic correctness." },
+  { q: "Khi Claude Code tạo code sai, nên phản hồi thế nào cho hiệu quả?", opts: ["Xóa hết và viết lại từ đầu", "Chỉ rõ chỗ sai, giải thích tại sao sai, và mô tả kết quả mong muốn", "Chỉ nói 'sai rồi, làm lại'", "Không phản hồi, chuyển sang AI khác"], ans: 1, cat: "prompt", diff: "medium", explain: "Phản hồi hiệu quả cần <strong>cụ thể</strong>: chỉ ra dòng/đoạn sai, giải thích lỗi, đưa ví dụ đúng. Giúp Claude hiểu và sửa chính xác thay vì đoán." },
+  { q: "Prompt nào dưới đây là tốt nhất khi yêu cầu Claude Code tạo API endpoint?", opts: ["Tạo API cho tôi", "Tạo REST API endpoint POST /api/users với validation email, name (required, min 2 chars), trả về 201 với user object hoặc 400 với error details, dùng Express.js", "Làm backend", "Code API nhanh"], ans: 1, cat: "prompt", diff: "medium", explain: "Prompt tốt cần <strong>cụ thể</strong>: endpoint path, method, input validation, response format, error handling, framework. Càng rõ ràng → kết quả càng chính xác." },
+  { q: "Khi nào nên dùng Claude Code thay vì tự code?", opts: ["Luôn luôn dùng AI", "Khi tác vụ lặp lại (boilerplate), refactor lớn, viết test, hoặc cần explore codebase nhanh", "Chỉ khi không biết code", "Không bao giờ nên dùng AI"], ans: 1, cat: "prompt", diff: "basic", explain: "AI mạnh ở: <strong>boilerplate code, refactoring, viết test, documentation, giải thích code</strong>. Bạn vẫn nên tự thiết kế kiến trúc và review kết quả." },
+  { q: "Extended thinking trong Claude giúp gì?", opts: ["Trả lời nhanh hơn", "Claude suy nghĩ sâu hơn trước khi trả lời, cải thiện chất lượng cho tác vụ phức tạp", "Tiết kiệm token", "Không có tác dụng gì đặc biệt"], ans: 1, cat: "prompt", diff: "medium", explain: "<strong>Extended thinking</strong> cho phép Claude \"suy nghĩ\" nhiều hơn trước khi đưa ra câu trả lời, đặc biệt hữu ích cho bài toán phức tạp cần nhiều bước suy luận." },
+  { q: "Khi Claude Code đọc file trong project, nó sử dụng tool nào?", opts: ["Chỉ dùng cat command", "Sử dụng các tool tích hợp: Read, Grep, Glob, Bash", "Không thể đọc file", "Chỉ đọc file đang mở trong IDE"], ans: 1, cat: "prompt", diff: "medium", explain: "Claude Code có các tool: <strong>Read</strong> (đọc file), <strong>Grep</strong> (tìm kiếm), <strong>Glob</strong> (tìm file theo pattern), <strong>Bash</strong> (chạy lệnh) — cho phép khám phá toàn bộ codebase." },
+  { q: "Compact prompt là gì và khi nào nên dùng?", opts: ["Prompt cực ngắn, luôn dùng để tiết kiệm", "Kỹ thuật tóm tắt context khi conversation quá dài, để giải phóng context window", "Một loại model Claude", "Không tồn tại khái niệm này"], ans: 1, cat: "prompt", diff: "hard", explain: "Khi conversation dài, context window đầy, có thể yêu cầu Claude <strong>tóm tắt những gì đã làm</strong> và bắt đầu conversation mới với bản tóm tắt — giữ được tiến độ mà giải phóng token." },
+  { q: "Khi Claude Code trả lời quá dài và lan man, nên điều chỉnh thế nào?", opts: ["Không thể điều chỉnh", "Yêu cầu cụ thể: 'trả lời ngắn gọn', 'chỉ show code, không giải thích', hoặc 'tối đa 10 dòng'", "Chuyển sang model khác", "Tắt và mở lại"], ans: 1, cat: "prompt", diff: "basic", explain: "Bạn có thể <strong>điều chỉnh output format</strong>: 'chỉ code, không comment', 'tóm tắt trong 3 bullet points', 'trả lời yes/no'. Claude sẽ tuân theo chỉ dẫn." },
+
+  // ===== PLAN MODE (29-40) =====
+  { q: "Plan Mode trong Claude Code là gì?", opts: ["Chế độ chỉ lên kế hoạch, không thực thi code", "Chế độ tự động deploy", "Chế độ debug", "Chế độ review code"], ans: 0, cat: "plan", diff: "basic", explain: "<strong>Plan Mode</strong> yêu cầu Claude chỉ phân tích và lên kế hoạch thực hiện, không tự động tạo/sửa code. Giúp bạn review kế hoạch trước khi thực thi." },
+  { q: "Khi nào nên bật Plan Mode?", opts: ["Luôn luôn bật", "Khi task phức tạp, ảnh hưởng nhiều file, hoặc cần đánh giá approach trước khi code", "Chỉ khi viết test", "Chỉ khi fix bug"], ans: 1, cat: "plan", diff: "basic", explain: "Plan Mode hữu ích khi: <strong>refactor lớn, tính năng mới phức tạp, thay đổi kiến trúc</strong> — cần xem Claude hiểu vấn đề đúng chưa trước khi thực thi." },
+  { q: "Một kế hoạch tốt từ Plan Mode cần có những gì?", opts: ["Chỉ cần liệt kê file cần sửa", "Mục tiêu rõ ràng, các bước thực hiện, file bị ảnh hưởng, rủi ro tiềm ẩn, và thứ tự ưu tiên", "Chỉ cần ước lượng thời gian", "Không cần chi tiết, càng ngắn càng tốt"], ans: 1, cat: "plan", diff: "medium", explain: "Kế hoạch chất lượng gồm: <strong>mục tiêu, các bước cụ thể, file ảnh hưởng, dependency, rủi ro</strong>. Giúp bạn đánh giá và phản biện trước khi Claude thực thi." },
+  { q: "Red flag nào cho thấy kế hoạch của Claude chưa tốt?", opts: ["Kế hoạch quá chi tiết", "Kế hoạch mơ hồ, thiếu cụ thể, không đề cập edge case, hoặc bỏ qua file quan trọng", "Kế hoạch có nhiều bước", "Kế hoạch đề cập đến testing"], ans: 1, cat: "plan", diff: "medium", explain: "<strong>Red flags</strong>: mô tả chung chung ('sửa code cho tốt hơn'), thiếu file cụ thể, không nhắc error handling, bỏ qua backward compatibility, không xét edge case." },
+  { q: "Phản biện kế hoạch (challenge the plan) nghĩa là gì?", opts: ["Từ chối kế hoạch và tự làm", "Đặt câu hỏi về kế hoạch: tại sao chọn approach này? có cách nào tốt hơn? edge case nào bị bỏ sót?", "Để AI tự phản biện", "Không cần phản biện"], ans: 1, cat: "plan", diff: "medium", explain: "Sau khi nhận kế hoạch, bạn nên <strong>hỏi lại Claude</strong>: 'Tại sao không dùng pattern X?', 'Nếu Y xảy ra thì sao?', 'Approach này có scale được không?' — giúp cải thiện kế hoạch." },
+  { q: "Iterative planning là gì?", opts: ["Lập kế hoạch một lần duy nhất", "Lập kế hoạch → thực thi một phần → đánh giá → điều chỉnh kế hoạch → tiếp tục", "Để AI tự lặp lại kế hoạch", "Lập nhiều kế hoạch khác nhau cùng lúc"], ans: 1, cat: "plan", diff: "medium", explain: "<strong>Iterative planning</strong>: không cần kế hoạch hoàn hảo ngay từ đầu. Thực hiện từng phần, đánh giá kết quả, rồi điều chỉnh. Thực tế hơn là lên kế hoạch chi tiết 100% rồi mới bắt đầu." },
+  { q: "Trong Plan Mode, Claude có thể chạy lệnh terminal không?", opts: ["Có, chạy bình thường", "Không — Plan Mode chỉ phân tích và đề xuất, không thực thi bất kỳ thay đổi nào", "Chỉ chạy lệnh đọc, không chạy lệnh ghi", "Tùy thuộc vào cài đặt"], ans: 2, cat: "plan", diff: "hard", explain: "Trong Plan Mode, Claude Code vẫn có thể <strong>đọc file và chạy lệnh read-only</strong> để phân tích codebase, nhưng không thực hiện thay đổi (write/edit/create file)." },
+  { q: "Cách chuyển từ Plan Mode sang thực thi trong Claude Code?", opts: ["Tắt Plan Mode và gõ 'thực thi kế hoạch'", "Nhấn phím tắt hoặc gõ lệnh chuyển mode, sau đó yêu cầu Claude thực hiện kế hoạch đã đề ra", "Phải mở phiên mới", "Claude tự động chuyển"], ans: 1, cat: "plan", diff: "basic", explain: "Sau khi review kế hoạch trong Plan Mode, bạn <strong>tắt Plan Mode</strong> và yêu cầu Claude thực thi theo kế hoạch đã thống nhất." },
+  { q: "Plan Mode giúp tiết kiệm thời gian bằng cách nào?", opts: ["Chạy code nhanh hơn", "Phát hiện sai sót trong approach sớm, trước khi Claude tạo hàng trăm dòng code sai hướng", "Giảm số file cần sửa", "Tự động tối ưu code"], ans: 1, cat: "plan", diff: "basic", explain: "Nếu approach sai mà không dùng Plan Mode, Claude có thể tạo/sửa nhiều file theo hướng sai → <strong>mất thời gian undo và làm lại</strong>. Plan Mode giúp phát hiện sớm." },
+  { q: "Khi kế hoạch quá phức tạp, nên làm gì?", opts: ["Thực thi ngay cả khi chưa hiểu", "Yêu cầu Claude chia kế hoạch thành các phase nhỏ hơn, thực hiện phase 1 trước", "Bỏ Plan Mode", "Chuyển sang AI khác"], ans: 1, cat: "plan", diff: "medium", explain: "Kế hoạch lớn nên <strong>chia thành phases</strong>: Phase 1 — setup cấu trúc, Phase 2 — core logic, Phase 3 — UI, Phase 4 — testing. Dễ quản lý và review hơn." },
+  { q: "Đánh giá kế hoạch: yếu tố nào KHÔNG cần kiểm tra?", opts: ["Các file bị ảnh hưởng", "Tốc độ gõ phím của developer", "Backward compatibility", "Error handling strategy"], ans: 1, cat: "plan", diff: "basic", explain: "Khi review kế hoạch, cần kiểm tra: <strong>file ảnh hưởng, backward compatibility, error handling, edge cases, testing strategy</strong>. Tốc độ gõ phím không liên quan." },
+  { q: "Plan Mode có hữu ích cho task đơn giản như fix typo không?", opts: ["Có, luôn dùng Plan Mode", "Không — task đơn giản nên thực thi trực tiếp, Plan Mode gây overhead không cần thiết", "Chỉ dùng cho typo trong comment", "Plan Mode bắt buộc cho mọi task"], ans: 1, cat: "plan", diff: "basic", explain: "Plan Mode <strong>không cần cho task đơn giản</strong> (fix typo, rename variable, thêm comment). Dùng cho task phức tạp cần đánh giá approach trước." },
+
+  // ===== CLAUDE.md & MEMORY (41-55) =====
+  { q: "Context Window là gì?", opts: ["Cửa sổ trình duyệt", "Lượng text tối đa mà AI có thể 'nhìn thấy' trong một phiên hội thoại", "Bộ nhớ vĩnh viễn của AI", "Kích thước màn hình IDE"], ans: 1, cat: "memory", diff: "basic", explain: "<strong>Context Window</strong> = giới hạn token mà model xử lý được trong một lần. Khi hội thoại vượt quá giới hạn, AI sẽ 'quên' phần đầu." },
+  { q: "Tại sao Claude có thể 'quên' những gì đã nói ở đầu cuộc hội thoại?", opts: ["Lỗi phần mềm", "Vì context window có giới hạn — khi đầy, thông tin cũ bị đẩy ra ngoài", "AI cố tình quên", "Do kết nối internet"], ans: 1, cat: "memory", diff: "basic", explain: "AI không có bộ nhớ dài hạn trong conversation. Khi <strong>context window đầy</strong>, phần đầu cuộc trò chuyện bị loại bỏ → AI 'quên'." },
+  { q: "File CLAUDE.md nằm ở đâu trong project?", opts: ["Trong thư mục src/", "Ở thư mục gốc (root) của project", "Trong node_modules/", "Trong thư mục .vscode/"], ans: 1, cat: "memory", diff: "basic", explain: "<strong>CLAUDE.md</strong> đặt ở root project. Claude Code tự động đọc file này khi bắt đầu phiên làm việc để hiểu project context." },
+  { q: "CLAUDE.md dùng để làm gì?", opts: ["Tài liệu cho developer đọc", "Cung cấp context cho Claude Code về project: tech stack, convention, cấu trúc, lệnh chạy", "File cấu hình build", "File readme cho GitHub"], ans: 1, cat: "memory", diff: "basic", explain: "CLAUDE.md là <strong>hướng dẫn cho AI</strong>: mô tả project, tech stack, coding convention, lệnh build/test, cấu trúc thư mục. Claude Code đọc file này đầu tiên." },
+  { q: "Nội dung nào KHÔNG nên có trong CLAUDE.md?", opts: ["Tech stack và framework", "API key, password, hoặc secret", "Coding convention", "Lệnh build và test"], ans: 1, cat: "memory", diff: "basic", explain: "<strong>NEVER</strong> đặt secret/credential trong CLAUDE.md vì file này thường commit vào git. Chỉ nên chứa: mô tả project, tech stack, convention, cấu trúc." },
+  { q: "Cấu trúc CLAUDE.md nên bao gồm những phần nào?", opts: ["Chỉ tên project", "Project Overview, Commands, Architecture, Key Patterns, và Coding Convention", "Chỉ danh sách file", "Lịch sử thay đổi"], ans: 1, cat: "memory", diff: "medium", explain: "CLAUDE.md tốt gồm: <strong>Overview</strong> (mô tả ngắn), <strong>Commands</strong> (dev/build/test), <strong>Architecture</strong> (cấu trúc), <strong>Key Patterns</strong> (convention, quy tắc)." },
+  { q: "Memory System trong Claude Code gồm những loại nào?", opts: ["Chỉ có CLAUDE.md", "User memory, project memory, và conversation context", "Chỉ có conversation history", "Database riêng của AI"], ans: 1, cat: "memory", diff: "medium", explain: "Claude Code có nhiều tầng memory: <strong>User memory</strong> (preferences cá nhân), <strong>Project memory</strong> (CLAUDE.md, .claude/), <strong>Conversation context</strong> (phiên hiện tại)." },
+  { q: "Phân biệt Memory và CLAUDE.md?", opts: ["Giống nhau hoàn toàn", "CLAUDE.md là file tĩnh trong repo, Memory là hệ thống nhớ động của Claude Code qua nhiều phiên", "Memory chỉ dùng cho chat", "CLAUDE.md thay thế hoàn toàn Memory"], ans: 1, cat: "memory", diff: "medium", explain: "<strong>CLAUDE.md</strong>: file text, commit vào git, chia sẻ với team. <strong>Memory</strong>: hệ thống nhớ của Claude Code, lưu preferences, feedback — tồn tại qua các phiên làm việc." },
+  { q: "Khi nào nên cập nhật CLAUDE.md?", opts: ["Không bao giờ cần cập nhật", "Khi thêm tech stack mới, thay đổi convention, hoặc thêm lệnh build/deploy mới", "Chỉ khi tạo project mới", "Mỗi ngày một lần"], ans: 1, cat: "memory", diff: "basic", explain: "Cập nhật CLAUDE.md khi: <strong>thêm framework/library mới, thay đổi cấu trúc project, thêm convention, hoặc thay đổi quy trình build/deploy</strong>." },
+  { q: "Claude Code đọc CLAUDE.md ở thời điểm nào?", opts: ["Chỉ khi bạn yêu cầu", "Tự động đọc khi bắt đầu phiên làm việc tại thư mục project", "Chỉ đọc lần đầu cài đặt", "Không bao giờ đọc tự động"], ans: 1, cat: "memory", diff: "basic", explain: "Claude Code <strong>tự động đọc CLAUDE.md</strong> khi bạn chạy <code>claude</code> trong thư mục project. Không cần yêu cầu thủ công." },
+  { q: "User memory lưu trữ thông tin gì?", opts: ["Code của project", "Preferences cá nhân: coding style, ngôn ngữ ưa thích, convention bạn hay dùng", "Lịch sử git", "Danh sách file"], ans: 1, cat: "memory", diff: "medium", explain: "<strong>User memory</strong> lưu preferences cá nhân như: thích code functional hay OOP, dùng tab hay space, convention đặt tên, framework ưa thích." },
+  { q: "Nếu CLAUDE.md có nội dung mâu thuẫn với prompt hiện tại, Claude ưu tiên cái nào?", opts: ["Luôn ưu tiên CLAUDE.md", "Ưu tiên prompt hiện tại vì gần nhất với ý định người dùng", "Bỏ qua cả hai", "Hỏi lại người dùng"], ans: 1, cat: "memory", diff: "hard", explain: "Claude ưu tiên <strong>prompt hiện tại</strong> vì nó phản ánh ý định mới nhất. CLAUDE.md là context nền, prompt là chỉ thị trực tiếp." },
+  { q: "Thư mục <code>.claude/</code> trong project chứa gì?", opts: ["Source code", "Cấu hình Claude Code: commands (skills), settings cho project", "Build output", "Dependencies"], ans: 1, cat: "memory", diff: "medium", explain: "Thư mục <strong>.claude/</strong> chứa: custom commands (skills), project-specific settings, và các cấu hình khác cho Claude Code tại project đó." },
+  { q: "Reference memory trong Claude Code là gì?", opts: ["Bộ nhớ RAM", "Thông tin tham chiếu mà Claude nhớ qua các phiên: tài liệu, link, pattern hay dùng", "Bộ nhớ tạm", "Cache của trình duyệt"], ans: 1, cat: "memory", diff: "hard", explain: "<strong>Reference memory</strong> giúp Claude nhớ các tài liệu, link, pattern bạn hay tham chiếu — không cần nhắc lại mỗi phiên làm việc." },
+  { q: "Feedback memory hoạt động thế nào?", opts: ["Claude không học từ feedback", "Khi bạn sửa lỗi Claude hoặc nói 'từ giờ làm thế này', Claude nhớ cho các phiên sau", "Chỉ hoạt động trong phiên hiện tại", "Cần cấu hình thủ công"], ans: 1, cat: "memory", diff: "medium", explain: "<strong>Feedback memory</strong>: khi bạn điều chỉnh Claude ('đừng dùng var, dùng const', 'luôn thêm error handling'), Claude lưu và áp dụng cho các phiên sau." },
+
+  // ===== SKILL & WORKFLOW (56-70) =====
+  { q: "Skill trong Claude Code là gì?", opts: ["Kỹ năng lập trình của developer", "Custom command được định nghĩa bằng file .md, chứa hướng dẫn cho Claude thực hiện tác vụ cụ thể", "Plugin bên thứ ba", "Model AI riêng"], ans: 1, cat: "skill", diff: "basic", explain: "<strong>Skill</strong> = custom command (file .md) chứa hướng dẫn chi tiết cho Claude. Chạy bằng <code>/tên-skill</code>. Giúp chuẩn hóa workflow." },
+  { q: "File Skill được đặt ở đâu trong project?", opts: ["Thư mục src/", "Thư mục <code>.claude/commands/</code>", "Thư mục root", "Thư mục node_modules/"], ans: 1, cat: "skill", diff: "basic", explain: "Skill files (.md) đặt trong <strong>.claude/commands/</strong>. Claude Code tự động nhận diện và cho phép chạy bằng <code>/tên-file</code>." },
+  { q: "Cách chạy một Skill trong Claude Code?", opts: ["Gõ tên skill bình thường", "Gõ <code>/tên-skill</code> trong Claude Code prompt", "Nhấn F5", "Chạy file .md trực tiếp"], ans: 1, cat: "skill", diff: "basic", explain: "Gõ <code>/</code> theo sau tên skill. Ví dụ: <code>/commit</code>, <code>/review-pr</code>, <code>/unit-test</code>." },
+  { q: "Skill CRUD dùng để làm gì?", opts: ["Quản lý database", "Hướng dẫn Claude tạo các thao tác Create, Read, Update, Delete cho một entity", "Chỉ tạo form", "Quản lý user"], ans: 1, cat: "skill", diff: "medium", explain: "Skill CRUD chứa hướng dẫn chi tiết để Claude tạo <strong>đầy đủ CRUD operations</strong>: API endpoints, validation, error handling, database queries cho một entity." },
+  { q: "Skill Unit Test giúp gì?", opts: ["Chạy test tự động", "Hướng dẫn Claude viết unit test theo convention: test structure, naming, coverage, edge cases", "Chỉ kiểm tra syntax", "Deploy test lên server"], ans: 1, cat: "skill", diff: "medium", explain: "Skill Unit Test hướng dẫn Claude: <strong>dùng framework nào (Jest, Vitest), cấu trúc test (Arrange-Act-Assert), đặt tên test, edge cases cần cover</strong>." },
+  { q: "Tại sao cần tạo Skill thay vì gõ prompt mỗi lần?", opts: ["Không cần, gõ lại mỗi lần cũng được", "Skill đảm bảo consistency, tiết kiệm thời gian, và chia sẻ được với team qua git", "Skill chạy nhanh hơn prompt", "Claude bắt buộc dùng Skill"], ans: 1, cat: "skill", diff: "basic", explain: "Skill giúp: <strong>1)</strong> Không phải viết lại prompt dài mỗi lần, <strong>2)</strong> Đảm bảo output consistent, <strong>3)</strong> Team share qua git, <strong>4)</strong> Chuẩn hóa workflow." },
+  { q: "Kết hợp Skill theo workflow nào là hợp lý?", opts: ["Chạy tất cả Skill cùng lúc", "Plan → Code → Test → Review: lên kế hoạch trước, code, viết test, rồi review", "Chỉ dùng một Skill duy nhất", "Chạy ngược: Review → Test → Code → Plan"], ans: 1, cat: "skill", diff: "medium", explain: "Workflow chuẩn: <strong>Plan</strong> (phân tích, lên kế hoạch) → <strong>Code</strong> (thực thi) → <strong>Test</strong> (viết test) → <strong>Review</strong> (kiểm tra chất lượng)." },
+  { q: "Skill Documentation dùng để làm gì?", opts: ["Viết blog", "Hướng dẫn Claude tạo documentation: JSDoc, README, API docs theo convention của team", "Chỉ tạo comment", "Dịch tài liệu"], ans: 1, cat: "skill", diff: "medium", explain: "Skill Documentation hướng dẫn Claude: <strong>format JSDoc, cấu trúc README, API documentation style</strong> — đảm bảo tài liệu nhất quán trong toàn bộ project." },
+  { q: "Làm sao chia sẻ Skill với team?", opts: ["Gửi email file .md", "Commit thư mục <code>.claude/commands/</code> vào git repository", "Upload lên cloud", "Không thể chia sẻ"], ans: 1, cat: "skill", diff: "basic", explain: "Vì Skill nằm trong <strong>.claude/commands/</strong> thuộc project, chỉ cần <strong>commit vào git</strong> → team members pull về là có." },
+  { q: "Nội dung file Skill (.md) nên viết thế nào?", opts: ["Càng ngắn càng tốt", "Mô tả rõ mục tiêu, các bước thực hiện, convention cần tuân theo, ví dụ output mong muốn", "Chỉ viết tiêu đề", "Viết bằng code, không dùng Markdown"], ans: 1, cat: "skill", diff: "medium", explain: "Skill file cần: <strong>mục tiêu rõ ràng, các bước chi tiết, convention/pattern cần follow, ví dụ cụ thể</strong>. Càng chi tiết → Claude thực hiện càng chính xác." },
+  { q: "Skill có thể gọi Skill khác không?", opts: ["Không, mỗi Skill độc lập", "Có — Skill có thể tham chiếu hoặc chạy Skill khác, tạo workflow tự động", "Chỉ gọi được 2 Skill", "Cần plugin đặc biệt"], ans: 1, cat: "skill", diff: "hard", explain: "Skill có thể <strong>chain</strong> với nhau: Skill A gọi Skill B. Ví dụ: Skill 'new-feature' có thể gọi /plan → /code → /test liên tiếp." },
+  { q: "Cách debug Skill khi nó không hoạt động đúng?", opts: ["Xóa và tạo lại từ đầu", "Chạy Skill, xem output, xác định bước nào sai, sửa hướng dẫn trong file .md", "Không thể debug Skill", "Liên hệ Anthropic support"], ans: 1, cat: "skill", diff: "medium", explain: "Debug Skill giống debug code: <strong>chạy → xem kết quả → xác định bước sai → sửa hướng dẫn → chạy lại</strong>. Thêm ví dụ cụ thể giúp Claude hiểu đúng hơn." },
+  { q: "Skill nào dưới đây KHÔNG phải là use case phổ biến?", opts: ["/commit — tạo conventional commit", "/review-pr — review pull request", "/make-coffee — pha cà phê tự động", "/unit-test — viết unit test"], ans: 2, cat: "skill", diff: "basic", explain: "Claude Code là AI assistant cho coding — <strong>không thể pha cà phê</strong>. Các skill phổ biến: commit, review, test, documentation, refactor." },
+  { q: "Ưu điểm của Skill so với system prompt?", opts: ["Skill nhanh hơn", "Skill nằm trong project, version-controlled, team có thể review và cải thiện qua git", "System prompt luôn tốt hơn", "Không có khác biệt"], ans: 1, cat: "skill", diff: "hard", explain: "Skill (file .md trong .claude/commands/): <strong>version-controlled, team collaboration, project-specific</strong>. System prompt: global, không track được thay đổi." },
+
+  // ===== GIT & DEBUG (71-85) =====
+  { q: "Claude Code hỗ trợ git bằng cách nào?", opts: ["Chỉ xem git log", "Có thể chạy mọi git command: add, commit, push, pull, branch, merge, diff, log", "Chỉ tạo commit", "Không hỗ trợ git"], ans: 1, cat: "git", diff: "basic", explain: "Claude Code có thể <strong>chạy mọi git command</strong> thông qua Bash tool. Cũng có thể dùng skill /commit để tạo conventional commit." },
+  { q: "Conventional Commits format đúng là gì?", opts: ["<code>fixed bug</code>", "<code>feat: add user authentication</code>", "<code>UPDATE: login page</code>", "<code>changed some stuff</code>"], ans: 1, cat: "git", diff: "basic", explain: "Conventional Commits: <code><strong>type: description</strong></code>. Types: feat (tính năng mới), fix (sửa bug), refactor, docs, test, chore, style." },
+  { q: "Claude Code tạo commit message theo convention nào mặc định?", opts: ["Không có convention", "Conventional Commits: type(scope): description + body giải thích chi tiết", "Chỉ ghi ngày tháng", "Random message"], ans: 1, cat: "git", diff: "basic", explain: "Claude Code mặc định tạo commit theo <strong>Conventional Commits</strong> với message mô tả rõ 'what' và 'why'." },
+  { q: "Khi có merge conflict, Claude Code giúp thế nào?", opts: ["Tự động chọn bản local", "Phân tích conflict, giải thích sự khác biệt, và đề xuất cách resolve phù hợp", "Xóa cả hai phiên bản", "Không hỗ trợ conflict"], ans: 1, cat: "git", diff: "medium", explain: "Claude Code có thể <strong>đọc conflict markers, hiểu context cả hai bên, và đề xuất resolution</strong> — giúp resolve nhanh hơn làm thủ công." },
+  { q: "Lệnh nào trong Claude Code để tạo commit?", opts: ["<code>git commit</code> thủ công", "Dùng skill <code>/commit</code> hoặc yêu cầu Claude tạo commit", "<code>claude commit</code>", "<code>cc commit</code>"], ans: 1, cat: "git", diff: "basic", explain: "Có thể dùng <strong>/commit</strong> skill hoặc yêu cầu Claude 'commit thay đổi hiện tại'. Claude sẽ tạo conventional commit message phù hợp." },
+  { q: "Khi debug với Claude Code, thông tin nào cần cung cấp?", opts: ["Chỉ nói 'code bị lỗi'", "Mô tả bug, error message/log, bước tái tạo (reproduce steps), hành vi mong muốn vs thực tế", "Chỉ copy error message", "Không cần thông tin gì"], ans: 1, cat: "git", diff: "basic", explain: "Debug hiệu quả cần: <strong>error message, bước tái tạo, expected vs actual behavior</strong>. Càng cụ thể → Claude xác định nguyên nhân càng nhanh." },
+  { q: "Thu hẹp phạm vi debug (narrow down) nghĩa là gì?", opts: ["Xóa bớt code", "Xác định chính xác file, function, dòng code gây lỗi thay vì để Claude tìm trong toàn bộ codebase", "Giảm kích thước project", "Chỉ debug một ngôn ngữ"], ans: 1, cat: "git", diff: "medium", explain: "Thay vì nói 'app bị lỗi', hãy <strong>thu hẹp</strong>: 'function handleLogin ở file auth.js line 45 throw error khi email rỗng'. Giúp Claude tập trung đúng chỗ." },
+  { q: "Conventional Commit type <code>refactor:</code> dùng khi nào?", opts: ["Khi thêm tính năng mới", "Khi thay đổi code mà không thay đổi behavior — cải thiện cấu trúc, readability", "Khi fix bug", "Khi xóa file"], ans: 1, cat: "git", diff: "medium", explain: "<strong>refactor:</strong> thay đổi code nhưng giữ nguyên chức năng — ví dụ: tách function, đổi tên biến cho rõ hơn, simplify logic. Không thêm feature, không fix bug." },
+  { q: "Claude Code có thể tạo Pull Request không?", opts: ["Không, chỉ tạo commit", "Có — có thể tạo PR trên GitHub/GitLab với title, description, và reviewers", "Chỉ trên GitLab", "Cần extension riêng"], ans: 1, cat: "git", diff: "medium", explain: "Claude Code dùng <strong>gh CLI</strong> để tạo Pull Request trên GitHub: tạo branch, push, tạo PR với title và description tự động." },
+  { q: "Rewind trong Claude Code khác gì với <code>git reset</code>?", opts: ["Giống nhau hoàn toàn", "Rewind quay về trạng thái trước của conversation + code, git reset chỉ quay về commit trước trong git", "Rewind chỉ ảnh hưởng git", "git reset an toàn hơn Rewind"], ans: 1, cat: "git", diff: "hard", explain: "<strong>Rewind</strong> trong Claude Code: quay về bước trước trong conversation, undo cả thay đổi code. <strong>git reset</strong>: chỉ undo commit trong git history." },
+  { q: "Error log nào hữu ích nhất khi debug?", opts: ["Log không quan trọng", "Stack trace đầy đủ với file, line number, và error message", "Chỉ tên error", "Log của ngày hôm qua"], ans: 1, cat: "git", diff: "basic", explain: "<strong>Stack trace</strong> cho thấy: error type, message, file nào, dòng nào, call chain — giúp Claude xác định chính xác nguyên nhân." },
+  { q: "Conventional Commit type <code>docs:</code> dùng khi nào?", opts: ["Khi sửa code", "Khi chỉ thay đổi documentation: README, JSDoc, comment, CHANGELOG", "Khi thêm tính năng", "Khi fix bug"], ans: 1, cat: "git", diff: "basic", explain: "<strong>docs:</strong> dành cho thay đổi chỉ liên quan đến tài liệu, không ảnh hưởng code logic. Ví dụ: cập nhật README, thêm JSDoc comment." },
+  { q: "Khi Claude Code suggest sửa code nhưng bạn không đồng ý, nên làm gì?", opts: ["Accept rồi sửa lại sau", "Reject và giải thích lý do, đề xuất approach khác", "Tắt Claude Code", "Accept tất cả để nhanh"], ans: 1, cat: "git", diff: "medium", explain: "Luôn có quyền <strong>reject suggestion</strong>. Giải thích tại sao không đồng ý giúp Claude hiểu context tốt hơn và đề xuất chính xác hơn." },
+  { q: "Claude Code có thể review code của bạn không?", opts: ["Không, chỉ viết code mới", "Có — phân tích code quality, tìm bug tiềm ẩn, suggest cải thiện, kiểm tra convention", "Chỉ review syntax", "Cần plugin riêng"], ans: 1, cat: "git", diff: "basic", explain: "Claude Code rất giỏi <strong>code review</strong>: phát hiện bug, suggest refactor, kiểm tra convention, tìm security issue, improve performance." },
+  { q: "Conventional Commit type <code>test:</code> dùng khi nào?", opts: ["Khi test thủ công", "Khi thêm hoặc sửa automated test (unit test, integration test)", "Khi fix bug phát hiện qua test", "Khi xóa test"], ans: 1, cat: "git", diff: "basic", explain: "<strong>test:</strong> dành cho thay đổi liên quan test code: thêm test mới, sửa test bị fail, tăng coverage. Nếu fix bug thì dùng <code>fix:</code>." },
+
+  // ===== TOKEN & CHI PHÍ (86-92) =====
+  { q: "Input token và output token khác nhau thế nào?", opts: ["Giống nhau", "Input token = text bạn gửi cho AI, Output token = text AI tạo ra. Output thường đắt hơn", "Input đắt hơn output", "Chỉ tính output token"], ans: 1, cat: "token", diff: "basic", explain: "<strong>Input token</strong>: prompt + context bạn gửi. <strong>Output token</strong>: câu trả lời AI tạo ra. Output token thường có giá <strong>cao hơn 3-5x</strong> so với input." },
+  { q: "Cách nào giúp tiết kiệm token khi dùng Claude Code?", opts: ["Gửi toàn bộ codebase mỗi lần", "Viết prompt ngắn gọn, cụ thể. Dùng CLAUDE.md thay vì nhắc lại context. Chia task nhỏ", "Dùng model đắt nhất", "Không cần tiết kiệm"], ans: 1, cat: "token", diff: "medium", explain: "Tiết kiệm token: <strong>1)</strong> Prompt cụ thể, <strong>2)</strong> CLAUDE.md chứa context cố định, <strong>3)</strong> Chia task nhỏ, <strong>4)</strong> Dùng Haiku cho task đơn giản, <strong>5)</strong> Tận dụng prompt caching." },
+  { q: "Prompt caching là gì?", opts: ["Cache kết quả trong trình duyệt", "Anthropic cache phần prompt lặp lại (system prompt, CLAUDE.md) để giảm chi phí input token", "Cache code output", "Không tồn tại tính năng này"], ans: 1, cat: "token", diff: "medium", explain: "<strong>Prompt caching</strong>: khi phần đầu prompt giống nhau qua nhiều request (system prompt, CLAUDE.md), Anthropic cache lại → giảm đến 90% chi phí input token." },
+  { q: "Context window của Claude Opus lớn bao nhiêu?", opts: ["4K token", "32K token", "200K token", "1K token"], ans: 2, cat: "token", diff: "basic", explain: "Claude có context window lên đến <strong>200K token</strong> — tương đương ~150K từ hoặc ~500 trang sách. Rất lớn so với nhiều model khác." },
+  { q: "Khi context window gần đầy, nên làm gì?", opts: ["Tiếp tục gõ thêm", "Bắt đầu conversation mới, tóm tắt tiến độ trước đó trong prompt đầu tiên", "Xóa CLAUDE.md để có thêm chỗ", "Không cần quan tâm"], ans: 1, cat: "token", diff: "medium", explain: "Khi context window đầy, Claude bắt đầu 'quên'. Nên <strong>mở conversation mới</strong> với bản tóm tắt: đã làm gì, đang ở bước nào, cần làm gì tiếp." },
+  { q: "Chi phí Claude API tính theo đơn vị nào?", opts: ["Theo phút sử dụng", "Theo số token (input + output), tính bằng USD per million tokens", "Theo số file đọc", "Theo số lần nhấn Enter"], ans: 1, cat: "token", diff: "basic", explain: "Chi phí tính theo <strong>token</strong>: $/1M input tokens + $/1M output tokens. Mỗi model có giá khác nhau. Haiku rẻ nhất, Opus đắt nhất." },
+  { q: "Tại sao gửi quá nhiều context không cần thiết là lãng phí?", opts: ["Không lãng phí, càng nhiều càng tốt", "Tốn nhiều input token → tăng chi phí, và context dài có thể khiến AI mất focus vào phần quan trọng", "AI xử lý nhanh hơn với nhiều context", "Context miễn phí"], ans: 1, cat: "token", diff: "medium", explain: "Context thừa: <strong>1)</strong> Tốn token = tốn tiền, <strong>2)</strong> AI có thể bị 'nhiễu', mất tập trung vào yêu cầu chính. Cung cấp context <strong>đủ và đúng</strong> là tối ưu nhất." },
+
+  // ===== MCP & NÂNG CAO (93-100) =====
+  { q: "MCP (Model Context Protocol) là gì?", opts: ["Một ngôn ngữ lập trình", "Giao thức chuẩn cho phép AI kết nối với data sources và tools bên ngoài", "Một model AI mới", "Giao thức mạng internet"], ans: 1, cat: "advanced", diff: "medium", explain: "<strong>MCP</strong> là giao thức mở do Anthropic phát triển, cho phép Claude kết nối với: database, API, file system, và các tools khác — mở rộng khả năng beyond text." },
+  { q: "Sub-agents trong Claude Code là gì?", opts: ["Người dùng phụ", "Claude có thể tạo sub-agent để xử lý sub-task song song hoặc chuyên biệt", "Plugin bên thứ ba", "Một loại model nhỏ hơn"], ans: 1, cat: "advanced", diff: "hard", explain: "<strong>Sub-agents</strong>: Claude chính có thể ủy quyền tác vụ cho sub-agent chuyên biệt — ví dụ: một agent tìm kiếm code, một agent viết test — tăng hiệu suất." },
+  { q: "Hooks trong Claude Code là gì?", opts: ["Móc treo code", "Script tự động chạy trước/sau các sự kiện: pre-commit, post-edit, pre-push", "Công cụ debug", "Tên một Skill"], ans: 1, cat: "advanced", diff: "hard", explain: "<strong>Hooks</strong> cho phép chạy script tự động khi có sự kiện: ví dụ lint code trước commit, chạy test sau khi edit, format code sau khi tạo file." },
+  { q: "Multi Claude Instances nghĩa là gì?", opts: ["Cài Claude trên nhiều máy", "Chạy nhiều phiên Claude Code cùng lúc trên cùng project hoặc khác project", "Dùng nhiều tài khoản", "Chạy Claude trên cloud"], ans: 1, cat: "advanced", diff: "medium", explain: "Có thể mở <strong>nhiều terminal chạy Claude Code</strong> cùng lúc: một instance refactor, một instance viết test — làm việc song song tăng tốc độ." },
+  { q: "Claude Code có thể deploy ứng dụng không?", opts: ["Không, chỉ viết code", "Có — chạy lệnh deploy, cấu hình CI/CD, tạo Docker file, setup cloud services", "Chỉ deploy lên localhost", "Cần mua license riêng"], ans: 1, cat: "advanced", diff: "medium", explain: "Claude Code có thể <strong>chạy bất kỳ terminal command</strong>: npm run build, docker build, deploy scripts, cấu hình GitHub Actions — hỗ trợ full deployment workflow." },
+  { q: "Agent Teams trong Claude Code hoạt động thế nào?", opts: ["Nhiều người dùng chat cùng Claude", "Nhiều Claude agent phối hợp: một agent plan, một agent code, một agent review — orchestrated workflow", "Một team dùng chung account", "Chat nhóm với AI"], ans: 1, cat: "advanced", diff: "hard", explain: "<strong>Agent Teams</strong>: nhiều Claude agent chuyên biệt phối hợp tự động. Ví dụ: Planner agent → Coder agent → Tester agent → Reviewer agent — mỗi agent có expertise riêng." },
+  { q: "MCP server có thể cung cấp những gì cho Claude?", opts: ["Chỉ text", "Tools (chức năng), Resources (dữ liệu), và Prompts (template) — mở rộng khả năng của Claude", "Chỉ hình ảnh", "Chỉ file PDF"], ans: 1, cat: "advanced", diff: "hard", explain: "MCP server cung cấp: <strong>Tools</strong> (function AI có thể gọi), <strong>Resources</strong> (data sources), <strong>Prompts</strong> (templates). Ví dụ: MCP server cho database → Claude truy vấn trực tiếp." },
+  { q: "Claude Code CLI có thể chạy ở chế độ non-interactive (headless) không?", opts: ["Không, luôn cần người dùng tương tác", "Có — dùng <code>claude -p 'prompt'</code> để chạy một lệnh và nhận kết quả, phù hợp cho automation", "Chỉ trên Linux", "Cần cấu hình phức tạp"], ans: 1, cat: "advanced", diff: "hard", explain: "<code>claude -p 'prompt'</code> chạy ở chế độ <strong>non-interactive</strong>: gửi prompt, nhận output, thoát. Phù hợp cho: CI/CD scripts, automation, batch processing." },
+  { q: "Permission system trong Claude Code hoạt động thế nào?", opts: ["Claude có toàn quyền mặc định", "Claude Code xin phép trước khi thực hiện thay đổi (edit file, chạy lệnh) — bạn approve hoặc reject", "Không có hệ thống permission", "Chỉ admin mới dùng được"], ans: 1, cat: "advanced", diff: "medium", explain: "Claude Code có <strong>permission system</strong>: trước khi edit file hoặc chạy bash command, sẽ hiện xác nhận để bạn approve. Có thể cấu hình auto-approve cho các tool an toàn." },
+];
+
+// ===== APP LOGIC =====
+let answered = {};
+let filterCat = 'all';
+window._selected = {};
+
+function loadState() {
+  try { answered = JSON.parse(localStorage.getItem('claude-quiz-answered') || '{}'); } catch(e) { answered = {}; }
+  try { window._selected = JSON.parse(localStorage.getItem('claude-quiz-selected') || '{}'); } catch(e) { window._selected = {}; }
+}
+function saveState() {
+  localStorage.setItem('claude-quiz-answered', JSON.stringify(answered));
+  localStorage.setItem('claude-quiz-selected', JSON.stringify(window._selected));
+}
+
+function updateScore() {
+  const correct = Object.values(answered).filter(v => v === true).length;
+  const wrong = Object.values(answered).filter(v => v === false).length;
+  const total = correct + wrong;
+  document.getElementById('sc-correct').textContent = correct;
+  document.getElementById('sc-wrong').textContent = wrong;
+  document.getElementById('sc-total').textContent = total;
+  const pct = Math.round((total / QUESTIONS.length) * 100);
+  document.getElementById('sc-bar').style.width = pct + '%';
+  document.getElementById('sc-pct').textContent = pct + '% hoàn thành (' + correct + ' đúng / ' + QUESTIONS.length + ' câu)';
+}
+
+function selectAnswer(qIdx, optIdx) {
+  if (answered[qIdx] !== undefined) return;
+  const q = QUESTIONS[qIdx];
+  const isCorrect = optIdx === q.ans;
+  answered[qIdx] = isCorrect;
+  window._selected[qIdx] = optIdx;
+  saveState();
+  renderQuestion(qIdx);
+  updateScore();
+}
+
+function renderQuestion(idx) {
+  const q = QUESTIONS[idx];
+  const el = document.getElementById('q-' + idx);
+  if (!el) return;
+  const state = answered[idx];
+  const isAnswered = state !== undefined;
+  const selectedOpt = window._selected[idx];
+
+  el.className = 'q-card' + (isAnswered ? (state ? ' answered-correct' : ' answered-wrong') : '');
+
+  const diffLabel = { basic: 'Cơ bản', medium: 'Trung bình', hard: 'Nâng cao' };
+  let html = '<div class="q-header">' +
+    '<span class="q-num">' + (idx + 1) + '</span>' +
+    '<span class="q-tag ' + q.diff + '">' + diffLabel[q.diff] + '</span>' +
+    '</div>' +
+    '<div class="q-text">' + q.q + '</div>' +
+    '<div class="q-options">';
+
+  var letters = ['A', 'B', 'C', 'D'];
+  q.opts.forEach(function(opt, oi) {
+    var cls = 'q-opt';
+    if (isAnswered) {
+      cls += ' disabled';
+      if (oi === q.ans) cls += ' correct';
+      else if (selectedOpt === oi && oi !== q.ans) cls += ' wrong';
+    }
+    html += '<div class="' + cls + '" onclick="selectAnswer(' + idx + ',' + oi + ')">' +
+      '<span class="letter">' + letters[oi] + '</span>' +
+      '<span>' + opt + '</span>' +
+      '</div>';
+  });
+  html += '</div>';
+  html += '<div class="q-explain ' + (isAnswered ? 'show' : '') + '">' + q.explain + '</div>';
+  el.innerHTML = html;
+}
+
+function renderAll() {
+  var container = document.getElementById('quizContainer');
+  container.innerHTML = '';
+  QUESTIONS.forEach(function(q, idx) {
+    if (filterCat !== 'all' && q.cat !== filterCat) return;
+    var div = document.createElement('div');
+    div.id = 'q-' + idx;
+    div.className = 'q-card';
+    container.appendChild(div);
+    renderQuestion(idx);
+  });
+  updateScore();
+}
+
+function resetAll() {
+  if (!confirm('Bạn có chắc muốn làm lại tất cả?')) return;
+  answered = {};
+  window._selected = {};
+  localStorage.removeItem('claude-quiz-answered');
+  localStorage.removeItem('claude-quiz-selected');
+  renderAll();
+}
+
+// Filter
+document.getElementById('filterBar').addEventListener('click', function(e) {
+  var btn = e.target.closest('.filter-btn');
+  if (!btn) return;
+  filterCat = btn.dataset.cat;
+  document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderAll();
+});
+
+// Shuffle options with seeded random so order is stable across reloads
+function seededRandom(seed) {
+  return function() {
+    seed = (seed * 16807 + 0) % 2147483647;
+    return (seed - 1) / 2147483646;
+  };
+}
+
+function shuffleOptions() {
+  var rng = seededRandom(42);
+  QUESTIONS.forEach(function(q) {
+    var indices = q.opts.map(function(_, i) { return i; });
+    for (var i = indices.length - 1; i > 0; i--) {
+      var j = Math.floor(rng() * (i + 1));
+      var tmp = indices[i]; indices[i] = indices[j]; indices[j] = tmp;
+    }
+    var newOpts = indices.map(function(i) { return q.opts[i]; });
+    var newAns = indices.indexOf(q.ans);
+    q.opts = newOpts;
+    q.ans = newAns;
+  });
+}
+
+// Init
+shuffleOptions();
+loadState();
+renderAll();
+</script>
+
+</body>
+</html>

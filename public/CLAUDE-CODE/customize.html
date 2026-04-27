@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Claude Code Customize — Commands, Skills, Hooks, Subagents</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">Claude<span class="accent">Code</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="basics.html">Cơ Bản</a>
+      <a href="commands.html">Commands</a>
+      <a href="customize.html" class="active">Customize</a>
+      <a href="integrations.html">Integrations</a>
+      <a href="tips.html">Tips & FAQ</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">LEVEL 3 · MID-LEVEL</div>
+  <h1>Tuỳ biến <span class="gradient">Claude Code</span></h1>
+  <p class="hero-desc">Viết slash command riêng, hooks tự động, skills tái sử dụng, gọi subagents. Biến Claude Code thành assistant đúng workflow của bạn.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Tổng quan 4 cơ chế mở rộng</h2>
+    <table class="cmp">
+      <tr>
+        <th></th>
+        <th>Slash Commands</th>
+        <th>Skills</th>
+        <th>Hooks</th>
+        <th>Subagents</th>
+      </tr>
+      <tr>
+        <td><strong>Kích hoạt</strong></td>
+        <td>User gõ <code>/name</code></td>
+        <td>Claude tự invoke khi gặp tình huống</td>
+        <td>Event hệ thống (trước/sau tool)</td>
+        <td>Claude tự gọi khi cần</td>
+      </tr>
+      <tr>
+        <td><strong>Nội dung</strong></td>
+        <td>Prompt template</td>
+        <td>Template + hướng dẫn + example</td>
+        <td>Shell script</td>
+        <td>Prompt + tool whitelist</td>
+      </tr>
+      <tr>
+        <td><strong>Nơi lưu</strong></td>
+        <td><code>.claude/commands/</code></td>
+        <td><code>.claude/skills/</code></td>
+        <td><code>settings.json</code></td>
+        <td><code>.claude/agents/</code></td>
+      </tr>
+      <tr>
+        <td><strong>Dùng khi</strong></td>
+        <td>Shortcut tới prompt hay dùng</td>
+        <td>Task có quy trình lặp lại</td>
+        <td>Tự động format, test, log</td>
+        <td>Scope riêng (context, tool)</td>
+      </tr>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">1. Custom Slash Commands</h2>
+    <p class="section-sub">Viết 1 file Markdown, gõ <code>/tên-file</code> để thực thi. Đơn giản nhưng cực mạnh.</p>
+
+    <h3 style="color: var(--primary); margin-top: 1rem">Tạo command "test-changes"</h3>
+    <pre class="code"><span class="c"># Tạo file</span>
+mkdir -p .claude/commands
+touch .claude/commands/test-changes.md</pre>
+
+    <pre class="code"><span class="c"># .claude/commands/test-changes.md</span>
+---
+name: test-changes
+description: Chạy test chỉ cho những file đã thay đổi trong branch
+---
+
+Do the following:
+1. Run `git diff --name-only origin/main` to get changed files
+2. For each .ts/.tsx file, find the matching test file
+3. Run `npx vitest run &lt;test-files&gt;` with only those tests
+4. Report pass/fail + list of untested changed files</pre>
+
+    <p style="color: var(--muted); margin-top:.5rem">Sau đó trong session: gõ <code>/test-changes</code> → Claude thực hiện đúng quy trình.</p>
+
+    <h3 style="color: var(--primary); margin-top: 1.5rem">Command nhận argument</h3>
+    <pre class="code"><span class="c"># .claude/commands/deploy-feature.md</span>
+---
+name: deploy-feature
+description: Deploy feature branch lên staging với tên tuỳ ý
+argument-hint: "&lt;branch-name&gt;"
+---
+
+Deploy branch <span class="cmd">$ARGUMENTS</span> to staging:
+1. git checkout $ARGUMENTS
+2. npm run build
+3. Upload dist/ to staging bucket
+4. Invalidate CDN cache
+5. Report staging URL</pre>
+
+    <pre class="code"><span class="c"># Dùng</span>
+/deploy-feature feature/new-auth</pre>
+
+    <h3 style="color: var(--primary); margin-top: 1.5rem">User-global vs Project command</h3>
+    <table class="cmp">
+      <tr><th>Vị trí</th><th>Scope</th><th>Ưu tiên</th></tr>
+      <tr><td><code>.claude/commands/*.md</code> (project)</td><td>Chỉ repo này</td><td>Cao</td></tr>
+      <tr><td><code>~/.claude/commands/*.md</code> (user)</td><td>Mọi project</td><td>Thấp hơn</td></tr>
+    </table>
+
+    <div class="tip">
+      <strong>Namespace:</strong> tổ chức theo folder — <code>.claude/commands/git/release.md</code> → gõ <code>/git:release</code>.
+    </div>
+
+    <h3 style="color: var(--primary); margin-top: 1.5rem">Ví dụ command hay gặp</h3>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4><code>/fix-lint</code></h4>
+        <pre class="code">---
+name: fix-lint
+---
+Run npm run lint. Auto-fix what can be fixed.
+For remaining errors, analyze and fix them.
+Verify with npm run lint again.</pre>
+      </div>
+      <div class="card">
+        <h4><code>/write-test</code></h4>
+        <pre class="code">---
+name: write-test
+argument-hint: "&lt;file-path&gt;"
+---
+Read $ARGUMENTS and write unit tests:
+- Use existing test framework (check package.json)
+- Test happy path + 2 edge cases + error case
+- Keep under 80 lines
+- Place in same folder with .test. suffix</pre>
+      </div>
+      <div class="card">
+        <h4><code>/changelog</code></h4>
+        <pre class="code">---
+name: changelog
+---
+Scan `git log` since last release tag.
+Group by feat/fix/chore.
+Write CHANGELOG.md entry in standard format.
+Do NOT commit — let me review first.</pre>
+      </div>
+      <div class="card">
+        <h4><code>/explain</code></h4>
+        <pre class="code">---
+name: explain
+argument-hint: "&lt;file-or-symbol&gt;"
+---
+Read $ARGUMENTS. Explain in Vietnamese:
+1. What it does (1-2 sentences)
+2. Why it exists (design intent)
+3. Key gotchas or non-obvious behavior
+4. Where it's called from</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">2. Skills — "Biết làm gì khi gặp X"</h2>
+    <p class="section-sub">Skill = hướng dẫn chi tiết cho một loại task. Claude <strong>tự invoke</strong> khi gặp tình huống phù hợp. Khác slash command ở chỗ: user không phải gõ lệnh.</p>
+
+    <h3 style="color: var(--primary); margin-top: 1rem">Skill đơn giản</h3>
+    <pre class="code"><span class="c"># .claude/skills/database-migration.md</span>
+---
+name: database-migration
+description: Viết Prisma migration an toàn — reversible,
+  có rollback, test trên staging trước prod
+when-to-use: Khi user yêu cầu đổi schema DB, thêm/xoá column,
+  migrate data
+---
+
+Quy trình bắt buộc khi viết migration:
+
+1. Tạo migration qua `prisma migrate dev --create-only`
+2. Mở file .sql sinh ra, review từng lệnh
+3. **Bắt buộc có rollback** — viết down migration
+4. Nếu migration breaking (drop column, rename):
+   - Chia 2 phase: add column mới → migrate data → drop cũ
+   - Không được 1 deployment
+5. Test trên local DB copy trước
+6. Update schema.prisma để match
+7. Commit với message: `db: &lt;description&gt;`
+
+Ví dụ breaking migration tốt:
+```sql
+-- Phase 1 (deploy trước)
+ALTER TABLE users ADD COLUMN email_verified BOOLEAN DEFAULT false;
+
+-- Phase 2 (backfill, chạy sau deploy phase 1)
+UPDATE users SET email_verified = (verified_at IS NOT NULL);
+
+-- Phase 3 (deploy sau)
+ALTER TABLE users DROP COLUMN verified_at;
+```</pre>
+
+    <p style="color: var(--muted); margin-top:.5rem">Bất cứ khi nào user prompt có "add column", "migration", "đổi schema" → Claude tự nhớ và follow skill này.</p>
+
+    <h3 style="color: var(--primary); margin-top: 1.5rem">Skill có công cụ</h3>
+    <pre class="code"><span class="c"># .claude/skills/screenshot-bug/SKILL.md</span>
+---
+name: screenshot-bug
+description: Capture browser screenshot + console log khi debug UI
+allowed-tools:
+  - Bash(npx playwright*)
+  - Read
+  - Write
+---
+
+Khi user báo UI bug, làm:
+1. Chạy `npx playwright screenshot &lt;URL&gt; bug.png`
+2. Mở DevTools console, copy errors
+3. Save vào `./debug/&lt;timestamp&gt;/` cả 2
+4. Analyze screenshot + log, propose fix</pre>
+
+    <div class="info-box">
+      <strong>Skill folder structure:</strong>
+      <pre class="code" style="margin-top:.5rem">.claude/skills/
+  my-skill/
+    SKILL.md              <span class="c"># required — metadata + instructions</span>
+    template.ts           <span class="c"># optional — file template</span>
+    example.md            <span class="c"># optional — example output</span>
+    references/           <span class="c"># optional — subfolders for deep context</span></pre>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">3. Hooks — Event-driven automation</h2>
+    <p class="section-sub">Shell command chạy tự động khi có event (trước/sau tool call). Dùng cho: auto-format, auto-test, log, notify.</p>
+
+    <h3 style="color: var(--primary); margin-top: 1rem">Hooks events</h3>
+    <table class="cmp">
+      <tr><th>Event</th><th>Khi nào trigger</th><th>Use case</th></tr>
+      <tr><td><code>PreToolUse</code></td><td>Trước Claude chạy 1 tool</td><td>Block dangerous commands, log</td></tr>
+      <tr><td><code>PostToolUse</code></td><td>Sau tool chạy</td><td>Auto-format file sau Edit</td></tr>
+      <tr><td><code>UserPromptSubmit</code></td><td>User vừa gửi prompt</td><td>Inject context (ngày hiện tại, env info)</td></tr>
+      <tr><td><code>Stop</code></td><td>Claude xong turn</td><td>Notify, summary</td></tr>
+      <tr><td><code>SubagentStop</code></td><td>Subagent xong</td><td>Aggregate results</td></tr>
+      <tr><td><code>Notification</code></td><td>Claude cần attention</td><td>Desktop notification</td></tr>
+    </table>
+
+    <h3 style="color: var(--primary); margin-top: 1.5rem">Ví dụ 1: Auto-format sau Edit</h3>
+    <pre class="code"><span class="c"># .claude/settings.json</span>
+{
+  <span class="s">"hooks"</span>: {
+    <span class="s">"PostToolUse"</span>: [
+      {
+        <span class="s">"matcher"</span>: <span class="s">"Edit|Write"</span>,
+        <span class="s">"hooks"</span>: [
+          {
+            <span class="s">"type"</span>: <span class="s">"command"</span>,
+            <span class="s">"command"</span>: <span class="s">"npx prettier --write $CLAUDE_TOOL_INPUT_FILE_PATH"</span>
+          }
+        ]
+      }
+    ]
+  }
+}</pre>
+
+    <p style="color: var(--muted); margin-top:.5rem">Mỗi lần Claude edit file → Prettier tự format ngay. Code luôn đẹp mà Claude không cần nhớ.</p>
+
+    <h3 style="color: var(--primary); margin-top: 1.5rem">Ví dụ 2: Block <code>rm -rf</code> nguy hiểm</h3>
+    <pre class="code">{
+  <span class="s">"hooks"</span>: {
+    <span class="s">"PreToolUse"</span>: [
+      {
+        <span class="s">"matcher"</span>: <span class="s">"Bash"</span>,
+        <span class="s">"hooks"</span>: [
+          {
+            <span class="s">"type"</span>: <span class="s">"command"</span>,
+            <span class="s">"command"</span>: <span class="s">"echo $CLAUDE_TOOL_INPUT_COMMAND | grep -qE 'rm -rf /' && echo BLOCKED || exit 0"</span>
+          }
+        ]
+      }
+    ]
+  }
+}</pre>
+
+    <h3 style="color: var(--primary); margin-top: 1.5rem">Ví dụ 3: Desktop notify khi xong task</h3>
+    <pre class="code">{
+  <span class="s">"hooks"</span>: {
+    <span class="s">"Stop"</span>: [
+      {
+        <span class="s">"hooks"</span>: [
+          {
+            <span class="s">"type"</span>: <span class="s">"command"</span>,
+            <span class="s">"command"</span>: <span class="s">"notify-send 'Claude Code' 'Task done!'"</span>
+          }
+        ]
+      }
+    ]
+  }
+}</pre>
+
+    <div class="danger-box">
+      <strong>⚠️ Hooks chạy với quyền user:</strong> nếu viết sai (vô hạn loop, rm thư mục) có thể phá máy. Test ở repo throwaway trước.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">4. Subagents — Claude gọi Claude khác</h2>
+    <p class="section-sub">Subagent là session Claude riêng biệt với prompt/tool/context riêng. Dùng để isolate workload hoặc parallel.</p>
+
+    <h3 style="color: var(--primary); margin-top: 1rem">Subagent built-in</h3>
+    <table class="cmp">
+      <tr><th>Agent</th><th>Mô tả</th><th>Khi Claude tự dùng</th></tr>
+      <tr><td><code>Explore</code></td><td>Agent chuyên search/explore codebase</td><td>Cần tìm file/pattern tốn &gt;3 query</td></tr>
+      <tr><td><code>Plan</code></td><td>Architect agent — thiết kế implementation plan</td><td>Task lớn cần plan chi tiết</td></tr>
+      <tr><td><code>general-purpose</code></td><td>Claude fresh session, full tool</td><td>Task độc lập không cần context hiện tại</td></tr>
+    </table>
+
+    <div class="info-box">
+      <strong>Lợi ích subagent:</strong>
+      <ul style="padding-left:1.3rem; margin-top:.3rem">
+        <li><strong>Context isolation</strong> — main session không bị nhồi output raw của tool</li>
+        <li><strong>Parallel</strong> — 3 subagent chạy cùng lúc → nhanh 3×</li>
+        <li><strong>Specialized</strong> — subagent có prompt/tool riêng</li>
+      </ul>
+    </div>
+
+    <h3 style="color: var(--primary); margin-top: 1.5rem">Viết subagent riêng</h3>
+    <pre class="code"><span class="c"># .claude/agents/code-reviewer.md</span>
+---
+name: code-reviewer
+description: Independent code reviewer — senior dev hảo hạng,
+  review diff giống đồng nghiệp khó tính
+tools:
+  - Read
+  - Grep
+  - Bash(git diff*, git log*)
+model: opus
+---
+
+You are a senior code reviewer. Your job:
+1. Read the diff / files the user points to
+2. Check for:
+   - Logic bugs, edge cases
+   - Security issues (SQLi, XSS, secrets)
+   - Performance concerns
+   - Test coverage gaps
+   - Code smells (duplication, god objects)
+   - Naming, convention consistency
+3. Group findings by severity: Critical / Major / Minor / Nit
+4. For each finding: file:line, issue, suggested fix
+5. Be direct. No "this looks fine" if there are issues.
+
+Don't fix code — only review. User will fix.</pre>
+
+    <p style="color: var(--muted); margin-top:.5rem">Trong session Claude chính: gõ <code>Use the code-reviewer agent to review this PR</code>, Claude sẽ spawn agent với prompt trên.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">5. settings.json — Cấu hình tổng</h2>
+    <p class="section-sub">File cấu hình chính. 3 cấp: user global, project shared, project local.</p>
+
+    <table class="cmp">
+      <tr><th>File</th><th>Vị trí</th><th>Commit</th><th>Mục đích</th></tr>
+      <tr><td>User</td><td><code>~/.claude/settings.json</code></td><td>❌</td><td>Preferences cá nhân xuyên project</td></tr>
+      <tr><td>Project shared</td><td><code>.claude/settings.json</code></td><td>✅</td><td>Team convention</td></tr>
+      <tr><td>Project local</td><td><code>.claude/settings.local.json</code></td><td>❌ (gitignored)</td><td>Override cá nhân trong project</td></tr>
+    </table>
+
+    <h3 style="color: var(--primary); margin-top: 1.5rem">Ví dụ settings.json đầy đủ</h3>
+    <pre class="code">{
+  <span class="s">"theme"</span>: <span class="s">"dark"</span>,
+  <span class="s">"model"</span>: <span class="s">"claude-sonnet-4-6"</span>,
+
+  <span class="s">"permissions"</span>: {
+    <span class="s">"allow"</span>: [
+      <span class="s">"Bash(npm *)"</span>,
+      <span class="s">"Bash(git *)"</span>,
+      <span class="s">"Bash(node *)"</span>,
+      <span class="s">"Read"</span>,
+      <span class="s">"Write"</span>,
+      <span class="s">"Edit"</span>
+    ],
+    <span class="s">"deny"</span>: [
+      <span class="s">"Bash(rm -rf *)"</span>,
+      <span class="s">"Bash(sudo *)"</span>,
+      <span class="s">"Bash(curl * | sh)"</span>
+    ]
+  },
+
+  <span class="s">"env"</span>: {
+    <span class="s">"NODE_ENV"</span>: <span class="s">"development"</span>
+  },
+
+  <span class="s">"hooks"</span>: {
+    <span class="s">"PostToolUse"</span>: [
+      {
+        <span class="s">"matcher"</span>: <span class="s">"Edit|Write"</span>,
+        <span class="s">"hooks"</span>: [
+          { <span class="s">"type"</span>: <span class="s">"command"</span>, <span class="s">"command"</span>: <span class="s">"npx prettier --write $CLAUDE_TOOL_INPUT_FILE_PATH 2&gt;/dev/null || true"</span> }
+        ]
+      }
+    ]
+  }
+}</pre>
+
+    <div class="tip">
+      <strong>Allow/deny patterns:</strong> glob-like. <code>Bash(npm *)</code> cho phép mọi lệnh npm. <code>Bash(rm -rf /*)</code> chặn xoá root. Deny luôn thắng allow.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">6. Cấu trúc folder <code>.claude/</code> hoàn chỉnh</h2>
+    <pre class="code">my-project/
+├── CLAUDE.md                    <span class="c"># project instructions</span>
+├── CLAUDE.local.md              <span class="c"># personal (gitignored)</span>
+└── .claude/
+    ├── settings.json            <span class="c"># team shared</span>
+    ├── settings.local.json      <span class="c"># personal (gitignored)</span>
+    ├── commands/
+    │   ├── test-changes.md
+    │   ├── fix-lint.md
+    │   └── git/
+    │       └── release.md       <span class="c"># → /git:release</span>
+    ├── skills/
+    │   ├── database-migration.md
+    │   └── screenshot-bug/
+    │       ├── SKILL.md
+    │       └── template.sh
+    └── agents/
+        ├── code-reviewer.md
+        └── data-scientist.md</pre>
+
+    <div class="info-box">
+      <strong>Best practice team:</strong> commit <code>.claude/settings.json</code>, <code>commands/</code>, <code>skills/</code>, <code>agents/</code>. <code>settings.local.json</code> và <code>CLAUDE.local.md</code> đặt trong <code>.gitignore</code>.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">💡 Bài tập</h2>
+    <ol class="steps">
+      <li><strong>Viết command <code>/explain</code></strong> — nhận argument file path, giải thích code file đó. Test với 3 file khác nhau.</li>
+      <li><strong>Skill riêng</strong> — viết skill "git-commit-conventional" dạy Claude viết commit theo chuẩn Conventional Commits của team bạn.</li>
+      <li><strong>Hook auto-format</strong> — setup Prettier chạy sau Edit. Verify: yêu cầu Claude sửa 1 file có indent xấu → check file sau khi xong phải đẹp.</li>
+      <li><strong>Subagent review</strong> — tạo <code>code-reviewer</code> agent, trigger: "Use code-reviewer to review my recent commit". Xem kết quả.</li>
+      <li><strong>Deny rule</strong> — thêm deny <code>Bash(rm *)</code> vào settings, thử yêu cầu Claude xoá file → phải bị chặn.</li>
+    </ol>
+
+    <div class="tip" style="margin-top: 1rem">
+      <strong>Sẵn sàng L4?</strong> Sang <a href="integrations.html" style="color: var(--primary)">Integrations</a> — MCP servers, IDE, Agent SDK, CI/CD.
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Claude Code Mastery · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

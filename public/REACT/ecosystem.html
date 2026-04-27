@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>React Ecosystem - Router, State, Data, Forms, Testing, Next.js</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">React<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="basics.html">Cơ bản</a>
+      <a href="hooks.html">Hooks</a>
+      <a href="advanced.html">Nâng cao</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="ecosystem.html" class="active">Ecosystem</a>
+      <a href="interview.html">Phỏng vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">LEVEL 5 · MASTER · PRODUCTION</div>
+  <h1>Hệ sinh thái <span class="gradient">React 2026</span></h1>
+  <p class="hero-desc">Router, state management, data fetching, form, testing, Next.js &amp; Server Components. Lựa chọn đúng lib = 50% thành công của dự án.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🧭 Routing</h2>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>React Router v7</h3>
+        <pre class="code"><span class="k">import</span> { createBrowserRouter, RouterProvider, Outlet } <span class="k">from</span> <span class="s">'react-router'</span>;
+
+<span class="k">const</span> router = createBrowserRouter([
+  {
+    path: <span class="s">'/'</span>,
+    element: &lt;<span class="t">Layout</span> /&gt;,
+    children: [
+      { index: <span class="k">true</span>, element: &lt;<span class="t">Home</span> /&gt; },
+      { path: <span class="s">'products'</span>, element: &lt;<span class="t">Products</span> /&gt;,
+        loader: () =&gt; fetch(<span class="s">'/api/products'</span>) },
+      { path: <span class="s">'products/:id'</span>, element: &lt;<span class="t">Product</span> /&gt; },
+      { path: <span class="s">'*'</span>, element: &lt;<span class="t">NotFound</span> /&gt; },
+    ],
+  },
+]);
+
+&lt;<span class="t">RouterProvider</span> router={router} /&gt;
+
+<span class="c">// Layout có &lt;Outlet /&gt; để render route con</span></pre>
+      </div>
+
+      <div class="card">
+        <h3>Hooks của Router</h3>
+        <ul>
+          <li><code>useNavigate()</code> — chuyển trang lập trình</li>
+          <li><code>useParams()</code> — đọc <code>:id</code></li>
+          <li><code>useSearchParams()</code> — query string</li>
+          <li><code>useLoaderData()</code> — data từ loader</li>
+          <li><code>useLocation()</code> — URL hiện tại</li>
+        </ul>
+        <div class="info-box" style="margin-top:.75rem"><strong>Framework mode:</strong> React Router v7 cũng chạy SSR được như Next.js nhẹ.</div>
+      </div>
+
+      <div class="card">
+        <h3>Protected Route</h3>
+        <pre class="code"><span class="k">function</span> <span class="n">RequireAuth</span>({ children }) {
+  <span class="k">const</span> user = useAuth();
+  <span class="k">const</span> location = useLocation();
+
+  <span class="k">if</span> (!user) {
+    <span class="k">return</span> &lt;<span class="t">Navigate</span>
+      to=<span class="s">"/login"</span>
+      state={{ from: location }}
+      replace /&gt;;
+  }
+  <span class="k">return</span> children;
+}
+
+&lt;<span class="t">RequireAuth</span>&gt;&lt;<span class="t">Dashboard</span> /&gt;&lt;/<span class="t">RequireAuth</span>&gt;</pre>
+      </div>
+
+      <div class="card">
+        <h3>Link vs navigate()</h3>
+        <pre class="code"><span class="c">// Khi render JSX</span>
+&lt;<span class="t">Link</span> to=<span class="s">"/products"</span>&gt;Sản phẩm&lt;/<span class="t">Link</span>&gt;
+
+<span class="c">// Khi trong handler</span>
+<span class="k">const</span> navigate = useNavigate();
+<span class="k">const</span> submit = async () =&gt; {
+  <span class="k">await</span> saveForm();
+  navigate(<span class="s">'/success'</span>, { replace: <span class="k">true</span> });
+};</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">📦 State Management</h2>
+    <p class="section-sub">Quy tắc: bắt đầu với <code>useState</code> + Context. Chỉ cần lib khi thật sự có state xuyên app phức tạp.</p>
+
+    <table class="cmp">
+      <tr><th>Lib</th><th>Khi nào dùng</th><th>Kích thước</th><th>Độ khó</th></tr>
+      <tr><td><strong>useState</strong></td><td>State cục bộ, form, toggle</td><td>0 KB</td><td>⭐</td></tr>
+      <tr><td><strong>Context + useReducer</strong></td><td>State vừa, &lt;10 consumer</td><td>0 KB</td><td>⭐⭐</td></tr>
+      <tr><td><strong>Zustand</strong></td><td>State global đơn giản, selector-based</td><td>~1KB</td><td>⭐⭐</td></tr>
+      <tr><td><strong>Jotai</strong></td><td>Atomic state, cực fine-grained</td><td>~3KB</td><td>⭐⭐⭐</td></tr>
+      <tr><td><strong>Redux Toolkit</strong></td><td>App rất lớn, team đông, cần time-travel debug</td><td>~12KB</td><td>⭐⭐⭐⭐</td></tr>
+      <tr><td><strong>Valtio</strong></td><td>Mutate proxy-style, DX viết dễ</td><td>~3KB</td><td>⭐⭐</td></tr>
+    </table>
+
+    <h3 style="margin-top:1.5rem;color:var(--primary)">Zustand — 2026 khuyên mặc định</h3>
+    <pre class="code"><span class="k">import</span> { create } <span class="k">from</span> <span class="s">'zustand'</span>;
+
+<span class="k">const</span> useCart = create((set) =&gt; ({
+  items: [],
+  add: (item) =&gt; set(state =&gt; ({ items: [...state.items, item] })),
+  remove: (id) =&gt; set(state =&gt; ({ items: state.items.filter(x =&gt; x.id !== id) })),
+  clear: () =&gt; set({ items: [] }),
+}));
+
+<span class="c">// Dùng trong component — chỉ re-render khi selector đổi</span>
+<span class="k">function</span> <span class="n">Cart</span>() {
+  <span class="k">const</span> items = useCart(s =&gt; s.items);
+  <span class="k">const</span> remove = useCart(s =&gt; s.remove);
+  <span class="k">return</span> ...;
+}</pre>
+
+    <h3 style="margin-top:1.5rem;color:var(--primary)">Redux Toolkit — khi dự án cần</h3>
+    <pre class="code"><span class="k">const</span> cartSlice = createSlice({
+  name: <span class="s">'cart'</span>,
+  initialState: { items: [] },
+  reducers: {
+    add: (state, { payload }) =&gt; { state.items.push(payload); },  <span class="c">// Immer → viết mutate được</span>
+    remove: (state, { payload }) =&gt; { state.items = state.items.filter(x =&gt; x.id !== payload); },
+  },
+});
+
+<span class="c">// Component</span>
+<span class="k">const</span> items = useSelector(s =&gt; s.cart.items);
+<span class="k">const</span> dispatch = useDispatch();
+dispatch(cartSlice.actions.add(newItem));</pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🔌 Data Fetching — React Query</h2>
+    <p class="section-sub"><strong>Dừng</strong> viết <code>useEffect + fetch + loading + error</code>. Dùng TanStack React Query — caching, retry, revalidation miễn phí.</p>
+
+    <pre class="code"><span class="k">import</span> { useQuery, useMutation, useQueryClient } <span class="k">from</span> <span class="s">'@tanstack/react-query'</span>;
+
+<span class="c">// Fetch</span>
+<span class="k">function</span> <span class="n">Products</span>() {
+  <span class="k">const</span> { data, isLoading, error } = useQuery({
+    queryKey: [<span class="s">'products'</span>],
+    queryFn: () =&gt; fetch(<span class="s">'/api/products'</span>).then(r =&gt; r.json()),
+    staleTime: <span class="s">60_000</span>,  <span class="c">// cache 60s trước khi refetch</span>
+  });
+
+  <span class="k">if</span> (isLoading) <span class="k">return</span> &lt;<span class="t">Spinner</span> /&gt;;
+  <span class="k">if</span> (error) <span class="k">return</span> &lt;<span class="t">Error</span> /&gt;;
+  <span class="k">return</span> &lt;<span class="t">List</span> items={data} /&gt;;
+}
+
+<span class="c">// Mutate + invalidate cache</span>
+<span class="k">function</span> <span class="n">AddForm</span>() {
+  <span class="k">const</span> qc = useQueryClient();
+  <span class="k">const</span> { mutate } = useMutation({
+    mutationFn: (newItem) =&gt; fetch(<span class="s">'/api/products'</span>, {
+      method: <span class="s">'POST'</span>,
+      body: JSON.stringify(newItem),
+    }),
+    onSuccess: () =&gt; qc.invalidateQueries({ queryKey: [<span class="s">'products'</span>] }),
+  });
+  ...
+}</pre>
+
+    <div class="tip">
+      <strong>Lợi ích miễn phí:</strong>
+      <ul style="padding-left:1.2rem;margin-top:.3rem">
+        <li>Tự cache theo <code>queryKey</code>, share giữa component</li>
+        <li>Tự refetch khi focus window, reconnect mạng</li>
+        <li>Dedupe request trùng, retry khi fail</li>
+        <li>Optimistic update</li>
+        <li>Pagination, infinite query sẵn API</li>
+      </ul>
+    </div>
+
+    <p style="color:var(--muted);margin-top:1rem"><strong>Lib tương đương:</strong> SWR (Vercel, nhẹ hơn), RTK Query (nếu đã dùng Redux).</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">📝 Forms — React Hook Form + Zod</h2>
+    <p class="section-sub">Form phức tạp (validate, arrays, multi-step) → RHF nhanh hơn controlled 5x, validate bằng Zod schema.</p>
+
+    <pre class="code"><span class="k">import</span> { useForm } <span class="k">from</span> <span class="s">'react-hook-form'</span>;
+<span class="k">import</span> { zodResolver } <span class="k">from</span> <span class="s">'@hookform/resolvers/zod'</span>;
+<span class="k">import</span> { z } <span class="k">from</span> <span class="s">'zod'</span>;
+
+<span class="k">const</span> schema = z.object({
+  email: z.string().email(<span class="s">'Email sai định dạng'</span>),
+  age:   z.number().min(<span class="s">18</span>, <span class="s">'Phải đủ 18'</span>),
+});
+
+<span class="k">function</span> <span class="n">RegisterForm</span>() {
+  <span class="k">const</span> {
+    register, handleSubmit, formState: { errors, isSubmitting }
+  } = useForm({ resolver: zodResolver(schema) });
+
+  <span class="k">const</span> onSubmit = async (data) =&gt; {
+    <span class="k">await</span> api.register(data);
+  };
+
+  <span class="k">return</span> (
+    &lt;<span class="t">form</span> onSubmit={handleSubmit(onSubmit)}&gt;
+      &lt;<span class="t">input</span> {...register(<span class="s">'email'</span>)} /&gt;
+      {errors.email &amp;&amp; &lt;<span class="t">span</span>&gt;{errors.email.message}&lt;/<span class="t">span</span>&gt;}
+
+      &lt;<span class="t">input</span> type=<span class="s">"number"</span> {...register(<span class="s">'age'</span>, { valueAsNumber: <span class="k">true</span> })} /&gt;
+      {errors.age &amp;&amp; &lt;<span class="t">span</span>&gt;{errors.age.message}&lt;/<span class="t">span</span>&gt;}
+
+      &lt;<span class="t">button</span> disabled={isSubmitting}&gt;Đăng ký&lt;/<span class="t">button</span>&gt;
+    &lt;/<span class="t">form</span>&gt;
+  );
+}</pre>
+
+    <div class="info-box"><strong>Sức mạnh Zod:</strong> 1 schema — dùng cho client validate, API contract, infer TypeScript type (<code>type User = z.infer&lt;typeof schema&gt;</code>).</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🧪 Testing</h2>
+    <p class="section-sub">Test pyramid cho React: nhiều unit, vừa phải integration, ít E2E. Focus vào hành vi, không implementation.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Vitest + React Testing Library</h3>
+        <pre class="code"><span class="k">import</span> { render, screen, userEvent } <span class="k">from</span> <span class="s">'@testing-library/react'</span>;
+<span class="k">import</span> Counter <span class="k">from</span> <span class="s">'./Counter'</span>;
+
+test(<span class="s">'tăng đếm khi click'</span>, async () =&gt; {
+  render(&lt;<span class="t">Counter</span> /&gt;);
+  <span class="k">const</span> btn = screen.getByRole(<span class="s">'button'</span>, { name: /\+/i });
+  <span class="k">await</span> userEvent.click(btn);
+  expect(screen.getByText(<span class="s">'1'</span>)).toBeInTheDocument();
+});</pre>
+        <div class="tip" style="margin-top:.5rem"><strong>Mantra của RTL:</strong> "Test app như user dùng". Query theo <code>role</code>, <code>label</code>, <code>text</code>, không theo className/id.</div>
+      </div>
+
+      <div class="card">
+        <h3>MSW — Mock API</h3>
+        <pre class="code"><span class="k">import</span> { http, HttpResponse } <span class="k">from</span> <span class="s">'msw'</span>;
+<span class="k">import</span> { setupServer } <span class="k">from</span> <span class="s">'msw/node'</span>;
+
+<span class="k">const</span> server = setupServer(
+  http.get(<span class="s">'/api/users'</span>, () =&gt; {
+    <span class="k">return</span> HttpResponse.json([{ id: <span class="s">1</span>, name: <span class="s">'Lan'</span> }]);
+  })
+);
+beforeAll(() =&gt; server.listen());
+afterAll(() =&gt; server.close());</pre>
+        <p style="color:var(--muted);font-size:.88rem">Mock ở tầng network, không mock <code>fetch</code>. Test chạy y như prod.</p>
+      </div>
+
+      <div class="card">
+        <h3>Playwright — E2E</h3>
+        <pre class="code">test(<span class="s">'user login thành công'</span>, async ({ page }) =&gt; {
+  <span class="k">await</span> page.goto(<span class="s">'/login'</span>);
+  <span class="k">await</span> page.fill(<span class="s">'[name=email]'</span>, <span class="s">'a@b.com'</span>);
+  <span class="k">await</span> page.fill(<span class="s">'[name=password]'</span>, <span class="s">'123'</span>);
+  <span class="k">await</span> page.click(<span class="s">'button[type=submit]'</span>);
+  <span class="k">await</span> expect(page).toHaveURL(<span class="s">'/dashboard'</span>);
+});</pre>
+      </div>
+
+      <div class="card">
+        <h3>Storybook</h3>
+        <p>Render component isolated với các state khác nhau. Dev UI nhanh, chia sẻ design system với team.</p>
+        <ul>
+          <li>Visual regression test (Chromatic)</li>
+          <li>Accessibility test (addon-a11y)</li>
+          <li>Play function để giả user action</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🎨 Styling 2026</h2>
+    <div class="grid grid-3">
+      <div class="card">
+        <h4>Tailwind CSS</h4>
+        <p>Utility-first. Nhanh, nhất quán, tree-shake tự động. Chuẩn de-facto 2026.</p>
+      </div>
+      <div class="card">
+        <h4>shadcn/ui</h4>
+        <p>Không phải lib — là <em>công cụ copy component</em> vào project (Radix + Tailwind). Quyền tùy biến 100%.</p>
+      </div>
+      <div class="card">
+        <h4>Radix UI / Headless UI</h4>
+        <p>Unstyled primitives (Dialog, Popover, Select…) với accessibility chuẩn. Bạn tự style.</p>
+      </div>
+      <div class="card">
+        <h4>CSS Modules</h4>
+        <p>Scoped CSS traditional. Dễ tiếp cận, không cần build tool đặc biệt.</p>
+      </div>
+      <div class="card">
+        <h4>Vanilla Extract</h4>
+        <p>CSS-in-TS zero-runtime — safety của TS + perf của CSS tĩnh.</p>
+      </div>
+      <div class="card">
+        <h4>Styled-components / Emotion</h4>
+        <p>CSS-in-JS cổ điển. Chậm lại 2026 vì runtime cost &amp; RSC không friendly.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">⚡ Next.js &amp; Server Components</h2>
+    <p class="section-sub">Framework React có opinions. 2026 là default cho project mới (Vercel, Netlify, self-host). App Router + RSC là tương lai.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>App Router cơ bản</h3>
+        <pre class="code">app/
+  layout.tsx       <span class="c">// root layout</span>
+  page.tsx         <span class="c">// /</span>
+  products/
+    page.tsx       <span class="c">// /products</span>
+    [id]/
+      page.tsx     <span class="c">// /products/:id</span>
+    loading.tsx    <span class="c">// tự động Suspense fallback</span>
+    error.tsx      <span class="c">// Error Boundary</span>
+  api/
+    users/
+      route.ts     <span class="c">// GET/POST /api/users</span></pre>
+      </div>
+
+      <div class="card">
+        <h3>Server Component (mặc định)</h3>
+        <pre class="code"><span class="c">// app/products/page.tsx — chạy ở server</span>
+<span class="k">export default async function</span> <span class="n">Products</span>() {
+  <span class="k">const</span> data = <span class="k">await</span> db.product.findMany();
+  <span class="c">// Không có JS gửi xuống client cho đoạn này</span>
+  <span class="k">return</span> &lt;<span class="t">ul</span>&gt;
+    {data.map(p =&gt; &lt;<span class="t">li</span> key={p.id}&gt;{p.name}&lt;/<span class="t">li</span>&gt;)}
+  &lt;/<span class="t">ul</span>&gt;;
+}</pre>
+      </div>
+
+      <div class="card">
+        <h3>Client Component</h3>
+        <pre class="code"><span class="s">'use client'</span>;  <span class="c">// bắt buộc khi dùng hooks/events</span>
+
+<span class="k">export default function</span> <span class="n">Counter</span>() {
+  <span class="k">const</span> [n, setN] = useState(<span class="s">0</span>);
+  <span class="k">return</span> &lt;<span class="t">button</span> onClick={() =&gt; setN(n+<span class="s">1</span>)}&gt;{n}&lt;/<span class="t">button</span>&gt;;
+}</pre>
+        <div class="warn-box" style="margin-top:.5rem"><strong>Nguyên tắc:</strong> mặc định Server, chỉ "use client" khi cần state/effect/event. Push client component xa nhất có thể ra lá.</div>
+      </div>
+
+      <div class="card">
+        <h3>Server Actions</h3>
+        <pre class="code"><span class="c">// Không cần tự viết route /api</span>
+<span class="s">'use server'</span>;
+<span class="k">export async function</span> <span class="n">createPost</span>(formData) {
+  <span class="k">await</span> db.post.create({ data: {
+    title: formData.get(<span class="s">'title'</span>)
+  }});
+  revalidatePath(<span class="s">'/posts'</span>);
+}
+
+<span class="c">// Form tự gọi action</span>
+&lt;<span class="t">form</span> action={createPost}&gt;
+  &lt;<span class="t">input</span> name=<span class="s">"title"</span> /&gt;
+  &lt;<span class="t">button</span>&gt;Tạo&lt;/<span class="t">button</span>&gt;
+&lt;/<span class="t">form</span>&gt;</pre>
+      </div>
+    </div>
+
+    <h3 style="margin-top:1.5rem;color:var(--primary)">Render strategies</h3>
+    <table class="cmp">
+      <tr><th>Strategy</th><th>Khi dùng</th><th>Ưu/Nhược</th></tr>
+      <tr><td><strong>Static (SSG)</strong></td><td>Blog, marketing, docs</td><td>Nhanh nhất, cache CDN. Không động.</td></tr>
+      <tr><td><strong>SSR</strong></td><td>Trang cá nhân hoá, SEO</td><td>HTML luôn mới. Tốn server CPU.</td></tr>
+      <tr><td><strong>ISR</strong></td><td>Trang cập nhật không-realtime (product listing)</td><td>Static + revalidate định kỳ. Best of both.</td></tr>
+      <tr><td><strong>Streaming</strong></td><td>Page có phần nhanh + phần chậm</td><td>User thấy nhanh, <code>Suspense</code> stream phần chậm.</td></tr>
+      <tr><td><strong>Client (SPA)</strong></td><td>Dashboard sau đăng nhập</td><td>Như CRA/Vite. Không SEO.</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🚀 Deployment &amp; Observability</h2>
+    <div class="grid grid-3">
+      <div class="card">
+        <h4>Hosting</h4>
+        <ul>
+          <li><strong>Vercel</strong> — tối ưu cho Next.js</li>
+          <li><strong>Netlify</strong> — tương đương, ecosystem riêng</li>
+          <li><strong>Cloudflare Pages</strong> — edge, giá rẻ</li>
+          <li><strong>VPS + Docker</strong> — tự host toàn quyền</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Monitoring</h4>
+        <ul>
+          <li><strong>Sentry</strong> — error tracking + session replay</li>
+          <li><strong>Datadog RUM</strong> — real user monitoring</li>
+          <li><strong>Vercel Analytics</strong> — Web Vitals</li>
+          <li><strong>Highlight.io</strong> — open source thay Sentry</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Performance</h4>
+        <ul>
+          <li><strong>Core Web Vitals</strong> — LCP, INP, CLS</li>
+          <li><strong>Lighthouse</strong> — audit định kỳ</li>
+          <li><strong>Bundle Analyzer</strong> — tìm chunk phình to</li>
+          <li><strong>Chrome DevTools</strong> — Performance tab</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">📚 Stack khuyên dùng 2026</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>🥇 Stack SaaS hiện đại</h3>
+        <ul>
+          <li>Next.js 15 (App Router)</li>
+          <li>TypeScript + Zod</li>
+          <li>Tailwind + shadcn/ui</li>
+          <li>React Query (client data), Drizzle (DB)</li>
+          <li>NextAuth / Clerk (auth)</li>
+          <li>Vercel + Neon Postgres</li>
+          <li>Sentry + PostHog</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>🥈 Stack SPA (dashboard nội bộ)</h3>
+        <ul>
+          <li>Vite + React + TS</li>
+          <li>React Router v7</li>
+          <li>React Query + Zustand</li>
+          <li>React Hook Form + Zod</li>
+          <li>Tailwind + Radix</li>
+          <li>Deploy Cloudflare Pages</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>ReactJS Mastery · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

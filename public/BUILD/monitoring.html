@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoring & Logging</title>
+    <link rel="stylesheet" href="build.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html">Build<span class="accent">&Deploy</span></a></div>
+            <div class="nav-links">
+                <a href="index.html">🗺️ Tổng quan</a>
+                <a href="git.html">📦 Git</a>
+                <a href="cicd.html">⚙️ CI/CD</a>
+                <a href="jenkins.html">🔴 Jenkins</a>
+                <a href="docker.html">🐳 Docker</a>
+                <a href="hosting.html">☁️ Hosting</a>
+                <a href="cloud.html">⛅ Cloud</a>
+                <a href="domain.html">🌐 Domain</a>
+                <a href="ssl.html">🔒 SSL</a>
+                <a href="monitoring.html" class="active">📊 Monitoring</a>
+                <a href="workflow.html">🔄 Workflow</a>
+            </div>
+            <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <header class="build-hero">
+        <div class="hero-content">
+            <div class="hero-badge">CHƯƠNG 9 · OBSERVABILITY</div>
+            <h1>Monitoring & <span class="gradient-text">Logging</span></h1>
+            <p class="hero-desc">Biết lỗi trước khi user báo. Application Insights, Sentry, Prometheus, Grafana.</p>
+        </div>
+    </header>
+
+    <!-- ===== SECTION 9: MONITORING ===== -->
+    <section class="section" id="monitoring">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">📊</div>
+                <h2>9. Monitoring & Logging — Biết Trước Khi User Báo</h2>
+                <p>Deploy xong mà không monitor = lái xe bịt mắt. Bạn không biết app sống hay chết.</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>📈 3 Trụ Cột Monitoring (Observability)</h3>
+                <div class="monitor-grid">
+                    <div class="monitor-card">
+                        <div class="monitor-icon">📝</div>
+                        <h4>Logs</h4>
+                        <p><strong>"Chuyện gì đã xảy ra?"</strong></p>
+                        <p>Ghi lại events: request, error, warning. Structured logging (JSON) cho dễ search.</p>
+                        <div class="monitor-tools">
+                            <strong>Tools:</strong> Seq, ELK Stack, Azure Log Analytics, Datadog Logs
+                        </div>
+                    </div>
+                    <div class="monitor-card">
+                        <div class="monitor-icon">📊</div>
+                        <h4>Metrics</h4>
+                        <p><strong>"Hệ thống đang hoạt động thế nào?"</strong></p>
+                        <p>Số liệu: response time, error rate, CPU/RAM, request count, active users.</p>
+                        <div class="monitor-tools">
+                            <strong>Tools:</strong> Prometheus + Grafana, Azure Monitor, Datadog, New Relic
+                        </div>
+                    </div>
+                    <div class="monitor-card">
+                        <div class="monitor-icon">🔗</div>
+                        <h4>Traces</h4>
+                        <p><strong>"Request đi qua đâu, chậm ở đâu?"</strong></p>
+                        <p>Theo dõi 1 request từ browser → API → DB → response. Tìm bottleneck.</p>
+                        <div class="monitor-tools">
+                            <strong>Tools:</strong> OpenTelemetry, Jaeger, Azure Application Insights
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🛠️ Monitoring Stack Khuyên Dùng</h3>
+                <div class="tools-grid">
+                    <div class="tool-card tool-rec">
+                        <div class="tool-badge">⭐ CHO .NET</div>
+                        <h4>Application Insights (Azure)</h4>
+                        <p>Tích hợp .NET chỉ 3 dòng code. Auto collect: requests, exceptions, dependencies, performance. Free tier tốt.</p>
+                    </div>
+                    <div class="tool-card tool-rec">
+                        <div class="tool-badge">⭐ UPTIME</div>
+                        <h4>UptimeRobot / Better Uptime</h4>
+                        <p>Ping website mỗi 5 phút. Down → alert qua email/Slack/SMS. Free tier đủ dùng.</p>
+                    </div>
+                    <div class="tool-card">
+                        <h4>Sentry</h4>
+                        <p>Error tracking #1. Bắt mọi exception frontend + backend. Source maps, user context, breadcrumbs. Free tier hào phóng.</p>
+                    </div>
+                    <div class="tool-card">
+                        <h4>Grafana + Prometheus</h4>
+                        <p>Open source, self-hosted. Dashboard đẹp, alert mạnh. Chuẩn industry cho metrics.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🚨 Alert Rules — Cảnh Báo Gì?</h3>
+                <div class="alert-grid">
+                    <div class="alert-item alert-critical">
+                        <strong>🔴 P1 — Website down</strong>
+                        <p>Health check fail > 2 phút → gọi điện + SMS ngay</p>
+                    </div>
+                    <div class="alert-item alert-critical">
+                        <strong>🔴 P1 — Error rate > 5%</strong>
+                        <p>Quá nhiều 5xx errors → có vấn đề nghiêm trọng</p>
+                    </div>
+                    <div class="alert-item alert-warning">
+                        <strong>🟡 P2 — Response time > 3 giây</strong>
+                        <p>App chậm, user sẽ bỏ đi. Check DB, external APIs.</p>
+                    </div>
+                    <div class="alert-item alert-warning">
+                        <strong>🟡 P2 — CPU/RAM > 80%</strong>
+                        <p>Sắp hết resource. Scale up hoặc optimize.</p>
+                    </div>
+                    <div class="alert-item alert-info">
+                        <strong>🔵 P3 — Disk > 85%</strong>
+                        <p>Log files, temp files đầy disk → app crash khi không ghi được.</p>
+                    </div>
+                    <div class="alert-item alert-info">
+                        <strong>🔵 P3 — SSL expiring < 14 ngày</strong>
+                        <p>SSL hết hạn = "Not Secure" warning. Auto-renew nên catch trước.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="closing-box">
+                <div class="closing-nav">
+                    <a href="index.html" class="closing-btn">🗺️ Tổng quan</a>
+                    <a href="git.html" class="closing-btn">📦 Git</a>
+                    <a href="cicd.html" class="closing-btn">⚙️ CI/CD</a>
+                    <a href="jenkins.html" class="closing-btn">🔴 Jenkins</a>
+                    <a href="docker.html" class="closing-btn">🐳 Docker</a>
+                    <a href="hosting.html" class="closing-btn">☁️ Hosting</a>
+                    <a href="cloud.html" class="closing-btn">⛅ Cloud</a>
+                    <a href="domain.html" class="closing-btn">🌐 Domain</a>
+                    <a href="ssl.html" class="closing-btn">🔒 SSL</a>
+                    <a href="workflow.html" class="closing-btn">🔄 Workflow</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Build & Deploy — Triển khai website từ A→Z cho web developer</p>
+        </div>
+    </footer>
+
+    <script src="build.js"></script>
+</body>
+</html>

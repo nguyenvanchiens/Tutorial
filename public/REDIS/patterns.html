@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Redis Patterns — Cache, Rate Limit, Lock, Queue</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">Redis<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="basics.html">Cơ Bản</a>
+      <a href="patterns.html" class="active">Patterns</a>
+      <a href="production.html">Production</a>
+      <a href="interview.html">Phỏng Vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">LEVEL 3 · MID-LEVEL · THỰC CHIẾN</div>
+  <h1>Redis <span class="gradient">Patterns</span></h1>
+  <p class="hero-desc">10 pattern thực tế: cache-aside, rate limit, distributed lock, leaderboard, queue, pub/sub, session, counter. Code C# + Node.js, cái bẫy thường gặp.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">1. Cache-Aside (Lazy Loading) — 90% use case</h2>
+    <p class="section-sub">Pattern phổ biến nhất. App check cache trước → miss → query DB → lưu cache → trả về.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Flow</h3>
+        <ol style="padding-left:1.2rem; color: var(--muted)">
+          <li>Client gọi <code>GetUser(5)</code></li>
+          <li>App <code>GET user:5</code> từ Redis</li>
+          <li>Nếu có → return luôn</li>
+          <li>Nếu không → query DB</li>
+          <li><code>SET user:5 {...} EX 300</code> (TTL 5 phút)</li>
+          <li>Return user</li>
+        </ol>
+      </div>
+      <div class="card">
+        <h3>Invalidation</h3>
+        <p>Khi update user trong DB, nhớ <code>DEL user:5</code>. Nếu không: cache stale, user thấy data cũ.</p>
+        <ul>
+          <li><strong>Write-around:</strong> update DB, DEL cache</li>
+          <li><strong>TTL-only:</strong> chấp nhận stale ≤ TTL</li>
+          <li><strong>Event-driven:</strong> DB CDC → publish invalidate</li>
+        </ul>
+      </div>
+    </div>
+
+    <pre class="code"><span class="c">// C# — cache-aside pattern</span>
+<span class="k">async</span> Task&lt;User&gt; <span class="n">GetUserAsync</span>(<span class="k">int</span> id) {
+    <span class="k">var</span> key = $<span class="s">"user:{id}"</span>;
+    <span class="k">var</span> cached = <span class="k">await</span> _db.StringGetAsync(key);
+
+    <span class="k">if</span> (cached.HasValue)
+        <span class="k">return</span> JsonSerializer.Deserialize&lt;User&gt;(cached!);
+
+    <span class="k">var</span> user = <span class="k">await</span> _dbContext.Users.FindAsync(id);
+    <span class="k">if</span> (user != <span class="k">null</span>) {
+        <span class="k">await</span> _db.StringSetAsync(key,
+            JsonSerializer.Serialize(user),
+            TimeSpan.FromMinutes(<span class="s">5</span>));
+    }
+    <span class="k">return</span> user;
+}
+
+<span class="k">async</span> Task <span class="n">UpdateUserAsync</span>(User user) {
+    _dbContext.Users.Update(user);
+    <span class="k">await</span> _dbContext.SaveChangesAsync();
+    <span class="k">await</span> _db.KeyDeleteAsync($<span class="s">"user:{user.Id}"</span>);  <span class="c">// invalidate</span>
+}</pre>
+
+    <div class="danger-box"><strong>🐛 Bẫy: Cache Stampede.</strong> Khi cache hết TTL và 1000 request đồng loạt miss → 1000 query DB cùng lúc → DB sập. Giải pháp: single-flight lock, hoặc pre-warm cache, hoặc stale-while-revalidate.</div>
+
+    <h4 style="margin-top:1rem; color: var(--primary)">Giải pháp stampede: lock + fallback stale</h4>
+    <pre class="code"><span class="k">async</span> Task&lt;User&gt; <span class="n">GetUserSafeAsync</span>(<span class="k">int</span> id) {
+    <span class="k">var</span> key = $<span class="s">"user:{id}"</span>;
+    <span class="k">var</span> lockKey = $<span class="s">"lock:user:{id}"</span>;
+
+    <span class="k">var</span> cached = <span class="k">await</span> _db.StringGetAsync(key);
+    <span class="k">if</span> (cached.HasValue) <span class="k">return</span> Deserialize(cached);
+
+    <span class="c">// Chỉ 1 request được quyền query DB</span>
+    <span class="k">if</span> (<span class="k">await</span> _db.StringSetAsync(lockKey, <span class="s">"1"</span>, TimeSpan.FromSeconds(<span class="s">10</span>), When.NotExists)) {
+        <span class="k">try</span> {
+            <span class="k">var</span> user = <span class="k">await</span> QueryDbAsync(id);
+            <span class="k">await</span> _db.StringSetAsync(key, Serialize(user), TimeSpan.FromMinutes(<span class="s">5</span>));
+            <span class="k">return</span> user;
+        } <span class="k">finally</span> {
+            <span class="k">await</span> _db.KeyDeleteAsync(lockKey);
+        }
+    }
+
+    <span class="c">// Các request khác: đợi 50ms rồi retry cache</span>
+    <span class="k">await</span> Task.Delay(<span class="s">50</span>);
+    <span class="k">return</span> <span class="k">await</span> GetUserSafeAsync(id);
+}</pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">2. Rate Limiting</h2>
+    <p class="section-sub">Chặn user/IP spam API. 3 thuật toán phổ biến, chọn theo nhu cầu.</p>
+
+    <div class="grid grid-3">
+      <div class="card">
+        <h4>Fixed Window</h4>
+        <p style="font-size:.9rem">Đơn giản nhất: đếm request trong mỗi phút. Vấn đề: burst ở rìa phút có thể 2× limit.</p>
+        <pre class="code"><span class="k">const</span> key = `rate:${ip}:${Math.floor(Date.now()/<span class="s">60000</span>)}`;
+<span class="k">const</span> count = <span class="k">await</span> redis.incr(key);
+<span class="k">if</span> (count === <span class="s">1</span>) <span class="k">await</span> redis.expire(key, <span class="s">60</span>);
+<span class="k">if</span> (count &gt; <span class="s">100</span>) <span class="k">throw new</span> Error(<span class="s">'Rate limit'</span>);</pre>
+      </div>
+
+      <div class="card">
+        <h4>Sliding Window (Sorted Set)</h4>
+        <p style="font-size:.9rem">Chính xác hơn. Lưu timestamp từng request, đếm trong cửa sổ trượt.</p>
+        <pre class="code"><span class="k">const</span> now = Date.now();
+<span class="k">const</span> window = <span class="s">60_000</span>;
+<span class="k">const</span> key = `rate:${ip}`;
+
+<span class="k">await</span> redis.zremrangebyscore(key, <span class="s">0</span>, now - window);
+<span class="k">const</span> count = <span class="k">await</span> redis.zcard(key);
+<span class="k">if</span> (count &gt;= <span class="s">100</span>) <span class="k">throw new</span> Error(<span class="s">'Rate limit'</span>);
+
+<span class="k">await</span> redis.zadd(key, now, `${now}:${Math.random()}`);
+<span class="k">await</span> redis.expire(key, <span class="s">60</span>);</pre>
+      </div>
+
+      <div class="card">
+        <h4>Token Bucket</h4>
+        <p style="font-size:.9rem">Mỗi user có "xô" chứa N token, refill r token/s. Gọi API = tiêu 1 token. Tốt cho burst vừa phải.</p>
+        <p style="font-size:.85rem; color: var(--warn)">→ Dùng Lua script để atomic. Code trong mục "Lua" bên dưới.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:1.5rem; color: var(--primary)">Token bucket atomic với Lua</h3>
+    <pre class="code"><span class="c">-- rate_limit.lua</span>
+<span class="k">local</span> key = KEYS[<span class="s">1</span>]
+<span class="k">local</span> capacity = <span class="n">tonumber</span>(ARGV[<span class="s">1</span>])
+<span class="k">local</span> refill = <span class="n">tonumber</span>(ARGV[<span class="s">2</span>])
+<span class="k">local</span> now = <span class="n">tonumber</span>(ARGV[<span class="s">3</span>])
+
+<span class="k">local</span> data = <span class="n">redis.call</span>(<span class="s">'HMGET'</span>, key, <span class="s">'tokens'</span>, <span class="s">'ts'</span>)
+<span class="k">local</span> tokens = <span class="n">tonumber</span>(data[<span class="s">1</span>]) <span class="k">or</span> capacity
+<span class="k">local</span> ts = <span class="n">tonumber</span>(data[<span class="s">2</span>]) <span class="k">or</span> now
+
+<span class="c">-- Refill theo thời gian trôi qua</span>
+<span class="k">local</span> elapsed = (now - ts) / <span class="s">1000</span>
+tokens = <span class="n">math.min</span>(capacity, tokens + elapsed * refill)
+
+<span class="k">if</span> tokens &lt; <span class="s">1</span> <span class="k">then</span>
+  <span class="k">return</span> <span class="s">0</span>  <span class="c">-- rejected</span>
+<span class="k">end</span>
+
+tokens = tokens - <span class="s">1</span>
+<span class="n">redis.call</span>(<span class="s">'HMSET'</span>, key, <span class="s">'tokens'</span>, tokens, <span class="s">'ts'</span>, now)
+<span class="n">redis.call</span>(<span class="s">'EXPIRE'</span>, key, <span class="s">3600</span>)
+<span class="k">return</span> <span class="s">1</span>  <span class="c">-- allowed</span></pre>
+
+    <pre class="code"><span class="c">// C# gọi Lua script</span>
+<span class="k">var</span> script = File.ReadAllText(<span class="s">"rate_limit.lua"</span>);
+<span class="k">var</span> result = (<span class="k">int</span>)<span class="k">await</span> _db.ScriptEvaluateAsync(
+    script,
+    keys: <span class="k">new</span> RedisKey[] { $<span class="s">"rl:{userId}"</span> },
+    values: <span class="k">new</span> RedisValue[] { <span class="s">100</span>, <span class="s">10</span>, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }
+);
+<span class="k">if</span> (result == <span class="s">0</span>) <span class="k">throw new</span> Exception(<span class="s">"Rate limit exceeded"</span>);</pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">3. Distributed Lock</h2>
+    <p class="section-sub">Đảm bảo chỉ 1 worker xử lý 1 resource tại 1 thời điểm. Ví dụ: cron job chạy trên 3 server, chỉ muốn 1 cái thực thi.</p>
+
+    <div class="card">
+      <h3>Simple lock — <code>SET NX EX</code></h3>
+      <pre class="code"><span class="c">// Acquire</span>
+<span class="k">const</span> token = crypto.randomUUID();  <span class="c">// unique per process</span>
+<span class="k">const</span> ok = <span class="k">await</span> redis.set(
+    `lock:send-email-job`,
+    token,
+    <span class="s">'NX'</span>,     <span class="c">// chỉ set nếu chưa tồn tại</span>
+    <span class="s">'EX'</span>, <span class="s">30</span>  <span class="c">// auto-release sau 30s (nếu process chết)</span>
+);
+<span class="k">if</span> (!ok) <span class="k">return</span>;  <span class="c">// worker khác đã giữ lock</span>
+
+<span class="k">try</span> {
+    <span class="k">await</span> doJob();
+} <span class="k">finally</span> {
+    <span class="c">// Release — CHỈ xoá nếu token còn là của mình (dùng Lua)</span>
+    <span class="k">await</span> redis.eval(`
+        if redis.call('GET', KEYS[1]) == ARGV[1] then
+            return redis.call('DEL', KEYS[1])
+        end
+        return 0
+    `, <span class="s">1</span>, `lock:send-email-job`, token);
+}</pre>
+    </div>
+
+    <div class="warn-box">
+      <strong>Tại sao phải check token khi release?</strong> Nếu job của bạn chạy quá TTL (30s) → lock expire, worker B giành. Bạn xong việc mà vô tình <code>DEL</code> sẽ xoá lock của B. Check token = "chỉ xoá lock nếu còn là của tôi".
+    </div>
+
+    <div class="info-box">
+      <strong>Redlock:</strong> để đảm bảo an toàn hơn khi có nhiều Redis node, dùng thuật toán <a href="https://redis.io/docs/manual/patterns/distributed-locks/" style="color: var(--primary);">Redlock</a> — acquire trên đa số nodes. Cài library <code>redlock</code> (Node) hoặc <code>RedLock.net</code> (C#).
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">4. Leaderboard — Game rank top 100</h2>
+    <p class="section-sub">Sorted Set giải quyết đẹp. Thêm/đọc/rank đều O(log N).</p>
+
+    <pre class="code"><span class="c">// Khi user thắng trận, +100 điểm</span>
+<span class="k">await</span> redis.zincrby(<span class="s">'leaderboard:global'</span>, <span class="s">100</span>, `user:${userId}`);
+
+<span class="c">// Top 10</span>
+<span class="k">const</span> top10 = <span class="k">await</span> redis.zrevrange(
+    <span class="s">'leaderboard:global'</span>, <span class="s">0</span>, <span class="s">9</span>, <span class="s">'WITHSCORES'</span>
+);
+<span class="c">// [ 'user:5', '8400', 'user:2', '7650', ... ]</span>
+
+<span class="c">// Rank của 1 user</span>
+<span class="k">const</span> rank = <span class="k">await</span> redis.zrevrank(<span class="s">'leaderboard:global'</span>, `user:${userId}`);
+<span class="c">// 0-indexed, null nếu chưa có trong leaderboard</span>
+
+<span class="c">// Score của 1 user</span>
+<span class="k">const</span> score = <span class="k">await</span> redis.zscore(<span class="s">'leaderboard:global'</span>, `user:${userId}`);
+
+<span class="c">// Leaderboard hàng tuần — dùng key khác</span>
+<span class="k">const</span> week = getISOWeek(<span class="k">new</span> Date());
+<span class="k">await</span> redis.zincrby(`leaderboard:week:${week}`, <span class="s">100</span>, `user:${userId}`);
+<span class="k">await</span> redis.expire(`leaderboard:week:${week}`, <span class="s">60 * 86400</span>);  <span class="c">// 60 ngày</span></pre>
+
+    <div class="tip"><strong>Giảm độ to:</strong> 10 triệu user trong 1 sorted set ăn ~500MB RAM. Nếu chỉ cần top 1000 — <code>ZREMRANGEBYRANK</code> xoá phần dưới định kỳ.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">5. Queue đơn giản — List</h2>
+    <p class="section-sub">Producer <code>LPUSH</code>, worker <code>BRPOP</code>. Đủ cho hầu hết background task. Production nên dùng Stream hoặc RabbitMQ.</p>
+
+    <pre class="code"><span class="c">// Producer — khi có email cần gửi</span>
+<span class="k">await</span> redis.lpush(<span class="s">'queue:email'</span>, JSON.stringify({
+    to: <span class="s">'user@example.com'</span>,
+    template: <span class="s">'welcome'</span>,
+    data: {...}
+}));
+
+<span class="c">// Worker — loop vô hạn</span>
+<span class="k">while</span> (<span class="k">true</span>) {
+    <span class="k">const</span> result = <span class="k">await</span> redis.brpop(<span class="s">'queue:email'</span>, <span class="s">10</span>);  <span class="c">// đợi 10s</span>
+    <span class="k">if</span> (!result) <span class="k">continue</span>;
+    <span class="k">const</span> [, payload] = result;
+    <span class="k">const</span> job = JSON.parse(payload);
+    <span class="k">try</span> {
+        <span class="k">await</span> sendEmail(job);
+    } <span class="k">catch</span> (err) {
+        <span class="c">// Retry queue hoặc DLQ</span>
+        <span class="k">await</span> redis.lpush(<span class="s">'queue:email:dlq'</span>, payload);
+    }
+}</pre>
+
+    <div class="warn-box">
+      <strong>Hạn chế List-queue:</strong>
+      <ul style="padding-left:1.2rem; margin-top: .3rem">
+        <li>Không có ack → worker chết giữa chừng = mất job</li>
+        <li>Không có consumer group → khó scale nhiều worker</li>
+        <li>Không có delayed message</li>
+      </ul>
+      Dùng <strong>Redis Stream + XGROUP</strong> (ack, retry, consumer group) hoặc BullMQ / Hangfire khi production.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">6. Redis Stream — Kafka mini</h2>
+    <p class="section-sub">Append-only log + consumer group + ack. Giải quyết mọi hạn chế của List-queue.</p>
+
+    <pre class="code"><span class="c"># Producer</span>
+<span class="cmd">XADD</span> events * type <span class="s">"order.created"</span> userId <span class="s">5</span> amount <span class="s">99.99</span>
+
+<span class="c"># Consumer group — worker group lấy mỗi message 1 lần</span>
+<span class="cmd">XGROUP</span> <span class="cmd">CREATE</span> events order-processors <span class="s">$</span> <span class="cmd">MKSTREAM</span>
+
+<span class="c"># Worker lấy message chưa xử lý</span>
+<span class="cmd">XREADGROUP</span> <span class="cmd">GROUP</span> order-processors worker-1 <span class="cmd">COUNT</span> <span class="s">10</span> <span class="cmd">BLOCK</span> <span class="s">5000</span> <span class="cmd">STREAMS</span> events <span class="s">&gt;</span>
+
+<span class="c"># ACK khi xử lý xong</span>
+<span class="cmd">XACK</span> events order-processors <span class="s">1678901234-0</span>
+
+<span class="c"># Xem message chưa ack (pending) của worker</span>
+<span class="cmd">XPENDING</span> events order-processors</pre>
+
+    <div class="tip"><strong>Ưu điểm:</strong> retry tự động (worker không ack → message quay lại), scale ngang (thêm worker cùng group = tự chia load), replay history (dùng ID cụ thể thay <code>$</code>).</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">7. Pub/Sub — Real-time notification</h2>
+    <p class="section-sub">Publisher gửi message lên channel, tất cả subscriber đang connect nhận được. <strong>Fire-and-forget</strong> — không persist.</p>
+
+    <pre class="code"><span class="c">// Subscriber (WebSocket server, worker)</span>
+<span class="k">const</span> sub = <span class="k">new</span> Redis();
+<span class="k">await</span> sub.subscribe(<span class="s">'notifications:user:5'</span>);
+sub.on(<span class="s">'message'</span>, (channel, message) =&gt; {
+    ws.send(message);  <span class="c">// push xuống browser</span>
+});
+
+<span class="c">// Publisher (API server)</span>
+<span class="k">await</span> redis.publish(<span class="s">'notifications:user:5'</span>, JSON.stringify({
+    type: <span class="s">'new_message'</span>,
+    from: <span class="s">'admin'</span>
+}));</pre>
+
+    <div class="warn-box">
+      <strong>Giới hạn Pub/Sub:</strong> nếu subscriber offline lúc publish → <strong>mất message</strong>. Dùng Pub/Sub cho notification không quan trọng (toast, presence). Cần persist → dùng Stream.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">8. Session Store — Multi-instance app</h2>
+    <p class="section-sub">App chạy trên 3 server load-balanced → session không thể ở memory từng server. Redis là session store mặc định.</p>
+
+    <pre class="code"><span class="c">// Express + connect-redis</span>
+<span class="k">import</span> session <span class="k">from</span> <span class="s">'express-session'</span>;
+<span class="k">import</span> RedisStore <span class="k">from</span> <span class="s">'connect-redis'</span>;
+<span class="k">import</span> Redis <span class="k">from</span> <span class="s">'ioredis'</span>;
+
+<span class="k">const</span> redis = <span class="k">new</span> Redis();
+app.use(session({
+    store: <span class="k">new</span> RedisStore({ client: redis, prefix: <span class="s">'sess:'</span> }),
+    secret: process.env.SESSION_SECRET,
+    resave: <span class="k">false</span>,
+    saveUninitialized: <span class="k">false</span>,
+    cookie: { maxAge: <span class="s">3600_000</span> },  <span class="c">// 1h</span>
+}));
+
+<span class="c">// Trong handler</span>
+req.session.userId = <span class="s">5</span>;  <span class="c">// tự lưu vào Redis</span></pre>
+
+    <p style="margin-top: 1rem"><strong>.NET Core:</strong></p>
+    <pre class="code"><span class="c">// Program.cs</span>
+builder.Services.AddStackExchangeRedisCache(o =&gt; {
+    o.Configuration = <span class="s">"localhost:6379"</span>;
+    o.InstanceName = <span class="s">"sess:"</span>;
+});
+builder.Services.AddSession(o =&gt; {
+    o.IdleTimeout = TimeSpan.FromHours(<span class="s">1</span>);
+    o.Cookie.HttpOnly = <span class="k">true</span>;
+});
+
+app.UseSession();</pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">9. Counter — View count, like count</h2>
+    <p class="section-sub"><code>INCR</code> atomic. Nhưng tạo 1M row DB mỗi lần like = chết. Redis buffer rồi flush định kỳ xuống DB.</p>
+
+    <pre class="code"><span class="c">// Khi user like</span>
+<span class="k">await</span> redis.hincrby(<span class="s">'post:likes:pending'</span>, `post:${postId}`, <span class="s">1</span>);
+
+<span class="c">// Cron job mỗi 1 phút: flush vào DB</span>
+<span class="k">const</span> pending = <span class="k">await</span> redis.hgetall(<span class="s">'post:likes:pending'</span>);
+<span class="k">for</span> (<span class="k">const</span> [key, count] <span class="k">of</span> Object.entries(pending)) {
+    <span class="k">const</span> postId = key.split(<span class="s">':'</span>)[<span class="s">1</span>];
+    <span class="k">await</span> db.query(
+        <span class="s">'UPDATE posts SET likes = likes + $1 WHERE id = $2'</span>,
+        [count, postId]
+    );
+}
+<span class="k">await</span> redis.del(<span class="s">'post:likes:pending'</span>);</pre>
+
+    <div class="info-box"><strong>Trade-off:</strong> chấp nhận mất tối đa 1 phút data nếu Redis crash. Đa số use case (like, view count) có thể chấp nhận. Tiền bạc → không.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">10. Full-page Cache — Giảm 99% tải</h2>
+    <p class="section-sub">Cache HTML hoặc JSON response nguyên trang. Key theo URL + query.</p>
+
+    <pre class="code"><span class="c">// Middleware Express</span>
+<span class="k">function</span> <span class="n">cachePage</span>(ttl = <span class="s">60</span>) {
+    <span class="k">return async</span> (req, res, next) =&gt; {
+        <span class="k">if</span> (req.method !== <span class="s">'GET'</span>) <span class="k">return</span> next();
+
+        <span class="k">const</span> key = `page:${req.originalUrl}`;
+        <span class="k">const</span> cached = <span class="k">await</span> redis.get(key);
+        <span class="k">if</span> (cached) {
+            res.setHeader(<span class="s">'X-Cache'</span>, <span class="s">'HIT'</span>);
+            <span class="k">return</span> res.json(JSON.parse(cached));
+        }
+
+        <span class="c">// Intercept res.json</span>
+        <span class="k">const</span> orig = res.json.bind(res);
+        res.json = (body) =&gt; {
+            redis.set(key, JSON.stringify(body), <span class="s">'EX'</span>, ttl);
+            orig(body);
+        };
+        next();
+    };
+}
+
+app.get(<span class="s">'/api/products'</span>, cachePage(<span class="s">120</span>), productsHandler);</pre>
+
+    <div class="tip"><strong>Invalidation:</strong> khi admin update product → <code>SCAN MATCH page:/api/products*</code> rồi <code>DEL</code>. Hoặc đơn giản: tag cache bằng <code>SADD tag:products key</code>, khi invalidate thì <code>SMEMBERS tag:products</code> → <code>DEL</code>.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🚫 5 Anti-pattern cần tránh</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>❌ Dùng <code>KEYS</code> trong production</h4>
+        <p>Chặn Redis single-thread. Dùng <code>SCAN</code> với cursor.</p>
+      </div>
+      <div class="card">
+        <h4>❌ Lưu object khổng lồ trong 1 key</h4>
+        <p>1 key 100MB → network slow, block Redis khi GET. Chia nhỏ.</p>
+      </div>
+      <div class="card">
+        <h4>❌ Không set TTL cho cache</h4>
+        <p>Không TTL + không xoá → memory đầy → eviction ép buộc → miss tăng.</p>
+      </div>
+      <div class="card">
+        <h4>❌ Dùng Redis thay DB chính</h4>
+        <p>Persistence Redis không mạnh bằng DB truyền thống. Mất data = thảm hoạ.</p>
+      </div>
+      <div class="card">
+        <h4>❌ Round-trip không pipeline</h4>
+        <p>10,000 GET riêng lẻ = 10,000 RTT = 10s+. Pipeline = 1 RTT.</p>
+      </div>
+      <div class="card">
+        <h4>❌ Hot key — 1 key chịu 99% traffic</h4>
+        <p>Ví dụ <code>page:home</code> bị request 10k/s. Cluster cũng không cứu vì 1 shard. Giải pháp: client-side LRU cache, hoặc shard key theo user.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Redis Mastery · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

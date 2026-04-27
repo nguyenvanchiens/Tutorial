@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>React Cơ Bản - JSX, Component, Props, State</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">React<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="basics.html" class="active">Cơ bản</a>
+      <a href="hooks.html">Hooks</a>
+      <a href="advanced.html">Nâng cao</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="ecosystem.html">Ecosystem</a>
+      <a href="interview.html">Phỏng vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">LEVEL 1 · BEGINNER</div>
+  <h1>React <span class="gradient">Cơ Bản</span></h1>
+  <p class="hero-desc">JSX, Component, Props, State, Events, Conditional rendering, Lists &amp; Keys, Forms. Đây là 8 khối xây nên <strong>mọi</strong> ứng dụng React.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">1. Setup dự án React</h2>
+    <p class="section-sub">Vite là công cụ chuẩn 2026 — nhanh, HMR tức thì, config tối thiểu. Create React App đã ngừng phát triển.</p>
+    <pre class="code"><span class="c"># Tạo project mới</span>
+npm create vite@latest my-app -- --template react
+cd my-app
+npm install
+npm run dev
+
+<span class="c"># Cấu trúc tối thiểu</span>
+src/
+  main.jsx      <span class="c">// điểm vào, gắn App vào #root</span>
+  App.jsx       <span class="c">// component gốc</span>
+  components/   <span class="c">// các component con</span>
+  hooks/        <span class="c">// custom hooks</span>
+index.html      <span class="c">// chứa &lt;div id="root"&gt;&lt;/div&gt;</span></pre>
+
+    <div class="info-box"><strong>Mẹo:</strong> Thêm <code>eslint-plugin-react-hooks</code> ngay từ đầu. Nó bắt 90% lỗi về dependency array và rules of hooks.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">2. JSX — HTML trong JavaScript</h2>
+    <p class="section-sub">JSX chỉ là cú pháp thân thiện, sau khi compile nó biến thành <code>React.createElement(...)</code>. Nhớ: đang viết JS, không phải HTML.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>Cú pháp cơ bản</h4>
+        <pre class="code"><span class="k">const</span> name = <span class="s">"Chiến"</span>;
+
+<span class="k">const</span> element = (
+  &lt;<span class="t">div</span> className=<span class="s">"box"</span>&gt;
+    &lt;<span class="t">h1</span>&gt;Xin chào {name}&lt;/<span class="t">h1</span>&gt;
+    &lt;<span class="t">p</span>&gt;2 + 2 = {<span class="s">2</span> + <span class="s">2</span>}&lt;/<span class="t">p</span>&gt;
+  &lt;/<span class="t">div</span>&gt;
+);</pre>
+      </div>
+
+      <div class="card">
+        <h4>Khác biệt với HTML</h4>
+        <table class="cmp">
+          <tr><th>HTML</th><th>JSX</th></tr>
+          <tr><td><code>class</code></td><td><code>className</code></td></tr>
+          <tr><td><code>for</code></td><td><code>htmlFor</code></td></tr>
+          <tr><td><code>onclick</code></td><td><code>onClick</code></td></tr>
+          <tr><td>inline <code>style="..."</code></td><td><code>style={{color: 'red'}}</code></td></tr>
+          <tr><td><code>&lt;input&gt;</code></td><td><code>&lt;input /&gt;</code> (self-close)</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <h3 style="margin-top:1.5rem;color:var(--primary)">Quy tắc vàng của JSX</h3>
+    <ul style="color:var(--muted);padding-left:1.5rem">
+      <li><strong>Một root element</strong>: dùng <code>&lt;&gt;...&lt;/&gt;</code> (Fragment) nếu không muốn thêm <code>div</code> thừa.</li>
+      <li><strong>Mọi biến JS trong <code>{ }</code></strong>: kể cả hàm, array, ternary. Nhưng <em>không</em> được <code>if/for</code> statement.</li>
+      <li><strong>Attribute dùng camelCase</strong>: <code>tabIndex</code>, <code>readOnly</code>, <code>autoFocus</code>.</li>
+      <li><strong>Comment trong JSX</strong>: <code>{/* comment */}</code>, không dùng <code>&lt;!-- --&gt;</code>.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">3. Component — Khối Lego của React</h2>
+    <p class="section-sub">Component là function JavaScript trả về JSX. Tên component <strong>phải viết hoa chữ cái đầu</strong> (React phân biệt <code>&lt;Button&gt;</code> là component vs <code>&lt;button&gt;</code> là HTML tag).</p>
+
+    <pre class="code"><span class="c">// components/Greeting.jsx</span>
+<span class="k">export default function</span> <span class="n">Greeting</span>() {
+  <span class="k">return</span> &lt;<span class="t">h1</span>&gt;Hello React&lt;/<span class="t">h1</span>&gt;;
+}
+
+<span class="c">// App.jsx</span>
+<span class="k">import</span> Greeting <span class="k">from</span> <span class="s">'./components/Greeting'</span>;
+
+<span class="k">export default function</span> <span class="n">App</span>() {
+  <span class="k">return</span> (
+    &lt;<span class="t">div</span>&gt;
+      &lt;<span class="t">Greeting</span> /&gt;
+      &lt;<span class="t">Greeting</span> /&gt;  <span class="c">// tái sử dụng vô hạn</span>
+    &lt;/<span class="t">div</span>&gt;
+  );
+}</pre>
+
+    <div class="tip"><strong>Quy tắc đặt tên file:</strong> PascalCase cho component (<code>UserCard.jsx</code>), camelCase cho hook/util (<code>useFetch.js</code>, <code>formatDate.js</code>).</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">4. Props — Truyền dữ liệu xuống con</h2>
+    <p class="section-sub">Props giống tham số hàm. Con <strong>chỉ đọc</strong> props, không được sửa (immutable).</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>Truyền &amp; nhận props</h4>
+        <pre class="code"><span class="c">// Con</span>
+<span class="k">function</span> <span class="n">UserCard</span>({ name, age, avatar }) {
+  <span class="k">return</span> (
+    &lt;<span class="t">div</span> className=<span class="s">"card"</span>&gt;
+      &lt;<span class="t">img</span> src={avatar} /&gt;
+      &lt;<span class="t">h3</span>&gt;{name}&lt;/<span class="t">h3</span>&gt;
+      &lt;<span class="t">p</span>&gt;{age} tuổi&lt;/<span class="t">p</span>&gt;
+    &lt;/<span class="t">div</span>&gt;
+  );
+}
+
+<span class="c">// Cha</span>
+&lt;<span class="t">UserCard</span>
+  name=<span class="s">"Chiến"</span>
+  age={<span class="s">25</span>}
+  avatar=<span class="s">"/me.jpg"</span>
+/&gt;</pre>
+      </div>
+
+      <div class="card">
+        <h4>Default + Rest</h4>
+        <pre class="code"><span class="k">function</span> <span class="n">Button</span>({
+  variant = <span class="s">'primary'</span>,  <span class="c">// default</span>
+  size = <span class="s">'md'</span>,
+  children,            <span class="c">// nội dung bên trong</span>
+  ...rest              <span class="c">// các prop còn lại</span>
+}) {
+  <span class="k">return</span> (
+    &lt;<span class="t">button</span>
+      className={`btn ${variant} ${size}`}
+      {...rest}&gt;
+      {children}
+    &lt;/<span class="t">button</span>&gt;
+  );
+}
+
+<span class="c">// Dùng</span>
+&lt;<span class="t">Button</span> variant=<span class="s">"danger"</span> onClick={handleDel}&gt;
+  Xoá
+&lt;/<span class="t">Button</span>&gt;</pre>
+      </div>
+    </div>
+
+    <h3 style="margin-top:1.5rem;color:var(--primary)"><code>children</code> — prop đặc biệt</h3>
+    <pre class="code"><span class="k">function</span> <span class="n">Card</span>({ title, children }) {
+  <span class="k">return</span> (
+    &lt;<span class="t">div</span> className=<span class="s">"card"</span>&gt;
+      &lt;<span class="t">h3</span>&gt;{title}&lt;/<span class="t">h3</span>&gt;
+      &lt;<span class="t">div</span>&gt;{children}&lt;/<span class="t">div</span>&gt;
+    &lt;/<span class="t">div</span>&gt;
+  );
+}
+
+&lt;<span class="t">Card</span> title=<span class="s">"Thông báo"</span>&gt;
+  &lt;<span class="t">p</span>&gt;Nội dung tuỳ ý ở đây&lt;/<span class="t">p</span>&gt;
+  &lt;<span class="t">button</span>&gt;OK&lt;/<span class="t">button</span>&gt;
+&lt;/<span class="t">Card</span>&gt;</pre>
+
+    <div class="danger-box"><strong>Không làm điều này:</strong> <code>props.name = 'new'</code> — React không theo dõi, và sẽ gây bug khó tìm. Muốn "đổi" → tạo state mới hoặc gọi callback.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">5. State với <code>useState</code></h2>
+    <p class="section-sub">State là dữ liệu <strong>thay đổi theo thời gian</strong> và cần React render lại khi thay đổi.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>Cú pháp cơ bản</h4>
+        <pre class="code"><span class="k">import</span> { useState } <span class="k">from</span> <span class="s">'react'</span>;
+
+<span class="k">function</span> <span class="n">Counter</span>() {
+  <span class="k">const</span> [count, setCount] = <span class="n">useState</span>(<span class="s">0</span>);
+
+  <span class="k">return</span> (
+    &lt;<span class="t">div</span>&gt;
+      &lt;<span class="t">p</span>&gt;Đã bấm {count} lần&lt;/<span class="t">p</span>&gt;
+      &lt;<span class="t">button</span> onClick={() =&gt; setCount(count + <span class="s">1</span>)}&gt;
+        +1
+      &lt;/<span class="t">button</span>&gt;
+    &lt;/<span class="t">div</span>&gt;
+  );
+}</pre>
+      </div>
+
+      <div class="card">
+        <h4>Functional update (an toàn)</h4>
+        <pre class="code"><span class="c">// Khi state mới phụ thuộc state cũ</span>
+<span class="c">// → TRUYỀN FUNCTION, không truyền giá trị</span>
+
+<span class="k">const</span> handleClick = () =&gt; {
+  setCount(c =&gt; c + <span class="s">1</span>);
+  setCount(c =&gt; c + <span class="s">1</span>);
+  setCount(c =&gt; c + <span class="s">1</span>);
+  <span class="c">// count tăng 3, không phải 1</span>
+};
+
+<span class="c">// Nếu viết setCount(count+1) 3 lần</span>
+<span class="c">// → cả 3 đều dùng count cũ → chỉ +1</span></pre>
+      </div>
+    </div>
+
+    <h3 style="margin-top:1.5rem;color:var(--primary)">Những kiểu state hay dùng</h3>
+    <pre class="code"><span class="c">// Object state — nhớ spread khi cập nhật</span>
+<span class="k">const</span> [user, setUser] = <span class="n">useState</span>({ name: <span class="s">''</span>, age: <span class="s">0</span> });
+setUser({ ...user, name: <span class="s">'Chiến'</span> });
+
+<span class="c">// Array state — không mutate, tạo array mới</span>
+<span class="k">const</span> [todos, setTodos] = <span class="n">useState</span>([]);
+setTodos([...todos, newTodo]);               <span class="c">// thêm</span>
+setTodos(todos.filter(t =&gt; t.id !== id));     <span class="c">// xoá</span>
+setTodos(todos.map(t =&gt; t.id === id ? {...t, done: <span class="k">true</span>} : t));  <span class="c">// sửa</span>
+
+<span class="c">// Lazy initial — tính toán nặng chỉ chạy 1 lần</span>
+<span class="k">const</span> [items, setItems] = <span class="n">useState</span>(() =&gt; {
+  <span class="k">return</span> JSON.parse(localStorage.getItem(<span class="s">'items'</span>)) ?? [];
+});</pre>
+
+    <div class="warn-box"><strong>Nguyên tắc:</strong> State là <strong>snapshot</strong>. Trong 1 lần render, biến <code>count</code> là hằng số. Gọi <code>setCount</code> chỉ lên lịch render mới, KHÔNG đổi biến hiện tại.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">6. Xử lý Events</h2>
+    <pre class="code"><span class="k">function</span> <span class="n">Form</span>() {
+  <span class="k">const</span> handleSubmit = (e) =&gt; {
+    e.preventDefault();  <span class="c">// chặn reload trang</span>
+    console.log(<span class="s">'submitted'</span>);
+  };
+
+  <span class="k">const</span> handleChange = (e) =&gt; {
+    console.log(e.target.value);
+  };
+
+  <span class="k">return</span> (
+    &lt;<span class="t">form</span> onSubmit={handleSubmit}&gt;
+      &lt;<span class="t">input</span> onChange={handleChange} /&gt;
+      &lt;<span class="t">button</span> onClick={(e) =&gt; e.stopPropagation()}&gt;OK&lt;/<span class="t">button</span>&gt;
+    &lt;/<span class="t">form</span>&gt;
+  );
+}</pre>
+
+    <div class="info-box"><strong>Synthetic Event:</strong> React bọc native event thành <code>SyntheticEvent</code> để cross-browser. API gần như y hệt (<code>e.target</code>, <code>e.preventDefault()</code>, …).</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">7. Conditional Rendering</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>Ternary — phổ biến nhất</h4>
+        <pre class="code">{isLoggedIn
+  ? &lt;<span class="t">Dashboard</span> /&gt;
+  : &lt;<span class="t">Login</span> /&gt;}</pre>
+      </div>
+      <div class="card">
+        <h4>Short-circuit với <code>&amp;&amp;</code></h4>
+        <pre class="code">{cart.length &gt; <span class="s">0</span> &amp;&amp; (
+  &lt;<span class="t">CartBadge</span> count={cart.length} /&gt;
+)}</pre>
+        <div class="warn-box" style="margin:.75rem 0 0"><strong>Bẫy:</strong> <code>{count &amp;&amp; &lt;X/&gt;}</code> khi <code>count=0</code> sẽ render ra "0". Dùng <code>{count &gt; 0 &amp;&amp; ...}</code>.</div>
+      </div>
+      <div class="card">
+        <h4>Early return</h4>
+        <pre class="code"><span class="k">function</span> <span class="n">Profile</span>({ user }) {
+  <span class="k">if</span> (!user) <span class="k">return</span> &lt;<span class="t">Spinner</span> /&gt;;
+  <span class="k">if</span> (user.banned) <span class="k">return</span> &lt;<span class="t">Banned</span> /&gt;;
+
+  <span class="k">return</span> &lt;<span class="t">UserCard</span> user={user} /&gt;;
+}</pre>
+      </div>
+      <div class="card">
+        <h4>Map cho nhiều trường hợp</h4>
+        <pre class="code"><span class="k">const</span> STATUS = {
+  loading: &lt;<span class="t">Spinner</span> /&gt;,
+  error:   &lt;<span class="t">ErrorView</span> /&gt;,
+  success: &lt;<span class="t">DataView</span> /&gt;,
+};
+<span class="k">return</span> STATUS[status];</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">8. Lists &amp; Keys</h2>
+    <pre class="code"><span class="k">const</span> users = [
+  { id: <span class="s">1</span>, name: <span class="s">'Chiến'</span> },
+  { id: <span class="s">2</span>, name: <span class="s">'Lan'</span> },
+];
+
+<span class="k">return</span> (
+  &lt;<span class="t">ul</span>&gt;
+    {users.map(u =&gt; (
+      &lt;<span class="t">li</span> key={u.id}&gt;{u.name}&lt;/<span class="t">li</span>&gt;
+    ))}
+  &lt;/<span class="t">ul</span>&gt;
+);</pre>
+
+    <div class="grid grid-2" style="margin-top:1rem">
+      <div class="card">
+        <h4>✅ Key tốt</h4>
+        <ul>
+          <li>Giá trị <strong>ổn định, duy nhất</strong> trong phạm vi list</li>
+          <li>Thường là <code>id</code> từ DB, <code>uuid</code></li>
+          <li>Tuyệt đối không đổi giữa các lần render</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>❌ Key tệ</h4>
+        <ul>
+          <li><code>index</code> khi list thay đổi thứ tự/insert/remove</li>
+          <li><code>Math.random()</code> — đổi mỗi render → mọi item bị remount, mất state/focus</li>
+          <li>Trùng lặp — React warning &amp; dính bug</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">9. Forms — Controlled Inputs</h2>
+    <p class="section-sub">React pattern chuẩn: form field được <strong>điều khiển bởi state</strong>. Single source of truth.</p>
+
+    <pre class="code"><span class="k">function</span> <span class="n">LoginForm</span>() {
+  <span class="k">const</span> [form, setForm] = <span class="n">useState</span>({ email: <span class="s">''</span>, password: <span class="s">''</span> });
+
+  <span class="k">const</span> onChange = (e) =&gt; {
+    <span class="k">const</span> { name, value } = e.target;
+    setForm(f =&gt; ({ ...f, [name]: value }));
+  };
+
+  <span class="k">const</span> onSubmit = (e) =&gt; {
+    e.preventDefault();
+    console.log(form);
+  };
+
+  <span class="k">return</span> (
+    &lt;<span class="t">form</span> onSubmit={onSubmit}&gt;
+      &lt;<span class="t">input</span>
+        name=<span class="s">"email"</span>
+        value={form.email}
+        onChange={onChange}
+      /&gt;
+      &lt;<span class="t">input</span>
+        name=<span class="s">"password"</span>
+        type=<span class="s">"password"</span>
+        value={form.password}
+        onChange={onChange}
+      /&gt;
+      &lt;<span class="t">button</span>&gt;Đăng nhập&lt;/<span class="t">button</span>&gt;
+    &lt;/<span class="t">form</span>&gt;
+  );
+}</pre>
+
+    <div class="info-box"><strong>Khi form phức tạp (validate, nhiều step, arrays):</strong> dùng <code>react-hook-form</code> + <code>zod</code> — xem trang Ecosystem.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">10. Styling — 4 cách phổ biến</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>1. CSS file + className</h4>
+        <pre class="code"><span class="c">// Button.css</span>
+.btn { padding: <span class="s">8</span>px <span class="s">16</span>px; }
+
+<span class="c">// Button.jsx</span>
+<span class="k">import</span> <span class="s">'./Button.css'</span>;
+&lt;<span class="t">button</span> className=<span class="s">"btn"</span>&gt;OK&lt;/<span class="t">button</span>&gt;</pre>
+      </div>
+      <div class="card">
+        <h4>2. CSS Module — scoped</h4>
+        <pre class="code"><span class="c">// Button.module.css</span>
+.btn { color: blue; }
+
+<span class="c">// Button.jsx</span>
+<span class="k">import</span> s <span class="k">from</span> <span class="s">'./Button.module.css'</span>;
+&lt;<span class="t">button</span> className={s.btn}&gt;OK&lt;/<span class="t">button</span>&gt;</pre>
+      </div>
+      <div class="card">
+        <h4>3. Tailwind CSS (utility-first)</h4>
+        <pre class="code">&lt;<span class="t">button</span> className=<span class="s">"px-4 py-2 bg-blue-500
+  text-white rounded hover:bg-blue-600"</span>&gt;
+  OK
+&lt;/<span class="t">button</span>&gt;</pre>
+        <p style="color:var(--muted);font-size:.85rem">Nhanh, đồng nhất, tree-shake tự động. Chuẩn 2026.</p>
+      </div>
+      <div class="card">
+        <h4>4. CSS-in-JS</h4>
+        <pre class="code"><span class="c">// styled-components / emotion</span>
+<span class="k">const</span> Btn = styled.button`
+  padding: 8px 16px;
+  background: ${p =&gt; p.primary ? <span class="s">'blue'</span> : <span class="s">'gray'</span>};
+`;</pre>
+        <p style="color:var(--muted);font-size:.85rem">Mạnh nhưng chi phí runtime. 2026 ít dùng hơn Tailwind.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">💡 Bài tập thực hành</h2>
+    <ol class="steps">
+      <li><strong>Counter với bước tùy chỉnh</strong><br/><span style="color:var(--muted)">Nhập step bằng input, +/- theo step đó. Học: state, controlled input.</span></li>
+      <li><strong>Todo list</strong><br/><span style="color:var(--muted)">Thêm, xoá, tick hoàn thành, filter all/active/done. Học: array state, lift state up.</span></li>
+      <li><strong>Tip calculator</strong><br/><span style="color:var(--muted)">Nhập hoá đơn + % tip + số người → chia tiền. Học: derived state (tính toán từ state có sẵn).</span></li>
+      <li><strong>Card flip game (memory)</strong><br/><span style="color:var(--muted)">Lật thẻ tìm cặp giống nhau. Học: array state phức tạp, conditional render.</span></li>
+      <li><strong>Mini Blog 3 trang</strong><br/><span style="color:var(--muted)">Hardcode mảng bài viết, render list + detail bằng state <code>activePostId</code>. Học: component breakdown.</span></li>
+    </ol>
+
+    <div class="tip" style="margin-top:1.5rem">
+      <strong>Tự check:</strong> hoàn thành 5 bài này = bạn đã qua Level 1. Sẵn sàng học <a href="hooks.html" style="color:var(--primary)">Hooks</a>.
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>ReactJS Mastery · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

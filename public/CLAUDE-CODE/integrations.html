@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Claude Code Integrations — MCP, IDE, Agent SDK, CI/CD</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">Claude<span class="accent">Code</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="basics.html">Cơ Bản</a>
+      <a href="commands.html">Commands</a>
+      <a href="customize.html">Customize</a>
+      <a href="integrations.html" class="active">Integrations</a>
+      <a href="tips.html">Tips & FAQ</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">LEVEL 4 · SENIOR</div>
+  <h1>Tích hợp <span class="gradient">Claude Code</span></h1>
+  <p class="hero-desc">MCP servers (Slack, DB, Linear), VS Code + JetBrains extensions, Agent SDK cho automation, GitHub Actions để Claude tự review PR. Đưa Claude vào toàn bộ workflow team.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">1. MCP — Model Context Protocol</h2>
+    <p class="section-sub">MCP là chuẩn open-source để kết nối AI với external system. Claude Code hỗ trợ MCP full native — kết nối tới Slack, GitHub, Linear, Postgres, Notion, và hàng trăm server khác.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>💡 MCP làm gì?</h3>
+        <p>Mở rộng khả năng của Claude bằng <strong>thêm tool</strong>. Ví dụ:</p>
+        <ul>
+          <li>MCP Slack → Claude có tool <code>send_message</code></li>
+          <li>MCP Postgres → tool <code>query</code> để đọc DB</li>
+          <li>MCP GitHub → tool <code>create_issue</code>, <code>review_pr</code></li>
+          <li>MCP Filesystem → đọc file ngoài workspace</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>🏗 Kiến trúc</h3>
+        <p>MCP server = process riêng, expose tool qua JSON-RPC.</p>
+        <pre class="code">┌──────────────┐
+│ Claude Code  │
+└──────┬───────┘
+       │ stdio / HTTP
+┌──────▼───────┐
+│  MCP server  │
+│ (slack, db…) │
+└──────────────┘</pre>
+      </div>
+    </div>
+
+    <h3 style="color: var(--primary); margin-top: 1.5rem">Thêm MCP server — các cách</h3>
+    <pre class="code"><span class="c"># Cách 1: CLI (khuyên dùng)</span>
+claude mcp add slack --env SLACK_BOT_TOKEN=xoxb-... -- npx @modelcontextprotocol/server-slack
+
+<span class="c"># Cách 2: Sửa settings.json</span>
+{
+  <span class="s">"mcpServers"</span>: {
+    <span class="s">"slack"</span>: {
+      <span class="s">"command"</span>: <span class="s">"npx"</span>,
+      <span class="s">"args"</span>: [<span class="s">"@modelcontextprotocol/server-slack"</span>],
+      <span class="s">"env"</span>: {
+        <span class="s">"SLACK_BOT_TOKEN"</span>: <span class="s">"xoxb-..."</span>
+      }
+    }
+  }
+}
+
+<span class="c"># Kiểm tra server đã connect</span>
+claude mcp list</pre>
+
+    <h3 style="color: var(--primary); margin-top: 1.5rem">MCP server phổ biến</h3>
+    <table class="cmp">
+      <tr><th>Server</th><th>Tool chính</th><th>Use case</th></tr>
+      <tr><td><code>@modelcontextprotocol/server-filesystem</code></td><td>read/write file</td><td>Truy cập folder ngoài workspace</td></tr>
+      <tr><td><code>@modelcontextprotocol/server-github</code></td><td>issue, PR, repo info</td><td>Claude tạo issue, review PR auto</td></tr>
+      <tr><td><code>@modelcontextprotocol/server-slack</code></td><td>send message, read channel</td><td>Notify khi task xong</td></tr>
+      <tr><td><code>@modelcontextprotocol/server-postgres</code></td><td>query, schema</td><td>Debug query, analyze data</td></tr>
+      <tr><td><code>@modelcontextprotocol/server-puppeteer</code></td><td>browser automation</td><td>E2E test, scrape, screenshot</td></tr>
+      <tr><td><code>@modelcontextprotocol/server-memory</code></td><td>persistent memory</td><td>Claude nhớ xuyên session</td></tr>
+      <tr><td>Linear / Notion / Sentry (community)</td><td>task, docs, errors</td><td>Workflow đồng bộ tool team</td></tr>
+    </table>
+
+    <h3 style="color: var(--primary); margin-top: 1.5rem">Ví dụ dùng MCP Postgres</h3>
+    <div class="terminal">
+<span class="user">You:</span> How many users signed up last week?
+
+<span class="asst">Claude:</span> I'll query the database.
+
+<span class="comment">● mcp__postgres__query(</span>
+<span class="comment">    SELECT count(*) FROM users</span>
+<span class="comment">    WHERE created_at &gt; now() - interval '7 days'</span>
+<span class="comment">  )</span>
+  ⎿  { count: 1847 }
+
+<span class="ret">1,847 users signed up in the last 7 days.</span> Want breakdown by day?
+    </div>
+
+    <div class="info-box">
+      <strong>Tìm thêm MCP server:</strong> <code>github.com/modelcontextprotocol/servers</code> — list chính thức. Hoặc Google "MCP server &lt;tool-name&gt;".
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">2. IDE Extensions</h2>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>🎨 VS Code Extension</h3>
+        <p><strong>Cài:</strong> Extensions marketplace → search "Claude Code" → Install.</p>
+        <p><strong>Tính năng:</strong></p>
+        <ul>
+          <li>Sidebar panel riêng cho Claude</li>
+          <li>Inline suggestion như Copilot</li>
+          <li>Quick edit: chọn code → <kbd>Ctrl</kbd>+<kbd>I</kbd> → prompt edit</li>
+          <li>Command Palette: <code>Claude: New session</code>, <code>Claude: Review file</code></li>
+          <li>Auto sync với CLI session đang chạy</li>
+        </ul>
+        <div class="tip" style="margin-top:.5rem"><strong>Tip:</strong> Chạy <code>/ide</code> trong CLI để pair với VS Code đang mở → Claude sync với file user đang edit.</div>
+      </div>
+
+      <div class="card">
+        <h3>🧪 JetBrains Plugin</h3>
+        <p><strong>Cài:</strong> Settings → Plugins → Marketplace → "Claude Code".</p>
+        <p><strong>Support:</strong> IntelliJ IDEA, WebStorm, PyCharm, GoLand, Rider, RubyMine, PhpStorm, CLion.</p>
+        <p><strong>Tính năng:</strong></p>
+        <ul>
+          <li>Tool window riêng</li>
+          <li>Selection actions: right-click → Claude: Explain/Refactor</li>
+          <li>Integrate run config, debugger</li>
+          <li>Version control integration</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>⚡ Keybindings tuỳ biến</h3>
+        <p>File: <code>~/.claude/keybindings.json</code></p>
+        <pre class="code">{
+  <span class="s">"submit"</span>: <span class="s">"enter"</span>,
+  <span class="s">"newline"</span>: <span class="s">"shift+enter"</span>,
+  <span class="s">"interrupt"</span>: <span class="s">"escape"</span>,
+  <span class="s">"chord.git"</span>: <span class="s">"ctrl+g"</span>,
+  <span class="s">"chord.git.commit"</span>: <span class="s">"ctrl+g c"</span>,
+  <span class="s">"chord.git.push"</span>: <span class="s">"ctrl+g p"</span>
+}</pre>
+      </div>
+
+      <div class="card">
+        <h3>🌐 Web mode — claude.ai/code</h3>
+        <p>Khi không muốn cài gì — dùng trực tiếp trên browser.</p>
+        <ul>
+          <li>Link GitHub repo vào</li>
+          <li>Claude làm trong cloud sandbox</li>
+          <li>Commit/PR từ web UI</li>
+          <li>Share link session với đồng nghiệp</li>
+        </ul>
+        <p style="color: var(--muted); font-size:.85rem; margin-top:.3rem">Yêu cầu: Claude Pro ($20/tháng) hoặc Max plan.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">3. Claude Agent SDK — Build automation</h2>
+    <p class="section-sub">Khi bạn muốn Claude Code chạy programmatic (script, cron, webhook handler) — dùng Agent SDK.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>🐍 Python SDK</h3>
+        <pre class="code"><span class="c"># pip install anthropic-agent-sdk</span>
+<span class="k">import</span> asyncio
+<span class="k">from</span> anthropic_agent_sdk <span class="k">import</span> query
+
+<span class="k">async def</span> <span class="n">main</span>():
+    <span class="k">async for</span> message <span class="k">in</span> query(
+        prompt=<span class="s">"Fix all lint errors in this repo"</span>,
+        cwd=<span class="s">"/path/to/repo"</span>,
+        allowed_tools=[<span class="s">"Bash"</span>, <span class="s">"Edit"</span>, <span class="s">"Read"</span>],
+        model=<span class="s">"claude-sonnet-4-6"</span>,
+    ):
+        print(message)
+
+asyncio.run(main())</pre>
+      </div>
+
+      <div class="card">
+        <h3>📘 TypeScript SDK</h3>
+        <pre class="code"><span class="c">// npm install @anthropic-ai/agent-sdk</span>
+<span class="k">import</span> { query } <span class="k">from</span> <span class="s">'@anthropic-ai/agent-sdk'</span>;
+
+<span class="k">for await</span> (<span class="k">const</span> message <span class="k">of</span> query({
+  prompt: <span class="s">'Summarize recent commits'</span>,
+  cwd: process.cwd(),
+  allowedTools: [<span class="s">'Bash'</span>, <span class="s">'Read'</span>],
+  maxTurns: <span class="s">10</span>,
+})) {
+  console.log(message);
+}</pre>
+      </div>
+    </div>
+
+    <h3 style="color: var(--primary); margin-top: 1.5rem">Use case: Daily report bot</h3>
+    <pre class="code"><span class="c"># Cron chạy mỗi sáng — Claude tổng kết PR team + post Slack</span>
+<span class="k">import</span> asyncio
+<span class="k">from</span> anthropic_agent_sdk <span class="k">import</span> query
+
+<span class="k">async def</span> <span class="n">daily_report</span>():
+    prompt = <span class="s">"""</span>
+<span class="s">    1. List all PRs merged yesterday (git log, github MCP)</span>
+<span class="s">    2. Categorize: feat / fix / chore / refactor</span>
+<span class="s">    3. Post summary to Slack #dev-daily (use slack MCP)</span>
+<span class="s">    """</span>
+
+    <span class="k">async for</span> msg <span class="k">in</span> query(
+        prompt=prompt,
+        allowed_tools=[<span class="s">"Bash"</span>, <span class="s">"mcp__github__*"</span>, <span class="s">"mcp__slack__*"</span>],
+        max_turns=<span class="s">20</span>,
+    ):
+        pass
+
+asyncio.run(daily_report())</pre>
+
+    <div class="info-box">
+      <strong>Khi nào dùng SDK vs CLI <code>--print</code>?</strong>
+      <ul style="padding-left:1.3rem; margin-top:.3rem">
+        <li>CLI <code>--print</code>: script 1-off, shell pipeline, CI step</li>
+        <li>SDK: chương trình phức tạp, nhiều agent, streaming output, custom UI</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">4. GitHub Actions — Claude tự review PR</h2>
+
+    <h3 style="color: var(--primary); margin-top: 1rem">Setup secrets</h3>
+    <pre class="code"><span class="c"># Repo Settings → Secrets → Actions</span>
+ANTHROPIC_API_KEY=sk-ant-api03-...  <span class="c"># lấy từ console.anthropic.com</span></pre>
+
+    <h3 style="color: var(--primary); margin-top: 1rem">Workflow auto-review PR</h3>
+    <pre class="code"><span class="c"># .github/workflows/claude-review.yml</span>
+name: Claude PR Review
+<span class="k">on</span>:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    <span class="k">permissions</span>:
+      pull-requests: write
+      contents: read
+    steps:
+      - <span class="k">uses</span>: actions/checkout@v4
+        <span class="k">with</span>: { fetch-depth: <span class="s">0</span> }
+
+      - <span class="k">uses</span>: actions/setup-node@v4
+        <span class="k">with</span>: { node-version: <span class="s">'20'</span> }
+
+      - <span class="k">name</span>: Install Claude Code
+        <span class="k">run</span>: npm install -g @anthropic-ai/claude-code
+
+      - <span class="k">name</span>: Review PR
+        <span class="k">run</span>: |
+          claude --print --dangerously-skip-permissions \
+            <span class="s">"Review the PR diff against main. Output markdown feedback grouped by Critical/Major/Minor. Then post as PR comment using gh CLI."</span>
+        <span class="k">env</span>:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}</pre>
+
+    <h3 style="color: var(--primary); margin-top: 1.5rem">Workflow khác — Claude sửa lint/test fail</h3>
+    <pre class="code">name: Auto-fix failing tests
+<span class="k">on</span>:
+  workflow_dispatch:
+  schedule:
+    - cron: <span class="s">'0 9 * * 1-5'</span>  <span class="c"># mỗi sáng workday</span>
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - <span class="k">uses</span>: actions/checkout@v4
+      - <span class="k">uses</span>: actions/setup-node@v4
+      - <span class="k">run</span>: npm ci
+
+      - <span class="k">name</span>: Claude fix failing tests
+        <span class="k">run</span>: |
+          npm install -g @anthropic-ai/claude-code
+          claude --print --dangerously-skip-permissions <span class="s">"</span>
+<span class="s">            Run npm test. If tests fail, analyze and fix each one.</span>
+<span class="s">            Commit to branch auto-fix/tests with descriptive message.</span>
+<span class="s">            Create PR with list of fixed tests.</span>
+<span class="s">          "</span>
+        <span class="k">env</span>:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}</pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">5. Background Agents — Task chạy hàng giờ</h2>
+    <p class="section-sub">Task lớn (refactor toàn codebase, migrate hundreds of files) — chạy Claude background, kiểm tra kết quả sau.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>📱 Qua claude.ai/code web</h3>
+        <p>Anthropic hỗ trợ "background tasks" native:</p>
+        <ul>
+          <li>Gõ task → <strong>Run in background</strong></li>
+          <li>Claude chạy trong cloud sandbox</li>
+          <li>Bạn đóng browser được — task vẫn chạy</li>
+          <li>Nhận email/notification khi xong</li>
+          <li>Review diff, commit/PR từ web</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>💻 Qua CLI + screen/tmux</h3>
+        <pre class="code"><span class="c"># Chạy Claude trong tmux session</span>
+tmux new -s claude-refactor
+claude --print <span class="s">"Large refactor task..."</span>
+<span class="c"># Ctrl+B D để detach</span>
+
+<span class="c"># Quay lại sau</span>
+tmux attach -t claude-refactor</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">6. Cloud deployment — Claude API qua proxy</h2>
+    <p class="section-sub">Triển khai Claude Code như service nội bộ của team.</p>
+
+    <pre class="code"><span class="c">// proxy.ts — Express app wrap Claude SDK</span>
+<span class="k">import</span> express <span class="k">from</span> <span class="s">'express'</span>;
+<span class="k">import</span> { query } <span class="k">from</span> <span class="s">'@anthropic-ai/agent-sdk'</span>;
+
+<span class="k">const</span> app = express();
+app.use(express.json());
+
+app.post(<span class="s">'/task'</span>, <span class="k">async</span> (req, res) =&gt; {
+  <span class="k">const</span> { prompt, repo } = req.body;
+
+  <span class="c">// Clone repo sang tmp</span>
+  <span class="k">const</span> workdir = <span class="k">await</span> cloneRepo(repo);
+
+  <span class="k">const</span> messages = [];
+  <span class="k">for await</span> (<span class="k">const</span> msg <span class="k">of</span> query({
+    prompt,
+    cwd: workdir,
+    allowedTools: [<span class="s">'Read'</span>, <span class="s">'Edit'</span>, <span class="s">'Bash'</span>],
+  })) {
+    messages.push(msg);
+  }
+
+  res.json({ messages, diff: <span class="k">await</span> getDiff(workdir) });
+});
+
+app.listen(<span class="s">3000</span>);</pre>
+
+    <div class="info-box">
+      <strong>Use case:</strong> Slack slash command <code>/claude fix the bug X</code> → hit proxy → Claude work → kết quả post ngược lại Slack.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">7. Remote Triggers &amp; Scheduled Tasks</h2>
+    <p class="section-sub">Trigger Claude từ outside:</p>
+
+    <div class="grid grid-3">
+      <div class="card">
+        <h4>🌐 Remote Trigger</h4>
+        <p>Claude Code CLI hỗ trợ trigger từ webhook — đăng ký URL, HTTP POST tới URL đó → Claude chạy trong session hiện tại.</p>
+        <p>Use case: Trigger Claude từ dashboard nội bộ.</p>
+      </div>
+      <div class="card">
+        <h4>⏰ Cron / Scheduled</h4>
+        <p>Dùng <code>CronCreate</code> tool trong Claude Code Web / Managed Agents. Setup task chạy định kỳ (mỗi sáng, mỗi giờ).</p>
+        <p>Use case: Daily changelog, weekly dependency audit.</p>
+      </div>
+      <div class="card">
+        <h4>🔁 Loop mode</h4>
+        <p>Slash command <code>/loop 5m /check-build</code> → Claude tự chạy <code>/check-build</code> mỗi 5 phút cho đến khi interrupt.</p>
+        <p>Use case: Poll deployment status.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">💡 Bài tập</h2>
+    <ol class="steps">
+      <li><strong>Cài MCP filesystem</strong> — add 1 folder ngoài workspace (ví dụ <code>~/Documents</code>) cho Claude đọc.</li>
+      <li><strong>IDE integration</strong> — cài VS Code extension, thử inline quick edit <kbd>Ctrl</kbd>+<kbd>I</kbd>.</li>
+      <li><strong>Script với SDK</strong> — viết Python script dùng Agent SDK để in tổng số line code của project.</li>
+      <li><strong>GitHub Action review</strong> — setup workflow auto-review PR trên 1 repo test.</li>
+      <li><strong>MCP Postgres</strong> — connect Claude vào Postgres local, yêu cầu "đếm số row table X".</li>
+    </ol>
+
+    <div class="tip" style="margin-top: 1rem">
+      <strong>Sẵn sàng L5?</strong> Sang <a href="tips.html" style="color: var(--primary)">Tips &amp; FAQ</a> — prompt patterns, workflows thực chiến, debug khi Claude sai.
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Claude Code Mastery · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

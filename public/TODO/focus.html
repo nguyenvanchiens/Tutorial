@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Mode — Chống Trì Hoãn & Nỗ Lực Ảo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{
+            --bg:#0B0F1A;--surface:#111827;--surface2:#1E293B;--border:#1E293B;
+            --text:#E2E8F0;--text-dim:#94A3B8;--primary:#22D3EE;--accent:#A78BFA;
+            --green:#10B981;--orange:#F59E0B;--red:#F43F5E;--blue:#3B82F6;
+            --radius:12px;--radius-sm:8px;
+        }
+        html{scroll-behavior:smooth}
+        body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;min-height:100vh}
+
+        /* ═══ Navbar ═══ */
+        .navbar{position:fixed;top:0;left:0;width:100%;background:rgba(11,15,26,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px}
+        .nav-logo{font-weight:800;font-size:1rem;color:var(--primary);text-decoration:none}
+        .nav-links{display:flex;gap:20px}
+        .nav-links a{color:var(--text-dim);text-decoration:none;font-size:.85rem;font-weight:500;transition:color .2s}
+        .nav-links a:hover{color:var(--primary)}
+
+        /* ═══ Container ═══ */
+        .container{max-width:860px;margin:0 auto;padding:80px 24px 60px}
+
+        /* ═══ Hero ═══ */
+        .hero{text-align:center;padding:20px 0 40px}
+        .hero h1{font-size:2.2rem;font-weight:900;margin-bottom:8px}
+        .gradient-text{background:linear-gradient(135deg,var(--red),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .hero p{color:var(--text-dim);font-size:.95rem;max-width:600px;margin:0 auto}
+
+        /* ═══ Section ═══ */
+        .section{margin-bottom:32px}
+        .section-title{font-size:1.15rem;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+        .section-title .icon{font-size:1.3rem}
+
+        /* ═══ Card ═══ */
+        .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:12px;transition:border-color .2s}
+        .card:hover{border-color:rgba(34,211,238,.2)}
+
+        /* ═══ Pomodoro Timer ═══ */
+        .timer-container{text-align:center;padding:20px 0}
+        .timer-display{font-family:'JetBrains Mono',monospace;font-size:5rem;font-weight:700;color:var(--primary);letter-spacing:4px;margin:16px 0;transition:color .3s}
+        .timer-display.break-mode{color:var(--green)}
+        .timer-display.warning{color:var(--orange)}
+        .timer-label{font-size:.9rem;color:var(--text-dim);margin-bottom:20px;font-weight:600;text-transform:uppercase;letter-spacing:2px}
+        .timer-buttons{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+        .timer-sessions{margin-top:20px;display:flex;gap:8px;justify-content:center}
+        .session-dot{width:14px;height:14px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);transition:all .3s}
+        .session-dot.done{background:var(--green);border-color:var(--green)}
+        .session-dot.current{border-color:var(--primary);box-shadow:0 0 8px rgba(34,211,238,.4)}
+
+        /* ═══ Commitment ═══ */
+        .commit-box{background:var(--surface2);border:2px dashed var(--border);border-radius:var(--radius);padding:20px;text-align:center;transition:all .3s}
+        .commit-box.active{border-color:var(--green);border-style:solid;background:rgba(16,185,129,.05)}
+        .commit-input{width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-size:.95rem;font-family:inherit;outline:none;text-align:center;transition:border-color .2s}
+        .commit-input:focus{border-color:var(--primary)}
+        .commit-input::placeholder{color:var(--text-dim)}
+        .commit-label{font-size:.82rem;color:var(--text-dim);margin-bottom:8px;font-weight:600}
+
+        /* ═══ Buttons ═══ */
+        .btn{padding:12px 24px;border:none;border-radius:var(--radius-sm);font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+        .btn:disabled{opacity:.4;cursor:not-allowed}
+        .btn-primary{background:var(--primary);color:var(--bg)}
+        .btn-primary:hover:not(:disabled){background:#06B6D4}
+        .btn-red{background:var(--red);color:#fff}
+        .btn-red:hover:not(:disabled){background:#E11D48}
+        .btn-green{background:var(--green);color:#fff}
+        .btn-green:hover:not(:disabled){background:#059669}
+        .btn-ghost{background:transparent;color:var(--text-dim);border:1px solid var(--border)}
+        .btn-ghost:hover{border-color:var(--primary);color:var(--text)}
+        .btn-orange{background:var(--orange);color:var(--bg)}
+        .btn-sm{padding:8px 16px;font-size:.82rem}
+
+        /* ═══ Wisdom Cards ═══ */
+        .wisdom-card{background:linear-gradient(135deg,rgba(244,63,94,.06),rgba(245,158,11,.06));border:1px solid rgba(244,63,94,.2);border-radius:var(--radius);padding:20px 24px;margin-bottom:12px;position:relative}
+        .wisdom-card::before{content:'"';position:absolute;top:8px;left:16px;font-size:3rem;color:rgba(244,63,94,.2);font-family:Georgia,serif;line-height:1}
+        .wisdom-text{font-size:.95rem;padding-left:24px;font-style:italic;color:var(--text)}
+        .wisdom-source{font-size:.78rem;color:var(--text-dim);margin-top:8px;padding-left:24px;font-style:normal}
+
+        /* ═══ Rules ═══ */
+        .rule{display:flex;gap:16px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--border)}
+        .rule:last-child{border-bottom:none}
+        .rule-num{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:900;color:var(--red);min-width:32px}
+        .rule-content h4{font-size:.95rem;font-weight:700;margin-bottom:4px}
+        .rule-content p{font-size:.85rem;color:var(--text-dim)}
+        .rule-bad{background:rgba(244,63,94,.08);border-radius:6px;padding:8px 12px;margin-top:8px;font-size:.82rem;color:var(--red)}
+        .rule-good{background:rgba(16,185,129,.08);border-radius:6px;padding:8px 12px;margin-top:6px;font-size:.82rem;color:var(--green)}
+
+        /* ═══ Daily Log ═══ */
+        .log-entry{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border)}
+        .log-entry:last-child{border-bottom:none}
+        .log-time{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--primary);min-width:55px;padding-top:2px}
+        .log-text{font-size:.88rem;color:var(--text)}
+        .log-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700;margin-left:8px}
+        .tag-focus{background:rgba(16,185,129,.12);color:var(--green)}
+        .tag-break{background:rgba(59,130,246,.12);color:var(--blue)}
+        .tag-skip{background:rgba(244,63,94,.12);color:var(--red)}
+
+        /* ═══ Stats Row ═══ */
+        .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+        .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
+        .stat-num{font-size:1.8rem;font-weight:900;font-family:'JetBrains Mono',monospace}
+        .stat-num.red{color:var(--red)}
+        .stat-num.green{color:var(--green)}
+        .stat-num.orange{color:var(--orange)}
+        .stat-num.primary{color:var(--primary)}
+        .stat-label{font-size:.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+
+        /* ═══ Honest Check ═══ */
+        .check-question{background:var(--surface2);border-radius:var(--radius-sm);padding:16px;margin-bottom:10px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:12px}
+        .check-question:hover{background:rgba(34,211,238,.05)}
+        .check-icon{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.7rem;flex-shrink:0;transition:all .2s}
+        .check-question.yes .check-icon{background:var(--green);border-color:var(--green);color:#fff}
+        .check-question.no .check-icon{background:var(--red);border-color:var(--red);color:#fff}
+        .check-text{font-size:.9rem}
+        .check-result{padding:16px;border-radius:var(--radius);text-align:center;font-weight:700;font-size:.95rem;margin-top:12px;display:none}
+
+        /* ═══ Progress Bar ═══ */
+        .progress-bar{width:100%;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;margin:12px 0}
+        .progress-fill{height:100%;border-radius:3px;transition:width .5s ease}
+
+        /* ═══ Toast ═══ */
+        .toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:var(--radius-sm);font-size:.85rem;font-weight:600;color:#fff;z-index:200;transform:translateY(100px);opacity:0;transition:all .3s ease}
+        .toast.show{transform:translateY(0);opacity:1}
+        .toast-success{background:var(--green)}
+        .toast-error{background:var(--red)}
+        .toast-info{background:var(--blue)}
+        .toast-warning{background:var(--orange);color:var(--bg)}
+
+        /* ═══ Footer ═══ */
+        .footer{padding:32px 24px;text-align:center;border-top:1px solid var(--border);margin-top:40px}
+        .footer p{color:var(--text-dim);font-size:.82rem}
+        .footer a{color:var(--primary);text-decoration:none}
+
+        /* ═══ Responsive ═══ */
+        @media(max-width:768px){
+            .stats-row{grid-template-columns:repeat(2,1fr)}
+            .timer-display{font-size:3.5rem}
+            .hero h1{font-size:1.6rem}
+        }
+        @media(max-width:480px){
+            .stats-row{grid-template-columns:1fr 1fr}
+            .timer-display{font-size:2.8rem}
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav class="navbar">
+    <a href="index.html" class="nav-logo">TODO Hub</a>
+    <div class="nav-links">
+        <a href="index.html">Schedule</a>
+        <a href="vocab.html">Vocabulary</a>
+        <a href="focus.html" style="color:var(--red)">Focus</a>
+    </div>
+</nav>
+
+<div class="container">
+
+<!-- ═══ HERO ═══ -->
+<header class="hero">
+    <h1><span class="gradient-text">Focus Mode</span></h1>
+    <p>Nỗ lực thật, không tự lừa mình. Mỗi phút ngồi xuống phải tạo ra giá trị thật.</p>
+</header>
+
+<!-- ═══ STATS ═══ -->
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-num green" id="stat-sessions">0</div>
+        <div class="stat-label">Phiên hôm nay</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num primary" id="stat-minutes">0</div>
+        <div class="stat-label">Phút tập trung</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num orange" id="stat-streak">0</div>
+        <div class="stat-label">Ngày streak</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num red" id="stat-skips">0</div>
+        <div class="stat-label">Lần bỏ giữa</div>
+    </div>
+</div>
+
+<!-- ═══ POMODORO TIMER ═══ -->
+<div class="section">
+    <div class="section-title"><span class="icon">&#9201;</span> Pomodoro Timer</div>
+    <div class="card">
+        <!-- Cam kết trước khi bắt đầu -->
+        <div id="commit-section">
+            <div class="commit-box" id="commit-box">
+                <div class="commit-label">TRƯỚC KHI BẮT ĐẦU — Cam kết cụ thể bạn sẽ làm gì:</div>
+                <input type="text" class="commit-input" id="commit-input" placeholder="VD: Đọc xong Chapter 3 về Dependency Injection và code 1 ví dụ">
+                <div style="margin-top:8px;font-size:.78rem;color:var(--text-dim)">
+                    Phải viết CỤ THỂ. Không chấp nhận "học .NET" hay "ôn bài". Viết rõ: học gì, làm gì, output là gì.
+                </div>
+            </div>
+        </div>
+
+        <div class="timer-container">
+            <div class="timer-label" id="timer-label">SAN SANG</div>
+            <div class="timer-display" id="timer-display">25:00</div>
+            <div class="timer-sessions" id="session-dots">
+                <div class="session-dot current"></div>
+                <div class="session-dot"></div>
+                <div class="session-dot"></div>
+                <div class="session-dot"></div>
+            </div>
+            <div style="margin:16px 0">
+                <div class="progress-bar"><div class="progress-fill" id="timer-progress" style="width:100%;background:var(--primary)"></div></div>
+            </div>
+            <div class="timer-buttons">
+                <button class="btn btn-primary" id="btn-start">BẮT ĐẦU</button>
+                <button class="btn btn-ghost" id="btn-pause" style="display:none">TẠM DỪNG</button>
+                <button class="btn btn-red btn-sm" id="btn-skip" style="display:none">BỎ PHIÊN NÀY</button>
+                <button class="btn btn-ghost btn-sm" id="btn-reset">RESET</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ HONEST CHECK — Kiểm tra trung thực ═══ -->
+<div class="section">
+    <div class="section-title"><span class="icon">&#128269;</span> Honest Check — Bạn có đang tự lừa mình?</div>
+    <div class="card">
+        <p style="font-size:.85rem;color:var(--text-dim);margin-bottom:16px">Click vào mỗi câu. Xanh = Có, Đỏ = Không. Trả lời thật với chính mình.</p>
+        <div id="check-list">
+            <div class="check-question" data-q="0">
+                <div class="check-icon"></div>
+                <div class="check-text">Tôi có thể giải thích lại bằng lời những gì vừa học, KHÔNG cần nhìn tài liệu?</div>
+            </div>
+            <div class="check-question" data-q="1">
+                <div class="check-icon"></div>
+                <div class="check-text">Tôi đã viết code / làm bài tập thực hành, không chỉ đọc hoặc xem video?</div>
+            </div>
+            <div class="check-question" data-q="2">
+                <div class="check-icon"></div>
+                <div class="check-text">Nếu ai đó hỏi tôi về topic này ngay bây giờ, tôi trả lời được?</div>
+            </div>
+            <div class="check-question" data-q="3">
+                <div class="check-icon"></div>
+                <div class="check-text">Tôi không mở tab khác (YouTube, Facebook, TikTok) trong lúc học?</div>
+            </div>
+            <div class="check-question" data-q="4">
+                <div class="check-icon"></div>
+                <div class="check-text">Tôi có thể chỉ ra 1 điều MỚI mà trước phiên này tôi chưa biết?</div>
+            </div>
+            <div class="check-question" data-q="5">
+                <div class="check-icon"></div>
+                <div class="check-text">Thời gian tôi thật sự tập trung chiếm trên 80% phiên vừa rồi?</div>
+            </div>
+        </div>
+        <div class="check-result" id="check-result"></div>
+        <div style="text-align:center;margin-top:12px">
+            <button class="btn btn-ghost btn-sm" id="btn-reset-check">Reset check</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ 10 QUY TẮC CHỐNG NỖ LỰC ẢO ═══ -->
+<div class="section">
+    <div class="section-title"><span class="icon">&#128293;</span> 10 Quy Tắc Chống Nỗ Lực Ảo</div>
+    <div class="card" style="padding:16px 24px">
+        <div class="rule">
+            <div class="rule-num">01</div>
+            <div class="rule-content">
+                <h4>Output trước, Input sau</h4>
+                <p>Đừng đọc thêm 1 bài viết nữa. Hãy viết code trước, gặp lỗi rồi mới tìm hiểu. Não bạn chỉ thật sự học khi nó phải giải quyết vấn đề.</p>
+                <div class="rule-bad">Nỗ lực ảo: Đọc 5 bài "How to learn X" mà chưa viết dòng code nào</div>
+                <div class="rule-good">Nỗ lực thật: Mở IDE lên, tạo project mới, bắt đầu code ngay — Google khi bị stuck</div>
+            </div>
+        </div>
+        <div class="rule">
+            <div class="rule-num">02</div>
+            <div class="rule-content">
+                <h4>1 Chủ đề = 1 Phiên. Không nhảy lung tung.</h4>
+                <p>Bạn không thể học Docker, rồi nhảy sang React, rồi lại xem video về System Design trong cùng 1 buổi tối. Não cần thời gian để khắc sâu.</p>
+                <div class="rule-bad">Nỗ lực ảo: "Hôm nay mình học được Docker, React hooks, và đọc về microservices" — thực ra không nhớ gì cả</div>
+                <div class="rule-good">Nỗ lực thật: "Hôm nay mình chỉ học Docker volume mount — đã build được 1 container kết nối database"</div>
+            </div>
+        </div>
+        <div class="rule">
+            <div class="rule-num">03</div>
+            <div class="rule-content">
+                <h4>Nếu không giải thích được = Chưa hiểu</h4>
+                <p>Feynman Technique: Sau mỗi phiên học, thử giải thích bằng lời đơn giản nhất. Nếu phải dùng từ chuyên môn để "che" sự thiếu hiểu biết, bạn chưa thật sự hiểu.</p>
+                <div class="rule-bad">Nỗ lực ảo: "Dependency Injection là design pattern inject dependency vào class" — copy paste definition</div>
+                <div class="rule-good">Nỗ lực thật: "Thay vì class tự tạo database connection, mình đưa nó từ bên ngoài vào — giống như thay vì tự nấu ăn, mình đặt ship"</div>
+            </div>
+        </div>
+        <div class="rule">
+            <div class="rule-num">04</div>
+            <div class="rule-content">
+                <h4>Xem video KHÔNG phải là học</h4>
+                <p>Video cho bạn cảm giác hiểu, nhưng đó là illusion of competence. Bạn thấy người khác làm được → não nghĩ mình cũng làm được. Tắt video, tự code lại từ đầu — mới biết thật sự hiểu bao nhiêu.</p>
+                <div class="rule-bad">Nỗ lực ảo: Xem xong 3 tiếng tutorial YouTube, check "done" trong to-do list</div>
+                <div class="rule-good">Nỗ lực thật: Xem 20 phút, pause, tự làm lại KHÔNG nhìn code, debug đến khi chạy được</div>
+            </div>
+        </div>
+        <div class="rule">
+            <div class="rule-num">05</div>
+            <div class="rule-content">
+                <h4>Cài đặt tool KHÔNG phải là tiến bộ</h4>
+                <p>Setup môi trường, config theme VS Code, install extension, tạo folder structure "hoàn hảo" — tất cả đều là procrastination nguỵ trang thành productivity.</p>
+                <div class="rule-bad">Nỗ lực ảo: Dành 2 tiếng setup Docker + Kubernetes cho project chỉ có 1 file index.js</div>
+                <div class="rule-good">Nỗ lực thật: node index.js chạy trước, optimize infrastructure sau khi có user thật</div>
+            </div>
+        </div>
+        <div class="rule">
+            <div class="rule-num">06</div>
+            <div class="rule-content">
+                <h4>Khó chịu = Đang học. Thoải mái = Đang lặp lại cái cũ.</h4>
+                <p>Nếu bạn cảm thấy dễ dàng suốt cả buổi, bạn không đang học thêm gì mới. Growth nằm ở vùng uncomfortable. Nếu không bị stuck ít nhất 1 lần, bạn chưa đủ thử thách.</p>
+                <div class="rule-bad">Nỗ lực ảo: Làm lại CRUD tutorial lần thứ 3 vì "cần nắm vững"</div>
+                <div class="rule-good">Nỗ lực thật: Thử tự build feature mới KHÔNG có tutorial — authentication, real-time, caching</div>
+            </div>
+        </div>
+        <div class="rule">
+            <div class="rule-num">07</div>
+            <div class="rule-content">
+                <h4>2 phút rule: Nếu trì hoãn, chỉ cần làm 2 phút</h4>
+                <p>Rào cản lớn nhất không phải là task khó — mà là bắt đầu. Hứa với bản thân: chỉ 2 phút. Mở file lên, viết 1 dòng code. 80% bạn sẽ tiếp tục sau 2 phút đó.</p>
+                <div class="rule-bad">Nỗ lực ảo: "Tối nay mình sẽ học 3 tiếng" → quá overwhelming → mở YouTube thay vì code</div>
+                <div class="rule-good">Nỗ lực thật: "Mình chỉ cần mở VS Code và viết 1 function" → 2 phút → vào flow → 1 tiếng trôi qua lúc nào không hay</div>
+            </div>
+        </div>
+        <div class="rule">
+            <div class="rule-num">08</div>
+            <div class="rule-content">
+                <h4>Đừng học nhiều ngôn ngữ/framework cùng lúc</h4>
+                <p>Jack of all trades, master of none. Chọn 1 stack, đào sâu đến khi build được project thật. 1 người giỏi 1 thứ có giá trị hơn 1 người biết sơ 10 thứ.</p>
+                <div class="rule-bad">Nỗ lực ảo: "Mình biết React, Vue, Angular, Svelte" — nhưng chưa deploy được app nào lên production</div>
+                <div class="rule-good">Nỗ lực thật: "Mình chuyên .NET — đã build và deploy 2 API production, handle được 10k requests/s"</div>
+            </div>
+        </div>
+        <div class="rule">
+            <div class="rule-num">09</div>
+            <div class="rule-content">
+                <h4>Mệt thì nghỉ, đừng giả vờ học</h4>
+                <p>Ngồi trước màn hình 3 tiếng mà đầu không tiếp thu = 0. Nghỉ 20 phút thật sự rồi quay lại 1 tiếng tập trung = gấp 10 lần. Chất lượng quan trọng hơn số giờ.</p>
+                <div class="rule-bad">Nỗ lực ảo: "Mình ngồi code 5 tiếng" — thực tế: 4 tiếng lướt điện thoại + 1 tiếng nhìn màn hình</div>
+                <div class="rule-good">Nỗ lực thật: 2 phiên Pomodoro 25 phút tập trung tuyệt đối = 50 phút vàng, hơn 5 tiếng ngồi đồng</div>
+            </div>
+        </div>
+        <div class="rule">
+            <div class="rule-num">10</div>
+            <div class="rule-content">
+                <h4>Đo bằng OUTPUT, không đo bằng thời gian</h4>
+                <p>Đừng nói "hôm nay mình học 3 tiếng". Hãy nói "hôm nay mình đã build xong feature X" hoặc "hôm nay mình đã hiểu cách Y hoạt động và viết được Z". Thời gian ngồi không nói lên điều gì.</p>
+                <div class="rule-bad">Nỗ lực ảo: KPI = "học mỗi ngày 2 tiếng"</div>
+                <div class="rule-good">Nỗ lực thật: KPI = "mỗi tuần hoàn thành 1 mini-project hoặc 1 feature mới"</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ LỜI NHẮC TỪ NGƯỜI ĐI TRƯỚC ═══ -->
+<div class="section">
+    <div class="section-title"><span class="icon">&#128172;</span> Lời nhắc từ người đi trước</div>
+    <div id="wisdom-list">
+        <div class="wisdom-card">
+            <div class="wisdom-text">Tôi từng dành 6 tháng "học" programming mà không viết nổi 1 app hoàn chỉnh. Vì tôi cứ nhảy từ tutorial này sang tutorial khác. Ngày tôi thật sự bắt đầu học là ngày tôi đóng hết YouTube và mở terminal lên.</div>
+            <div class="wisdom-source">— Kinh nghiệm thực tế: Tutorial Hell</div>
+        </div>
+        <div class="wisdom-card">
+            <div class="wisdom-text">Không ai trở nên giỏi bằng cách đọc về người giỏi. Bạn giỏi bằng cách làm — làm dở, làm sai, sửa, làm lại. Mỗi cái bug bạn fix dạy bạn nhiều hơn 10 bài blog.</div>
+            <div class="wisdom-source">— Nguyên tắc: Learning by Doing</div>
+        </div>
+        <div class="wisdom-card">
+            <div class="wisdom-text">Junior ngồi 8 tiếng nhưng productive 2 tiếng. Senior ngồi 4 tiếng nhưng productive 3.5 tiếng. Sự khác biệt không phải talent — mà là kỷ luật với thời gian và sự trung thực với bản thân.</div>
+            <div class="wisdom-source">— Quan sát thực tế: Junior vs Senior</div>
+        </div>
+        <div class="wisdom-card">
+            <div class="wisdom-text">Bạn không cần motivation để bắt đầu. Bạn cần bắt đầu để có motivation. Action tạo ra motivation, không phải ngược lại. Đừng chờ "cảm hứng" — nó sẽ không bao giờ đến nếu bạn cứ nằm trên giường scroll điện thoại.</div>
+            <div class="wisdom-source">— Tâm lý học: Action precedes motivation</div>
+        </div>
+        <div class="wisdom-card">
+            <div class="wisdom-text">1 năm sau, bạn sẽ ước mình đã bắt đầu từ hôm nay. Mỗi ngày bỏ qua là 1 ngày bạn tặng cho phiên bản tương lai của mình thêm áp lực. Đừng phản bội bản thân tương lai.</div>
+            <div class="wisdom-source">— Góc nhìn dài hạn</div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ DAILY LOG ═══ -->
+<div class="section">
+    <div class="section-title"><span class="icon">&#128221;</span> Nhật ký hôm nay</div>
+    <div class="card">
+        <div id="daily-log">
+            <div style="text-align:center;padding:20px;color:var(--text-dim)">
+                <p>Chưa có phiên nào hôm nay.</p>
+                <p style="font-size:.82rem;margin-top:4px">Bắt đầu phiên Pomodoro đầu tiên để tạo nhật ký.</p>
+            </div>
+        </div>
+        <div style="text-align:center;margin-top:12px">
+            <button class="btn btn-ghost btn-sm" id="btn-clear-log">Xoá nhật ký hôm nay</button>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer">
+    <p>Focus Mode — <a href="index.html">Schedule</a> · <a href="vocab.html">Vocabulary</a></p>
+</footer>
+
+<script>
+(function(){
+    'use strict';
+
+    // ═══ UTILS ═══
+    const $ = s => document.querySelector(s);
+    const $$ = s => document.querySelectorAll(s);
+    const toastEl = $('#toast');
+
+    function toast(msg, type = 'success') {
+        toastEl.textContent = msg;
+        toastEl.className = 'toast toast-' + type + ' show';
+        setTimeout(() => toastEl.classList.remove('show'), 3000);
+    }
+
+    // ═══ STATE ═══
+    const WORK_MIN = 25;
+    const SHORT_BREAK = 5;
+    const LONG_BREAK = 15;
+    const SESSIONS_BEFORE_LONG = 4;
+
+    let timerInterval = null;
+    let secondsLeft = WORK_MIN * 60;
+    let totalSeconds = WORK_MIN * 60;
+    let isRunning = false;
+    let isPaused = false;
+    let isBreak = false;
+    let currentSession = 0; // 0-based
+    let commitment = '';
+
+    // ═══ PERSISTENT DATA ═══
+    function loadData() {
+        try {
+            return JSON.parse(localStorage.getItem('focus-data') || '{}');
+        } catch { return {}; }
+    }
+    function saveData(data) {
+        localStorage.setItem('focus-data', JSON.stringify(data));
+    }
+    function getTodayKey() {
+        return new Date().toISOString().slice(0, 10);
+    }
+    function getTodayData() {
+        const data = loadData();
+        const key = getTodayKey();
+        if (!data[key]) data[key] = { sessions: 0, minutes: 0, skips: 0, log: [] };
+        return { data, today: data[key], key };
+    }
+
+    // Streak calculation
+    function calcStreak() {
+        const data = loadData();
+        let streak = 0;
+        const d = new Date();
+        // Check today first
+        const todayKey = getTodayKey();
+        if (data[todayKey] && data[todayKey].sessions > 0) streak = 1;
+        // Go backwards
+        for (let i = 1; i < 365; i++) {
+            d.setDate(d.getDate() - 1);
+            const k = d.toISOString().slice(0, 10);
+            if (data[k] && data[k].sessions > 0) {
+                if (i === 1 && streak === 0) streak = 1; // yesterday counts if today hasn't started
+                streak++;
+            } else {
+                break;
+            }
+        }
+        return streak;
+    }
+
+    // ═══ STATS ═══
+    function updateStats() {
+        const { today } = getTodayData();
+        $('#stat-sessions').textContent = today.sessions;
+        $('#stat-minutes').textContent = today.minutes;
+        $('#stat-skips').textContent = today.skips;
+        $('#stat-streak').textContent = calcStreak();
+    }
+
+    // ═══ TIMER ═══
+    function formatTime(s) {
+        const m = Math.floor(s / 60);
+        const sec = s % 60;
+        return String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+    }
+
+    function updateTimerUI() {
+        const display = $('#timer-display');
+        display.textContent = formatTime(secondsLeft);
+        display.className = 'timer-display' + (isBreak ? ' break-mode' : '') + (secondsLeft <= 60 && !isBreak ? ' warning' : '');
+
+        const pct = totalSeconds > 0 ? (secondsLeft / totalSeconds) * 100 : 0;
+        const bar = $('#timer-progress');
+        bar.style.width = pct + '%';
+        bar.style.background = isBreak ? 'var(--green)' : (secondsLeft <= 60 ? 'var(--orange)' : 'var(--primary)');
+
+        $('#timer-label').textContent = isBreak ? (secondsLeft > SHORT_BREAK * 60 ? 'NGHI DAI' : 'NGHI NGAN') : (isRunning ? 'DANG TAP TRUNG...' : (isPaused ? 'TAM DUNG' : 'SAN SANG'));
+
+        // Session dots
+        const dots = $$('#session-dots .session-dot');
+        dots.forEach((dot, i) => {
+            dot.className = 'session-dot' + (i < currentSession ? ' done' : '') + (i === currentSession && isRunning ? ' current' : '');
+        });
+
+        // Update page title
+        document.title = (isRunning || isPaused ? formatTime(secondsLeft) + ' — ' : '') + 'Focus Mode';
+    }
+
+    function startTimer() {
+        const commitVal = $('#commit-input').value.trim();
+        if (!commitVal && !isBreak && !isPaused) {
+            toast('Viết cam kết cụ thể trước khi bắt đầu!', 'warning');
+            $('#commit-input').focus();
+            return;
+        }
+        if (!isPaused && !isBreak) commitment = commitVal;
+
+        isRunning = true;
+        isPaused = false;
+
+        $('#btn-start').style.display = 'none';
+        $('#btn-pause').style.display = '';
+        $('#btn-skip').style.display = '';
+        $('#commit-input').disabled = true;
+        $('#commit-box').classList.add('active');
+
+        timerInterval = setInterval(() => {
+            secondsLeft--;
+            updateTimerUI();
+            if (secondsLeft <= 0) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                onTimerEnd();
+            }
+        }, 1000);
+
+        if (!isBreak && !isPaused) {
+            addLog('Bắt đầu: ' + commitment, 'focus');
+        }
+        updateTimerUI();
+    }
+
+    function pauseTimer() {
+        if (!isRunning) return;
+        clearInterval(timerInterval);
+        timerInterval = null;
+        isRunning = false;
+        isPaused = true;
+
+        $('#btn-start').style.display = '';
+        $('#btn-start').textContent = 'TIEP TUC';
+        $('#btn-pause').style.display = 'none';
+        updateTimerUI();
+    }
+
+    function skipSession() {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        isRunning = false;
+        isPaused = false;
+
+        if (!isBreak) {
+            const { data, today, key } = getTodayData();
+            today.skips++;
+            data[key] = today;
+            saveData(data);
+            addLog('Bo giua phien: ' + commitment, 'skip');
+            toast('Da bo phien. Hay trung thuc voi ban than.', 'error');
+        }
+
+        resetTimerUI();
+        updateStats();
+    }
+
+    function resetTimer() {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        isRunning = false;
+        isPaused = false;
+        isBreak = false;
+        currentSession = 0;
+        secondsLeft = WORK_MIN * 60;
+        totalSeconds = WORK_MIN * 60;
+
+        resetTimerUI();
+    }
+
+    function resetTimerUI() {
+        if (!isBreak) {
+            secondsLeft = WORK_MIN * 60;
+            totalSeconds = WORK_MIN * 60;
+        }
+        isBreak = false;
+        $('#btn-start').style.display = '';
+        $('#btn-start').textContent = 'BAT DAU';
+        $('#btn-pause').style.display = 'none';
+        $('#btn-skip').style.display = 'none';
+        $('#commit-input').disabled = false;
+        $('#commit-box').classList.remove('active');
+        updateTimerUI();
+    }
+
+    function onTimerEnd() {
+        isRunning = false;
+
+        if (isBreak) {
+            // Break ended → start new work session
+            isBreak = false;
+            secondsLeft = WORK_MIN * 60;
+            totalSeconds = WORK_MIN * 60;
+            resetTimerUI();
+            toast('Het gio nghi! San sang cho phien tiep theo.', 'info');
+            addLog('Het nghi — san sang phien moi', 'break');
+            // Notify
+            notifyUser('Het gio nghi!', 'San sang tap trung lai.');
+        } else {
+            // Work session ended
+            currentSession++;
+            const { data, today, key } = getTodayData();
+            today.sessions++;
+            today.minutes += WORK_MIN;
+            data[key] = today;
+            saveData(data);
+
+            addLog('Hoan thanh phien ' + currentSession + '/4: ' + commitment, 'focus');
+            toast('Tuyet voi! Hoan thanh phien ' + currentSession + '!', 'success');
+            notifyUser('Hoan thanh!', 'Phien ' + currentSession + ' da xong. Nghi ngoi di!');
+
+            // Start break
+            if (currentSession >= SESSIONS_BEFORE_LONG) {
+                // Long break after 4 sessions
+                isBreak = true;
+                secondsLeft = LONG_BREAK * 60;
+                totalSeconds = LONG_BREAK * 60;
+                currentSession = 0;
+                addLog('Nghi dai ' + LONG_BREAK + ' phut — da hoan thanh 4 phien!', 'break');
+            } else {
+                isBreak = true;
+                secondsLeft = SHORT_BREAK * 60;
+                totalSeconds = SHORT_BREAK * 60;
+            }
+
+            // Auto-start break
+            resetTimerUI();
+            isBreak = true;
+            updateTimerUI();
+            $('#btn-start').textContent = 'BAT DAU NGHI';
+            updateStats();
+        }
+    }
+
+    function notifyUser(title, body) {
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification(title, { body, icon: '🎯' });
+        }
+    }
+
+    // Request notification permission
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
+
+    // ═══ DAILY LOG ═══
+    function addLog(text, tag) {
+        const { data, today, key } = getTodayData();
+        const time = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        today.log.push({ time, text, tag });
+        data[key] = today;
+        saveData(data);
+        renderLog();
+    }
+
+    function renderLog() {
+        const { today } = getTodayData();
+        const el = $('#daily-log');
+        if (!today.log || today.log.length === 0) {
+            el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-dim)"><p>Chua co phien nao hom nay.</p><p style="font-size:.82rem;margin-top:4px">Bat dau phien Pomodoro dau tien de tao nhat ky.</p></div>';
+            return;
+        }
+        const tagMap = { focus: 'tag-focus', break: 'tag-break', skip: 'tag-skip' };
+        const tagLabel = { focus: 'FOCUS', break: 'BREAK', skip: 'SKIP' };
+        el.innerHTML = today.log.map(l => `
+            <div class="log-entry">
+                <div class="log-time">${l.time}</div>
+                <div class="log-text">${l.text} <span class="log-tag ${tagMap[l.tag] || ''}">${tagLabel[l.tag] || ''}</span></div>
+            </div>
+        `).join('');
+    }
+
+    function clearLog() {
+        const { data, key } = getTodayData();
+        if (data[key]) {
+            data[key].log = [];
+            saveData(data);
+        }
+        renderLog();
+        toast('Da xoa nhat ky hom nay.', 'info');
+    }
+
+    // ═══ HONEST CHECK ═══
+    const checkStates = [null, null, null, null, null, null]; // null, 'yes', 'no'
+
+    function handleCheck(el) {
+        const idx = parseInt(el.dataset.q);
+        if (checkStates[idx] === null) {
+            checkStates[idx] = 'yes';
+            el.className = 'check-question yes';
+            el.querySelector('.check-icon').textContent = '✓';
+        } else if (checkStates[idx] === 'yes') {
+            checkStates[idx] = 'no';
+            el.className = 'check-question no';
+            el.querySelector('.check-icon').textContent = '✗';
+        } else {
+            checkStates[idx] = null;
+            el.className = 'check-question';
+            el.querySelector('.check-icon').textContent = '';
+        }
+        evaluateCheck();
+    }
+
+    function evaluateCheck() {
+        const answered = checkStates.filter(s => s !== null).length;
+        if (answered < 6) { $('#check-result').style.display = 'none'; return; }
+
+        const yesCount = checkStates.filter(s => s === 'yes').length;
+        const result = $('#check-result');
+        result.style.display = 'block';
+
+        if (yesCount >= 5) {
+            result.style.background = 'rgba(16,185,129,.1)';
+            result.style.color = 'var(--green)';
+            result.textContent = yesCount + '/6 — Phien hoc hieu qua! Ban dang no luc that su. Tiep tuc phat huy!';
+        } else if (yesCount >= 3) {
+            result.style.background = 'rgba(245,158,11,.1)';
+            result.style.color = 'var(--orange)';
+            result.textContent = yesCount + '/6 — Tam on nhung can cai thien. Xem lai nhung cau tra loi "Khong" — do chinh la diem can fix.';
+        } else {
+            result.style.background = 'rgba(244,63,94,.1)';
+            result.style.color = 'var(--red)';
+            result.textContent = yesCount + '/6 — Trung thuc: phien vua roi la no luc ao. Dung tu lua minh. Dung len, uong nuoc, roi quay lai voi 1 cam ket CU THE.';
+        }
+    }
+
+    function resetCheck() {
+        checkStates.fill(null);
+        $$('.check-question').forEach(el => {
+            el.className = 'check-question';
+            el.querySelector('.check-icon').textContent = '';
+        });
+        $('#check-result').style.display = 'none';
+    }
+
+    // ═══ EVENTS ═══
+    $('#btn-start').addEventListener('click', startTimer);
+    $('#btn-pause').addEventListener('click', pauseTimer);
+    $('#btn-skip').addEventListener('click', skipSession);
+    $('#btn-reset').addEventListener('click', resetTimer);
+    $('#btn-clear-log').addEventListener('click', clearLog);
+    $('#btn-reset-check').addEventListener('click', resetCheck);
+
+    $$('.check-question').forEach(el => {
+        el.addEventListener('click', () => handleCheck(el));
+    });
+
+    // Enter in commit input → start
+    $('#commit-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter') startTimer();
+    });
+
+    // ═══ INIT ═══
+    updateStats();
+    updateTimerUI();
+    renderLog();
+})();
+</script>
+</body>
+</html>

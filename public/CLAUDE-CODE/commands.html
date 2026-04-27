@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Claude Code Commands — Slash Commands, CLI Flags, Shortcuts</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">Claude<span class="accent">Code</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="basics.html">Cơ Bản</a>
+      <a href="commands.html" class="active">Commands</a>
+      <a href="customize.html">Customize</a>
+      <a href="integrations.html">Integrations</a>
+      <a href="tips.html">Tips & FAQ</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">LEVEL 2 · JUNIOR</div>
+  <h1>Claude Code <span class="gradient">Commands</span></h1>
+  <p class="hero-desc">20+ slash commands built-in, CLI flags, keyboard shortcuts, Plan Mode. Thành thạo 1 tuần để tăng tốc workflow 3-5×.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">1. Slash Commands Built-in</h2>
+    <p class="section-sub">Gõ <code>/</code> trong input, danh sách hiện ra. Chọn bằng phím mũi tên hoặc gõ tên.</p>
+
+    <table class="cmp">
+      <tr><th>Command</th><th>Công dụng</th><th>Khi nào dùng</th></tr>
+      <tr><td><code>/help</code></td><td>Liệt kê tất cả command</td><td>Quên command nào</td></tr>
+      <tr><td><code>/clear</code></td><td>Xoá conversation, bắt đầu session mới</td><td>Chuyển chủ đề, tránh context cũ nhiễu</td></tr>
+      <tr><td><code>/compact</code></td><td>Nén conversation dài thành summary ngắn, giữ context chính</td><td>Session dài, context gần đầy</td></tr>
+      <tr><td><code>/model</code></td><td>Đổi model (Opus / Sonnet / Haiku)</td><td>Đổi theo độ khó task</td></tr>
+      <tr><td><code>/init</code></td><td>Phân tích repo, sinh CLAUDE.md đầu tiên</td><td>Lần đầu setup project</td></tr>
+      <tr><td><code>/review</code></td><td>Review PR hiện tại</td><td>Trước khi merge</td></tr>
+      <tr><td><code>/security-review</code></td><td>Scan security issues trong diff</td><td>Pre-release audit</td></tr>
+      <tr><td><code>/config</code></td><td>Xem/sửa settings (theme, model default, etc.)</td><td>Tuning trải nghiệm</td></tr>
+      <tr><td><code>/permissions</code></td><td>Đổi permission mode mid-session</td><td>Task thay đổi tính chất</td></tr>
+      <tr><td><code>/resume</code></td><td>Resume session cũ (sau khi <code>/clear</code> hoặc đóng terminal)</td><td>Tiếp task dở</td></tr>
+      <tr><td><code>/cost</code></td><td>Xem token + chi phí session hiện tại</td><td>Track API usage</td></tr>
+      <tr><td><code>/memory</code></td><td>Xem/sửa persistent memory</td><td>Ghi fact lâu dài</td></tr>
+      <tr><td><code>/ide</code></td><td>Connect với IDE đang mở</td><td>Sync với VS Code/JetBrains</td></tr>
+      <tr><td><code>/logout</code></td><td>Logout khỏi tài khoản Claude</td><td>Đổi account</td></tr>
+      <tr><td><code>/status</code></td><td>Info session: model, cwd, git branch</td><td>Debug</td></tr>
+      <tr><td><code>/doctor</code></td><td>Check setup có lỗi gì không</td><td>Khi gặp lỗi lạ</td></tr>
+      <tr><td><code>/fast</code></td><td>Toggle Fast Mode (Opus 4.6 faster)</td><td>Task không cần suy nghĩ sâu</td></tr>
+      <tr><td><code>/bug</code></td><td>Submit bug report cho Anthropic</td><td>Khi Claude lỗi</td></tr>
+      <tr><td><code>/plan</code></td><td>Vào Plan Mode (chỉ plan, không edit)</td><td>Task lớn, cần review plan</td></tr>
+      <tr><td><code>/exit</code></td><td>Thoát</td><td></td></tr>
+    </table>
+
+    <div class="info-box">
+      <strong>Tìm hết command:</strong> <code>/help</code> luôn hiện list đầy đủ và up-to-date theo version Claude Code bạn cài.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">2. Các command dùng nhiều nhất — đi sâu</h2>
+
+    <h3 style="color: var(--primary); margin-top: 1rem"><code>/clear</code> vs <code>/compact</code> — khi nào dùng?</h3>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4><code>/clear</code></h4>
+        <p>Xoá sạch conversation, như bắt đầu session mới. Giữ <code>CLAUDE.md</code> nhưng mất toàn bộ thảo luận trước.</p>
+        <p><strong>Dùng khi:</strong> chuyển hẳn sang task mới, không liên quan.</p>
+      </div>
+      <div class="card">
+        <h4><code>/compact</code></h4>
+        <p>Claude tóm tắt conversation dài thành 1 summary ngắn, giữ các fact chính để tiếp tục. Không mất context.</p>
+        <p><strong>Dùng khi:</strong> context window gần đầy, cần tiếp task đang dở.</p>
+      </div>
+    </div>
+
+    <div class="tip"><strong>Dấu hiệu cần compact:</strong> Claude trả lời chậm hẳn, hoặc bắt đầu "quên" những gì đã nói đầu session. Gõ <code>/compact</code> ngay.</div>
+
+    <h3 style="color: var(--primary); margin-top: 1.5rem"><code>/model</code> — Chọn đúng model cho đúng task</h3>
+    <table class="cmp">
+      <tr><th>Model</th><th>Khi dùng</th><th>Tốc độ</th><th>Chi phí / 1M token</th></tr>
+      <tr><td><strong>Opus 4.7</strong></td><td>Task phức tạp, reasoning nặng, refactor lớn, design</td><td>Chậm</td><td>~$15-75</td></tr>
+      <tr><td><strong>Sonnet 4.6</strong></td><td>Default — cân bằng tốt cho 90% task</td><td>Vừa</td><td>~$3-15</td></tr>
+      <tr><td><strong>Haiku 4.5</strong></td><td>Task đơn giản, format, rename, simple edits</td><td>Nhanh</td><td>~$1-5</td></tr>
+    </table>
+    <p style="color: var(--muted); margin-top:.5rem"><strong>Chiến lược:</strong> Mặc định Sonnet. Gặp task khó (multi-file refactor, architecture) → <code>/model opus</code>. Task vặt → <code>/model haiku</code>.</p>
+
+    <h3 style="color: var(--primary); margin-top: 1.5rem"><code>/init</code> — Sinh CLAUDE.md tự động</h3>
+    <div class="terminal">
+<span class="user">You:</span> /init
+
+<span class="asst">Claude:</span> I'll analyze the repository structure and create CLAUDE.md.
+
+<span class="comment">● Glob(**/*.json)</span>
+<span class="comment">● Read(package.json)</span>
+<span class="comment">● Read(README.md)</span>
+<span class="comment">● Glob(src/**/*.ts)</span>
+<span class="comment">● Bash(git log --oneline -20)</span>
+
+<span class="comment">● Write(CLAUDE.md)</span>
+  ⎿  Wrote 87 lines
+
+<span class="ret">✓ Created CLAUDE.md.</span> Review it and customize for your workflow.
+    </div>
+
+    <h3 style="color: var(--primary); margin-top: 1.5rem"><code>/review</code> — Review PR như senior dev</h3>
+    <pre class="code"><span class="c"># Trong branch đang có PR</span>
+/review
+
+<span class="c"># Claude sẽ:</span>
+<span class="c"># 1. git diff với base branch</span>
+<span class="c"># 2. Đọc từng file thay đổi</span>
+<span class="c"># 3. Check: logic, edge case, test coverage, security, convention</span>
+<span class="c"># 4. Đưa feedback từng file với severity</span></pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">3. Plan Mode — "Hãy nghĩ trước khi hành động"</h2>
+    <p class="section-sub">Chế độ đặc biệt: Claude chỉ <strong>plan</strong>, không edit file / chạy lệnh. Bạn review plan, approve mới thực thi.</p>
+
+    <pre class="code"><span class="c"># Vào plan mode — 2 cách</span>
+
+<span class="c"># 1. Gõ lệnh</span>
+/plan
+
+<span class="c"># 2. Hoặc phím tắt khi đang gõ prompt</span>
+Shift+Tab <span class="c"># cycle đến Plan Mode</span></pre>
+
+    <div class="terminal">
+<span class="user">You:</span> Implement OAuth Google login
+
+<span class="asst">Claude [Plan Mode]:</span> Let me plan this.
+
+<span class="comment">● Read(src/auth/*.ts)</span>
+<span class="comment">● Read(package.json)</span>
+
+<span class="asst">Plan:</span>
+ 1. Install <span class="ret">next-auth</span> package
+ 2. Create <span class="ret">src/lib/auth.ts</span> với Google provider
+ 3. Add <span class="ret">GOOGLE_CLIENT_ID/SECRET</span> to <span class="ret">.env.example</span>
+ 4. Wrap app in <span class="ret">SessionProvider</span>
+ 5. Replace manual auth in src/pages/login.tsx
+ 6. Update middleware để bảo vệ routes
+ 7. Add test cho login flow
+
+<span class="comment">[Plan Mode - no changes made yet. Approve? Y/n/edit]</span>
+
+<span class="user">You:</span> <span class="cmd">edit</span>
+Skip step 6 — middleware đã có sẵn. Giữ còn lại.
+
+<span class="asst">Claude:</span> Got it. Executing steps 1-5, 7.
+    </div>
+
+    <div class="info-box">
+      <strong>Khi nào dùng Plan Mode?</strong>
+      <ul style="padding-left:1.3rem; margin-top:.3rem">
+        <li>Task lớn đụng nhiều file (&gt;5)</li>
+        <li>Refactor architecture</li>
+        <li>Bạn chưa rõ Claude sẽ làm gì</li>
+        <li>Dùng permission mode YOLO cho safe</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">4. CLI Flags — Headless &amp; automation</h2>
+    <p class="section-sub">Chạy Claude từ script, CI pipeline — không cần session tương tác.</p>
+
+    <pre class="code"><span class="c"># Chạy 1 prompt, xong thì exit</span>
+claude --print <span class="s">"Summarize this codebase in 3 bullet points"</span>
+
+<span class="c"># Output JSON (machine readable)</span>
+claude --print --output-format json <span class="s">"List all TODOs"</span>
+
+<span class="c"># Append system prompt</span>
+claude --append-system-prompt <span class="s">"Always use TypeScript"</span>
+
+<span class="c"># Chọn model</span>
+claude --model opus <span class="s">"Refactor this module"</span>
+
+<span class="c"># Non-interactive — auto accept mọi thao tác (DANGEROUS, dùng cho CI)</span>
+claude --dangerously-skip-permissions --print <span class="s">"Fix all lint errors"</span>
+
+<span class="c"># Chạy trong thư mục khác</span>
+claude --cwd /path/to/other/project
+
+<span class="c"># Verbose logs để debug</span>
+claude --debug</pre>
+
+    <h3 style="color: var(--primary); margin-top: 1rem">Ví dụ thực tế — lint fixer CI step</h3>
+    <pre class="code"><span class="c"># .github/workflows/ci.yml</span>
+- <span class="k">name</span>: Auto-fix lint with Claude
+  <span class="k">run</span>: |
+    npm install -g @anthropic-ai/claude-code
+    claude --print --dangerously-skip-permissions \
+      <span class="s">"Run npm run lint. Fix all errors. Commit with message 'chore: lint fixes'."</span>
+  <span class="k">env</span>:
+    ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}</pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">5. Keyboard Shortcuts</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Trong input</h3>
+        <table class="cmp">
+          <tr><th>Phím</th><th>Công dụng</th></tr>
+          <tr><td><kbd>Enter</kbd></td><td>Gửi prompt</td></tr>
+          <tr><td><kbd>Shift</kbd>+<kbd>Enter</kbd></td><td>Xuống dòng mới (multi-line)</td></tr>
+          <tr><td><kbd>↑</kbd> / <kbd>↓</kbd></td><td>History prompt đã gõ</td></tr>
+          <tr><td><kbd>Tab</kbd></td><td>Auto-complete file path</td></tr>
+          <tr><td><kbd>Shift</kbd>+<kbd>Tab</kbd></td><td>Cycle permission mode</td></tr>
+          <tr><td><kbd>Ctrl</kbd>+<kbd>C</kbd></td><td>Huỷ lệnh đang gõ</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>Khi Claude đang chạy</h3>
+        <table class="cmp">
+          <tr><th>Phím</th><th>Công dụng</th></tr>
+          <tr><td><kbd>Esc</kbd></td><td><strong>Interrupt</strong> — dừng Claude</td></tr>
+          <tr><td><kbd>Esc</kbd> <kbd>Esc</kbd></td><td>Interrupt + rewind 1 turn</td></tr>
+          <tr><td><kbd>Y</kbd></td><td>Accept prompt yes/no</td></tr>
+          <tr><td><kbd>N</kbd></td><td>Reject</td></tr>
+          <tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd></td><td>Clear screen (giữ context)</td></tr>
+          <tr><td><kbd>Ctrl</kbd>+<kbd>D</kbd></td><td>Exit session</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Pro shortcut:</strong> <kbd>Esc</kbd> <kbd>Esc</kbd> cực kỳ hữu ích. Claude đi nhầm hướng → nhấn 2 lần Esc, Claude rewind về bước trước cuối cùng, sửa prompt rồi gõ lại.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">6. Reference file trong prompt</h2>
+    <p class="section-sub">Ký hiệu <code>@</code> + tên file để Claude tự động đọc file đó vào context.</p>
+
+    <pre class="code"><span class="c"># Ví dụ</span>
+Compare @src/old-impl.ts with @src/new-impl.ts
+and explain why new one is faster.
+
+<span class="c"># Reference folder</span>
+Scan @src/components/ and list all files that use
+deprecated 'useEffect' with empty deps.
+
+<span class="c"># Reference với glob (tab-complete giúp)</span>
+Fix TypeScript errors in @src/pages/**/*.tsx</pre>
+
+    <p style="color: var(--muted); margin-top:.75rem">Khi gõ <code>@</code>, Claude Code tự động gợi ý file có sẵn trong repo. <kbd>Tab</kbd> để chọn.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">7. Paste screenshot / image</h2>
+    <p class="section-sub">Claude hiểu ảnh — paste screenshot UI lỗi, Figma mockup, diagram vào prompt.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>Windows / Linux</h4>
+        <p>Chụp screenshot → <kbd>Ctrl</kbd>+<kbd>V</kbd> trong terminal Claude. Terminal hỗ trợ paste image (Windows Terminal, WezTerm, iTerm2, …).</p>
+      </div>
+      <div class="card">
+        <h4>Hoặc path file</h4>
+        <pre class="code">Đây là mockup cần implement:
+@./design/mockup.png
+
+Viết component React match design này.</pre>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <strong>Use case phổ biến:</strong> "Đây là screenshot bug, debug giúp", "Implement UI theo mockup này", "Đọc diagram kiến trúc và giải thích".
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">8. Workflow mẫu — Task git chuẩn</h2>
+    <div class="terminal">
+<span class="user">You:</span> Create a new branch feature/add-dark-mode, implement dark mode
+        toggle, commit with conventional message, and push.
+
+<span class="asst">Claude:</span> I'll plan this.
+
+<span class="comment">Plan:</span>
+ 1. git checkout -b feature/add-dark-mode
+ 2. Read current Theme implementation
+ 3. Add DarkModeToggle component
+ 4. Wire to localStorage + document.body class
+ 5. Update Tailwind config for dark: variants
+ 6. Run tests to verify nothing broken
+ 7. git add + commit + push
+
+<span class="comment">● Bash(git checkout -b feature/add-dark-mode)</span>
+<span class="comment">● Read(src/hooks/useTheme.ts)</span>
+<span class="comment">● Write(src/components/DarkModeToggle.tsx)</span>
+<span class="comment">● Edit(src/App.tsx)</span>
+<span class="comment">● Edit(tailwind.config.js)</span>
+<span class="comment">● Bash(npm test)</span>
+  ⎿  24 passed
+<span class="comment">● Bash(git add -A && git commit -m "feat: add dark mode toggle with localStorage persistence")</span>
+<span class="comment">● Bash(git push -u origin feature/add-dark-mode)</span>
+
+<span class="ret">✓ Done.</span> Branch pushed. Create PR:
+https://github.com/you/repo/compare/feature/add-dark-mode
+    </div>
+
+    <p style="color: var(--muted); margin-top:.75rem"><strong>1 prompt → 1 feature hoàn chỉnh.</strong> Đây là giá trị cốt lõi của Claude Code.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">💡 Bài tập</h2>
+    <ol class="steps">
+      <li><strong>Thuộc 10 slash command</strong> — gõ <code>/help</code>, đọc, thử từng cái.</li>
+      <li><strong>Thử đổi model giữa session</strong> — <code>/model haiku</code> cho task đơn giản, <code>/model opus</code> cho task khó.</li>
+      <li><strong>Test Plan Mode</strong> — <kbd>Shift</kbd>+<kbd>Tab</kbd> đến Plan Mode, đưa 1 task lớn, xem plan rồi approve/edit.</li>
+      <li><strong>Reference file với <code>@</code></strong> — <code>Compare @file-a.ts and @file-b.ts</code>.</li>
+      <li><strong>Headless mode</strong> — chạy <code>claude --print "list 3 bugs in this repo"</code> từ terminal.</li>
+      <li><strong>Git workflow</strong> — cho Claude làm cả flow: branch → code → commit → push.</li>
+    </ol>
+
+    <div class="tip" style="margin-top:1rem">
+      <strong>Sẵn sàng L3?</strong> Sang <a href="customize.html" style="color:var(--primary)">Customize</a> — học viết slash commands riêng, hooks, skills, subagents.
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Claude Code Mastery · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

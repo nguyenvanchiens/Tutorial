@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jenkins — CI/CD Self-hosted</title>
+    <link rel="stylesheet" href="build.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html">Build<span class="accent">&Deploy</span></a></div>
+            <div class="nav-links">
+                <a href="index.html">🗺️ Tổng quan</a>
+                <a href="git.html">📦 Git</a>
+                <a href="cicd.html">⚙️ CI/CD</a>
+                <a href="jenkins.html" class="active">🔴 Jenkins</a>
+                <a href="docker.html">🐳 Docker</a>
+                <a href="hosting.html">☁️ Hosting</a>
+                <a href="cloud.html">⛅ Cloud</a>
+                <a href="domain.html">🌐 Domain</a>
+                <a href="ssl.html">🔒 SSL</a>
+                <a href="monitoring.html">📊 Monitoring</a>
+                <a href="workflow.html">🔄 Workflow</a>
+            </div>
+            <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <header class="build-hero">
+        <div class="hero-content">
+            <div class="hero-badge">CHƯƠNG 3.5 · JENKINS DEEP DIVE</div>
+            <h1><span class="gradient-text">Jenkins</span> A → Z</h1>
+            <p class="hero-desc">CI/CD server open-source phổ biến nhất. Self-hosted, tùy biến 100%, 1800+ plugins. Chuẩn enterprise.</p>
+        </div>
+    </header>
+
+    <section class="section section-dark" id="jenkins">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🔴</div>
+                <h2>Jenkins — Hướng Dẫn Chi Tiết Từ A đến Z</h2>
+                <p>Tất cả về Jenkins: cài đặt, pipeline, agent, shared library, JCasC.</p>
+            </div>
+
+            <!-- JENKINS DEEP DIVE -->
+            <div class="concept-card jenkins-highlight">
+                <h3>🔴 Jenkins — Hướng Dẫn Chi Tiết Từ Đầu Đến Cuối</h3>
+                <p>Jenkins = CI/CD server open-source phổ biến nhất thế giới. Self-hosted, tùy biến 100%, 1800+ plugins. Dùng nhiều trong enterprise và dự án cần kiểm soát hoàn toàn pipeline.</p>
+
+                <!-- Jenkins là gì -->
+                <div class="jenkins-section">
+                    <h4>📖 Jenkins Là Gì & Khi Nào Nên Dùng?</h4>
+                    <div class="compare-grid">
+                        <div class="compare-card">
+                            <h4>✅ Chọn Jenkins khi:</h4>
+                            <div class="compare-list">
+                                <div class="compare-item"><strong>Self-hosted:</strong> Cần kiểm soát hoàn toàn server CI/CD, chạy on-premise</div>
+                                <div class="compare-item"><strong>Enterprise:</strong> Dự án lớn, security policy nghiêm ngặt, air-gapped network</div>
+                                <div class="compare-item"><strong>Complex pipelines:</strong> Pipeline phức tạp, nhiều stage, parallel builds</div>
+                                <div class="compare-item"><strong>Multi-platform:</strong> Build cho Windows + Linux + macOS cùng lúc</div>
+                                <div class="compare-item"><strong>Miễn phí:</strong> Không giới hạn build minutes (chỉ tốn server)</div>
+                            </div>
+                        </div>
+                        <div class="compare-card">
+                            <h4>❌ Không cần Jenkins khi:</h4>
+                            <div class="compare-list">
+                                <div class="compare-item"><strong>Dự án nhỏ:</strong> GitHub Actions miễn phí, dễ hơn 10x</div>
+                                <div class="compare-item"><strong>Không muốn quản lý server:</strong> Jenkins cần bảo trì, update, backup</div>
+                                <div class="compare-item"><strong>Team nhỏ:</strong> Setup + maintain Jenkins > giá trị nó mang lại</div>
+                                <div class="compare-item"><strong>Đã dùng GitLab:</strong> GitLab CI tích hợp sẵn, không cần thêm tool</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cài đặt Jenkins -->
+                <div class="jenkins-section">
+                    <h4>🛠️ Cài Đặt Jenkins — 3 Cách</h4>
+                    <div class="cmd-grid">
+                        <div class="cmd-card">
+                            <div class="cmd-label">🐳 Cách 1: Docker (khuyên dùng — dễ nhất)</div>
+<pre class="code-block"><span class="c-cmt"># Chạy Jenkins bằng Docker</span>
+<span class="c-cmd">docker run -d</span> \
+  --name jenkins \
+  -p <span class="c-str">8080:8080</span> \
+  -p <span class="c-str">50000:50000</span> \
+  -v <span class="c-str">jenkins_home:/var/jenkins_home</span> \
+  jenkins/jenkins:lts-jdk17
+
+<span class="c-cmt"># Lấy admin password ban đầu</span>
+<span class="c-cmd">docker exec</span> jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+
+<span class="c-cmt"># Mở browser: http://localhost:8080</span>
+<span class="c-cmt"># Nhập password → Install suggested plugins → Tạo admin user</span></pre>
+                        </div>
+                        <div class="cmd-card">
+                            <div class="cmd-label">🐧 Cách 2: Ubuntu/Debian server</div>
+<pre class="code-block"><span class="c-cmt"># Thêm Jenkins repo</span>
+<span class="c-cmd">curl -fsSL</span> https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key \
+  | <span class="c-cmd">sudo tee</span> /usr/share/keyrings/jenkins.asc > /dev/null
+
+<span class="c-cmd">echo</span> <span class="c-str">"deb [signed-by=/usr/share/keyrings/jenkins.asc] \
+  https://pkg.jenkins.io/debian-stable binary/"</span> \
+  | <span class="c-cmd">sudo tee</span> /etc/apt/sources.list.d/jenkins.list
+
+<span class="c-cmt"># Cài đặt</span>
+<span class="c-cmd">sudo apt update</span>
+<span class="c-cmd">sudo apt install</span> jenkins openjdk-17-jdk
+
+<span class="c-cmt"># Start & enable</span>
+<span class="c-cmd">sudo systemctl start</span> jenkins
+<span class="c-cmd">sudo systemctl enable</span> jenkins
+
+<span class="c-cmt"># Lấy password: sudo cat /var/lib/jenkins/secrets/initialAdminPassword</span></pre>
+                        </div>
+                    </div>
+
+                    <div class="cmd-card" style="margin-top: 16px;">
+                        <div class="cmd-label">🪟 Cách 3: Windows (cho dev local)</div>
+<pre class="code-block"><span class="c-cmt"># Tải Jenkins WAR file hoặc MSI installer từ jenkins.io</span>
+<span class="c-cmt"># Cách nhanh: dùng Chocolatey</span>
+<span class="c-cmd">choco install</span> jenkins
+
+<span class="c-cmt"># Hoặc chạy trực tiếp WAR</span>
+<span class="c-cmd">java -jar</span> jenkins.war --httpPort=8080
+
+<span class="c-cmt"># Mở: http://localhost:8080</span></pre>
+                    </div>
+                </div>
+
+                <!-- Jenkins Architecture -->
+                <div class="jenkins-section">
+                    <h4>🏗️ Jenkins Architecture — Hiểu Cách Hoạt Động</h4>
+                    <div class="jenkins-arch">
+                        <div class="arch-card">
+                            <div class="arch-icon">🧠</div>
+                            <strong>Controller (Master)</strong>
+                            <p>Server chính chạy Jenkins UI. Quản lý jobs, plugins, users, scheduling. <strong>KHÔNG nên chạy build trên master</strong> — chỉ điều phối.</p>
+                        </div>
+                        <div class="arch-arrow">→</div>
+                        <div class="arch-card">
+                            <div class="arch-icon">⚙️</div>
+                            <strong>Agents (Slaves/Nodes)</strong>
+                            <p>Máy thực sự chạy build. Có thể là: VM, Docker container, Kubernetes pod. Nhiều agent = build song song.</p>
+                        </div>
+                        <div class="arch-arrow">→</div>
+                        <div class="arch-card">
+                            <div class="arch-icon">📋</div>
+                            <strong>Jobs / Pipelines</strong>
+                            <p>Định nghĩa "làm gì": build, test, deploy. Viết bằng <strong>Jenkinsfile</strong> (Pipeline as Code) hoặc cấu hình qua UI.</p>
+                        </div>
+                    </div>
+
+                    <div class="tip-box">
+                        <strong>💡 Best Practice:</strong> Luôn dùng <strong>Pipeline as Code (Jenkinsfile)</strong> thay vì cấu hình qua UI. Jenkinsfile nằm trong repo → version control, review được, không mất khi Jenkins chết.
+                    </div>
+                </div>
+
+                <!-- Plugins -->
+                <div class="jenkins-section">
+                    <h4>🔌 Plugins Cần Cài Ngay</h4>
+                    <div class="plugin-grid">
+                        <div class="plugin-card"><strong>Pipeline</strong> — Jenkinsfile support (có sẵn)</div>
+                        <div class="plugin-card"><strong>Git</strong> — Kết nối GitHub/GitLab/Bitbucket</div>
+                        <div class="plugin-card"><strong>Docker Pipeline</strong> — Build & push Docker images trong pipeline</div>
+                        <div class="plugin-card"><strong>Credentials Binding</strong> — Quản lý secrets an toàn</div>
+                        <div class="plugin-card"><strong>Blue Ocean</strong> — UI hiện đại, đẹp hơn Classic UI</div>
+                        <div class="plugin-card"><strong>GitHub Branch Source</strong> — Auto detect branches, PRs → tạo job tự động</div>
+                        <div class="plugin-card"><strong>Slack Notification</strong> — Gửi kết quả build vào Slack</div>
+                        <div class="plugin-card"><strong>Role-based Authorization</strong> — Phân quyền user chi tiết</div>
+                        <div class="plugin-card"><strong>.NET SDK</strong> — Build .NET projects</div>
+                        <div class="plugin-card"><strong>NodeJS</strong> — Cài Node.js cho frontend builds</div>
+                        <div class="plugin-card"><strong>SonarQube Scanner</strong> — Code quality analysis</div>
+                        <div class="plugin-card"><strong>OWASP Dependency-Check</strong> — Scan lỗ hổng bảo mật dependencies</div>
+                    </div>
+                    <div class="warning-box">
+                        <strong>⚠️ Plugin quá nhiều = Jenkins chậm + không stable.</strong> Chỉ cài plugin thật sự cần. Review plugin trước khi cài: xem last update, rating, compatibility. Plugin lâu không update = rủi ro bảo mật.
+                    </div>
+                </div>
+
+                <!-- Jenkinsfile examples -->
+                <div class="jenkins-section">
+                    <h4>📝 Jenkinsfile — Ví Dụ Thực Tế</h4>
+
+                    <div class="cmd-card">
+                        <div class="cmd-label">Jenkinsfile cho .NET 8 API — Build, Test, Docker, Deploy</div>
+<pre class="code-block"><span class="c-key">pipeline</span> {
+    <span class="c-key">agent any</span>
+
+    <span class="c-key">environment</span> {
+        DOTNET_VERSION = <span class="c-str">'8.0'</span>
+        REGISTRY       = <span class="c-str">'myregistry.azurecr.io'</span>
+        IMAGE_NAME     = <span class="c-str">'myapp-api'</span>
+        IMAGE_TAG      = <span class="c-str">"${env.BUILD_NUMBER}"</span>
+    }
+
+    <span class="c-key">stages</span> {
+        <span class="c-key">stage</span>(<span class="c-str">'Checkout'</span>) {
+            <span class="c-key">steps</span> {
+                checkout scm
+            }
+        }
+
+        <span class="c-key">stage</span>(<span class="c-str">'Restore & Build'</span>) {
+            <span class="c-key">steps</span> {
+                sh <span class="c-str">'dotnet restore'</span>
+                sh <span class="c-str">'dotnet build --configuration Release --no-restore'</span>
+            }
+        }
+
+        <span class="c-key">stage</span>(<span class="c-str">'Test'</span>) {
+            <span class="c-key">steps</span> {
+                sh <span class="c-str">'dotnet test --configuration Release --no-build --logger trx'</span>
+            }
+            <span class="c-key">post</span> {
+                <span class="c-key">always</span> {
+                    <span class="c-cmt">// Publish test results</span>
+                    mstest testResultsFile: <span class="c-str">'**/*.trx'</span>
+                }
+            }
+        }
+
+        <span class="c-key">stage</span>(<span class="c-str">'Docker Build & Push'</span>) {
+            <span class="c-key">when</span> {
+                branch <span class="c-str">'main'</span>  <span class="c-cmt">// Chỉ build Docker khi merge vào main</span>
+            }
+            <span class="c-key">steps</span> {
+                script {
+                    docker.build(<span class="c-str">"${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"</span>)
+                    docker.withRegistry(<span class="c-str">"https://${REGISTRY}"</span>, <span class="c-str">'acr-credentials'</span>) {
+                        docker.image(<span class="c-str">"${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"</span>).push()
+                        docker.image(<span class="c-str">"${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"</span>).push(<span class="c-str">'latest'</span>)
+                    }
+                }
+            }
+        }
+
+        <span class="c-key">stage</span>(<span class="c-str">'Deploy Staging'</span>) {
+            <span class="c-key">when</span> { branch <span class="c-str">'main'</span> }
+            <span class="c-key">steps</span> {
+                sh <span class="c-str">"""
+                    ssh deploy@staging-server \\
+                    'docker pull ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} && \\
+                     docker compose up -d api'
+                """</span>
+            }
+        }
+
+        <span class="c-key">stage</span>(<span class="c-str">'Deploy Production'</span>) {
+            <span class="c-key">when</span> { branch <span class="c-str">'main'</span> }
+            <span class="c-key">input</span> {
+                message <span class="c-str">"Deploy lên Production?"</span>
+                ok <span class="c-str">"Deploy 🚀"</span>
+            }
+            <span class="c-key">steps</span> {
+                sh <span class="c-str">"""
+                    ssh deploy@prod-server \\
+                    'docker pull ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} && \\
+                     docker compose up -d api'
+                """</span>
+            }
+        }
+    }
+
+    <span class="c-key">post</span> {
+        <span class="c-key">success</span> {
+            slackSend color: <span class="c-str">'good'</span>,
+                message: <span class="c-str">"✅ Build #${env.BUILD_NUMBER} SUCCESS — ${env.JOB_NAME}"</span>
+        }
+        <span class="c-key">failure</span> {
+            slackSend color: <span class="c-str">'danger'</span>,
+                message: <span class="c-str">"❌ Build #${env.BUILD_NUMBER} FAILED — ${env.JOB_NAME}"</span>
+        }
+        <span class="c-key">always</span> {
+            cleanWs()  <span class="c-cmt">// Dọn workspace sau mỗi build</span>
+        }
+    }
+}</pre>
+                    </div>
+
+                    <div class="cmd-card" style="margin-top: 16px;">
+                        <div class="cmd-label">Jenkinsfile cho Frontend (React/Next.js) + Deploy lên Nginx</div>
+<pre class="code-block"><span class="c-key">pipeline</span> {
+    <span class="c-key">agent</span> {
+        docker {
+            image <span class="c-str">'node:20-alpine'</span>  <span class="c-cmt">// Chạy trong Docker container Node.js</span>
+        }
+    }
+
+    <span class="c-key">environment</span> {
+        CI = <span class="c-str">'true'</span>
+    }
+
+    <span class="c-key">stages</span> {
+        <span class="c-key">stage</span>(<span class="c-str">'Install'</span>) {
+            <span class="c-key">steps</span> {
+                sh <span class="c-str">'npm ci'</span>
+            }
+        }
+
+        <span class="c-key">stage</span>(<span class="c-str">'Lint & Test'</span>) {
+            <span class="c-key">parallel</span> {             <span class="c-cmt">// Chạy song song → nhanh hơn</span>
+                <span class="c-key">stage</span>(<span class="c-str">'Lint'</span>) {
+                    <span class="c-key">steps</span> { sh <span class="c-str">'npm run lint'</span> }
+                }
+                <span class="c-key">stage</span>(<span class="c-str">'Test'</span>) {
+                    <span class="c-key">steps</span> { sh <span class="c-str">'npm run test -- --ci --coverage'</span> }
+                }
+            }
+        }
+
+        <span class="c-key">stage</span>(<span class="c-str">'Build'</span>) {
+            <span class="c-key">steps</span> {
+                sh <span class="c-str">'npm run build'</span>
+            }
+        }
+
+        <span class="c-key">stage</span>(<span class="c-str">'Deploy'</span>) {
+            <span class="c-key">when</span> { branch <span class="c-str">'main'</span> }
+            <span class="c-key">steps</span> {
+                <span class="c-cmt">// Copy static files lên web server</span>
+                sh <span class="c-str">'rsync -avz --delete dist/ deploy@web-server:/var/www/myapp/'</span>
+            }
+        }
+    }
+
+    <span class="c-key">post</span> {
+        <span class="c-key">always</span> {
+            junit <span class="c-str">'**/test-results.xml'</span>          <span class="c-cmt">// Publish test results</span>
+            publishHTML target: [                      <span class="c-cmt">// Coverage report</span>
+                reportDir: <span class="c-str">'coverage/lcov-report'</span>,
+                reportFiles: <span class="c-str">'index.html'</span>,
+                reportName: <span class="c-str">'Coverage Report'</span>
+            ]
+        }
+    }
+}</pre>
+                    </div>
+                </div>
+
+                <!-- Jenkinsfile syntax -->
+                <div class="jenkins-section">
+                    <h4>📚 Jenkinsfile Syntax — Cheat Sheet</h4>
+                    <div class="jenkins-syntax">
+                        <div class="syntax-card">
+                            <code class="syntax-key">pipeline { }</code>
+                            <span>Block gốc, chứa toàn bộ pipeline</span>
+                        </div>
+                        <div class="syntax-card">
+                            <code class="syntax-key">agent any</code>
+                            <span>Chạy trên bất kỳ agent nào available</span>
+                        </div>
+                        <div class="syntax-card">
+                            <code class="syntax-key">agent { docker { image 'node:20' } }</code>
+                            <span>Chạy trong Docker container cụ thể</span>
+                        </div>
+                        <div class="syntax-card">
+                            <code class="syntax-key">agent { label 'linux' }</code>
+                            <span>Chạy trên agent có label "linux"</span>
+                        </div>
+                        <div class="syntax-card">
+                            <code class="syntax-key">stages { stage('Name') { steps { } } }</code>
+                            <span>Định nghĩa các bước tuần tự</span>
+                        </div>
+                        <div class="syntax-card">
+                            <code class="syntax-key">parallel { stage('A') { } stage('B') { } }</code>
+                            <span>Chạy nhiều stage song song</span>
+                        </div>
+                        <div class="syntax-card">
+                            <code class="syntax-key">when { branch 'main' }</code>
+                            <span>Chỉ chạy stage này khi ở branch main</span>
+                        </div>
+                        <div class="syntax-card">
+                            <code class="syntax-key">when { changeset '**/*.cs' }</code>
+                            <span>Chỉ chạy khi file .cs thay đổi</span>
+                        </div>
+                        <div class="syntax-card">
+                            <code class="syntax-key">environment { KEY = 'value' }</code>
+                            <span>Biến môi trường cho pipeline</span>
+                        </div>
+                        <div class="syntax-card">
+                            <code class="syntax-key">credentials('secret-id')</code>
+                            <span>Lấy secret từ Jenkins Credentials Store</span>
+                        </div>
+                        <div class="syntax-card">
+                            <code class="syntax-key">input { message 'Approve?' }</code>
+                            <span>Chờ người dùng approve (manual gate)</span>
+                        </div>
+                        <div class="syntax-card">
+                            <code class="syntax-key">post { success { } failure { } always { } }</code>
+                            <span>Actions sau khi pipeline kết thúc</span>
+                        </div>
+                        <div class="syntax-card">
+                            <code class="syntax-key">triggers { pollSCM('H/5 * * * *') }</code>
+                            <span>Poll Git mỗi 5 phút (hoặc dùng webhook)</span>
+                        </div>
+                        <div class="syntax-card">
+                            <code class="syntax-key">options { timeout(time: 30, unit: 'MINUTES') }</code>
+                            <span>Timeout cho pipeline</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Jenkins Credentials -->
+                <div class="jenkins-section">
+                    <h4>🔐 Quản Lý Secrets Trong Jenkins</h4>
+                    <div class="cmd-card">
+                        <div class="cmd-label">Dùng Credentials trong Jenkinsfile</div>
+<pre class="code-block"><span class="c-key">pipeline</span> {
+    <span class="c-key">agent any</span>
+
+    <span class="c-key">environment</span> {
+        <span class="c-cmt">// Lấy username/password credential</span>
+        DB_CREDS = credentials(<span class="c-str">'database-credentials'</span>)
+        <span class="c-cmt">// → tự tạo biến: DB_CREDS_USR, DB_CREDS_PSW</span>
+
+        <span class="c-cmt">// Lấy secret text</span>
+        API_KEY = credentials(<span class="c-str">'api-key-prod'</span>)
+
+        <span class="c-cmt">// Lấy secret file (certificate, .env)</span>
+        KUBECONFIG = credentials(<span class="c-str">'k8s-config'</span>)
+    }
+
+    <span class="c-key">stages</span> {
+        <span class="c-key">stage</span>(<span class="c-str">'Deploy'</span>) {
+            <span class="c-key">steps</span> {
+                <span class="c-cmt">// Secrets tự động mask trong log</span>
+                sh <span class="c-str">'echo "Deploying with user: ${DB_CREDS_USR}"'</span>
+                <span class="c-cmt">// Password sẽ hiện ******* trong console</span>
+            }
+        }
+    }
+}</pre>
+                    </div>
+                    <div class="warning-box">
+                        <strong>⚠️ KHÔNG hardcode secrets trong Jenkinsfile!</strong> Jenkinsfile nằm trong repo = ai cũng đọc được. Luôn dùng Jenkins Credentials Store: <em>Manage Jenkins → Credentials → Add Credentials</em>. Jenkins auto-mask secrets trong console log.
+                    </div>
+                </div>
+
+                <!-- Webhook -->
+                <div class="jenkins-section">
+                    <h4>🔔 Webhook — Tự Động Trigger Khi Push Code</h4>
+                    <div class="webhook-steps">
+                        <div class="wh-step">
+                            <span class="wh-num">1</span>
+                            <div>
+                                <strong>Trong Jenkins:</strong> Job → Configure → Build Triggers → ✅ <code>GitHub hook trigger for GITScm polling</code>
+                            </div>
+                        </div>
+                        <div class="wh-step">
+                            <span class="wh-num">2</span>
+                            <div>
+                                <strong>Trong GitHub:</strong> Repo → Settings → Webhooks → Add webhook<br>
+                                Payload URL: <code>https://your-jenkins.com/github-webhook/</code><br>
+                                Content type: <code>application/json</code> — Events: <code>Just the push event</code>
+                            </div>
+                        </div>
+                        <div class="wh-step">
+                            <span class="wh-num">3</span>
+                            <div>
+                                <strong>Kết quả:</strong> Push code → GitHub gọi webhook → Jenkins trigger build ngay lập tức (không cần poll)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Jenkins + Docker -->
+                <div class="jenkins-section">
+                    <h4>🐳 Jenkins + Docker — Pipeline Thực Chiến</h4>
+                    <div class="cmd-card">
+                        <div class="cmd-label">docker-compose.yml — Jenkins + Docker-in-Docker</div>
+<pre class="code-block"><span class="c-key">version:</span> <span class="c-str">"3.8"</span>
+
+<span class="c-key">services:</span>
+  <span class="c-key">jenkins:</span>
+    <span class="c-key">image:</span> jenkins/jenkins:lts-jdk17
+    <span class="c-key">ports:</span>
+      - <span class="c-str">"8080:8080"</span>
+      - <span class="c-str">"50000:50000"</span>
+    <span class="c-key">volumes:</span>
+      - <span class="c-str">jenkins_home:/var/jenkins_home</span>
+      <span class="c-cmt"># Mount Docker socket → Jenkins có thể build Docker images</span>
+      - <span class="c-str">/var/run/docker.sock:/var/run/docker.sock</span>
+    <span class="c-key">user:</span> root  <span class="c-cmt"># Cần root để access Docker socket</span>
+
+<span class="c-key">volumes:</span>
+  <span class="c-key">jenkins_home:</span></pre>
+                    </div>
+                    <div class="tip-box">
+                        <strong>💡 Docker-in-Docker (DinD):</strong> Mount Docker socket vào Jenkins container → Jenkins có thể build Docker images mà không cần cài Docker bên trong. Production nên dùng <strong>Kaniko</strong> hoặc <strong>Buildah</strong> thay vì mount socket (bảo mật hơn).
+                    </div>
+                </div>
+
+                <!-- Jenkins Multibranch -->
+                <div class="jenkins-section">
+                    <h4>🌳 Multibranch Pipeline — Auto Detect Branches</h4>
+                    <p>Thay vì tạo 1 job cho mỗi branch → <strong>Multibranch Pipeline tự detect</strong> tất cả branches có Jenkinsfile → tạo job tự động.</p>
+                    <div class="multibranch-flow">
+                        <div class="mb-step">Tạo <strong>New Item → Multibranch Pipeline</strong></div>
+                        <div class="mb-step">Chọn <strong>Branch Sources → GitHub</strong> → nhập repo URL</div>
+                        <div class="mb-step">Jenkins scan tất cả branches</div>
+                        <div class="mb-step">Branch nào có <code>Jenkinsfile</code> → tự tạo job</div>
+                        <div class="mb-step">Push branch mới → Jenkins auto detect → chạy CI</div>
+                        <div class="mb-step">Xóa branch → Jenkins auto xóa job</div>
+                    </div>
+                    <div class="tip-box">
+                        <strong>💡 Đây là cách dùng Jenkins đúng nhất cho team:</strong> Mỗi branch/PR tự có CI riêng. Không cần tạo job thủ công. Giống GitHub Actions nhưng self-hosted.
+                    </div>
+                </div>
+
+                <!-- Jenkins Tips & Traps -->
+                <div class="jenkins-section">
+                    <h4>💀 Jenkins — Sai Lầm Phổ Biến & Mẹo</h4>
+                    <div class="jenkins-tips">
+                        <div class="jtip-card jtip-danger">
+                            <strong>🔴 Không backup Jenkins</strong>
+                            <p>Jenkins chết = mất TẤT CẢ config, credentials, job history. <strong>Backup <code>/var/jenkins_home</code> hàng ngày.</strong> Hoặc dùng <em>Configuration as Code (JCasC) plugin</em> → config bằng YAML.</p>
+                        </div>
+                        <div class="jtip-card jtip-danger">
+                            <strong>🔴 Build trên Master node</strong>
+                            <p>Master chỉ nên điều phối, không chạy build. Build nặng trên master = Jenkins UI lag, crash. <strong>Tạo agent riêng cho build.</strong></p>
+                        </div>
+                        <div class="jtip-card jtip-danger">
+                            <strong>🔴 Cài quá nhiều plugins</strong>
+                            <p>Plugin conflict, memory leak, security vulnerability. <strong>Chỉ cài plugin thật sự dùng.</strong> Review quarterly, xóa plugin không dùng.</p>
+                        </div>
+                        <div class="jtip-card jtip-warn">
+                            <strong>🟡 Không dọn workspace / Docker images</strong>
+                            <p>Build liên tục → disk đầy → Jenkins crash. Thêm <code>cleanWs()</code> trong post block. Docker: <code>docker system prune -af</code> weekly.</p>
+                        </div>
+                        <div class="jtip-card jtip-warn">
+                            <strong>🟡 Config qua UI thay vì Jenkinsfile</strong>
+                            <p>Config qua UI = không version control, không review, không reproduce. <strong>Mọi thứ nên ở Jenkinsfile trong repo.</strong></p>
+                        </div>
+                        <div class="jtip-card jtip-info">
+                            <strong>💡 Shared Libraries — DRY cho pipeline</strong>
+                            <p>Nhiều repo dùng pipeline giống nhau? Tạo <strong>Shared Library</strong> → viết common steps 1 lần, reuse ở mọi Jenkinsfile. <code>@Library('my-shared-lib') _</code></p>
+                        </div>
+                        <div class="jtip-card jtip-info">
+                            <strong>💡 Blue Ocean — UI hiện đại cho Jenkins</strong>
+                            <p>Classic Jenkins UI xấu và khó dùng. <strong>Blue Ocean plugin</strong> cho UI đẹp, visual pipeline editor, GitHub/Git integration tốt hơn.</p>
+                        </div>
+                        <div class="jtip-card jtip-info">
+                            <strong>💡 Jenkins Configuration as Code (JCasC)</strong>
+                            <p>Toàn bộ Jenkins config (plugins, security, credentials) viết bằng YAML. Jenkins chết → deploy lại từ YAML trong 5 phút. <strong>Infrastructure as Code cho Jenkins.</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="closing-box">
+                <div class="closing-nav">
+                    <a href="index.html" class="closing-btn">🗺️ Tổng quan</a>
+                    <a href="git.html" class="closing-btn">📦 Git</a>
+                    <a href="cicd.html" class="closing-btn">⚙️ CI/CD</a>
+                    <a href="docker.html" class="closing-btn">🐳 Docker</a>
+                    <a href="hosting.html" class="closing-btn">☁️ Hosting</a>
+                    <a href="cloud.html" class="closing-btn">⛅ Cloud</a>
+                    <a href="domain.html" class="closing-btn">🌐 Domain</a>
+                    <a href="ssl.html" class="closing-btn">🔒 SSL</a>
+                    <a href="monitoring.html" class="closing-btn">📊 Monitoring</a>
+                    <a href="workflow.html" class="closing-btn">🔄 Workflow</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Build & Deploy — Triển khai website từ A→Z cho web developer</p>
+        </div>
+    </footer>
+
+    <script src="build.js"></script>
+</body>
+</html>

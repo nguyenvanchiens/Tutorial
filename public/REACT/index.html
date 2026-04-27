@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ReactJS Mastery - Lộ Trình Beginner → Master</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">React<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html" class="active">Roadmap</a>
+      <a href="basics.html">Cơ bản</a>
+      <a href="hooks.html">Hooks</a>
+      <a href="advanced.html">Nâng cao</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="ecosystem.html">Ecosystem</a>
+      <a href="interview.html">Phỏng vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">REACT 19 · BEGINNER → MASTER · 2026</div>
+  <h1>Làm chủ <span class="gradient">ReactJS</span> từ A → Z</h1>
+  <p class="hero-desc">Lộ trình học React có hệ thống: từ JSX, Component, Hooks cốt lõi đến Patterns nâng cao, Performance, Testing, Server Components và hệ sinh thái Next.js. Viết bằng tiếng Việt, ví dụ code thực chiến.</p>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-number">6</span><span class="stat-label">Cấp độ</span></div>
+    <div class="stat"><span class="stat-number">7</span><span class="stat-label">Trang chi tiết</span></div>
+    <div class="stat"><span class="stat-number">50+</span><span class="stat-label">Code examples</span></div>
+    <div class="stat"><span class="stat-number">80+</span><span class="stat-label">Câu phỏng vấn</span></div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Triết lý học React</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>🎯 20% Cốt lõi = 80% Giá trị</h3>
+        <p>Hiểu <strong>rendering model</strong>, <strong>state &amp; props</strong>, <strong>hooks</strong>, và <strong>unidirectional data flow</strong>. Nắm vững bản chất, mọi thứ còn lại chỉ là API.</p>
+        <ul>
+          <li>JSX là syntactic sugar của <code>React.createElement</code></li>
+          <li>Component là function nhận props, trả về UI</li>
+          <li>State thay đổi → React re-render → reconcile VDOM</li>
+          <li>Hooks là cách inject behavior vào function component</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>⚡ Học bằng cách build</h3>
+        <p>Đọc 1 — code 3. Mỗi concept phải gõ lại, break nó ra, rồi tự giải thích. Anti-pattern học React:</p>
+        <ul>
+          <li>Xem video 10h không mở IDE</li>
+          <li>Copy-paste mà không hiểu re-render gây ra khi nào</li>
+          <li>Học Redux trước khi biết lifting state up</li>
+          <li>Bỏ qua TypeScript ở dự án thật</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Lộ trình 6 cấp độ</h2>
+    <p class="section-sub">Mỗi cấp khoảng 2-4 tuần nếu học 1-2h/ngày. Cấp sau giả định đã vững cấp trước.</p>
+
+    <div class="grid grid-3">
+      <div class="card level-card">
+        <span class="level-badge" style="background: linear-gradient(135deg,#667eea,#764ba2)">L0 · NEWBIE</span>
+        <h3>Trước khi học React</h3>
+        <div class="time">⏱ 1-2 tuần</div>
+        <ul>
+          <li>HTML/CSS căn bản (flexbox, grid)</li>
+          <li>JavaScript ES6+: arrow, destructuring, spread, modules</li>
+          <li>Array methods: map, filter, reduce, find</li>
+          <li>Async: Promise, async/await, fetch</li>
+          <li>npm/npx, terminal, Git basics</li>
+        </ul>
+      </div>
+
+      <div class="card level-card">
+        <span class="level-badge" style="background: linear-gradient(135deg,#4facfe,#00f2fe)">L1 · BEGINNER</span>
+        <h3>Nền tảng React</h3>
+        <div class="time">⏱ 2-3 tuần</div>
+        <ul>
+          <li>Vite + React setup, file structure</li>
+          <li>JSX: expression, attribute, conditional, list</li>
+          <li>Component, Props, children</li>
+          <li><code>useState</code>, event handling</li>
+          <li>Controlled forms</li>
+          <li>Styling: CSS Module, Tailwind</li>
+        </ul>
+        <p><a href="basics.html" style="color:var(--primary)">→ Xem trang Cơ bản</a></p>
+      </div>
+
+      <div class="card level-card">
+        <span class="level-badge" style="background: linear-gradient(135deg,#43e97b,#38f9d7)">L2 · JUNIOR</span>
+        <h3>Hooks &amp; Side effects</h3>
+        <div class="time">⏱ 3-4 tuần</div>
+        <ul>
+          <li><code>useEffect</code>, cleanup, deps array</li>
+          <li><code>useRef</code>, <code>useMemo</code>, <code>useCallback</code></li>
+          <li><code>useContext</code>, <code>useReducer</code></li>
+          <li>Custom hooks</li>
+          <li>Fetching data, loading/error state</li>
+          <li>React Router basics</li>
+        </ul>
+        <p><a href="hooks.html" style="color:var(--primary)">→ Xem trang Hooks</a></p>
+      </div>
+
+      <div class="card level-card">
+        <span class="level-badge" style="background: linear-gradient(135deg,#fa709a,#fee140)">L3 · MID-LEVEL</span>
+        <h3>Nâng cao &amp; Performance</h3>
+        <div class="time">⏱ 4-6 tuần</div>
+        <ul>
+          <li>Reconciliation, keys, lists</li>
+          <li><code>React.memo</code>, memoization trap</li>
+          <li>Code splitting, <code>lazy</code>, <code>Suspense</code></li>
+          <li>Portals, Error Boundaries</li>
+          <li><code>useTransition</code>, <code>useDeferredValue</code></li>
+          <li>Forwarding refs, <code>useImperativeHandle</code></li>
+        </ul>
+        <p><a href="advanced.html" style="color:var(--primary)">→ Xem trang Nâng cao</a></p>
+      </div>
+
+      <div class="card level-card">
+        <span class="level-badge" style="background: linear-gradient(135deg,#f093fb,#f5576c)">L4 · SENIOR</span>
+        <h3>Patterns &amp; Architecture</h3>
+        <div class="time">⏱ 6-8 tuần</div>
+        <ul>
+          <li>Composition, Container/Presentational</li>
+          <li>Compound Components, Render Props</li>
+          <li>HOC, Hook Factories</li>
+          <li>Controlled vs Uncontrolled</li>
+          <li>Provider Pattern, Slot Pattern</li>
+          <li>Folder structure cho app lớn</li>
+        </ul>
+        <p><a href="patterns.html" style="color:var(--primary)">→ Xem trang Patterns</a></p>
+      </div>
+
+      <div class="card level-card">
+        <span class="level-badge" style="background: linear-gradient(135deg,#ffecd2,#fcb69f)">L5 · MASTER</span>
+        <h3>Ecosystem &amp; Production</h3>
+        <div class="time">⏱ Liên tục</div>
+        <ul>
+          <li>State libs: Zustand, Redux Toolkit, Jotai</li>
+          <li>Data: React Query, SWR, RTK Query</li>
+          <li>Forms: React Hook Form, Zod</li>
+          <li>Testing: Vitest, RTL, Playwright</li>
+          <li>Next.js, Server Components, Server Actions</li>
+          <li>Bundling, SSR/SSG/ISR, Edge runtime</li>
+        </ul>
+        <p><a href="ecosystem.html" style="color:var(--primary)">→ Xem trang Ecosystem</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Mental Model của React</h2>
+    <p class="section-sub">Hiểu 4 nguyên lý này, bạn dùng React đúng bản chất chứ không "chỉ cho chạy được".</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>1. UI là hàm của State</h3>
+        <p>Xem UI như <code>UI = f(state)</code>. Mỗi lần state đổi, React tính lại <code>f(state)</code> và so sánh với lần trước để cập nhật DOM tối thiểu.</p>
+        <pre class="code"><span class="c">// Bạn không "cập nhật DOM" — bạn mô tả UI theo state</span>
+<span class="k">function</span> <span class="n">Counter</span>() {
+  <span class="k">const</span> [count, setCount] = <span class="n">useState</span>(<span class="s">0</span>);
+  <span class="k">return</span> &lt;<span class="t">button</span> onClick={() =&gt; setCount(count + <span class="s">1</span>)}&gt;
+    {count} clicks
+  &lt;/<span class="t">button</span>&gt;;
+}</pre>
+      </div>
+
+      <div class="card">
+        <h3>2. Dữ liệu đi xuống, event đi lên</h3>
+        <p>Cha truyền <strong>props</strong> xuống con. Con gọi <strong>callback</strong> do cha cung cấp để báo sự kiện ngược lên. Đây là <em>unidirectional data flow</em> — dễ debug, khó rối.</p>
+        <pre class="code">&lt;<span class="t">Parent</span>&gt;
+  &lt;<span class="t">Child</span> value={state} onChange={setState} /&gt;
+&lt;/<span class="t">Parent</span>&gt;</pre>
+      </div>
+
+      <div class="card">
+        <h3>3. Re-render ≠ Re-paint DOM</h3>
+        <p>"React re-render" = gọi lại function component. Nó <strong>không</strong> có nghĩa là DOM bị thay. Reconciler so sánh VDOM cũ/mới rồi chỉ patch phần khác.</p>
+        <div class="tip"><strong>Hệ quả:</strong> đừng tối ưu <code>React.memo</code> sớm. Re-render rẻ hơn bạn tưởng, trừ khi component làm tính toán nặng.</div>
+      </div>
+
+      <div class="card">
+        <h3>4. State cục bộ hóa tới mức thấp nhất</h3>
+        <p>Chỉ <em>lift state up</em> khi nhiều component <strong>cùng cần</strong> state đó. State đặt ở cha quá cao → nhiều component con re-render thừa.</p>
+        <div class="warn-box"><strong>Dấu hiệu sai:</strong> App.jsx có 20 <code>useState</code> → bạn đang dùng React như global store.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Lịch học 12 tuần (tham khảo)</h2>
+    <div class="timeline">
+      <div class="tl-item">
+        <small>Tuần 1-2</small>
+        <h4>JavaScript nền + React setup</h4>
+        <p>Ôn ES6+, array methods, async/await. Cài Vite + React, làm Todo List bằng <code>useState</code>.</p>
+      </div>
+      <div class="tl-item">
+        <small>Tuần 3-4</small>
+        <h4>Components, Props, Forms</h4>
+        <p>Tách component, truyền props, controlled inputs, list + key. Làm app Blog tĩnh 3-4 trang.</p>
+      </div>
+      <div class="tl-item">
+        <small>Tuần 5-6</small>
+        <h4>useEffect + Fetch + Router</h4>
+        <p>Gọi API, loading/error, cleanup. Dùng React Router, nested routes, params. Làm app Movie list (TMDB).</p>
+      </div>
+      <div class="tl-item">
+        <small>Tuần 7-8</small>
+        <h4>Context, useReducer, Custom hooks</h4>
+        <p>Global state nhẹ, tách logic ra custom hook. Viết <code>useFetch</code>, <code>useLocalStorage</code>, <code>useDebounce</code>.</p>
+      </div>
+      <div class="tl-item">
+        <small>Tuần 9-10</small>
+        <h4>Performance + Patterns</h4>
+        <p>memo, useMemo, useCallback đúng lúc. Code splitting. Compound component cho Modal/Tabs.</p>
+      </div>
+      <div class="tl-item">
+        <small>Tuần 11-12</small>
+        <h4>Ecosystem + Dự án cuối</h4>
+        <p>React Query + Zustand + React Hook Form. Testing với RTL. Deploy Vercel/Netlify. Capstone: mini e-commerce.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Sai lầm kinh điển khi học React</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>❌ Mutate state trực tiếp</h4>
+        <pre class="code"><span class="c">// SAI</span>
+state.items.push(newItem);
+setItems(state.items);
+
+<span class="c">// ĐÚNG</span>
+setItems([...state.items, newItem]);</pre>
+      </div>
+      <div class="card">
+        <h4>❌ Dùng index làm key trong list động</h4>
+        <p>Khi list thay đổi thứ tự/insert/remove, index-key làm React nhận nhầm item → state dính sai element. Dùng <code>id</code> ổn định.</p>
+      </div>
+      <div class="card">
+        <h4>❌ setState trong render</h4>
+        <pre class="code"><span class="c">// SAI — infinite loop</span>
+<span class="k">function</span> <span class="n">Comp</span>() {
+  <span class="k">const</span> [x, setX] = <span class="n">useState</span>(<span class="s">0</span>);
+  setX(x + <span class="s">1</span>); <span class="c">// BOOM</span>
+}</pre>
+      </div>
+      <div class="card">
+        <h4>❌ Quên cleanup trong useEffect</h4>
+        <p>Subscribe/interval/listener phải return cleanup, không thì memory leak khi unmount.</p>
+      </div>
+      <div class="card">
+        <h4>❌ Nhét tất cả vào một component</h4>
+        <p>Component &gt; 300 dòng, có nhiều vai trò → tách theo trách nhiệm, không tách theo "loại" (component/util/helper).</p>
+      </div>
+      <div class="card">
+        <h4>❌ Optimize sớm với useMemo/useCallback</h4>
+        <p>Chúng có chi phí. Chỉ memo khi (1) tính toán thật sự nặng, hoặc (2) dependency của component con đã <code>React.memo</code>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Checklist tự đánh giá</h2>
+    <div class="grid grid-3">
+      <div class="card">
+        <h4>✅ Beginner (L1)</h4>
+        <ul>
+          <li>Tạo project Vite + React</li>
+          <li>Tách component, truyền props</li>
+          <li>Dùng <code>useState</code>, controlled form</li>
+          <li>Render list với key đúng</li>
+          <li>Phân biệt props vs state</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>✅ Junior (L2)</h4>
+        <ul>
+          <li>Giải thích deps array của <code>useEffect</code></li>
+          <li>Viết 3 custom hooks hữu ích</li>
+          <li>Dùng Context đúng chỗ, tránh prop drilling</li>
+          <li>Fetch API với loading + error + cancel</li>
+          <li>React Router: nested route, params, guard</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>✅ Mid (L3)</h4>
+        <ul>
+          <li>Giải thích reconciliation &amp; keys</li>
+          <li>Biết khi nào cần <code>React.memo</code></li>
+          <li>Split bundle với <code>lazy</code> + <code>Suspense</code></li>
+          <li>Dùng <code>useTransition</code> cho UI mượt</li>
+          <li>Viết Error Boundary</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>✅ Senior (L4)</h4>
+        <ul>
+          <li>Compound components, render props</li>
+          <li>Thiết kế API component reusable</li>
+          <li>Folder structure theo feature</li>
+          <li>Tách logic thành hook/service layer</li>
+          <li>Review PR về render performance</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>✅ Master (L5)</h4>
+        <ul>
+          <li>SSR/SSG/ISR trong Next.js</li>
+          <li>Server Components, Server Actions</li>
+          <li>Cache layers (React Query, HTTP, CDN)</li>
+          <li>Testing pyramid: unit + integration + E2E</li>
+          <li>Observability: error monitoring, Web Vitals</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>🎯 Dự án portfolio gợi ý</h4>
+        <ul>
+          <li>Todo + Drag &amp; Drop (dnd-kit)</li>
+          <li>Movie app với TMDB + React Query</li>
+          <li>Chat realtime (socket.io)</li>
+          <li>E-commerce: cart, checkout, auth</li>
+          <li>Mini Notion clone với slash menu</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>ReactJS Mastery · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

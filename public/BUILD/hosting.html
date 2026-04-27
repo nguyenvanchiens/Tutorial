@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hosting — Đặt Website Ở Đâu</title>
+    <link rel="stylesheet" href="build.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html">Build<span class="accent">&Deploy</span></a></div>
+            <div class="nav-links">
+                <a href="index.html">🗺️ Tổng quan</a>
+                <a href="git.html">📦 Git</a>
+                <a href="cicd.html">⚙️ CI/CD</a>
+                <a href="jenkins.html">🔴 Jenkins</a>
+                <a href="docker.html">🐳 Docker</a>
+                <a href="hosting.html" class="active">☁️ Hosting</a>
+                <a href="cloud.html">⛅ Cloud</a>
+                <a href="domain.html">🌐 Domain</a>
+                <a href="ssl.html">🔒 SSL</a>
+                <a href="monitoring.html">📊 Monitoring</a>
+                <a href="workflow.html">🔄 Workflow</a>
+            </div>
+            <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <header class="build-hero">
+        <div class="hero-content">
+            <div class="hero-badge">CHƯƠNG 5 · HOSTING</div>
+            <h1><span class="gradient-text">Hosting</span></h1>
+            <p class="hero-desc">Static hosting, VPS, PaaS, Serverless — chọn đúng hosting cho app của bạn.</p>
+        </div>
+    </header>
+
+    <!-- ===== SECTION 5: HOSTING ===== -->
+    <section class="section" id="hosting">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🏠</div>
+                <h2>5. Hosting — Đặt Website Ở Đâu?</h2>
+                <p>Từ miễn phí đến enterprise — chọn hosting phù hợp với dự án và ngân sách</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>🎨 Frontend Hosting — Static Sites & SSR</h3>
+                <div class="hosting-grid">
+                    <div class="host-card host-rec">
+                        <div class="host-badge">⭐ TUYỆT VỜI CHO FE</div>
+                        <h4>Vercel</h4>
+                        <div class="host-price">Free → $20/tháng</div>
+                        <div class="host-features">
+                            <div>✅ Deploy Next.js tốt nhất (họ tạo ra Next.js)</div>
+                            <div>✅ Push code → auto deploy trong 30 giây</div>
+                            <div>✅ Preview URL cho mỗi PR</div>
+                            <div>✅ Edge Functions, CDN toàn cầu</div>
+                            <div>✅ Free SSL, custom domain</div>
+                        </div>
+                        <div class="host-deploy">Deploy: <code>git push</code> hoặc <code>vercel deploy</code></div>
+                    </div>
+
+                    <div class="host-card host-rec">
+                        <div class="host-badge">⭐ TUYỆT VỜI CHO FE</div>
+                        <h4>Netlify</h4>
+                        <div class="host-price">Free → $19/tháng</div>
+                        <div class="host-features">
+                            <div>✅ Static sites, React, Vue, Angular</div>
+                            <div>✅ Form handling, serverless functions</div>
+                            <div>✅ Split testing (A/B), branch deploys</div>
+                            <div>✅ CDN, free SSL, instant rollback</div>
+                        </div>
+                        <div class="host-deploy">Deploy: Drag & drop folder hoặc <code>git push</code></div>
+                    </div>
+
+                    <div class="host-card host-rec">
+                        <div class="host-badge">🟢 ĐANG DÙNG - FREE</div>
+                        <h4>Cloudflare Pages</h4>
+                        <div class="host-price">Free (rất hào phóng)</div>
+                        <div class="host-features">
+                            <div>✅ Unlimited bandwidth miễn phí</div>
+                            <div>✅ CDN nhanh nhất thế giới (Cloudflare network)</div>
+                            <div>✅ Workers cho server-side logic</div>
+                            <div>✅ Tích hợp Cloudflare DNS, DDoS protection</div>
+                            <div>✅ 500 builds/tháng, unlimited sites</div>
+                            <div>✅ Auto deploy từ GitHub/GitLab</div>
+                        </div>
+                        <div class="host-deploy">Deploy: Git integration hoặc <code>wrangler pages deploy</code></div>
+                    </div>
+
+                    <div class="host-card">
+                        <h4>GitHub Pages</h4>
+                        <div class="host-price">Free</div>
+                        <div class="host-features">
+                            <div>✅ Hoàn toàn miễn phí cho public repo</div>
+                            <div>✅ Static sites, Jekyll, Hugo</div>
+                            <div>⚠️ Không hỗ trợ SSR, server-side</div>
+                            <div>⚠️ Chỉ static HTML/CSS/JS</div>
+                        </div>
+                        <div class="host-deploy">Deploy: Push vào branch <code>gh-pages</code> hoặc GitHub Actions</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>⚙️ Backend Hosting — Server & PaaS</h3>
+                <div class="hosting-grid">
+                    <div class="host-card host-rec">
+                        <div class="host-badge">⭐ DỄ NHẤT CHO .NET</div>
+                        <h4>Azure App Service</h4>
+                        <div class="host-price">Free tier → $13/tháng (Basic)</div>
+                        <div class="host-features">
+                            <div>✅ Deploy .NET nhanh nhất — tích hợp Visual Studio</div>
+                            <div>✅ Auto-scaling, deployment slots</div>
+                            <div>✅ Managed SSL, custom domain</div>
+                            <div>✅ Azure SQL, Blob Storage tích hợp</div>
+                        </div>
+                        <div class="host-deploy">Deploy: <code>az webapp up</code> hoặc GitHub Actions → Azure</div>
+                    </div>
+
+                    <div class="host-card host-rec">
+                        <div class="host-badge">⭐ SIMPLE & MODERN</div>
+                        <h4>Railway</h4>
+                        <div class="host-price">$5/tháng (usage-based)</div>
+                        <div class="host-features">
+                            <div>✅ Push code → auto detect & deploy (mọi ngôn ngữ)</div>
+                            <div>✅ Database (PostgreSQL, MySQL, Redis) tích hợp</div>
+                            <div>✅ Environment variables UI đẹp</div>
+                            <div>✅ Preview environments cho PR</div>
+                        </div>
+                        <div class="host-deploy">Deploy: <code>git push</code> hoặc <code>railway up</code></div>
+                    </div>
+
+                    <div class="host-card">
+                        <h4>Render</h4>
+                        <div class="host-price">Free → $7/tháng</div>
+                        <div class="host-features">
+                            <div>✅ "Heroku thế hệ mới" — dễ dùng</div>
+                            <div>✅ Docker support, auto deploy từ Git</div>
+                            <div>✅ Free PostgreSQL (90 ngày), managed Redis</div>
+                            <div>⚠️ Free tier sleep sau 15 phút không dùng</div>
+                        </div>
+                        <div class="host-deploy">Deploy: Connect GitHub repo → auto deploy</div>
+                    </div>
+
+                    <div class="host-card host-rec">
+                        <div class="host-badge">🟢 ĐANG DÙNG - FREE</div>
+                        <h4>MonsterASP.net</h4>
+                        <div class="host-price">Free (Windows Hosting)</div>
+                        <div class="host-features">
+                            <div>✅ Hỗ trợ ASP.NET / .NET Core miễn phí</div>
+                            <div>✅ MSSQL Server database đi kèm</div>
+                            <div>✅ Windows IIS hosting — phù hợp .NET dev</div>
+                            <div>✅ Control panel quản lý dễ dùng</div>
+                            <div>⚠️ Giới hạn disk space & bandwidth ở plan free</div>
+                            <div>⚠️ Phù hợp cho học tập, demo, project nhỏ</div>
+                        </div>
+                        <div class="host-deploy">Deploy: FTP upload hoặc Web Deploy từ Visual Studio</div>
+                    </div>
+
+                    <div class="host-card">
+                        <h4>VPS (DigitalOcean, Hetzner, Vultr)</h4>
+                        <div class="host-price">$4-$12/tháng</div>
+                        <div class="host-features">
+                            <div>✅ Toàn quyền kiểm soát server</div>
+                            <div>✅ Giá rẻ nhất cho performance</div>
+                            <div>✅ Chạy Docker, nhiều app trên 1 server</div>
+                            <div>⚠️ Phải tự quản lý: updates, security, backup</div>
+                        </div>
+                        <div class="host-deploy">Deploy: SSH + Docker Compose hoặc Coolify/CapRover</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>💡 Database Hosting</h3>
+                <div class="hosting-grid">
+                    <div class="host-card">
+                        <h4>Supabase</h4>
+                        <div class="host-price">Free → $25/tháng</div>
+                        <div class="host-features">
+                            <div>PostgreSQL + Auth + Storage + Realtime</div>
+                            <div>"Firebase thay thế" nhưng SQL</div>
+                        </div>
+                    </div>
+                    <div class="host-card">
+                        <h4>PlanetScale</h4>
+                        <div class="host-price">$39/tháng</div>
+                        <div class="host-features">
+                            <div>MySQL serverless, branching giống Git</div>
+                            <div>Auto-scaling, zero-downtime schema changes</div>
+                        </div>
+                    </div>
+                    <div class="host-card">
+                        <h4>Neon</h4>
+                        <div class="host-price">Free → $19/tháng</div>
+                        <div class="host-features">
+                            <div>Serverless PostgreSQL, branching</div>
+                            <div>Auto-suspend khi không dùng = tiết kiệm</div>
+                        </div>
+                    </div>
+                    <div class="host-card">
+                        <h4>Azure SQL / AWS RDS</h4>
+                        <div class="host-price">$5-$50/tháng</div>
+                        <div class="host-features">
+                            <div>Managed SQL Server / PostgreSQL / MySQL</div>
+                            <div>Auto backup, HA, enterprise grade</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="closing-box">
+                <div class="closing-nav">
+                    <a href="index.html" class="closing-btn">🗺️ Tổng quan</a>
+                    <a href="git.html" class="closing-btn">📦 Git</a>
+                    <a href="cicd.html" class="closing-btn">⚙️ CI/CD</a>
+                    <a href="jenkins.html" class="closing-btn">🔴 Jenkins</a>
+                    <a href="docker.html" class="closing-btn">🐳 Docker</a>
+                    <a href="cloud.html" class="closing-btn">⛅ Cloud</a>
+                    <a href="domain.html" class="closing-btn">🌐 Domain</a>
+                    <a href="ssl.html" class="closing-btn">🔒 SSL</a>
+                    <a href="monitoring.html" class="closing-btn">📊 Monitoring</a>
+                    <a href="workflow.html" class="closing-btn">🔄 Workflow</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Build & Deploy — Triển khai website từ A→Z cho web developer</p>
+        </div>
+    </footer>
+
+    <script src="build.js"></script>
+</body>
+</html>

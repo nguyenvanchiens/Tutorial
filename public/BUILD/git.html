@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git & Git Workflow — Build & Deploy</title>
+    <link rel="stylesheet" href="build.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html">Build<span class="accent">&Deploy</span></a></div>
+            <div class="nav-links">
+                <a href="index.html">🗺️ Tổng quan</a>
+                <a href="git.html" class="active">📦 Git</a>
+                <a href="cicd.html">⚙️ CI/CD</a>
+                <a href="jenkins.html">🔴 Jenkins</a>
+                <a href="docker.html">🐳 Docker</a>
+                <a href="hosting.html">☁️ Hosting</a>
+                <a href="cloud.html">⛅ Cloud</a>
+                <a href="domain.html">🌐 Domain</a>
+                <a href="ssl.html">🔒 SSL</a>
+                <a href="monitoring.html">📊 Monitoring</a>
+                <a href="workflow.html">🔄 Workflow</a>
+            </div>
+            <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <header class="build-hero">
+        <div class="hero-content">
+            <div class="hero-badge">CHƯƠNG 2 · NỀN TẢNG DEPLOY</div>
+            <h1>Git & <span class="gradient-text">Workflow</span></h1>
+            <p class="hero-desc">Không có Git = không có CI/CD = không có deploy tự động. Git là bước #0 của mọi pipeline.</p>
+        </div>
+    </header>
+
+    <!-- ===== SECTION 2: GIT ===== -->
+    <section class="section section-dark" id="git">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🌿</div>
+                <h2>2. Git & Git Workflow — Nền Tảng Của Deploy</h2>
+                <p>Không có Git = không có CI/CD = không có deploy tự động. Git là bước #0.</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>📝 Git Cơ Bản — Lệnh Dùng Hàng Ngày</h3>
+                <div class="cmd-grid">
+                    <div class="cmd-card">
+                        <div class="cmd-label">Tạo repo mới</div>
+<pre class="code-block"><span class="c-cmd">git init</span>
+<span class="c-cmd">git remote add</span> origin https://github.com/you/repo.git
+<span class="c-cmd">git branch -M</span> main
+<span class="c-cmd">git push -u</span> origin main</pre>
+                    </div>
+                    <div class="cmd-card">
+                        <div class="cmd-label">Workflow hàng ngày</div>
+<pre class="code-block"><span class="c-cmd">git pull</span> origin main          <span class="c-cmt"># Lấy code mới nhất</span>
+<span class="c-cmd">git checkout -b</span> feature/login <span class="c-cmt"># Tạo branch mới</span>
+<span class="c-cmt"># ... code ...</span>
+<span class="c-cmd">git add</span> .                      <span class="c-cmt"># Stage changes</span>
+<span class="c-cmd">git commit -m</span> <span class="c-str">"feat: add login page"</span>
+<span class="c-cmd">git push</span> origin feature/login  <span class="c-cmt"># Push lên remote</span>
+<span class="c-cmt"># → Tạo Pull Request trên GitHub/GitLab</span></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🌳 Git Branching Strategy — Chọn Flow Phù Hợp</h3>
+                <div class="strategy-grid">
+                    <div class="strategy-card strategy-rec">
+                        <div class="strategy-badge">⭐ KHUYÊN DÙNG</div>
+                        <h4>GitHub Flow</h4>
+                        <p><strong>Đơn giản, phù hợp hầu hết team.</strong></p>
+                        <div class="strategy-flow">
+                            <code>main</code> → tạo <code>feature/xxx</code> → code → PR → review → merge → auto deploy
+                        </div>
+                        <div class="strategy-rules">
+                            <div>✓ <code>main</code> luôn deployable</div>
+                            <div>✓ Mọi thay đổi qua Pull Request</div>
+                            <div>✓ PR phải có code review</div>
+                            <div>✓ Merge vào main = tự động deploy</div>
+                        </div>
+                        <div class="strategy-for">Phù hợp: Team nhỏ-vừa, deploy thường xuyên, SaaS</div>
+                    </div>
+
+                    <div class="strategy-card">
+                        <h4>Git Flow</h4>
+                        <p><strong>Nhiều branch hơn, cho release cycle dài.</strong></p>
+                        <div class="strategy-flow">
+                            <code>main</code> + <code>develop</code> + <code>feature/*</code> + <code>release/*</code> + <code>hotfix/*</code>
+                        </div>
+                        <div class="strategy-rules">
+                            <div>✓ <code>develop</code> = branch phát triển chính</div>
+                            <div>✓ <code>release/*</code> = chuẩn bị phiên bản mới</div>
+                            <div>✓ <code>hotfix/*</code> = sửa lỗi khẩn trên production</div>
+                        </div>
+                        <div class="strategy-for">Phù hợp: Dự án lớn, release theo version (v1.0, v2.0)</div>
+                    </div>
+
+                    <div class="strategy-card">
+                        <h4>Trunk-Based Development</h4>
+                        <p><strong>Tất cả commit vào main, branch sống < 1 ngày.</strong></p>
+                        <div class="strategy-flow">
+                            <code>main</code> → short-lived branches (< 1 day) → merge liên tục
+                        </div>
+                        <div class="strategy-rules">
+                            <div>✓ Feature flags thay cho long-lived branch</div>
+                            <div>✓ CI chạy trên mọi commit</div>
+                            <div>✓ Deploy nhiều lần/ngày</div>
+                        </div>
+                        <div class="strategy-for">Phù hợp: Team senior, CI/CD mạnh, deploy liên tục (Google, Facebook style)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>📋 Conventional Commits — Viết Commit Message Chuẩn</h3>
+                <p>Commit message chuẩn giúp đọc lịch sử, tự động tạo changelog, trigger CI/CD.</p>
+                <div class="commit-grid">
+                    <div class="commit-type"><code>feat:</code> Tính năng mới — <span>feat: add user registration</span></div>
+                    <div class="commit-type"><code>fix:</code> Sửa bug — <span>fix: resolve login timeout issue</span></div>
+                    <div class="commit-type"><code>refactor:</code> Tái cấu trúc — <span>refactor: simplify auth middleware</span></div>
+                    <div class="commit-type"><code>docs:</code> Tài liệu — <span>docs: update API documentation</span></div>
+                    <div class="commit-type"><code>style:</code> Format, không logic — <span>style: fix indentation in login.cs</span></div>
+                    <div class="commit-type"><code>test:</code> Thêm test — <span>test: add unit tests for OrderService</span></div>
+                    <div class="commit-type"><code>chore:</code> Config, build — <span>chore: update Dockerfile</span></div>
+                    <div class="commit-type"><code>ci:</code> CI/CD pipeline — <span>ci: add staging deploy step</span></div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🔧 .gitignore — File KHÔNG ĐƯỢC push lên repo</h3>
+<pre class="code-block"><span class="c-cmt"># .gitignore cho project .NET + Frontend</span>
+
+<span class="c-cmt"># Build output</span>
+bin/
+obj/
+dist/
+node_modules/
+.next/
+out/
+
+<span class="c-cmt"># Environment — TUYỆT ĐỐI KHÔNG COMMIT</span>
+.env
+.env.local
+.env.production
+appsettings.Development.json
+*.pfx
+*.key
+
+<span class="c-cmt"># IDE</span>
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+
+<span class="c-cmt"># OS</span>
+.DS_Store
+Thumbs.db
+
+<span class="c-cmt"># Logs</span>
+*.log
+logs/</pre>
+                <div class="warning-box">
+                    <strong>☠️ Nếu đã lỡ commit secrets:</strong> File đã ở trong Git history VĨNH VIỄN dù bạn xóa nó. Phải dùng <code>git filter-branch</code> hoặc <strong>BFG Repo-Cleaner</strong> để xóa khỏi history. Và <strong>rotate tất cả credentials ngay lập tức</strong>.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="closing-box">
+                <div class="closing-nav">
+                    <a href="index.html" class="closing-btn">🗺️ Tổng quan</a>
+                    <a href="cicd.html" class="closing-btn">⚙️ CI/CD</a>
+                    <a href="jenkins.html" class="closing-btn">🔴 Jenkins</a>
+                    <a href="docker.html" class="closing-btn">🐳 Docker</a>
+                    <a href="hosting.html" class="closing-btn">☁️ Hosting</a>
+                    <a href="cloud.html" class="closing-btn">⛅ Cloud</a>
+                    <a href="domain.html" class="closing-btn">🌐 Domain</a>
+                    <a href="ssl.html" class="closing-btn">🔒 SSL</a>
+                    <a href="monitoring.html" class="closing-btn">📊 Monitoring</a>
+                    <a href="workflow.html" class="closing-btn">🔄 Workflow</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Build & Deploy — Triển khai website từ A→Z cho web developer</p>
+        </div>
+    </footer>
+
+    <script src="build.js"></script>
+</body>
+</html>

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Claude Code Mastery — Roadmap Beginner → Master</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">Claude<span class="accent">Code</span></div>
+    <div class="nav-links">
+      <a href="index.html" class="active">Roadmap</a>
+      <a href="basics.html">Cơ Bản</a>
+      <a href="commands.html">Commands</a>
+      <a href="customize.html">Customize</a>
+      <a href="integrations.html">Integrations</a>
+      <a href="tips.html">Tips & FAQ</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">CLAUDE CODE · ANTHROPIC · 2026</div>
+  <h1>Làm chủ <span class="gradient">Claude Code</span> từ zero đến master</h1>
+  <p class="hero-desc">Claude Code là AI coding agent mạnh nhất của Anthropic — chạy trong terminal, VS Code, JetBrains. Lộ trình có hệ thống: từ lệnh đầu tiên đến tự động hoá toàn bộ workflow dev, build custom agent qua SDK, tích hợp CI/CD.</p>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-number">6</span><span class="stat-label">Cấp độ</span></div>
+    <div class="stat"><span class="stat-number">6</span><span class="stat-label">Trang chi tiết</span></div>
+    <div class="stat"><span class="stat-number">50+</span><span class="stat-label">Ví dụ thực chiến</span></div>
+    <div class="stat"><span class="stat-number">100%</span><span class="stat-label">Tiếng Việt</span></div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Claude Code là gì?</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>💡 Định nghĩa 30 giây</h3>
+        <p><strong>Claude Code</strong> là AI coding agent của Anthropic. Khác ChatGPT ở chỗ: nó <strong>thực sự thao tác được</strong> với máy của bạn — đọc/sửa file, chạy lệnh shell, gọi git, chạy test. Bạn mô tả việc cần làm, nó suy nghĩ và thực thi từng bước.</p>
+        <p style="margin-top:.5rem"><strong>3 dạng sử dụng:</strong></p>
+        <ul>
+          <li><strong>CLI terminal</strong> — <code>claude</code> command</li>
+          <li><strong>IDE extension</strong> — VS Code, JetBrains</li>
+          <li><strong>Web</strong> — <code>claude.ai/code</code> (không cần cài)</li>
+          <li><strong>SDK</strong> — Python/TypeScript cho automation</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>⚡ Tại sao khác biệt?</h3>
+        <ul>
+          <li><strong>Agentic</strong> — tự lập plan, thực thi, tự kiểm tra, sửa khi sai</li>
+          <li><strong>Context window 1M+ token</strong> (Opus) — đọc được cả codebase</li>
+          <li><strong>Long-running tasks</strong> — làm task nhiều giờ không đứt</li>
+          <li><strong>Tích hợp sâu git</strong> — tự commit, PR, review</li>
+          <li><strong>Extensible</strong> — hooks, slash commands, skills, MCP, subagents</li>
+          <li><strong>Model Claude mới nhất</strong> — Opus 4.7, Sonnet 4.6, Haiku 4.5</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Khi nào dùng Claude Code?</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3 style="color: var(--success)">✅ Dùng khi</h3>
+        <ul>
+          <li><strong>Refactor lớn</strong> — rename hàm xuyên codebase, đổi pattern</li>
+          <li><strong>Bug fix đòi hỏi đọc nhiều file</strong> — trace error qua nhiều layer</li>
+          <li><strong>Viết test</strong> cho code hiện có</li>
+          <li><strong>Implement feature</strong> theo spec — từ ticket → code + test + PR</li>
+          <li><strong>Explore codebase lạ</strong> — "code này làm gì?"</li>
+          <li><strong>Automation</strong> — viết script, CI pipeline, migration</li>
+          <li><strong>Code review</strong> — tự động check PR</li>
+          <li><strong>Học tech mới</strong> — Claude giải thích + demo ngay</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="color: var(--danger)">❌ Ít hữu ích khi</h3>
+        <ul>
+          <li><strong>Task quá nhỏ</strong> — đổi 1 dòng, gõ tay còn nhanh hơn prompt</li>
+          <li><strong>Design thuần UI/UX</strong> — cần Figma, không phải code</li>
+          <li><strong>Quyết định business logic</strong> — Claude không biết context thị trường</li>
+          <li><strong>Code security/compliance cao</strong> — cần human review kỹ</li>
+          <li><strong>Offline environment</strong> — Claude cần internet</li>
+        </ul>
+        <p style="margin-top:.5rem"><strong>Quy tắc:</strong> task càng có scope rõ ràng, càng cần đọc nhiều code, càng hợp với Claude Code. Task mơ hồ hoặc cần sáng tạo → bạn lead, Claude hỗ trợ.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Lộ trình 6 cấp độ</h2>
+    <p class="section-sub">Mỗi cấp khoảng 1-2 tuần nếu dùng mỗi ngày. Cấp sau giả định đã vững cấp trước.</p>
+
+    <div class="grid grid-3">
+      <div class="card level-card">
+        <span class="level-badge" style="background: linear-gradient(135deg,#667eea,#764ba2)">L0 · READY</span>
+        <h3>Chuẩn bị</h3>
+        <p style="color: var(--warn); font-size:.85rem; font-weight:600;">⏱ 1 ngày</p>
+        <ul>
+          <li>Có tài khoản Anthropic (Claude.ai)</li>
+          <li>Biết cmd/bash cơ bản</li>
+          <li>Git + GitHub tối thiểu</li>
+          <li>Node.js 18+ (cho CLI)</li>
+          <li>Project nhỏ để thực hành</li>
+        </ul>
+      </div>
+
+      <div class="card level-card">
+        <span class="level-badge" style="background: linear-gradient(135deg,#4facfe,#00f2fe)">L1 · BEGINNER</span>
+        <h3>Cài đặt & First session</h3>
+        <p style="color: var(--warn); font-size:.85rem; font-weight:600;">⏱ 2-3 ngày</p>
+        <ul>
+          <li>Cài <code>claude</code> CLI</li>
+          <li>Login lần đầu</li>
+          <li>Prompt đầu tiên: "read this file", "fix this bug"</li>
+          <li>Hiểu permission modes (ask/accept/yolo)</li>
+          <li>CLAUDE.md — project instructions</li>
+        </ul>
+        <p><a href="basics.html" style="color:var(--primary)">→ Trang Cơ Bản</a></p>
+      </div>
+
+      <div class="card level-card">
+        <span class="level-badge" style="background: linear-gradient(135deg,#43e97b,#38f9d7)">L2 · JUNIOR</span>
+        <h3>Commands thành thạo</h3>
+        <p style="color: var(--warn); font-size:.85rem; font-weight:600;">⏱ 1 tuần</p>
+        <ul>
+          <li>Slash commands built-in: <code>/help /clear /compact /model</code></li>
+          <li>CLI flags: <code>--print --output-format</code></li>
+          <li>Keyboard shortcuts</li>
+          <li>Plan mode, multi-step task</li>
+          <li>Git workflow: commit, PR, review</li>
+        </ul>
+        <p><a href="commands.html" style="color:var(--primary)">→ Trang Commands</a></p>
+      </div>
+
+      <div class="card level-card">
+        <span class="level-badge" style="background: linear-gradient(135deg,#fa709a,#fee140)">L3 · MID-LEVEL</span>
+        <h3>Tuỳ biến &amp; mở rộng</h3>
+        <p style="color: var(--warn); font-size:.85rem; font-weight:600;">⏱ 2 tuần</p>
+        <ul>
+          <li>Custom slash commands — folder <code>.claude/commands/</code></li>
+          <li>Skills — template task tái dùng</li>
+          <li>Hooks — auto format, test sau mỗi edit</li>
+          <li>Subagents — Explore, Plan, code-reviewer</li>
+          <li><code>settings.json</code> permissions</li>
+        </ul>
+        <p><a href="customize.html" style="color:var(--primary)">→ Trang Customize</a></p>
+      </div>
+
+      <div class="card level-card">
+        <span class="level-badge" style="background: linear-gradient(135deg,#f093fb,#f5576c)">L4 · SENIOR</span>
+        <h3>Integrations</h3>
+        <p style="color: var(--warn); font-size:.85rem; font-weight:600;">⏱ 2-3 tuần</p>
+        <ul>
+          <li>MCP servers — kết nối Slack, Linear, DB</li>
+          <li>IDE extensions — VS Code, JetBrains</li>
+          <li>Agent SDK Python/TypeScript</li>
+          <li>GitHub Actions: Claude tự review PR</li>
+          <li>Background agents (long-running)</li>
+        </ul>
+        <p><a href="integrations.html" style="color:var(--primary)">→ Trang Integrations</a></p>
+      </div>
+
+      <div class="card level-card">
+        <span class="level-badge" style="background: linear-gradient(135deg,#ffecd2,#fcb69f)">L5 · MASTER</span>
+        <h3>Tips &amp; Best practices</h3>
+        <p style="color: var(--warn); font-size:.85rem; font-weight:600;">⏱ Liên tục</p>
+        <ul>
+          <li>Prompt patterns cho task khó</li>
+          <li>Plan-first workflow cho code lớn</li>
+          <li>Context engineering — <code>CLAUDE.md</code> strategy</li>
+          <li>Multi-agent workflow</li>
+          <li>Anti-patterns cần tránh</li>
+          <li>Debug khi Claude "đi sai hướng"</li>
+        </ul>
+        <p><a href="tips.html" style="color:var(--primary)">→ Trang Tips &amp; FAQ</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">⚡ Dùng Claude Code KHÔNG cần cài</h2>
+    <p class="section-sub">Giống Docker/Redis — Claude Code cũng có option web, không cần cài nặng máy.</p>
+
+    <div class="grid grid-2">
+      <div class="card" style="border: 2px solid var(--primary)">
+        <h3>🌐 Claude.ai/code — Web IDE <span style="color: var(--success); font-size:.75rem">KHUYÊN CHO NGƯỜI MỚI</span></h3>
+        <p><strong>URL:</strong> <code>claude.ai/code</code></p>
+        <p>Claude Code chạy ngay trên browser — không cài gì, không cần Node.js. Link GitHub repo vào, Claude code trong container cloud do Anthropic host.</p>
+        <ul>
+          <li>Zero setup</li>
+          <li>Miễn phí với Claude Pro/Max</li>
+          <li>Giống hệt CLI nhưng UI đẹp hơn</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>💻 CLI — cho control tối đa</h3>
+        <p>Dùng khi cần thao tác với repo local, chạy đồng thời với IDE của bạn.</p>
+        <pre class="code"><span class="c"># Cài một lệnh</span>
+npm install -g @anthropic-ai/claude-code
+
+<span class="c"># Login lần đầu</span>
+claude
+
+<span class="c"># Browser mở để auth</span>
+<span class="c"># → xong, ready to go</span></pre>
+        <p style="margin-top:.5rem">Cần Node.js 18+. Chi tiết ở <a href="basics.html" style="color:var(--primary)">trang Cơ Bản</a>.</p>
+      </div>
+
+      <div class="card">
+        <h3>🎨 VS Code Extension</h3>
+        <p>Marketplace search "Claude Code" → Install. Sidebar có panel riêng, command palette <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> "Claude:".</p>
+        <p>Inline suggestions, quick edit bằng <kbd>Ctrl</kbd>+<kbd>I</kbd>.</p>
+      </div>
+
+      <div class="card">
+        <h3>🧪 JetBrains Plugin</h3>
+        <p>Plugins marketplace → "Claude Code" → Install. Support IntelliJ, WebStorm, PyCharm, Rider, GoLand.</p>
+        <p>Integrate với built-in version control, run configuration.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Claude Code vs các AI coding tool khác</h2>
+    <table class="cmp">
+      <tr>
+        <th></th>
+        <th>Claude Code</th>
+        <th>GitHub Copilot</th>
+        <th>Cursor</th>
+        <th>Aider</th>
+      </tr>
+      <tr>
+        <td><strong>Dạng</strong></td>
+        <td>CLI + IDE + SDK + Web</td>
+        <td>IDE extension</td>
+        <td>Standalone IDE (fork VS Code)</td>
+        <td>CLI</td>
+      </tr>
+      <tr>
+        <td><strong>Agentic (tự chạy nhiều bước)</strong></td>
+        <td>✅ Mạnh nhất</td>
+        <td>❌ Chỉ suggest</td>
+        <td>✅ Có (agent mode)</td>
+        <td>✅ Có</td>
+      </tr>
+      <tr>
+        <td><strong>Context lớn (full repo)</strong></td>
+        <td>✅ 1M token Opus</td>
+        <td>❌ Hạn chế</td>
+        <td>✅ Có indexing</td>
+        <td>✅ Có</td>
+      </tr>
+      <tr>
+        <td><strong>Model cho chọn</strong></td>
+        <td>Opus/Sonnet/Haiku 4.x</td>
+        <td>Cố định (GPT/Copilot)</td>
+        <td>Claude/GPT/Gemini</td>
+        <td>Claude/GPT/Ollama</td>
+      </tr>
+      <tr>
+        <td><strong>Customization</strong></td>
+        <td>Slash cmd, skills, hooks, MCP, subagents</td>
+        <td>Hạn chế</td>
+        <td>Rules, MCP</td>
+        <td>Scripts, prompts</td>
+      </tr>
+      <tr>
+        <td><strong>Giá</strong></td>
+        <td>Pro $20/Max $200/api</td>
+        <td>$10-19/tháng</td>
+        <td>$20/tháng</td>
+        <td>Pay API</td>
+      </tr>
+      <tr>
+        <td><strong>Thế mạnh</strong></td>
+        <td>Task dài, codebase lớn, automation</td>
+        <td>Autocomplete trong IDE</td>
+        <td>IDE-first experience</td>
+        <td>Git-native workflow</td>
+      </tr>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Demo 60 giây — Claude Code làm gì?</h2>
+
+    <div class="terminal">
+<span class="prompt">$</span> <span class="cmd">claude</span>
+<span class="comment"># Claude Code khởi động trong repo hiện tại</span>
+
+<span class="user">You:</span> Read CLAUDE.md and summarize this project in 3 sentences.
+
+<span class="asst">Claude:</span> I'll read the file first.
+<span class="comment"># [Reads CLAUDE.md]</span>
+This is DevHub — a React SPA learning hub that loads static HTML pages via
+iframes. Content is organized around .NET, SQL, Build/Deploy, languages,
+English, AI, and tips. Uses localStorage for progress tracking.
+
+<span class="user">You:</span> Add a new section 'Rust' to the sidebar, with a hub page
+        that has the same style as the Redis section.
+
+<span class="asst">Claude:</span> I'll do this in 3 steps:
+ 1. Create public/RUST/ folder with index.html using Redis styling
+ 2. Register section in src/App.jsx SECTIONS
+ 3. Add stat card in Dashboard.jsx
+
+<span class="comment"># [Reads Redis folder, copies style pattern]</span>
+<span class="comment"># [Writes public/RUST/index.html - 240 lines]</span>
+<span class="comment"># [Edits src/App.jsx - adds rust entry]</span>
+<span class="comment"># [Edits Dashboard.jsx - adds card]</span>
+
+<span class="ret">✓ Done. Created 1 file, edited 2 files.</span>
+Restart npm run dev and click 🦀 Rust in sidebar to see it.
+    </div>
+
+    <p style="margin-top:1rem; color: var(--muted)"><strong>Đó là 1 request bình thường.</strong> Claude đọc code cũ để bắt chước pattern, tạo file mới, sửa 2 file React — đúng chỗ. Không copy-paste từ Stack Overflow, không hallucination tên file không có.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Checklist tự đánh giá</h2>
+    <div class="grid grid-3">
+      <div class="card">
+        <h4>✅ Beginner (L1)</h4>
+        <ul>
+          <li>Cài được <code>claude</code> CLI hoặc mở được web</li>
+          <li>Login thành công</li>
+          <li>Hỏi Claude đọc file, hiểu output</li>
+          <li>Cho Claude sửa 1 file đơn giản</li>
+          <li>Biết 3 permission mode</li>
+          <li>Tạo file CLAUDE.md</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>✅ Junior (L2)</h4>
+        <ul>
+          <li>Dùng <code>/compact /clear /model</code></li>
+          <li>Đổi model giữa chừng session</li>
+          <li>Plan mode trước khi làm task lớn</li>
+          <li>Cho Claude commit + push</li>
+          <li>Đọc/hiểu Claude plan, chấp thuận hoặc bác</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>✅ Mid (L3)</h4>
+        <ul>
+          <li>Viết 2-3 slash command riêng</li>
+          <li>Setup hook auto-format sau edit</li>
+          <li>Dùng <code>Agent</code> subagent cho task nặng</li>
+          <li>Cấu hình <code>.claude/settings.json</code></li>
+          <li>Tạo skill riêng cho project</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>✅ Senior (L4)</h4>
+        <ul>
+          <li>Setup MCP server (filesystem, GitHub)</li>
+          <li>Viết script tự động bằng Agent SDK</li>
+          <li>Tích hợp Claude Code vào GitHub Actions</li>
+          <li>Background agent chạy task giờ</li>
+          <li>Multi-agent workflow (planner + worker + reviewer)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>✅ Master (L5)</h4>
+        <ul>
+          <li>Thiết kế CLAUDE.md 200-300 dòng cho project phức tạp</li>
+          <li>Chia task theo pattern "Explore → Plan → Act → Review"</li>
+          <li>Biết khi nào nên interrupt Claude</li>
+          <li>Dùng Claude để review đồng nghiệp</li>
+          <li>Train team mới dùng Claude Code hiệu quả</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>🎯 Dự án luyện</h4>
+        <ul>
+          <li>Fix bug trong repo lớn lạ</li>
+          <li>Viết 100% test cho module sẵn có</li>
+          <li>Migrate project CRA → Vite</li>
+          <li>Tạo script tự release changelog</li>
+          <li>Build mini SaaS từ prompt đến deploy</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Claude Code Mastery · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

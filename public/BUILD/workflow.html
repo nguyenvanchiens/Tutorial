@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workflow Thực Tế — Từ Code Đến Production</title>
+    <link rel="stylesheet" href="build.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html">Build<span class="accent">&Deploy</span></a></div>
+            <div class="nav-links">
+                <a href="index.html">🗺️ Tổng quan</a>
+                <a href="git.html">📦 Git</a>
+                <a href="cicd.html">⚙️ CI/CD</a>
+                <a href="jenkins.html">🔴 Jenkins</a>
+                <a href="docker.html">🐳 Docker</a>
+                <a href="hosting.html">☁️ Hosting</a>
+                <a href="cloud.html">⛅ Cloud</a>
+                <a href="domain.html">🌐 Domain</a>
+                <a href="ssl.html">🔒 SSL</a>
+                <a href="monitoring.html">📊 Monitoring</a>
+                <a href="workflow.html" class="active">🔄 Workflow</a>
+            </div>
+            <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <header class="build-hero">
+        <div class="hero-content">
+            <div class="hero-badge">CHƯƠNG 10 · WORKFLOW</div>
+            <h1>Workflow <span class="gradient-text">Thực Tế</span></h1>
+            <p class="hero-desc">Ráp tất cả lại — một ngày làm việc thực tế của team chuẩn: code → PR → CI → deploy → monitor.</p>
+        </div>
+    </header>
+
+    <!-- ===== SECTION 10: WORKFLOW THỰC TẾ ===== -->
+    <section class="section section-dark" id="workflow">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🚀</div>
+                <h2>10. Workflow Thực Tế — Từ Code Đến Production</h2>
+                <p>Ghép tất cả lại — đây là cách deploy thật trong team chuyên nghiệp</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>📋 Workflow Hoàn Chỉnh — Step by Step</h3>
+                <div class="workflow-timeline">
+                    <div class="wf-step">
+                        <div class="wf-num">1</div>
+                        <div class="wf-content">
+                            <h4>Developer code trên feature branch</h4>
+                            <p><code>git checkout -b feature/user-profile</code> → code → commit theo conventional commits → push</p>
+                        </div>
+                    </div>
+                    <div class="wf-step">
+                        <div class="wf-num">2</div>
+                        <div class="wf-content">
+                            <h4>Tạo Pull Request</h4>
+                            <p>Mô tả thay đổi, screenshots nếu có UI. CI tự chạy: build, test, lint.</p>
+                        </div>
+                    </div>
+                    <div class="wf-step">
+                        <div class="wf-num">3</div>
+                        <div class="wf-content">
+                            <h4>Code Review</h4>
+                            <p>Ít nhất 1 người review. Check logic, security, performance. Request changes nếu cần.</p>
+                        </div>
+                    </div>
+                    <div class="wf-step">
+                        <div class="wf-num">4</div>
+                        <div class="wf-content">
+                            <h4>Merge vào main</h4>
+                            <p>CI pass ✅ + Review approved ✅ → Squash & merge. Branch cũ tự xóa.</p>
+                        </div>
+                    </div>
+                    <div class="wf-step">
+                        <div class="wf-num">5</div>
+                        <div class="wf-content">
+                            <h4>CD tự động deploy lên Staging</h4>
+                            <p>GitHub Actions build Docker image → push registry → deploy staging. Preview URL tự tạo.</p>
+                        </div>
+                    </div>
+                    <div class="wf-step">
+                        <div class="wf-num">6</div>
+                        <div class="wf-content">
+                            <h4>QA test trên Staging</h4>
+                            <p>Test manual + automated. Smoke test, regression test. Nếu bug → quay lại bước 1.</p>
+                        </div>
+                    </div>
+                    <div class="wf-step">
+                        <div class="wf-num">7</div>
+                        <div class="wf-content">
+                            <h4>Deploy Production</h4>
+                            <p>Approve manual gate (hoặc auto). Rolling deployment / Blue-green. Zero downtime.</p>
+                        </div>
+                    </div>
+                    <div class="wf-step">
+                        <div class="wf-num">8</div>
+                        <div class="wf-content">
+                            <h4>Monitor & Verify</h4>
+                            <p>Check Sentry (errors?), metrics (response time?), logs. Nếu có vấn đề → rollback ngay.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🔄 Deploy Strategies — Cách Deploy Không Downtime</h3>
+                <div class="deploy-strats">
+                    <div class="strat-card">
+                        <h4>Rolling Deployment</h4>
+                        <p>Update từng server/container một. Nếu có 3 replicas → update 1 → healthy → update tiếp. Luôn có instance chạy version cũ serve traffic.</p>
+                        <div class="strat-use">Dùng khi: Default cho hầu hết trường hợp. Kubernetes mặc định dùng cách này.</div>
+                    </div>
+                    <div class="strat-card">
+                        <h4>Blue-Green Deployment</h4>
+                        <p>2 environment giống hệt nhau: Blue (đang live) + Green (version mới). Test Green xong → switch traffic. Rollback = switch lại Blue.</p>
+                        <div class="strat-use">Dùng khi: Cần rollback tức thì. Tốn gấp đôi resource nhưng an toàn nhất.</div>
+                    </div>
+                    <div class="strat-card">
+                        <h4>Canary Release</h4>
+                        <p>Deploy version mới cho 5% users trước. Monitor lỗi. OK → tăng lên 25% → 50% → 100%. Lỗi → rollback chỉ ảnh hưởng 5%.</p>
+                        <div class="strat-use">Dùng khi: Feature quan trọng, cần validate với real traffic trước khi full rollout.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>💀 Lời Khuyên Sống Còn — Deploy Edition</h3>
+                <div class="survival-deploy">
+                    <div class="survive-item">
+                        <strong>🔴 KHÔNG deploy chiều thứ 6.</strong>
+                        <p>Bug phát hiện cuối tuần = không ai fix. Deploy thứ 2-4 sáng, khi team đầy đủ.</p>
+                    </div>
+                    <div class="survive-item">
+                        <strong>🔴 Mọi deploy PHẢI có rollback plan.</strong>
+                        <p>Trước khi bấm deploy: "Nếu lỗi, rollback bằng cách nào?" Không trả lời được = chưa sẵn sàng deploy.</p>
+                    </div>
+                    <div class="survive-item">
+                        <strong>🔴 Không deploy nhiều thay đổi 1 lúc.</strong>
+                        <p>Deploy 10 features cùng lúc → lỗi → không biết feature nào gây ra. Deploy nhỏ, thường xuyên.</p>
+                    </div>
+                    <div class="survive-item">
+                        <strong>🟡 Database migration TRƯỚC app deploy.</strong>
+                        <p>App mới cần schema mới → deploy app trước khi migrate = crash. Luôn: migrate DB → deploy app → verify.</p>
+                    </div>
+                    <div class="survive-item">
+                        <strong>🟡 Feature flags > long-lived branches.</strong>
+                        <p>Feature chưa xong? Dùng flag để ẩn, vẫn merge vào main. Tránh merge conflict hell.</p>
+                    </div>
+                    <div class="survive-item">
+                        <strong>🟡 Smoke test SAU MỌI deploy.</strong>
+                        <p>Deploy xong → test ngay: login được không? API trả data không? Thanh toán hoạt động không? Không phải "deploy xong tắt máy đi ngủ".</p>
+                    </div>
+                    <div class="survive-item">
+                        <strong>💡 Document mọi thứ.</strong>
+                        <p>README phải có: cách chạy local, cách deploy, environment variables cần gì, architecture diagram. Dev mới join team phải setup được trong < 30 phút.</p>
+                    </div>
+                    <div class="survive-item">
+                        <strong>💡 Infrastructure as Code.</strong>
+                        <p>Server setup bằng code (Terraform, Pulumi), không phải click UI. Server chết → tạo lại trong 10 phút từ code. "Pets vs Cattle" mindset.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="closing-box">
+                <div class="closing-nav">
+                    <a href="index.html" class="closing-btn">🗺️ Tổng quan</a>
+                    <a href="git.html" class="closing-btn">📦 Git</a>
+                    <a href="cicd.html" class="closing-btn">⚙️ CI/CD</a>
+                    <a href="jenkins.html" class="closing-btn">🔴 Jenkins</a>
+                    <a href="docker.html" class="closing-btn">🐳 Docker</a>
+                    <a href="hosting.html" class="closing-btn">☁️ Hosting</a>
+                    <a href="cloud.html" class="closing-btn">⛅ Cloud</a>
+                    <a href="domain.html" class="closing-btn">🌐 Domain</a>
+                    <a href="ssl.html" class="closing-btn">🔒 SSL</a>
+                    <a href="monitoring.html" class="closing-btn">📊 Monitoring</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Build & Deploy — Triển khai website từ A→Z cho web developer</p>
+        </div>
+    </footer>
+
+    <script src="build.js"></script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Platforms — AWS, Azure, GCP</title>
+    <link rel="stylesheet" href="build.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html">Build<span class="accent">&Deploy</span></a></div>
+            <div class="nav-links">
+                <a href="index.html">🗺️ Tổng quan</a>
+                <a href="git.html">📦 Git</a>
+                <a href="cicd.html">⚙️ CI/CD</a>
+                <a href="jenkins.html">🔴 Jenkins</a>
+                <a href="docker.html">🐳 Docker</a>
+                <a href="hosting.html">☁️ Hosting</a>
+                <a href="cloud.html" class="active">⛅ Cloud</a>
+                <a href="domain.html">🌐 Domain</a>
+                <a href="ssl.html">🔒 SSL</a>
+                <a href="monitoring.html">📊 Monitoring</a>
+                <a href="workflow.html">🔄 Workflow</a>
+            </div>
+            <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <header class="build-hero">
+        <div class="hero-content">
+            <div class="hero-badge">CHƯƠNG 6 · CLOUD</div>
+            <h1>Cloud <span class="gradient-text">Platforms</span></h1>
+            <p class="hero-desc">Big 3 cloud và khi nào cần dùng. Hiểu đúng trước khi chọn.</p>
+        </div>
+    </header>
+
+    <!-- ===== SECTION 6: CLOUD ===== -->
+    <section class="section section-dark" id="cloud">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">☁️</div>
+                <h2>6. Cloud Platforms — Big 3 & Khi Nào Cần</h2>
+                <p>Azure, AWS, GCP — khi nào cần cloud thật sự vs khi nào PaaS là đủ</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>☁️ Big 3 Cloud — So Sánh Nhanh</h3>
+                <div class="cloud-grid">
+                    <div class="cloud-card cloud-azure">
+                        <h4>Microsoft Azure</h4>
+                        <div class="cloud-best">Tốt nhất cho .NET</div>
+                        <div class="cloud-services">
+                            <div><strong>Compute:</strong> App Service, Azure Functions, AKS</div>
+                            <div><strong>Database:</strong> Azure SQL, Cosmos DB</div>
+                            <div><strong>Storage:</strong> Blob Storage, CDN</div>
+                            <div><strong>Auth:</strong> Azure AD, B2C</div>
+                        </div>
+                        <div class="cloud-why">Chọn khi: Team .NET, đã dùng Microsoft stack, enterprise</div>
+                    </div>
+
+                    <div class="cloud-card cloud-aws">
+                        <h4>Amazon AWS</h4>
+                        <div class="cloud-best">Lớn nhất, nhiều service nhất</div>
+                        <div class="cloud-services">
+                            <div><strong>Compute:</strong> EC2, Lambda, ECS, EKS</div>
+                            <div><strong>Database:</strong> RDS, DynamoDB, Aurora</div>
+                            <div><strong>Storage:</strong> S3, CloudFront</div>
+                            <div><strong>Auth:</strong> Cognito, IAM</div>
+                        </div>
+                        <div class="cloud-why">Chọn khi: Cần mọi thứ, startup-to-enterprise, job market lớn nhất</div>
+                    </div>
+
+                    <div class="cloud-card cloud-gcp">
+                        <h4>Google Cloud (GCP)</h4>
+                        <div class="cloud-best">Tốt nhất cho AI/ML, Big Data</div>
+                        <div class="cloud-services">
+                            <div><strong>Compute:</strong> Cloud Run, GKE, App Engine</div>
+                            <div><strong>Database:</strong> Cloud SQL, Firestore, BigQuery</div>
+                            <div><strong>Storage:</strong> Cloud Storage, CDN</div>
+                            <div><strong>Special:</strong> Firebase, Vertex AI</div>
+                        </div>
+                        <div class="cloud-why">Chọn khi: Dùng Firebase, Kubernetes, data/AI workload</div>
+                    </div>
+                </div>
+
+                <div class="tip-box">
+                    <strong>💡 Cho người mới:</strong> Bạn KHÔNG CẦN cloud cho dự án nhỏ-vừa. Vercel + Railway + Supabase = đủ cho 95% side projects và startup giai đoạn đầu. Chỉ cần cloud khi: scale lớn, cần nhiều managed services, hoặc enterprise yêu cầu.
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>⚡ Serverless — Không Cần Quản Lý Server</h3>
+                <p>"Viết function → deploy → chỉ trả tiền khi function chạy. Không traffic = $0."</p>
+                <div class="tools-grid">
+                    <div class="tool-card">
+                        <h4>Azure Functions</h4>
+                        <p>Serverless cho .NET. Trigger từ HTTP, queue, timer, blob. Free 1 triệu request/tháng.</p>
+                    </div>
+                    <div class="tool-card">
+                        <h4>AWS Lambda</h4>
+                        <p>Serverless phổ biến nhất. Mọi ngôn ngữ. Free 1 triệu request/tháng.</p>
+                    </div>
+                    <div class="tool-card">
+                        <h4>Vercel Serverless / Edge Functions</h4>
+                        <p>API routes trong Next.js = serverless tự động. Zero config. Chạy ở edge gần user.</p>
+                    </div>
+                    <div class="tool-card">
+                        <h4>Cloudflare Workers</h4>
+                        <p>Edge runtime cực nhanh (<5ms cold start). JS/TS/Wasm. Free 100K request/ngày.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="closing-box">
+                <div class="closing-nav">
+                    <a href="index.html" class="closing-btn">🗺️ Tổng quan</a>
+                    <a href="git.html" class="closing-btn">📦 Git</a>
+                    <a href="cicd.html" class="closing-btn">⚙️ CI/CD</a>
+                    <a href="jenkins.html" class="closing-btn">🔴 Jenkins</a>
+                    <a href="docker.html" class="closing-btn">🐳 Docker</a>
+                    <a href="hosting.html" class="closing-btn">☁️ Hosting</a>
+                    <a href="domain.html" class="closing-btn">🌐 Domain</a>
+                    <a href="ssl.html" class="closing-btn">🔒 SSL</a>
+                    <a href="monitoring.html" class="closing-btn">📊 Monitoring</a>
+                    <a href="workflow.html" class="closing-btn">🔄 Workflow</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Build & Deploy — Triển khai website từ A→Z cho web developer</p>
+        </div>
+    </footer>
+
+    <script src="build.js"></script>
+</body>
+</html>

@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Chụp Toàn Bộ Trang Web — Tips & Tricks</title>
+<style>
+  :root {
+    --primary: #667eea;
+    --accent: #f5576c;
+    --bg: #0f1117;
+    --card: #1a1d2e;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --border: #2d3148;
+    --success: #43e97b;
+    --warn: #f39c12;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; padding: 2rem; }
+
+  .hero { text-align: center; margin-bottom: 3rem; }
+  .hero h1 { font-size: 2.2rem; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero p { color: var(--muted); margin-top: .5rem; font-size: 1.1rem; }
+
+  .section { margin-bottom: 2.5rem; }
+  .section h2 { font-size: 1.5rem; color: var(--primary); margin-bottom: 1rem; border-left: 4px solid var(--primary); padding-left: .75rem; }
+  .section h3 { font-size: 1.15rem; color: var(--success); margin: 1.2rem 0 .5rem; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+  .card h4 { color: var(--primary); margin-bottom: .5rem; font-size: 1.05rem; }
+  .card p, .card li { color: var(--muted); font-size: .95rem; }
+
+  .step-list { counter-reset: step; list-style: none; padding: 0; }
+  .step-list li { counter-increment: step; position: relative; padding-left: 2.5rem; margin-bottom: 1.2rem; }
+  .step-list li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 1.8rem; height: 1.8rem; background: var(--primary); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: .85rem; }
+
+  code { background: #2d3148; padding: 2px 6px; border-radius: 4px; font-size: .9rem; color: #f8d06b; }
+  kbd { background: linear-gradient(180deg, #3a3d52, #2d3148); border: 1px solid #555; border-radius: 4px; padding: 2px 8px; font-size: .85rem; color: #fff; font-family: inherit; box-shadow: 0 2px 0 #1a1d2e; display: inline-block; min-width: 1.5em; text-align: center; }
+
+  .tip { background: linear-gradient(135deg, rgba(102,126,234,.1), rgba(67,233,123,.1)); border: 1px solid var(--primary); border-radius: 10px; padding: 1rem 1.25rem; margin: 1rem 0; }
+  .tip strong { color: var(--success); }
+
+  /* ===== Browser mockup ===== */
+  .browser { border: 2px solid var(--border); border-radius: 10px; overflow: hidden; margin: 1.2rem 0; }
+  .browser-bar { background: #2b2d3a; padding: 8px 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .browser-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .browser-dot.r { background: #ff5f57; } .browser-dot.y { background: #ffbd2e; } .browser-dot.g { background: #28c840; }
+  .browser-url { flex: 1; background: #1a1d2e; border-radius: 4px; padding: 4px 10px; color: var(--muted); font-size: .78rem; margin-left: 8px; }
+  .browser-body { background: #1a1d2e; min-height: 200px; position: relative; }
+
+  /* DevTools mockup */
+  .devtools { border-top: 2px solid var(--primary); background: #1e1e2e; }
+  .devtools-tabs { display: flex; gap: 0; background: #252736; border-bottom: 1px solid var(--border); }
+  .devtools-tab { padding: 6px 14px; font-size: .75rem; color: var(--muted); border-bottom: 2px solid transparent; cursor: default; }
+  .devtools-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+  .devtools-body { padding: 10px; font-size: .8rem; }
+
+  .cmd-palette { background: #252736; border: 1px solid var(--primary); border-radius: 8px; max-width: 450px; margin: 0 auto; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,.5); }
+  .cmd-input { display: flex; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--border); gap: 8px; }
+  .cmd-input span { color: var(--primary); font-size: .8rem; }
+  .cmd-input-text { flex: 1; background: none; color: var(--text); font-size: .85rem; }
+  .cmd-result { padding: 4px 0; }
+  .cmd-item { padding: 6px 16px; font-size: .82rem; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .cmd-item.highlight { background: rgba(102,126,234,.15); color: var(--text); }
+  .cmd-item .icon { font-size: .7rem; color: var(--primary); }
+
+  /* Responsive device mockup */
+  .device-bar { background: #252736; padding: 6px 10px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .device-btn { background: #3a3d52; color: var(--muted); border: 1px solid #4a4d62; border-radius: 4px; padding: 3px 8px; font-size: .7rem; cursor: default; }
+  .device-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .device-select { background: #3a3d52; color: var(--text); border: 1px solid #4a4d62; border-radius: 4px; padding: 3px 8px; font-size: .72rem; }
+
+  .phone-frame { width: 280px; margin: 16px auto; border: 2px solid var(--border); border-radius: 20px; overflow: hidden; background: var(--card); }
+  .phone-notch { width: 80px; height: 6px; background: #2d3148; border-radius: 0 0 8px 8px; margin: 0 auto; }
+  .phone-screen { min-height: 160px; padding: 10px; }
+  .phone-screen .mini-header { background: var(--primary); padding: 8px; border-radius: 4px; margin-bottom: 6px; }
+  .phone-screen .mini-header span { color: #fff; font-size: .7rem; font-weight: 600; }
+  .phone-screen .mini-card { background: #252736; border-radius: 4px; padding: 6px; margin-bottom: 4px; }
+  .phone-screen .mini-card span { color: var(--muted); font-size: .65rem; }
+
+  .caption { text-align: center; color: var(--primary); font-size: .9rem; font-weight: 600; margin: 1.5rem 0 .5rem; }
+
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+  .compare-item { text-align: center; }
+  .compare-item .label { color: var(--muted); font-size: .82rem; margin-top: .5rem; }
+  .compare-item .vs { background: var(--accent); color: #fff; padding: 2px 10px; border-radius: 10px; font-size: .75rem; font-weight: 600; }
+
+  .key-combo { display: inline-flex; align-items: center; gap: 4px; margin: 2px 0; }
+  .key-combo .plus { color: var(--muted); font-size: .75rem; }
+
+  @media (max-width: 600px) {
+    body { padding: 1rem; }
+    .hero h1 { font-size: 1.5rem; }
+    .compare-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Chụp Toàn Bộ Trang Web</h1>
+  <p>Không cần cài extension — chỉ dùng DevTools có sẵn trong Chrome/Edge để chụp full-page screenshot</p>
+</div>
+
+<!-- ==================== CÁCH 1: COMMAND PALETTE ==================== -->
+<div class="section">
+  <h2>Cách 1: Dùng Command Palette (Nhanh nhất)</h2>
+
+  <div class="card">
+    <h4>Các bước thực hiện</h4>
+    <ol class="step-list">
+      <li>Mở trang web bạn muốn chụp</li>
+      <li>
+        Nhấn <span class="key-combo"><kbd>F12</kbd></span> để mở DevTools
+        <br/><span style="color:var(--muted); font-size:.85rem">Hoặc nhấn <span class="key-combo"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>Shift</kbd><span class="plus">+</span><kbd>I</kbd></span></span>
+      </li>
+      <li>
+        Mở Command Palette bằng:
+        <br/><span class="key-combo"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>Shift</kbd><span class="plus">+</span><kbd>P</kbd></span>
+      </li>
+      <li>
+        Gõ <code>screenshot</code> — sẽ thấy danh sách lệnh hiện ra
+      </li>
+      <li>
+        Chọn <strong>"Capture full size screenshot"</strong>
+        <br/><span style="color:var(--muted); font-size:.85rem">Ảnh PNG toàn bộ trang sẽ tự động tải về máy!</span>
+      </li>
+    </ol>
+  </div>
+
+  <!-- MOCKUP: Command Palette -->
+  <div class="caption">Minh họa: Command Palette trong DevTools</div>
+  <div class="browser">
+    <div class="browser-bar">
+      <span class="browser-dot r"></span><span class="browser-dot y"></span><span class="browser-dot g"></span>
+      <div class="browser-url">https://example.com/my-project</div>
+    </div>
+    <div class="browser-body" style="display:flex; min-height:350px;">
+      <!-- Page content side -->
+      <div style="flex:1; padding:16px; background: #12141f;">
+        <div style="background:var(--primary); height:40px; border-radius:6px; margin-bottom:10px; display:flex; align-items:center; padding:0 12px;">
+          <span style="color:#fff; font-size:.8rem; font-weight:600">My Website</span>
+          <span style="color:rgba(255,255,255,.5); font-size:.7rem; margin-left:auto">Home &nbsp; About &nbsp; Contact</span>
+        </div>
+        <div style="background:#1a1d2e; border-radius:6px; padding:10px; margin-bottom:8px;">
+          <div style="background:#2d3148; height:8px; border-radius:4px; width:60%; margin-bottom:6px"></div>
+          <div style="background:#2d3148; height:8px; border-radius:4px; width:80%; margin-bottom:6px"></div>
+          <div style="background:#2d3148; height:8px; border-radius:4px; width:40%"></div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+          <div style="background:#1a1d2e; border-radius:4px; height:50px"></div>
+          <div style="background:#1a1d2e; border-radius:4px; height:50px"></div>
+        </div>
+
+        <!-- Command Palette overlay -->
+        <div style="margin-top:16px;">
+          <div class="cmd-palette">
+            <div class="cmd-input">
+              <span>></span>
+              <span class="cmd-input-text">screenshot</span>
+            </div>
+            <div class="cmd-result">
+              <div class="cmd-item highlight">
+                <span class="icon">📸</span>
+                <span><strong>Capture full size screenshot</strong> — Chụp toàn bộ trang</span>
+              </div>
+              <div class="cmd-item">
+                <span class="icon">📷</span>
+                <span>Capture screenshot — Chụp vùng đang thấy</span>
+              </div>
+              <div class="cmd-item">
+                <span class="icon">📐</span>
+                <span>Capture node screenshot — Chụp 1 element</span>
+              </div>
+              <div class="cmd-item">
+                <span class="icon">📱</span>
+                <span>Capture area screenshot — Chụp vùng chọn</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DevTools side -->
+      <div style="width:280px; border-left: 2px solid var(--primary); background:#1e1e2e; flex-shrink:0;">
+        <div class="devtools-tabs">
+          <div class="devtools-tab active">Elements</div>
+          <div class="devtools-tab">Console</div>
+          <div class="devtools-tab">Network</div>
+          <div class="devtools-tab">Sources</div>
+        </div>
+        <div class="devtools-body" style="color:var(--muted); font-size:.72rem;">
+          <div style="margin-bottom:4px; color:#555">&lt;html&gt;</div>
+          <div style="margin-bottom:4px; padding-left:12px">&lt;head&gt;...&lt;/head&gt;</div>
+          <div style="margin-bottom:4px; padding-left:12px; color:var(--text)">&lt;body&gt;</div>
+          <div style="padding-left:24px; color:var(--primary)">&lt;nav class="header"&gt;...&lt;/nav&gt;</div>
+          <div style="padding-left:24px">&lt;main class="content"&gt;</div>
+          <div style="padding-left:36px; color:var(--success)">&lt;h1&gt;Hello World&lt;/h1&gt;</div>
+          <div style="padding-left:24px">&lt;/main&gt;</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="tip">
+    <strong>Kết quả:</strong> File PNG được tải về tự động chứa <strong>TOÀN BỘ</strong> nội dung trang — kể cả phần phải scroll xuống mới thấy. Không cần cuộn tay, không cần ghép ảnh!
+  </div>
+</div>
+
+<!-- ==================== CÁCH 2: RESPONSIVE MODE ==================== -->
+<div class="section">
+  <h2>Cách 2: Chụp qua Responsive Mode (Tùy chỉnh kích thước)</h2>
+
+  <div class="card">
+    <h4>Các bước thực hiện</h4>
+    <ol class="step-list">
+      <li>Mở DevTools bằng <span class="key-combo"><kbd>F12</kbd></span></li>
+      <li>
+        Nhấn nút <strong>Toggle Device Toolbar</strong> (icon điện thoại + tablet)
+        <br/><span style="color:var(--muted); font-size:.85rem">Hoặc phím tắt: <span class="key-combo"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>Shift</kbd><span class="plus">+</span><kbd>M</kbd></span></span>
+      </li>
+      <li>Chọn thiết bị (iPhone, iPad, v.v.) hoặc nhập kích thước tùy ý</li>
+      <li>Nhấn nút <strong>⋮</strong> (ba chấm dọc) trên thanh device toolbar</li>
+      <li>Chọn <strong>"Capture full size screenshot"</strong></li>
+    </ol>
+  </div>
+
+  <!-- MOCKUP: Responsive Mode -->
+  <div class="caption">Minh họa: Responsive Mode với Device Toolbar</div>
+  <div class="browser">
+    <div class="browser-bar">
+      <span class="browser-dot r"></span><span class="browser-dot y"></span><span class="browser-dot g"></span>
+      <div class="browser-url">https://example.com/my-project</div>
+    </div>
+    <div class="device-bar">
+      <div class="device-btn active" style="font-size:.8rem" title="Toggle Device Toolbar">📱💻</div>
+      <div class="device-select">iPhone 14 Pro ▾</div>
+      <span style="color:var(--muted); font-size:.72rem">393 × 852</span>
+      <span style="color:var(--muted); font-size:.72rem; margin-left:4px">100%</span>
+      <div style="margin-left:auto; display:flex; gap:4px;">
+        <div class="device-btn">🔄 Rotate</div>
+        <div class="device-btn active" style="background:var(--accent); border-color:var(--accent);">⋮ Menu</div>
+      </div>
+    </div>
+    <div class="browser-body" style="padding:20px; display:flex; flex-direction:column; align-items:center; background:#0a0b10; min-height:300px;">
+      <!-- Dropdown menu -->
+      <div style="position:relative; width:100%; display:flex; justify-content:flex-end; margin-bottom:10px;">
+        <div style="background:#252736; border:1px solid var(--border); border-radius:6px; padding:4px 0; width:220px; position:absolute; right:0; top:0; z-index:5; box-shadow: 0 4px 16px rgba(0,0,0,.4);">
+          <div style="padding:6px 14px; font-size:.78rem; color:var(--muted); border-bottom:1px solid var(--border)">Capture screenshot</div>
+          <div style="padding:6px 14px; font-size:.78rem; color:var(--text); background:rgba(102,126,234,.12)"><strong>📸 Capture full size screenshot</strong></div>
+          <div style="padding:6px 14px; font-size:.78rem; color:var(--muted)">📷 Capture screenshot</div>
+        </div>
+      </div>
+
+      <!-- Phone frame -->
+      <div class="phone-frame" style="margin-top:30px;">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="mini-header"><span>My Website</span></div>
+          <div class="mini-card"><span>Welcome to my page!</span></div>
+          <div class="mini-card"><span>Feature 1: Dashboard</span></div>
+          <div class="mini-card"><span>Feature 2: Analytics</span></div>
+          <div class="mini-card"><span>Feature 3: Settings</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="tip">
+    <strong>Ưu điểm:</strong> Chụp ảnh ở bất kỳ kích thước thiết bị nào — rất hữu ích để kiểm tra responsive hoặc tạo ảnh preview cho mobile/tablet.
+  </div>
+</div>
+
+<!-- ==================== CÁCH 3: CHỤP 1 ELEMENT ==================== -->
+<div class="section">
+  <h2>Cách 3: Chụp 1 Phần Tử Cụ Thể (Node Screenshot)</h2>
+
+  <div class="card">
+    <h4>Các bước thực hiện</h4>
+    <ol class="step-list">
+      <li>Mở DevTools bằng <span class="key-combo"><kbd>F12</kbd></span></li>
+      <li>Trong tab <strong>Elements</strong>, click chọn phần tử muốn chụp (hoặc dùng nút <strong>Inspect</strong> 🔍 để click trực tiếp trên trang)</li>
+      <li>Click phải vào phần tử đã chọn trong panel Elements</li>
+      <li>Chọn <strong>"Capture node screenshot"</strong></li>
+      <li>Ảnh PNG chỉ chứa đúng phần tử đó sẽ được tải về</li>
+    </ol>
+  </div>
+
+  <div class="caption">Minh họa: Chọn element và chụp node screenshot</div>
+  <div class="browser">
+    <div class="browser-bar">
+      <span class="browser-dot r"></span><span class="browser-dot y"></span><span class="browser-dot g"></span>
+      <div class="browser-url">https://example.com/my-project</div>
+    </div>
+    <div class="browser-body" style="display:flex; min-height:250px;">
+      <div style="flex:1; padding:16px; background:#12141f;">
+        <div style="background:#1a1d2e; border-radius:6px; padding:10px; margin-bottom:8px;">
+          <div style="background:#2d3148; height:8px; border-radius:4px; width:50%; margin-bottom:6px"></div>
+          <div style="background:#2d3148; height:8px; border-radius:4px; width:70%"></div>
+        </div>
+        <!-- Selected element -->
+        <div style="border: 2px dashed var(--primary); border-radius:8px; padding:12px; background:rgba(102,126,234,.08); position:relative;">
+          <div style="position:absolute; top:-10px; left:8px; background:var(--primary); color:#fff; font-size:.65rem; padding:1px 8px; border-radius:3px;">div.stat-card</div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <div style="width:32px; height:32px; background:linear-gradient(135deg,#667eea,#764ba2); border-radius:6px;"></div>
+            <div>
+              <div style="background:#2d3148; height:7px; border-radius:4px; width:100px; margin-bottom:4px"></div>
+              <div style="background:#2d3148; height:6px; border-radius:4px; width:140px"></div>
+            </div>
+          </div>
+        </div>
+        <div style="background:#1a1d2e; border-radius:6px; padding:10px; margin-top:8px; opacity:.5;">
+          <div style="background:#2d3148; height:8px; border-radius:4px; width:40%"></div>
+        </div>
+      </div>
+      <div style="width:260px; border-left: 2px solid var(--primary); background:#1e1e2e; flex-shrink:0; padding:8px;">
+        <div style="font-size:.72rem; color:var(--muted); margin-bottom:6px;">Elements</div>
+        <div style="font-size:.7rem; color:#555; margin-bottom:3px; padding-left:0">&lt;main class="content"&gt;</div>
+        <div style="font-size:.7rem; color:var(--primary); margin-bottom:3px; padding-left:10px; background:rgba(102,126,234,.1); padding:3px 10px; border-radius:3px;">&lt;div class="stat-card"&gt; ← đang chọn</div>
+        <div style="font-size:.7rem; color:#555; padding-left:10px">&lt;div class="stat-card"&gt;</div>
+        <div style="margin-top:12px; background:#252736; border:1px solid var(--border); border-radius:6px; padding:6px;">
+          <div style="font-size:.7rem; color:var(--muted); margin-bottom:4px">Click phải → menu:</div>
+          <div style="font-size:.72rem; color:var(--muted); padding:3px 6px;">Edit as HTML</div>
+          <div style="font-size:.72rem; color:var(--muted); padding:3px 6px;">Copy → Copy element</div>
+          <div style="font-size:.72rem; color:var(--text); padding:3px 6px; background:rgba(102,126,234,.12); border-radius:3px;"><strong>📸 Capture node screenshot</strong></div>
+          <div style="font-size:.72rem; color:var(--muted); padding:3px 6px;">Hide element</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="tip"><strong>Khi nào dùng?</strong> Khi chỉ muốn chụp 1 component cụ thể (header, card, form...) mà không cần cả trang — rất tiện để gửi cho designer hoặc đưa vào tài liệu.</div>
+</div>
+
+<!-- ==================== TỔNG HỢP ==================== -->
+<div class="section">
+  <h2>Tổng Hợp 4 Kiểu Chụp</h2>
+  <table style="width:100%; border-collapse:collapse; margin:1rem 0;">
+    <tr>
+      <th style="padding:.6rem .8rem; border:1px solid var(--border); background:var(--card); color:var(--primary)">Kiểu chụp</th>
+      <th style="padding:.6rem .8rem; border:1px solid var(--border); background:var(--card); color:var(--primary)">Lệnh</th>
+      <th style="padding:.6rem .8rem; border:1px solid var(--border); background:var(--card); color:var(--primary)">Kết quả</th>
+      <th style="padding:.6rem .8rem; border:1px solid var(--border); background:var(--card); color:var(--primary)">Khi nào dùng</th>
+    </tr>
+    <tr>
+      <td style="padding:.6rem .8rem; border:1px solid var(--border); color:var(--text)"><strong>Full size</strong></td>
+      <td style="padding:.6rem .8rem; border:1px solid var(--border); color:var(--muted)">Capture full size screenshot</td>
+      <td style="padding:.6rem .8rem; border:1px solid var(--border); color:var(--muted)">Toàn bộ trang (kể cả phần scroll)</td>
+      <td style="padding:.6rem .8rem; border:1px solid var(--border); color:var(--muted)">Chụp nguyên trang web dài</td>
+    </tr>
+    <tr>
+      <td style="padding:.6rem .8rem; border:1px solid var(--border); color:var(--text)"><strong>Viewport</strong></td>
+      <td style="padding:.6rem .8rem; border:1px solid var(--border); color:var(--muted)">Capture screenshot</td>
+      <td style="padding:.6rem .8rem; border:1px solid var(--border); color:var(--muted)">Chỉ phần đang hiện trên màn hình</td>
+      <td style="padding:.6rem .8rem; border:1px solid var(--border); color:var(--muted)">Chụp nhanh phần đang xem</td>
+    </tr>
+    <tr>
+      <td style="padding:.6rem .8rem; border:1px solid var(--border); color:var(--text)"><strong>Node</strong></td>
+      <td style="padding:.6rem .8rem; border:1px solid var(--border); color:var(--muted)">Capture node screenshot</td>
+      <td style="padding:.6rem .8rem; border:1px solid var(--border); color:var(--muted)">Chỉ 1 phần tử HTML đang chọn</td>
+      <td style="padding:.6rem .8rem; border:1px solid var(--border); color:var(--muted)">Chụp 1 component cụ thể</td>
+    </tr>
+    <tr>
+      <td style="padding:.6rem .8rem; border:1px solid var(--border); color:var(--text)"><strong>Area</strong></td>
+      <td style="padding:.6rem .8rem; border:1px solid var(--border); color:var(--muted)">Capture area screenshot</td>
+      <td style="padding:.6rem .8rem; border:1px solid var(--border); color:var(--muted)">Vùng bạn kéo chọn trên trang</td>
+      <td style="padding:.6rem .8rem; border:1px solid var(--border); color:var(--muted)">Chụp vùng tùy ý, linh hoạt</td>
+    </tr>
+  </table>
+</div>
+
+<!-- ==================== PHÍM TẮT TÓM GỌN ==================== -->
+<div class="section">
+  <h2>Phím Tắt Ghi Nhớ</h2>
+  <div class="card" style="max-width:550px">
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span class="key-combo"><kbd>F12</kbd></span>
+        <span style="color:var(--muted)">→ Mở DevTools</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span class="key-combo"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>Shift</kbd><span class="plus">+</span><kbd>P</kbd></span>
+        <span style="color:var(--muted)">→ Mở Command Palette (trong DevTools)</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span class="key-combo"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>Shift</kbd><span class="plus">+</span><kbd>M</kbd></span>
+        <span style="color:var(--muted)">→ Toggle Responsive Mode</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span class="key-combo"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>Shift</kbd><span class="plus">+</span><kbd>C</kbd></span>
+        <span style="color:var(--muted)">→ Inspect element (chọn phần tử)</span>
+      </div>
+    </div>
+  </div>
+  <div class="tip"><strong>Ghi nhớ:</strong> Chỉ cần 2 bước: <span class="key-combo"><kbd>F12</kbd></span> → <span class="key-combo"><kbd>Ctrl</kbd><span class="plus">+</span><kbd>Shift</kbd><span class="plus">+</span><kbd>P</kbd></span> → gõ <code>screenshot</code> → Enter. Xong!</div>
+</div>
+
+<!-- ==================== TRANG TRONG IFRAME ==================== -->
+<div class="section">
+  <h2>Xử Lý Khi Trang Nằm Trong Iframe</h2>
+  <div class="card" style="border-color:var(--warn); border-width:2px;">
+    <h4 style="color:var(--warn)">Vấn đề: Chụp full-page nhưng chỉ ra được 1 phần?</h4>
+    <p>Nếu nội dung bạn muốn chụp đang nằm trong <strong>iframe</strong> (ví dụ: trang DevHub load nội dung qua iframe), thì lệnh "Capture full size screenshot" sẽ <strong>chỉ chụp khung ngoài</strong> — không phải nội dung bên trong iframe.</p>
+  </div>
+
+  <div class="card">
+    <h4>Cách khắc phục</h4>
+    <h3 style="margin-top:0">Cách A: Mở iframe ra tab riêng (đơn giản nhất)</h3>
+    <ol class="step-list">
+      <li>Click phải vào vùng nội dung bên trong iframe</li>
+      <li>Chọn <strong>"Open frame in new tab"</strong></li>
+      <li>Tab mới mở ra chứa nội dung gốc → chụp full-page bình thường tại đây</li>
+    </ol>
+  </div>
+
+  <!-- MOCKUP: Right-click menu -->
+  <div class="caption">Minh họa: Click phải → Open frame in new tab</div>
+  <div class="browser">
+    <div class="browser-bar">
+      <span class="browser-dot r"></span><span class="browser-dot y"></span><span class="browser-dot g"></span>
+      <div class="browser-url">http://localhost:5173</div>
+    </div>
+    <div class="browser-body" style="display:flex; min-height:280px;">
+      <!-- Sidebar -->
+      <div style="width:160px; background:#1a1c2a; border-right:1px solid var(--border); padding:10px 0; flex-shrink:0;">
+        <div style="padding:6px 12px; color:var(--primary); font-size:.8rem; font-weight:600;">Dev Hub</div>
+        <div style="padding:4px 12px; font-size:.72rem; color:var(--muted);">Dashboard</div>
+        <div style="padding:4px 12px; font-size:.72rem; color:var(--muted);">.NET Backend</div>
+        <div style="padding:4px 12px; font-size:.72rem; color:var(--success); font-weight:600;">Tips & Tricks</div>
+      </div>
+      <!-- Main content with iframe -->
+      <div style="flex:1; position:relative; background:#12141f; padding:0;">
+        <!-- Iframe indicator -->
+        <div style="position:absolute; top:4px; left:8px; background:var(--primary); color:#fff; font-size:.6rem; padding:1px 6px; border-radius:3px; z-index:2; opacity:.7;">&lt;iframe&gt;</div>
+        <!-- Iframe content -->
+        <div style="border:2px dashed var(--warn); margin:20px 10px 10px; border-radius:6px; padding:12px; min-height:220px; position:relative;">
+          <div style="background:var(--card); border-radius:6px; padding:8px; margin-bottom:6px;">
+            <div style="background:#2d3148; height:7px; border-radius:4px; width:50%; margin-bottom:4px"></div>
+            <div style="background:#2d3148; height:7px; border-radius:4px; width:70%"></div>
+          </div>
+          <div style="background:var(--card); border-radius:6px; padding:8px; margin-bottom:6px;">
+            <div style="background:#2d3148; height:7px; border-radius:4px; width:40%"></div>
+          </div>
+
+          <!-- Right-click context menu -->
+          <div style="position:absolute; top:30px; right:30px; background:#2b2d3a; border:1px solid var(--border); border-radius:6px; padding:4px 0; width:230px; box-shadow:0 4px 20px rgba(0,0,0,.5); z-index:10;">
+            <div style="padding:5px 14px; font-size:.75rem; color:var(--muted);">Back</div>
+            <div style="padding:5px 14px; font-size:.75rem; color:var(--muted);">Forward</div>
+            <div style="padding:5px 14px; font-size:.75rem; color:var(--muted);">Reload</div>
+            <div style="height:1px; background:var(--border); margin:3px 0;"></div>
+            <div style="padding:5px 14px; font-size:.75rem; color:var(--muted);">View page source</div>
+            <div style="padding:5px 14px; font-size:.75rem; color:var(--muted);">Inspect</div>
+            <div style="height:1px; background:var(--border); margin:3px 0;"></div>
+            <div style="padding:5px 14px; font-size:.75rem; color:var(--text); background:rgba(102,126,234,.12); font-weight:600;">📄 Open frame in new tab</div>
+            <div style="padding:5px 14px; font-size:.75rem; color:var(--muted);">View frame source</div>
+            <div style="padding:5px 14px; font-size:.75rem; color:var(--muted);">Reload frame</div>
+          </div>
+
+          <!-- Scroll indicator -->
+          <div style="position:absolute; bottom:4px; right:4px; color:var(--warn); font-size:.65rem;">↕ còn nhiều nội dung phía dưới...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Cách B: Dùng DevTools chọn đúng iframe context</h3>
+    <ol class="step-list">
+      <li>Mở DevTools bằng <span class="key-combo"><kbd>F12</kbd></span></li>
+      <li>Ở góc trên của tab <strong>Console</strong>, tìm dropdown <strong>"top"</strong> (hoặc <strong>"JavaScript context"</strong>)</li>
+      <li>Click vào dropdown đó → chọn <strong>iframe</strong> (sẽ hiện URL của iframe)</li>
+      <li>Giờ DevTools đang trỏ vào nội dung iframe → chạy lệnh screenshot sẽ chụp đúng nội dung bên trong</li>
+    </ol>
+  </div>
+
+  <!-- MOCKUP: Console context selector -->
+  <div class="caption">Minh họa: Chọn iframe context trong Console</div>
+  <div class="browser">
+    <div class="browser-bar">
+      <span class="browser-dot r"></span><span class="browser-dot y"></span><span class="browser-dot g"></span>
+      <div class="browser-url">http://localhost:5173</div>
+    </div>
+    <div style="border-top: 2px solid var(--primary); background:#1e1e2e;">
+      <div class="devtools-tabs">
+        <div class="devtools-tab">Elements</div>
+        <div class="devtools-tab active">Console</div>
+        <div class="devtools-tab">Network</div>
+        <div class="devtools-tab">Sources</div>
+      </div>
+      <div style="padding:8px; display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--border);">
+        <span style="color:var(--muted); font-size:.72rem">JavaScript context:</span>
+        <!-- Dropdown -->
+        <div style="position:relative;">
+          <div style="background:#252736; border:1px solid var(--primary); border-radius:4px; padding:3px 10px; font-size:.75rem; color:var(--primary); min-width:200px; cursor:default;">
+            ▾ top
+          </div>
+          <div style="position:absolute; top:100%; left:0; background:#252736; border:1px solid var(--border); border-radius:6px; padding:3px 0; width:320px; margin-top:4px; box-shadow:0 4px 16px rgba(0,0,0,.4); z-index:5;">
+            <div style="padding:5px 12px; font-size:.75rem; color:var(--muted);">✓ top</div>
+            <div style="padding:5px 12px; font-size:.75rem; color:var(--text); background:rgba(102,126,234,.12); font-weight:600;">→ iframe (TIPS/screenshot.html)</div>
+          </div>
+        </div>
+      </div>
+      <div style="padding:12px; color:var(--muted); font-size:.78rem;">
+        <span style="color:var(--primary)">></span> Giờ lệnh screenshot sẽ chụp nội dung <strong style="color:var(--success)">bên trong iframe</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip"><strong>Khuyến nghị:</strong> <strong>Cách A</strong> (mở frame trong tab mới) là đơn giản và hiệu quả nhất. Cách B phù hợp khi bạn không muốn rời khỏi trang hiện tại.</div>
+</div>
+
+<!-- ==================== LƯU Ý ==================== -->
+<div class="section">
+  <h2>Lưu Ý Quan Trọng</h2>
+  <div class="card">
+    <ul style="padding-left:1.2rem;">
+      <li>Tính năng này hoạt động trên <strong>Chrome, Edge, Brave</strong> và các trình duyệt Chromium khác</li>
+      <li>Firefox cũng hỗ trợ: click phải trên trang → <strong>"Take Screenshot"</strong> → <strong>"Save full page"</strong></li>
+      <li>Ảnh xuất ra là <strong>PNG</strong> với độ phân giải gốc — có thể rất lớn với trang dài</li>
+      <li>Nếu trang có phần tử <strong>position: fixed</strong> (header, navbar), chúng có thể bị lặp lại trong ảnh full-page</li>
+      <li>Với trang cần đăng nhập: chụp bình thường, DevTools giữ nguyên session của bạn</li>
+      <li><strong>Nếu nội dung nằm trong iframe</strong> → mở frame ra tab mới trước khi chụp (xem phần trên)</li>
+      <li><strong>Không cần cài thêm bất kỳ extension nào!</strong></li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

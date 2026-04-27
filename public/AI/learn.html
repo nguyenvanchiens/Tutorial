@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Mastery — Lộ Trình Làm Chủ AI Cho Developer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{
+            --bg:#0B0B1A;--surface:#151528;--surface2:#1E1E3A;--border:#2A2A4A;
+            --text:#E8E8F0;--text-dim:#8888AA;--primary:#7C3AED;--accent:#06B6D4;
+            --green:#10B981;--orange:#F59E0B;--red:#EF4444;--pink:#EC4899;--blue:#3B82F6;
+            --radius:12px;--radius-sm:8px;
+        }
+        html{scroll-behavior:smooth}
+        body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.8;min-height:100vh}
+
+        /* ═══ Navbar ═══ */
+        .navbar{position:fixed;top:0;left:0;width:100%;background:rgba(11,11,26,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px}
+        .nav-logo{font-weight:800;font-size:1rem;color:var(--primary);text-decoration:none}
+        .nav-logo span{color:var(--accent)}
+        .nav-links{display:flex;gap:20px}
+        .nav-links a{color:var(--text-dim);text-decoration:none;font-size:.85rem;font-weight:500;transition:color .2s}
+        .nav-links a:hover,.nav-links a.active{color:var(--primary)}
+
+        /* ═══ Container ═══ */
+        .container{max-width:920px;margin:0 auto;padding:0 24px}
+
+        /* ═══ Hero ═══ */
+        .hero{padding:90px 24px 40px;text-align:center;background:linear-gradient(180deg,rgba(124,58,237,.08) 0%,transparent 60%)}
+        .hero h1{font-size:2.4rem;font-weight:900;margin-bottom:12px}
+        .gradient-text{background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .hero p{color:var(--text-dim);font-size:.95rem;max-width:650px;margin:0 auto}
+        .hero-badge{display:inline-block;padding:4px 16px;border-radius:20px;font-size:.75rem;font-weight:700;background:rgba(124,58,237,.15);color:var(--primary);margin-bottom:16px;letter-spacing:1px}
+
+        /* ═══ TOC ═══ */
+        .toc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 28px;margin:0 auto 40px;max-width:920px}
+        .toc h3{font-size:1rem;font-weight:800;margin-bottom:12px;color:var(--accent)}
+        .toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px}
+        .toc a{color:var(--text-dim);text-decoration:none;font-size:.88rem;padding:4px 0;transition:color .2s;display:flex;align-items:center;gap:8px}
+        .toc a:hover{color:var(--primary)}
+        .toc-num{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;color:var(--primary);min-width:24px}
+
+        /* ═══ Section ═══ */
+        .section{margin-bottom:48px;scroll-margin-top:72px}
+        .section-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid var(--border)}
+        .section-num{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:900;color:var(--primary)}
+        .section-title{font-size:1.25rem;font-weight:800}
+        .section-subtitle{color:var(--text-dim);font-size:.85rem;margin-top:2px}
+
+        /* ═══ Card ═══ */
+        .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px;transition:border-color .2s}
+        .card:hover{border-color:rgba(124,58,237,.3)}
+        .card h4{font-size:1rem;font-weight:700;margin-bottom:8px;color:var(--text)}
+        .card p,.card li{font-size:.9rem;color:var(--text-dim);line-height:1.8}
+        .card ul{padding-left:20px}
+        .card li{margin-bottom:6px}
+
+        /* ═══ Module Card ═══ */
+        .module{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px;position:relative;overflow:hidden}
+        .module::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;border-radius:4px 0 0 4px}
+        .module.beginner::before{background:var(--green)}
+        .module.intermediate::before{background:var(--orange)}
+        .module.advanced::before{background:var(--red)}
+        .module.expert::before{background:var(--primary)}
+        .module-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+        .module h4{font-size:1.05rem;font-weight:800}
+        .module-level{padding:3px 10px;border-radius:12px;font-size:.7rem;font-weight:700;flex-shrink:0}
+        .level-beginner{background:rgba(16,185,129,.12);color:var(--green)}
+        .level-intermediate{background:rgba(245,158,11,.12);color:var(--orange)}
+        .level-advanced{background:rgba(239,68,68,.12);color:var(--red)}
+        .level-expert{background:rgba(124,58,237,.12);color:var(--primary)}
+        .module p{font-size:.88rem;color:var(--text-dim);margin-bottom:10px}
+        .module-what{font-size:.82rem;color:var(--text);margin-bottom:8px}
+        .module-what strong{color:var(--accent)}
+        .module-tools{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+        .tool-tag{padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:600;background:var(--surface2);color:var(--text-dim);border:1px solid var(--border)}
+
+        /* ═══ Roadmap ═══ */
+        .roadmap{position:relative;padding-left:32px}
+        .roadmap::before{content:'';position:absolute;left:11px;top:0;bottom:0;width:2px;background:var(--border)}
+        .roadmap-item{position:relative;margin-bottom:24px}
+        .roadmap-dot{position:absolute;left:-32px;top:4px;width:22px;height:22px;border-radius:50%;border:3px solid var(--border);background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:900;color:var(--text-dim)}
+        .roadmap-item.active .roadmap-dot{border-color:var(--primary);background:var(--primary);color:#fff}
+        .roadmap-time{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--primary);font-weight:700;margin-bottom:4px}
+        .roadmap-content h4{font-size:.95rem;font-weight:700;margin-bottom:4px}
+        .roadmap-content p{font-size:.85rem;color:var(--text-dim)}
+
+        /* ═══ Code Block ═══ */
+        .code-block{background:#0D0D20;border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 20px;margin:12px 0;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.7;color:#A5B4FC}
+        .code-comment{color:#6B7280}
+        .code-keyword{color:#C084FC}
+        .code-string{color:#34D399}
+        .code-fn{color:#60A5FA}
+
+        /* ═══ Highlight Box ═══ */
+        .highlight{border-radius:var(--radius);padding:16px 20px;margin:12px 0;font-size:.88rem}
+        .highlight-warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:var(--orange)}
+        .highlight-tip{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:var(--green)}
+        .highlight-important{background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);color:var(--primary)}
+        .highlight strong{color:var(--text)}
+
+        /* ═══ Comparison Table ═══ */
+        .compare-table{width:100%;border-collapse:collapse;font-size:.85rem;margin:12px 0}
+        .compare-table th{background:var(--surface2);padding:10px 14px;text-align:left;font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.5px;color:var(--accent);border-bottom:2px solid var(--border)}
+        .compare-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text-dim)}
+        .compare-table tr:hover td{background:rgba(124,58,237,.03)}
+
+        /* ═══ Footer ═══ */
+        .footer{padding:32px 24px;text-align:center;border-top:1px solid var(--border);margin-top:40px}
+        .footer p{color:var(--text-dim);font-size:.82rem}
+        .footer a{color:var(--primary);text-decoration:none}
+
+        /* ═══ Responsive ═══ */
+        @media(max-width:768px){
+            .hero h1{font-size:1.6rem}
+            .toc-grid{grid-template-columns:1fr}
+            .module-header{flex-direction:column;gap:8px}
+            .nav-links{display:none}
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav class="navbar">
+    <a href="index.html" class="nav-logo">AI<span>Hub</span></a>
+    <div class="nav-links">
+        <a href="index.html">Tin Tuc AI</a>
+        <a href="learn.html" class="active">Hoc AI</a>
+        <a href="../TODO/index.html">Schedule</a>
+        <a href="../TODO/vocab.html">Vocab</a>
+        <a href="../TODO/focus.html">Focus</a>
+        <a href="../BE/index.html">.NET</a>
+    </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<header class="hero">
+    <div class="hero-badge">AI MASTERY ROADMAP — TU ZERO DEN PRODUCTION</div>
+    <h1>Lam Chu <span class="gradient-text">AI</span></h1>
+    <p>Lo trinh hoc AI thuc chien cho developer. Khong ly thuyet suong, khong hype — chi nhung gi ban can de BUILD va DEPLOY AI vao san pham that.</p>
+</header>
+
+<!-- ═══ TOC ═══ -->
+<div class="container">
+<div class="toc">
+    <h3>Muc Luc</h3>
+    <div class="toc-grid">
+        <a href="#s1"><span class="toc-num">01</span> AI Landscape — Buc tranh toan canh</a>
+        <a href="#s2"><span class="toc-num">02</span> LLM API — Bat dau tu day</a>
+        <a href="#s3"><span class="toc-num">03</span> Prompt Engineering</a>
+        <a href="#s4"><span class="toc-num">04</span> RAG — Retrieval Augmented Generation</a>
+        <a href="#s5"><span class="toc-num">05</span> AI Agents & Function Calling</a>
+        <a href="#s6"><span class="toc-num">06</span> Fine-tuning & Training</a>
+        <a href="#s7"><span class="toc-num">07</span> Vector Database & Embeddings</a>
+        <a href="#s8"><span class="toc-num">08</span> Deploy AI len Production</a>
+        <a href="#s9"><span class="toc-num">09</span> AI trong .NET Ecosystem</a>
+        <a href="#s10"><span class="toc-num">10</span> Lo trinh 6 thang</a>
+    </div>
+</div>
+
+<!-- ═══ SECTION 1: AI LANDSCAPE ═══ -->
+<div class="section" id="s1">
+    <div class="section-header">
+        <div class="section-num">01</div>
+        <div>
+            <div class="section-title">AI Landscape — Buc tranh toan canh</div>
+            <div class="section-subtitle">Hieu dung truoc khi lam — dung hoc lung tung</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>AI khong phai 1 thu — no la 1 he sinh thai</h4>
+        <p>Nhieu nguoi nghe "hoc AI" la nhay vao hoc neural network, gradient descent. SAI. Nhu developer, ban can hieu AI tu goc do THUC CHIEN:</p>
+        <ul>
+            <li><strong>AI-as-a-Service (dung API)</strong> — Goi API cua OpenAI, Anthropic, Google de tich hop AI vao app. Day la 80% cong viec AI cua developer.</li>
+            <li><strong>AI Engineering (xay pipeline)</strong> — RAG, AI agents, function calling, embeddings. Gop nhieu manh ghep AI thanh he thong hoan chinh.</li>
+            <li><strong>ML Engineering (train model)</strong> — Fine-tune model, train tu dau. Chi can khi ban co USE CASE CU THE, khong phai de "hoc cho biet".</li>
+            <li><strong>ML Research (nghien cuu)</strong> — Tao model moi, viet paper. KHONG phai muc tieu cua developer — de cho researcher.</li>
+        </ul>
+        <div class="highlight highlight-important">
+            <strong>Quy tac vang:</strong> Developer nen bat dau tu tang 1 (API) → tang 2 (Engineering) → chi xuong tang 3 (Training) khi THAT SU can. 90% gia tri kinh doanh nam o tang 1 va 2.
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Cac loai AI model ban can biet</h4>
+        <table class="compare-table">
+            <tr><th>Loai</th><th>Lam gi</th><th>Model tieu bieu</th><th>Dung khi</th></tr>
+            <tr><td><strong>LLM (Large Language Model)</strong></td><td>Hieu va sinh text</td><td>GPT-4o, Claude, Gemini, Llama</td><td>Chatbot, tong hop, phan tich, code</td></tr>
+            <tr><td><strong>Embedding Model</strong></td><td>Chuyen text thanh vector so</td><td>text-embedding-3, Cohere, BGE</td><td>Tim kiem ngu nghia, RAG, phan loai</td></tr>
+            <tr><td><strong>Image Model</strong></td><td>Tao/sua hinh anh</td><td>DALL-E, Midjourney, Stable Diffusion</td><td>Tao asset, edit anh, design</td></tr>
+            <tr><td><strong>Speech Model</strong></td><td>Speech-to-text, text-to-speech</td><td>Whisper, ElevenLabs, TTS</td><td>Phien dich, voice app, podcast</td></tr>
+            <tr><td><strong>Vision Model</strong></td><td>Hieu hinh anh/video</td><td>GPT-4V, Claude Vision, LLaVA</td><td>OCR, phan tich UI, medical imaging</td></tr>
+            <tr><td><strong>Code Model</strong></td><td>Viet/review code</td><td>Copilot, Claude Code, Cursor</td><td>Code assistant, review, refactor</td></tr>
+        </table>
+    </div>
+</div>
+
+<!-- ═══ SECTION 2: LLM API ═══ -->
+<div class="section" id="s2">
+    <div class="section-header">
+        <div class="section-num">02</div>
+        <div>
+            <div class="section-title">LLM API — Bat dau tu day</div>
+            <div class="section-subtitle">Goi API la ky nang so 1. Khong can hieu neural network de lam duoc.</div>
+        </div>
+    </div>
+
+    <div class="module beginner">
+        <div class="module-header">
+            <h4>Module 2.1: Goi API co ban</h4>
+            <span class="module-level level-beginner">Beginner</span>
+        </div>
+        <p>Moi thu bat dau tu 1 HTTP request. Ban gui message, model tra loi. Don gian nhu goi REST API binh thuong.</p>
+        <div class="module-what"><strong>Ban se lam:</strong> Goi OpenAI/Anthropic API, xu ly response, stream response, xu ly loi, tinh cost</div>
+        <div class="code-block">
+<span class="code-comment">// C# — Goi Claude API bang Anthropic SDK</span>
+<span class="code-keyword">using</span> Anthropic;
+
+<span class="code-keyword">var</span> client = <span class="code-keyword">new</span> <span class="code-fn">AnthropicClient</span>(<span class="code-string">"your-api-key"</span>);
+<span class="code-keyword">var</span> message = <span class="code-keyword">await</span> client.Messages.<span class="code-fn">CreateAsync</span>(<span class="code-keyword">new</span>() {
+    Model = <span class="code-string">"claude-sonnet-4-20250514"</span>,
+    MaxTokens = 1024,
+    Messages = [<span class="code-keyword">new</span>() { Role = <span class="code-string">"user"</span>, Content = <span class="code-string">"Giai thich dependency injection nhu giai thich cho tre 5 tuoi"</span> }]
+});
+Console.<span class="code-fn">WriteLine</span>(message.Content[0].Text);
+        </div>
+        <div class="code-block">
+<span class="code-comment"># Python — Goi OpenAI API</span>
+<span class="code-keyword">from</span> openai <span class="code-keyword">import</span> OpenAI
+
+client = <span class="code-fn">OpenAI</span>(api_key=<span class="code-string">"your-key"</span>)
+response = client.chat.completions.<span class="code-fn">create</span>(
+    model=<span class="code-string">"gpt-4o"</span>,
+    messages=[{<span class="code-string">"role"</span>: <span class="code-string">"user"</span>, <span class="code-string">"content"</span>: <span class="code-string">"Viet unit test cho function sort"</span>}]
+)
+<span class="code-fn">print</span>(response.choices[0].message.content)
+        </div>
+        <div class="module-tools">
+            <span class="tool-tag">OpenAI SDK</span>
+            <span class="tool-tag">Anthropic SDK</span>
+            <span class="tool-tag">REST API</span>
+            <span class="tool-tag">HttpClient</span>
+        </div>
+    </div>
+
+    <div class="module beginner">
+        <div class="module-header">
+            <h4>Module 2.2: Streaming & Cost Optimization</h4>
+            <span class="module-level level-beginner">Beginner</span>
+        </div>
+        <p>Response tu LLM co the rat dai. Stream giup user thay text hien ra tung chu thay vi doi 10 giay. Hieu cach tinh cost de khong bi "chay bill".</p>
+        <div class="module-what"><strong>Ban se hieu:</strong> SSE streaming, token counting, cost per request, caching strategies, rate limiting</div>
+        <div class="highlight highlight-warn">
+            <strong>Luu y cost:</strong> GPT-4o ~ $2.50/1M input tokens. Claude Opus ~ $15/1M. Neu app co 1000 user/ngay, moi user gui 10 message → $25-$150/ngay. PHAI tinh cost truoc khi build.
+        </div>
+        <div class="module-tools">
+            <span class="tool-tag">Server-Sent Events</span>
+            <span class="tool-tag">tiktoken</span>
+            <span class="tool-tag">Response Caching</span>
+        </div>
+    </div>
+
+    <div class="module intermediate">
+        <div class="module-header">
+            <h4>Module 2.3: Multi-model Strategy</h4>
+            <span class="module-level level-intermediate">Intermediate</span>
+        </div>
+        <p>Khong co model nao tot nhat cho moi viec. Senior AI engineer biet khi nao dung model nao:</p>
+        <table class="compare-table">
+            <tr><th>Task</th><th>Model khuyen dung</th><th>Ly do</th></tr>
+            <tr><td>Code generation phuc tap</td><td>Claude Opus / GPT-4o</td><td>Can reasoning sau</td></tr>
+            <tr><td>Chat don gian</td><td>Claude Haiku / GPT-4o-mini</td><td>Re, nhanh, du tot</td></tr>
+            <tr><td>Phan loai text</td><td>GPT-4o-mini / Fine-tuned model</td><td>Task don gian, can throughput cao</td></tr>
+            <tr><td>Tong hop tai lieu dai</td><td>Claude / Gemini (context dai)</td><td>Context window 100K-1M tokens</td></tr>
+            <tr><td>On-premise / privacy</td><td>Llama, Mistral, Phi</td><td>Chay local, khong gui data ra ngoai</td></tr>
+        </table>
+        <div class="module-tools">
+            <span class="tool-tag">LiteLLM</span>
+            <span class="tool-tag">AI Gateway</span>
+            <span class="tool-tag">Model Router</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 3: PROMPT ENGINEERING ═══ -->
+<div class="section" id="s3">
+    <div class="section-header">
+        <div class="section-num">03</div>
+        <div>
+            <div class="section-title">Prompt Engineering</div>
+            <div class="section-subtitle">Ky nang quan trong nhat cua AI developer. Prompt tot = output tot.</div>
+        </div>
+    </div>
+
+    <div class="module beginner">
+        <div class="module-header">
+            <h4>Module 3.1: Nguyen tac viet Prompt</h4>
+            <span class="module-level level-beginner">Beginner</span>
+        </div>
+        <p>Prompt khong phai "hoi cho dung". Prompt la PROGRAMMING — ban dang "lap trinh" cach model suy nghi.</p>
+        <div class="module-what"><strong>5 nguyen tac core:</strong></div>
+        <ul style="font-size:.88rem;color:var(--text-dim);padding-left:20px">
+            <li><strong>Be Specific:</strong> "Viet API endpoint" → "Viet POST /api/users bang ASP.NET Core 8, validate email, return 201 voi user ID"</li>
+            <li><strong>Give Context:</strong> Cho model biet ban la ai, project gi, constraint gi. Model khong doan duoc context cua ban.</li>
+            <li><strong>Show Examples (Few-shot):</strong> Cho 2-3 vi du input → output. Model se hieu pattern va lam theo.</li>
+            <li><strong>Think Step by Step:</strong> Yeu cau model suy nghi tung buoc truoc khi tra loi. Tang chat luong dang ke voi task phuc tap.</li>
+            <li><strong>Define Output Format:</strong> Yeu cau tra ve JSON, Markdown, hoac format cu the. Giup parse output de dang.</li>
+        </ul>
+    </div>
+
+    <div class="module intermediate">
+        <div class="module-header">
+            <h4>Module 3.2: System Prompt & Persona</h4>
+            <span class="module-level level-intermediate">Intermediate</span>
+        </div>
+        <p>System prompt la "luat choi" cho model. Giong nhu ban viet spec cho 1 nhan vien moi — cang ro rang, ket qua cang tot.</p>
+        <div class="code-block">
+<span class="code-comment">// Vi du system prompt cho code review assistant</span>
+<span class="code-string">"Ban la senior .NET developer voi 10 nam kinh nghiem.
+Khi review code:
+1. Chi ra BUG truoc, roi moi den code style
+2. Moi suggestion phai kem code fix cu the
+3. Giai thich TAI SAO fix nhu vay, khong chi noi 'nen fix'
+4. Neu code ok, noi 'LGTM' — dung khen lung tung
+5. Tra loi bang tieng Viet, code comment bang tieng Anh
+Format: dung markdown voi ```csharp code blocks"</span>
+        </div>
+        <div class="module-tools">
+            <span class="tool-tag">System Prompts</span>
+            <span class="tool-tag">Few-shot Learning</span>
+            <span class="tool-tag">Chain-of-Thought</span>
+        </div>
+    </div>
+
+    <div class="module advanced">
+        <div class="module-header">
+            <h4>Module 3.3: Advanced Techniques</h4>
+            <span class="module-level level-advanced">Advanced</span>
+        </div>
+        <p>Nhung ky thuat nay tach biet giua nguoi "dung AI" va nguoi "lam chu AI":</p>
+        <ul style="font-size:.88rem;color:var(--text-dim);padding-left:20px">
+            <li><strong>Chain-of-Thought (CoT):</strong> Bat model "suy nghi to" — tang do chinh xac voi math, logic, code</li>
+            <li><strong>Self-Consistency:</strong> Chay cung prompt nhieu lan, lay ket qua pho bien nhat</li>
+            <li><strong>ReAct Pattern:</strong> Model suy nghi (Reason) → hanh dong (Act) → quan sat ket qua → lap lai. Nen tang cua AI Agents.</li>
+            <li><strong>Prompt Chaining:</strong> Tach 1 task lon thanh nhieu prompt nho, output cua prompt truoc la input cua prompt sau</li>
+            <li><strong>Structured Output:</strong> Bat model tra ve JSON schema cu the — dung cho API integration</li>
+        </ul>
+        <div class="module-tools">
+            <span class="tool-tag">CoT</span>
+            <span class="tool-tag">ReAct</span>
+            <span class="tool-tag">JSON Mode</span>
+            <span class="tool-tag">Tool Use</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 4: RAG ═══ -->
+<div class="section" id="s4">
+    <div class="section-header">
+        <div class="section-num">04</div>
+        <div>
+            <div class="section-title">RAG — Retrieval Augmented Generation</div>
+            <div class="section-subtitle">Cho AI doc tai lieu cua BAN. Ky thuat duoc dung nhieu nhat trong enterprise.</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>RAG la gi va tai sao quan trong?</h4>
+        <p>LLM biet nhieu nhung KHONG biet du lieu cua ban — noi quy cong ty, tai lieu ky thuat, database san pham. RAG = cho model "doc bai" truoc khi tra loi.</p>
+        <div class="highlight highlight-tip">
+            <strong>Pipeline RAG don gian:</strong> Tai lieu → Tach chunk → Tao embedding → Luu vector DB → User hoi → Tim chunk lien quan → Gui chunk + cau hoi cho LLM → Tra loi co nguon
+        </div>
+    </div>
+
+    <div class="module intermediate">
+        <div class="module-header">
+            <h4>Module 4.1: Xay RAG Pipeline</h4>
+            <span class="module-level level-intermediate">Intermediate</span>
+        </div>
+        <p>Pipeline co ban: Document Loading → Chunking → Embedding → Vector Store → Retrieval → Generation</p>
+        <div class="module-what"><strong>Ban se build:</strong> Chatbot doc duoc PDF noi quy cong ty, tra loi cau hoi dua tren tai lieu noi bo</div>
+        <div class="code-block">
+<span class="code-comment"># Python — RAG voi LangChain (don gian nhat)</span>
+<span class="code-keyword">from</span> langchain.document_loaders <span class="code-keyword">import</span> PyPDFLoader
+<span class="code-keyword">from</span> langchain.text_splitter <span class="code-keyword">import</span> RecursiveCharacterTextSplitter
+<span class="code-keyword">from</span> langchain.embeddings <span class="code-keyword">import</span> OpenAIEmbeddings
+<span class="code-keyword">from</span> langchain.vectorstores <span class="code-keyword">import</span> Chroma
+<span class="code-keyword">from</span> langchain.chat_models <span class="code-keyword">import</span> ChatOpenAI
+<span class="code-keyword">from</span> langchain.chains <span class="code-keyword">import</span> RetrievalQA
+
+<span class="code-comment"># 1. Load tai lieu</span>
+docs = <span class="code-fn">PyPDFLoader</span>(<span class="code-string">"company-policy.pdf"</span>).<span class="code-fn">load</span>()
+
+<span class="code-comment"># 2. Tach thanh chunks nho</span>
+chunks = <span class="code-fn">RecursiveCharacterTextSplitter</span>(chunk_size=500).<span class="code-fn">split_documents</span>(docs)
+
+<span class="code-comment"># 3. Tao vector store</span>
+vectorstore = Chroma.<span class="code-fn">from_documents</span>(chunks, <span class="code-fn">OpenAIEmbeddings</span>())
+
+<span class="code-comment"># 4. Tao chain: hoi → tim tai lieu → tra loi</span>
+qa = <span class="code-fn">RetrievalQA.from_chain_type</span>(
+    llm=<span class="code-fn">ChatOpenAI</span>(model=<span class="code-string">"gpt-4o"</span>),
+    retriever=vectorstore.<span class="code-fn">as_retriever</span>()
+)
+
+<span class="code-comment"># 5. Hoi</span>
+answer = qa.<span class="code-fn">run</span>(<span class="code-string">"Chinh sach nghi phep cong ty nhu the nao?"</span>)
+        </div>
+        <div class="module-tools">
+            <span class="tool-tag">LangChain</span>
+            <span class="tool-tag">LlamaIndex</span>
+            <span class="tool-tag">ChromaDB</span>
+            <span class="tool-tag">Pinecone</span>
+        </div>
+    </div>
+
+    <div class="module advanced">
+        <div class="module-header">
+            <h4>Module 4.2: RAG nang cao</h4>
+            <span class="module-level level-advanced">Advanced</span>
+        </div>
+        <p>RAG co ban se gap van de: tra sai tai lieu, chunk qua nho/lon, khong hieu context. Day la cach fix:</p>
+        <ul style="font-size:.88rem;color:var(--text-dim);padding-left:20px">
+            <li><strong>Hybrid Search:</strong> Ket hop vector search + keyword search (BM25) — tang do chinh xac</li>
+            <li><strong>Reranking:</strong> Sau khi tim duoc 20 chunk, dung model nho de xep hang lai → lay top 5 chinh xac nhat</li>
+            <li><strong>Contextual Chunking:</strong> Chunk thong minh hon — giu nguyen cau, paragraph, table. Khong cat giua cau.</li>
+            <li><strong>Query Expansion:</strong> Mo rong cau hoi user de tim duoc nhieu ket qua hon</li>
+            <li><strong>Citation:</strong> Tra loi kem link den doan tai lieu goc — de user verify</li>
+        </ul>
+        <div class="module-tools">
+            <span class="tool-tag">Cohere Rerank</span>
+            <span class="tool-tag">Hybrid Search</span>
+            <span class="tool-tag">Semantic Kernel</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 5: AI AGENTS ═══ -->
+<div class="section" id="s5">
+    <div class="section-header">
+        <div class="section-num">05</div>
+        <div>
+            <div class="section-title">AI Agents & Function Calling</div>
+            <div class="section-subtitle">AI khong chi tra loi — no co the HANH DONG. Day la tuong lai.</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Agent = LLM + Tools + Memory + Planning</h4>
+        <p>Thay vi chi hoi-dap, agent co the: goi API, truy van database, gui email, tao file, deploy code. Model quyet dinh DUNG tool nao, KHI NAO dung, va xu ly ket qua.</p>
+    </div>
+
+    <div class="module intermediate">
+        <div class="module-header">
+            <h4>Module 5.1: Function Calling / Tool Use</h4>
+            <span class="module-level level-intermediate">Intermediate</span>
+        </div>
+        <p>Ban dinh nghia cac "tool" (function) — model tu quyet dinh goi tool nao dua tren cau hoi user.</p>
+        <div class="code-block">
+<span class="code-comment">// Dinh nghia tools cho model</span>
+tools = [{
+    <span class="code-string">"name"</span>: <span class="code-string">"get_weather"</span>,
+    <span class="code-string">"description"</span>: <span class="code-string">"Lay thoi tiet hien tai cua 1 thanh pho"</span>,
+    <span class="code-string">"parameters"</span>: {
+        <span class="code-string">"city"</span>: { <span class="code-string">"type"</span>: <span class="code-string">"string"</span> }
+    }
+}]
+
+<span class="code-comment">// User hoi: "Thoi tiet Ha Noi hom nay the nao?"</span>
+<span class="code-comment">// Model tu dong goi: get_weather(city="Ha Noi")</span>
+<span class="code-comment">// Ban chay function that → tra ket qua cho model</span>
+<span class="code-comment">// Model tra loi: "Ha Noi hom nay 28 do, troi nang."</span>
+        </div>
+        <div class="module-tools">
+            <span class="tool-tag">Function Calling</span>
+            <span class="tool-tag">Tool Use</span>
+            <span class="tool-tag">Claude MCP</span>
+        </div>
+    </div>
+
+    <div class="module advanced">
+        <div class="module-header">
+            <h4>Module 5.2: Xay AI Agent hoan chinh</h4>
+            <span class="module-level level-advanced">Advanced</span>
+        </div>
+        <p>Agent phuc tap can: planning (lap ke hoach), memory (nho context), tool selection (chon tool), error handling (xu ly loi).</p>
+        <div class="module-what"><strong>Vi du agent thuc te:</strong></div>
+        <ul style="font-size:.88rem;color:var(--text-dim);padding-left:20px">
+            <li><strong>Code Review Agent:</strong> Doc PR → phan tich code → check best practices → de xuat fix → tao comment tren GitHub</li>
+            <li><strong>Customer Support Agent:</strong> Doc tin nhan → tim tai lieu → tra loi → escalate neu khong biet → tao ticket</li>
+            <li><strong>Data Analysis Agent:</strong> Nhan cau hoi → viet SQL → chay query → phan tich ket qua → tao bieu do</li>
+            <li><strong>DevOps Agent:</strong> Monitor alert → doc log → phan tich root cause → de xuat fix → thuc hien fix (voi approval)</li>
+        </ul>
+        <div class="module-tools">
+            <span class="tool-tag">LangGraph</span>
+            <span class="tool-tag">AutoGen</span>
+            <span class="tool-tag">CrewAI</span>
+            <span class="tool-tag">Claude Agent SDK</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 6: FINE-TUNING ═══ -->
+<div class="section" id="s6">
+    <div class="section-header">
+        <div class="section-num">06</div>
+        <div>
+            <div class="section-title">Fine-tuning & Training</div>
+            <div class="section-subtitle">Chi lam khi prompt engineering KHONG du. Dung fine-tune vi "nghe hay".</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Khi nao can fine-tune?</h4>
+        <table class="compare-table">
+            <tr><th>Tinh huong</th><th>Giai phap</th><th>Tai sao</th></tr>
+            <tr><td>Model tra loi sai format</td><td>Fix prompt truoc</td><td>90% truong hop chi can prompt tot hon</td></tr>
+            <tr><td>Can model biet domain cu the (y te, luat)</td><td>RAG truoc, fine-tune neu RAG khong du</td><td>RAG re hon va linh hoat hon</td></tr>
+            <tr><td>Can model co "giong noi" cu the</td><td>Fine-tune</td><td>Style/tone kho dat bang prompt</td></tr>
+            <tr><td>Can giam latency + cost (task don gian lap lai)</td><td>Fine-tune model nho</td><td>Model nho + fine-tuned > model lon + prompt dai</td></tr>
+            <tr><td>Data nhay cam, khong gui ra ngoai</td><td>Fine-tune open-source model, chay local</td><td>Privacy + compliance</td></tr>
+        </table>
+        <div class="highlight highlight-warn">
+            <strong>80/20 Rule:</strong> 80% use case chi can prompt engineering + RAG. Chi 20% can fine-tune. Dung nhay vao fine-tune khi chua thu het cac cach khac.
+        </div>
+    </div>
+
+    <div class="module expert">
+        <div class="module-header">
+            <h4>Module 6.1: Fine-tune tren OpenAI / Open-source</h4>
+            <span class="module-level level-expert">Expert</span>
+        </div>
+        <p>Fine-tune = day model bang data cua ban. Can chuan bi dataset (JSONL format), chon base model, train, evaluate.</p>
+        <div class="module-tools">
+            <span class="tool-tag">OpenAI Fine-tuning</span>
+            <span class="tool-tag">LoRA / QLoRA</span>
+            <span class="tool-tag">Hugging Face</span>
+            <span class="tool-tag">Unsloth</span>
+            <span class="tool-tag">Axolotl</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 7: VECTOR DB ═══ -->
+<div class="section" id="s7">
+    <div class="section-header">
+        <div class="section-num">07</div>
+        <div>
+            <div class="section-title">Vector Database & Embeddings</div>
+            <div class="section-subtitle">Ha tang nen tang cho RAG va semantic search</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Embedding la gi?</h4>
+        <p>Embedding = chuyen text thanh mang so (vector). Text giong nghia → vector gan nhau. Day la cach may tinh "hieu" nghia cua text.</p>
+        <p style="margin-top:8px">"Con meo" → [0.2, 0.8, 0.1, ...] va "Cat" → [0.21, 0.79, 0.12, ...] se rat GAN nhau trong khong gian vector.</p>
+    </div>
+
+    <div class="card">
+        <h4>So sanh Vector Database</h4>
+        <table class="compare-table">
+            <tr><th>Database</th><th>Uu diem</th><th>Dung khi</th><th>Cost</th></tr>
+            <tr><td><strong>ChromaDB</strong></td><td>Don gian, chay local</td><td>Prototype, project nho</td><td>Free (self-host)</td></tr>
+            <tr><td><strong>Pinecone</strong></td><td>Managed, scale tot</td><td>Production, team khong muon quan ly infra</td><td>Free tier → paid</td></tr>
+            <tr><td><strong>Weaviate</strong></td><td>Hybrid search built-in</td><td>Can keyword + vector search</td><td>Free (self-host)</td></tr>
+            <tr><td><strong>Qdrant</strong></td><td>Nhanh, filtering manh</td><td>Production, can filter phuc tap</td><td>Free (self-host)</td></tr>
+            <tr><td><strong>pgvector</strong></td><td>PostgreSQL extension</td><td>Da dung Postgres, khong muon them DB moi</td><td>Free</td></tr>
+        </table>
+        <div class="highlight highlight-tip">
+            <strong>Loi khuyen:</strong> Bat dau voi ChromaDB (local, nhanh). Len production chuyen sang Qdrant hoac pgvector. Chi dung Pinecone neu khong muon quan ly server.
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 8: DEPLOY ═══ -->
+<div class="section" id="s8">
+    <div class="section-header">
+        <div class="section-num">08</div>
+        <div>
+            <div class="section-title">Deploy AI len Production</div>
+            <div class="section-subtitle">Tu prototype den production — nhung bai hoc dat gia</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Checklist truoc khi deploy AI</h4>
+        <ul>
+            <li><strong>Rate Limiting:</strong> Gioi han so request/user/phut — tranh user spam → bill khung</li>
+            <li><strong>Content Filtering:</strong> Loc input/output — tranh model noi nhung dieu khong nen noi</li>
+            <li><strong>Fallback Strategy:</strong> Khi model A chet → tu dong chuyen sang model B</li>
+            <li><strong>Logging & Monitoring:</strong> Log moi request/response — de debug, danh gia chat luong, tinh cost</li>
+            <li><strong>Caching:</strong> Cache response cho cau hoi giong nhau — giam cost 50-80%</li>
+            <li><strong>Timeout:</strong> Set timeout 30s — LLM co the mat 10-60s, user khong cho lau hon</li>
+            <li><strong>Cost Alerts:</strong> Set alert khi chi phi vuot nguong — tranh "bill shock"</li>
+            <li><strong>User Feedback Loop:</strong> Thu thap phan hoi tu user — de cai thien prompt/RAG theo thoi gian</li>
+        </ul>
+    </div>
+
+    <div class="module advanced">
+        <div class="module-header">
+            <h4>Module 8.1: Architecture Patterns</h4>
+            <span class="module-level level-advanced">Advanced</span>
+        </div>
+        <div class="module-what"><strong>Cac pattern pho bien:</strong></div>
+        <ul style="font-size:.88rem;color:var(--text-dim);padding-left:20px">
+            <li><strong>API Gateway + LLM:</strong> API nhan request → validate → goi LLM → cache → tra ve. Don gian nhat.</li>
+            <li><strong>Queue-based:</strong> Request vao queue → worker xu ly → webhook/polling ket qua. Cho task nang (tong hop tai lieu dai).</li>
+            <li><strong>Streaming SSE:</strong> API stream response ve client real-time. UX tot nhat cho chat.</li>
+            <li><strong>Agent Loop:</strong> Request → Agent plan → Tool calls → Observe → Repeat → Final response. Cho task phuc tap.</li>
+        </ul>
+        <div class="module-tools">
+            <span class="tool-tag">Docker</span>
+            <span class="tool-tag">Redis Cache</span>
+            <span class="tool-tag">Azure OpenAI</span>
+            <span class="tool-tag">AWS Bedrock</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 9: AI TRONG .NET ═══ -->
+<div class="section" id="s9">
+    <div class="section-header">
+        <div class="section-num">09</div>
+        <div>
+            <div class="section-title">AI trong .NET Ecosystem</div>
+            <div class="section-subtitle">Danh rieng cho .NET developer — khong phai chi Python moi lam duoc AI</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>.NET co du cong cu de build AI app</h4>
+        <table class="compare-table">
+            <tr><th>Tool</th><th>Lam gi</th><th>Link</th></tr>
+            <tr><td><strong>Semantic Kernel</strong></td><td>Framework AI cua Microsoft — orchestrate LLM, plugins, memory</td><td>github.com/microsoft/semantic-kernel</td></tr>
+            <tr><td><strong>Microsoft.Extensions.AI</strong></td><td>Abstraction layer — doi model de dang (OpenAI ↔ Ollama ↔ Azure)</td><td>NuGet</td></tr>
+            <tr><td><strong>ML.NET</strong></td><td>Classical ML (phan loai, du doan) — khong can Python</td><td>dotnet.microsoft.com/ml</td></tr>
+            <tr><td><strong>ONNX Runtime</strong></td><td>Chay model ML/DL trong .NET voi toc do cao</td><td>onnxruntime.ai</td></tr>
+            <tr><td><strong>Kernel Memory</strong></td><td>RAG pipeline san cho .NET — doc PDF, Word, web</td><td>github.com/microsoft/kernel-memory</td></tr>
+        </table>
+    </div>
+
+    <div class="module intermediate">
+        <div class="module-header">
+            <h4>Module 9.1: Semantic Kernel — Framework AI cua Microsoft</h4>
+            <span class="module-level level-intermediate">Intermediate</span>
+        </div>
+        <p>Semantic Kernel la "LangChain cua .NET" — orchestrate LLM calls, plugins (tools), memory, planning.</p>
+        <div class="code-block">
+<span class="code-comment">// C# — Semantic Kernel co ban</span>
+<span class="code-keyword">using</span> Microsoft.SemanticKernel;
+
+<span class="code-keyword">var</span> kernel = Kernel.<span class="code-fn">CreateBuilder</span>()
+    .<span class="code-fn">AddOpenAIChatCompletion</span>(<span class="code-string">"gpt-4o"</span>, apiKey)
+    .<span class="code-fn">Build</span>();
+
+<span class="code-comment">// Goi LLM don gian</span>
+<span class="code-keyword">var</span> result = <span class="code-keyword">await</span> kernel.<span class="code-fn">InvokePromptAsync</span>(
+    <span class="code-string">"Tong hop email sau thanh 3 bullet points: {{$input}}"</span>,
+    <span class="code-keyword">new</span>() { [<span class="code-string">"input"</span>] = emailContent }
+);
+
+<span class="code-comment">// Voi Plugin (function calling)</span>
+kernel.<span class="code-fn">ImportPluginFromType</span>&lt;WeatherPlugin&gt;();
+<span class="code-keyword">var</span> settings = <span class="code-keyword">new</span> OpenAIPromptExecutionSettings {
+    ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
+};
+        </div>
+        <div class="module-tools">
+            <span class="tool-tag">Semantic Kernel</span>
+            <span class="tool-tag">Kernel Memory</span>
+            <span class="tool-tag">Azure AI</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 10: LO TRINH ═══ -->
+<div class="section" id="s10">
+    <div class="section-header">
+        <div class="section-num">10</div>
+        <div>
+            <div class="section-title">Lo trinh 6 thang</div>
+            <div class="section-subtitle">Tu zero den co the build AI feature cho production app</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="roadmap">
+            <div class="roadmap-item active">
+                <div class="roadmap-dot">1</div>
+                <div class="roadmap-time">Thang 1 — Nen tang</div>
+                <div class="roadmap-content">
+                    <h4>LLM API + Prompt Engineering</h4>
+                    <p>Goi OpenAI/Claude API, viet system prompt, few-shot, output format. Build 1 CLI chatbot don gian.</p>
+                </div>
+            </div>
+            <div class="roadmap-item">
+                <div class="roadmap-dot">2</div>
+                <div class="roadmap-time">Thang 2 — RAG co ban</div>
+                <div class="roadmap-content">
+                    <h4>Embeddings + Vector DB + RAG Pipeline</h4>
+                    <p>Hieu embedding, setup ChromaDB, build RAG doc PDF. Project: chatbot tra loi cau hoi tu tai lieu cong ty.</p>
+                </div>
+            </div>
+            <div class="roadmap-item">
+                <div class="roadmap-dot">3</div>
+                <div class="roadmap-time">Thang 3 — Tool Use & Agents</div>
+                <div class="roadmap-content">
+                    <h4>Function Calling + AI Agent don gian</h4>
+                    <p>Dinh nghia tools, model tu chon tool, xu ly ket qua. Project: agent lay thoi tiet + dat lich + gui email.</p>
+                </div>
+            </div>
+            <div class="roadmap-item">
+                <div class="roadmap-dot">4</div>
+                <div class="roadmap-time">Thang 4 — Production</div>
+                <div class="roadmap-content">
+                    <h4>Deploy, Caching, Monitoring, Cost Optimization</h4>
+                    <p>Deploy AI feature len app that. Setup rate limiting, caching, fallback, logging. Hieu cost model.</p>
+                </div>
+            </div>
+            <div class="roadmap-item">
+                <div class="roadmap-dot">5</div>
+                <div class="roadmap-time">Thang 5 — Nang cao</div>
+                <div class="roadmap-content">
+                    <h4>Advanced RAG + Multi-agent + Evaluation</h4>
+                    <p>Hybrid search, reranking, multi-agent system. Hoc cach evaluate AI output (khong chi "chay thu").</p>
+                </div>
+            </div>
+            <div class="roadmap-item">
+                <div class="roadmap-dot">6</div>
+                <div class="roadmap-time">Thang 6 — Chuyen gia</div>
+                <div class="roadmap-content">
+                    <h4>Fine-tuning + Self-hosted Models + AI Architecture</h4>
+                    <p>Fine-tune model cho use case cu the. Chay Llama/Mistral local. Thiet ke AI architecture cho hệ thống lon.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="highlight highlight-important" style="max-width:920px;margin:0 auto">
+        <strong>Nho quy tac tu trang Focus:</strong> Moi thang chi tap trung 1 module chinh. Khong nhay lung tung. Output > Input. Moi tuan phai co 1 mini-project chay duoc. Xong moi chuyen sang module tiep.
+    </div>
+</div>
+
+</div><!-- end container -->
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer">
+    <p>AI Mastery — <a href="index.html">AI News</a> · <a href="../TODO/index.html">Schedule</a> · <a href="../TODO/focus.html">Focus Mode</a></p>
+</footer>
+
+</body>
+</html>

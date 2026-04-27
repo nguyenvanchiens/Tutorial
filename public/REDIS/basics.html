@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Redis Cơ Bản — Data Types &amp; Commands</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">Redis<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="basics.html" class="active">Cơ Bản</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="production.html">Production</a>
+      <a href="interview.html">Phỏng Vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">LEVEL 1-2 · BEGINNER → JUNIOR</div>
+  <h1>Redis <span class="gradient">Cơ Bản</span></h1>
+  <p class="hero-desc">9 data types, lệnh thiết yếu, TTL, transaction, pipelining — tất cả những gì bạn cần để dùng Redis trong 99% use case.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">1. Mental Model — Hiểu trước khi dùng</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>🗝️ Key-Value, không phải Table</h3>
+        <p>Quên schema đi. Redis chỉ có <strong>key</strong> (string) → <strong>value</strong> (1 trong 9 kiểu). Không có row, column, index, foreign key, join.</p>
+        <pre class="code"><span class="c"># SQL</span>
+SELECT * FROM users WHERE id = 5;
+
+<span class="c"># Redis — bạn thiết kế key</span>
+<span class="cmd">GET</span> user:5          <span class="c"># string JSON</span>
+<span class="cmd">HGETALL</span> user:5      <span class="c"># hash</span></pre>
+      </div>
+      <div class="card">
+        <h3>⏱️ Tất cả đều có thể có TTL</h3>
+        <p>Bất kỳ key nào có thể set <strong>thời gian sống</strong>. Hết hạn → Redis tự xoá. Đây là nền tảng của cache.</p>
+        <pre class="code"><span class="cmd">SET</span> session:abc123 <span class="s">"user_5"</span> <span class="cmd">EX</span> 3600
+<span class="c"># Key này sẽ bị xoá sau 1 giờ</span>
+
+<span class="cmd">TTL</span> session:abc123
+<span class="ret">(integer) 3600</span>
+
+<span class="cmd">EXPIRE</span> user:5 300    <span class="c"># set TTL cho key đã tồn tại</span>
+<span class="cmd">PERSIST</span> user:5       <span class="c"># gỡ TTL</span></pre>
+      </div>
+      <div class="card">
+        <h3>⚛️ Mọi command là Atomic</h3>
+        <p>Redis single-threaded → mọi lệnh chạy tuần tự, không race condition. <code>INCR</code> 1000 client gọi đồng thời vẫn đúng.</p>
+      </div>
+      <div class="card">
+        <h3>💾 Naming convention</h3>
+        <p>Key là string bất kỳ, nhưng quy ước chuẩn: dùng <code>:</code> làm phân tách tầng.</p>
+        <pre class="code"><span class="c"># Tốt</span>
+user:5:profile
+user:5:sessions
+product:42:stock
+cache:api:/users/5
+
+<span class="c"># Tránh — không có pattern</span>
+usr5profile
+u_5_session_data</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">2. String — Đơn giản nhất, dùng nhiều nhất</h2>
+    <p class="section-sub">Lưu text, số, JSON, binary (tối đa 512MB / key). 70% use case Redis chỉ cần string.</p>
+
+    <div class="cli">
+<span class="prompt">&gt;</span> <span class="cmd">SET</span> name <span class="s">"Chien"</span>
+<span class="ret">OK</span>
+<span class="prompt">&gt;</span> <span class="cmd">GET</span> name
+<span class="ret">"Chien"</span>
+<span class="prompt">&gt;</span> <span class="cmd">SET</span> counter <span class="s">10</span>
+<span class="ret">OK</span>
+<span class="prompt">&gt;</span> <span class="cmd">INCR</span> counter              <span class="comment"># +1, atomic</span>
+<span class="ret">(integer) 11</span>
+<span class="prompt">&gt;</span> <span class="cmd">INCRBY</span> counter <span class="s">5</span>
+<span class="ret">(integer) 16</span>
+<span class="prompt">&gt;</span> <span class="cmd">DECR</span> counter
+<span class="ret">(integer) 15</span>
+<span class="prompt">&gt;</span> <span class="cmd">APPEND</span> name <span class="s">" Dev"</span>
+<span class="prompt">&gt;</span> <span class="cmd">GET</span> name
+<span class="ret">"Chien Dev"</span>
+<span class="prompt">&gt;</span> <span class="cmd">STRLEN</span> name
+<span class="ret">(integer) 9</span>
+<span class="prompt">&gt;</span> <span class="cmd">SET</span> cache:result <span class="s">"{...}"</span> <span class="cmd">EX</span> <span class="s">60</span>   <span class="comment"># TTL 60s ngay khi SET</span>
+<span class="prompt">&gt;</span> <span class="cmd">SETNX</span> lock:job <span class="s">"worker1"</span>          <span class="comment"># SET if Not eXists → distributed lock</span>
+<span class="ret">(integer) 1</span>
+<span class="prompt">&gt;</span> <span class="cmd">SETNX</span> lock:job <span class="s">"worker2"</span>          <span class="comment"># worker1 đã giữ → fail</span>
+<span class="ret">(integer) 0</span>
+    </div>
+
+    <div class="tip"><strong>Idiomatic:</strong> <code>INCR</code> cho view counter, <code>SET key val EX 3600</code> cho cache, <code>SET key val NX</code> cho lock nhẹ.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">3. List — Hàng đợi &amp; stack</h2>
+    <p class="section-sub">Doubly-linked list. Thêm/lấy 2 đầu O(1). Dùng làm queue, recent activity, stream đơn giản.</p>
+
+    <div class="cli">
+<span class="prompt">&gt;</span> <span class="cmd">LPUSH</span> queue <span class="s">"job1"</span> <span class="s">"job2"</span> <span class="s">"job3"</span>
+<span class="ret">(integer) 3</span>
+<span class="prompt">&gt;</span> <span class="cmd">RPUSH</span> queue <span class="s">"job4"</span>            <span class="comment"># push bên phải</span>
+<span class="prompt">&gt;</span> <span class="cmd">LRANGE</span> queue <span class="s">0</span> <span class="s">-1</span>             <span class="comment"># xem toàn list</span>
+<span class="ret">1) "job3"
+2) "job2"
+3) "job1"
+4) "job4"</span>
+<span class="prompt">&gt;</span> <span class="cmd">LPOP</span> queue                   <span class="comment"># lấy từ trái, FIFO queue</span>
+<span class="ret">"job3"</span>
+<span class="prompt">&gt;</span> <span class="cmd">RPOP</span> queue                   <span class="comment"># lấy từ phải, LIFO stack</span>
+<span class="ret">"job4"</span>
+<span class="prompt">&gt;</span> <span class="cmd">LLEN</span> queue
+<span class="ret">(integer) 2</span>
+<span class="prompt">&gt;</span> <span class="cmd">BRPOP</span> queue <span class="s">10</span>              <span class="comment"># BLOCKING pop, đợi 10s nếu empty</span>
+    </div>
+
+    <div class="info-box"><strong>Pattern queue đơn giản:</strong> producer <code>LPUSH</code>, worker <code>BRPOP</code> với timeout. Không mất message nếu worker chết trước khi ack — nên thay bằng Redis Stream hoặc RabbitMQ cho production quan trọng.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">4. Hash — Object có nhiều field</h2>
+    <p class="section-sub">Thay vì lưu JSON lớn, dùng hash khi cần đọc/cập nhật field riêng lẻ. Tiết kiệm RAM hơn string JSON.</p>
+
+    <div class="cli">
+<span class="prompt">&gt;</span> <span class="cmd">HSET</span> user:5 name <span class="s">"Chien"</span> age <span class="s">30</span> email <span class="s">"a@b.com"</span>
+<span class="ret">(integer) 3</span>
+<span class="prompt">&gt;</span> <span class="cmd">HGET</span> user:5 name
+<span class="ret">"Chien"</span>
+<span class="prompt">&gt;</span> <span class="cmd">HGETALL</span> user:5
+<span class="ret">1) "name"
+2) "Chien"
+3) "age"
+4) "30"
+5) "email"
+6) "a@b.com"</span>
+<span class="prompt">&gt;</span> <span class="cmd">HINCRBY</span> user:5 age <span class="s">1</span>         <span class="comment"># tăng age field, atomic</span>
+<span class="ret">(integer) 31</span>
+<span class="prompt">&gt;</span> <span class="cmd">HDEL</span> user:5 email              <span class="comment"># xoá 1 field</span>
+<span class="prompt">&gt;</span> <span class="cmd">HEXISTS</span> user:5 name
+<span class="ret">(integer) 1</span>
+<span class="prompt">&gt;</span> <span class="cmd">HMGET</span> user:5 name age          <span class="comment"># lấy nhiều field 1 lần</span>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>✅ Dùng Hash khi</h4>
+        <ul>
+          <li>Object &lt;100 field</li>
+          <li>Hay update 1 field riêng lẻ</li>
+          <li>Cần tiết kiệm RAM (nhỏ hơn JSON string)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>❌ Dùng String JSON khi</h4>
+        <ul>
+          <li>Chỉ đọc/ghi toàn bộ object</li>
+          <li>Có nested object phức tạp</li>
+          <li>App-side dùng ORM map object dễ hơn</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">5. Set — Tập hợp không trùng</h2>
+    <p class="section-sub">Unique members, O(1) check membership. Dùng cho: tags, friends, unique visitors, permission.</p>
+
+    <div class="cli">
+<span class="prompt">&gt;</span> <span class="cmd">SADD</span> tags:post:1 <span class="s">"redis"</span> <span class="s">"cache"</span> <span class="s">"database"</span>
+<span class="ret">(integer) 3</span>
+<span class="prompt">&gt;</span> <span class="cmd">SADD</span> tags:post:1 <span class="s">"redis"</span>       <span class="comment"># duplicate → ignored</span>
+<span class="ret">(integer) 0</span>
+<span class="prompt">&gt;</span> <span class="cmd">SMEMBERS</span> tags:post:1
+<span class="ret">1) "redis"
+2) "cache"
+3) "database"</span>
+<span class="prompt">&gt;</span> <span class="cmd">SISMEMBER</span> tags:post:1 <span class="s">"redis"</span>   <span class="comment"># check có trong set?</span>
+<span class="ret">(integer) 1</span>
+<span class="prompt">&gt;</span> <span class="cmd">SADD</span> tags:post:2 <span class="s">"redis"</span> <span class="s">"nosql"</span>
+<span class="prompt">&gt;</span> <span class="cmd">SINTER</span> tags:post:1 tags:post:2    <span class="comment"># giao 2 set</span>
+<span class="ret">1) "redis"</span>
+<span class="prompt">&gt;</span> <span class="cmd">SUNION</span> tags:post:1 tags:post:2    <span class="comment"># hợp</span>
+<span class="prompt">&gt;</span> <span class="cmd">SDIFF</span> tags:post:1 tags:post:2     <span class="comment"># hiệu (có ở 1, không ở 2)</span>
+<span class="prompt">&gt;</span> <span class="cmd">SRANDMEMBER</span> tags:post:1 <span class="s">2</span>         <span class="comment"># lấy 2 member random</span>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">6. Sorted Set — "Leaderboard built-in"</h2>
+    <p class="section-sub">Giống Set nhưng mỗi member có <strong>score</strong> (number). Tự động sort. Dùng: leaderboard, priority queue, time-series nhẹ.</p>
+
+    <div class="cli">
+<span class="prompt">&gt;</span> <span class="cmd">ZADD</span> leaderboard <span class="s">1500</span> <span class="s">"alice"</span> <span class="s">2100</span> <span class="s">"bob"</span> <span class="s">1800</span> <span class="s">"charlie"</span>
+<span class="ret">(integer) 3</span>
+<span class="prompt">&gt;</span> <span class="cmd">ZRANGE</span> leaderboard <span class="s">0</span> <span class="s">-1</span> <span class="cmd">WITHSCORES</span>    <span class="comment"># tăng dần</span>
+<span class="ret">1) "alice"    2) "1500"
+3) "charlie"  4) "1800"
+5) "bob"      6) "2100"</span>
+<span class="prompt">&gt;</span> <span class="cmd">ZREVRANGE</span> leaderboard <span class="s">0</span> <span class="s">2</span> <span class="cmd">WITHSCORES</span> <span class="comment"># top 3 giảm dần</span>
+<span class="ret">1) "bob"      2) "2100"
+3) "charlie"  4) "1800"
+5) "alice"    6) "1500"</span>
+<span class="prompt">&gt;</span> <span class="cmd">ZINCRBY</span> leaderboard <span class="s">300</span> <span class="s">"alice"</span>  <span class="comment"># +300 điểm, atomic</span>
+<span class="ret">"1800"</span>
+<span class="prompt">&gt;</span> <span class="cmd">ZRANK</span> leaderboard <span class="s">"bob"</span>             <span class="comment"># hạng bob (0-indexed)</span>
+<span class="ret">(integer) 2</span>
+<span class="prompt">&gt;</span> <span class="cmd">ZSCORE</span> leaderboard <span class="s">"alice"</span>
+<span class="ret">"1800"</span>
+<span class="prompt">&gt;</span> <span class="cmd">ZRANGEBYSCORE</span> leaderboard <span class="s">1500</span> <span class="s">2000</span>    <span class="comment"># range theo score</span>
+    </div>
+
+    <div class="info-box"><strong>Siêu tiện:</strong> viết 1 leaderboard game top 1 triệu user chỉ cần <code>ZADD</code> + <code>ZREVRANGE 0 99</code>. Tất cả O(log N).</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">7. Các data types đặc biệt</h2>
+    <div class="grid grid-2">
+      <div class="dtype">
+        <h4>🔢 Bitmap</h4>
+        <div class="dtype-sub">String nhưng thao tác từng bit. Memory siêu nhẹ.</div>
+        <p><strong>Use case:</strong> track 1M user đã login hôm nay — chỉ tốn 128KB.</p>
+        <pre class="code"><span class="cmd">SETBIT</span> login:2026-04-19 <span class="s">100005</span> <span class="s">1</span>
+<span class="cmd">GETBIT</span> login:2026-04-19 <span class="s">100005</span>
+<span class="cmd">BITCOUNT</span> login:2026-04-19       <span class="c"># đếm số user login</span></pre>
+      </div>
+
+      <div class="dtype">
+        <h4>🎯 HyperLogLog</h4>
+        <div class="dtype-sub">Đếm <em>unique</em> xấp xỉ (sai số 0.8%) tốn chỉ 12KB cho hàng tỷ item.</div>
+        <p><strong>Use case:</strong> unique visitors / unique queries.</p>
+        <pre class="code"><span class="cmd">PFADD</span> visitors:daily user:1 user:2 user:1
+<span class="cmd">PFCOUNT</span> visitors:daily    <span class="c"># ~2</span>
+<span class="cmd">PFMERGE</span> visitors:week visitors:mon visitors:tue</pre>
+      </div>
+
+      <div class="dtype">
+        <h4>🌍 Geo</h4>
+        <div class="dtype-sub">Toạ độ + tìm kiếm theo bán kính. Nội bộ là Sorted Set với geohash.</div>
+        <p><strong>Use case:</strong> "quán cafe gần tôi 2km".</p>
+        <pre class="code"><span class="cmd">GEOADD</span> cafes <span class="s">106.70</span> <span class="s">10.77</span> <span class="s">"BeanCafe"</span>
+<span class="cmd">GEOSEARCH</span> cafes <span class="cmd">FROMLONLAT</span> <span class="s">106.69</span> <span class="s">10.77</span> <span class="cmd">BYRADIUS</span> <span class="s">2</span> <span class="cmd">km</span></pre>
+      </div>
+
+      <div class="dtype">
+        <h4>🌊 Stream</h4>
+        <div class="dtype-sub">Append-only log như Kafka nhỏ. Có consumer group, ack, retry.</div>
+        <p><strong>Use case:</strong> event log, message queue bền bỉ.</p>
+        <pre class="code"><span class="cmd">XADD</span> events * type login user 5
+<span class="cmd">XREAD</span> <span class="cmd">COUNT</span> <span class="s">10</span> <span class="cmd">STREAMS</span> events <span class="s">0</span>
+<span class="cmd">XGROUP</span> <span class="cmd">CREATE</span> events workers <span class="s">$</span>
+<span class="cmd">XREADGROUP</span> <span class="cmd">GROUP</span> workers w1 <span class="cmd">STREAMS</span> events <span class="s">&gt;</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">8. Lệnh tổng quát — Key management</h2>
+    <table class="cmp">
+      <tr><th>Lệnh</th><th>Công dụng</th><th>Ghi chú</th></tr>
+      <tr><td><code>EXISTS key</code></td><td>Key có tồn tại?</td><td>Trả 0/1</td></tr>
+      <tr><td><code>DEL key1 key2</code></td><td>Xoá key</td><td>Nhiều key cùng lúc</td></tr>
+      <tr><td><code>TYPE key</code></td><td>Kiểu dữ liệu</td><td>string / list / hash / set / zset / stream</td></tr>
+      <tr><td><code>EXPIRE key 60</code></td><td>Set TTL 60s</td><td><code>PEXPIRE</code> cho ms</td></tr>
+      <tr><td><code>TTL key</code></td><td>Còn sống bao lâu?</td><td>-1 = không TTL, -2 = không tồn tại</td></tr>
+      <tr><td><code>PERSIST key</code></td><td>Gỡ TTL</td><td>Key tồn tại vĩnh viễn</td></tr>
+      <tr><td><code>RENAME old new</code></td><td>Đổi tên</td><td>Atomic</td></tr>
+      <tr><td><code>SCAN 0 MATCH user:* COUNT 100</code></td><td>Quét key theo pattern</td><td><strong>Dùng thay <code>KEYS</code></strong></td></tr>
+      <tr><td><code>DBSIZE</code></td><td>Tổng số key</td><td></td></tr>
+      <tr><td><code>FLUSHDB</code></td><td>Xoá toàn DB</td><td>⚠️ Không thu hồi!</td></tr>
+    </table>
+
+    <div class="danger-box">
+      <strong>🚫 ĐỪNG BAO GIỜ dùng <code>KEYS *</code> trong production!</strong> Nó chặn Redis (single-thread) khi quét toàn bộ keyspace. Với 1M key, app bạn đơ vài giây. <strong>Luôn dùng <code>SCAN</code></strong> — cursor-based, chia batch.
+      <pre class="code" style="margin-top:.5rem"><span class="c"># SCAN loop — an toàn production</span>
+<span class="cmd">SCAN</span> <span class="s">0</span> <span class="cmd">MATCH</span> <span class="s">"cache:*"</span> <span class="cmd">COUNT</span> <span class="s">100</span>
+<span class="c"># → trả cursor mới + 100 match, lặp đến khi cursor = 0</span></pre>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">9. Transaction — <code>MULTI/EXEC</code></h2>
+    <p class="section-sub">Gom nhiều lệnh chạy <strong>tuần tự không bị xen vào</strong>. Khác SQL transaction: không có rollback nếu 1 lệnh fail logic.</p>
+
+    <div class="cli">
+<span class="prompt">&gt;</span> <span class="cmd">MULTI</span>
+<span class="ret">OK</span>
+<span class="prompt">&gt;</span> <span class="cmd">INCR</span> balance:user:5
+<span class="ret">QUEUED</span>
+<span class="prompt">&gt;</span> <span class="cmd">INCR</span> total_transactions
+<span class="ret">QUEUED</span>
+<span class="prompt">&gt;</span> <span class="cmd">EXEC</span>
+<span class="ret">1) (integer) 101
+2) (integer) 4582</span>
+    </div>
+
+    <h3 style="margin-top:1rem;color:var(--primary)">Optimistic locking với WATCH</h3>
+    <pre class="code"><span class="cmd">WATCH</span> account:5
+<span class="k">val</span> = <span class="cmd">GET</span> account:5
+<span class="k">if</span> val &gt;= <span class="s">100</span>:
+  <span class="cmd">MULTI</span>
+  <span class="cmd">DECRBY</span> account:5 <span class="s">100</span>
+  <span class="cmd">EXEC</span>    <span class="c"># fail nếu ai đó đã thay đổi account:5 giữa chừng</span></pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">10. Pipelining — Batch để tăng tốc 10×</h2>
+    <p class="section-sub">Gửi nhiều lệnh <em>không đợi reply từng cái</em>. Giảm round-trip, đặc biệt khi client ở xa Redis.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>❌ Không pipeline — 100 RTT</h4>
+        <pre class="code"><span class="k">for</span> i <span class="k">in</span> range(<span class="s">100</span>):
+    redis.set(f<span class="s">"key:{i}"</span>, i)
+    <span class="c"># Mỗi lệnh = 1 round-trip</span>
+    <span class="c"># Với RTT 10ms → 1s total</span></pre>
+      </div>
+      <div class="card">
+        <h4>✅ Pipeline — 1 RTT</h4>
+        <pre class="code">pipe = redis.pipeline()
+<span class="k">for</span> i <span class="k">in</span> range(<span class="s">100</span>):
+    pipe.set(f<span class="s">"key:{i}"</span>, i)
+pipe.execute()
+<span class="c"># 1 round-trip, ~10-20ms</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">11. Kết nối từ code</h2>
+
+    <h3 style="color: var(--primary); margin-bottom: .5rem">C# / .NET — StackExchange.Redis</h3>
+    <pre class="code"><span class="c">// dotnet add package StackExchange.Redis</span>
+<span class="k">using</span> StackExchange.Redis;
+
+<span class="k">var</span> redis = <span class="k">await</span> ConnectionMultiplexer.ConnectAsync(<span class="s">"localhost:6379"</span>);
+<span class="k">var</span> db = redis.GetDatabase();
+
+<span class="c">// String</span>
+<span class="k">await</span> db.StringSetAsync(<span class="s">"user:5"</span>, <span class="s">"Chien"</span>, TimeSpan.FromMinutes(<span class="s">10</span>));
+<span class="k">var</span> name = <span class="k">await</span> db.StringGetAsync(<span class="s">"user:5"</span>);
+
+<span class="c">// Hash</span>
+<span class="k">await</span> db.HashSetAsync(<span class="s">"user:5"</span>, <span class="k">new</span>[] {
+    <span class="k">new</span> HashEntry(<span class="s">"name"</span>, <span class="s">"Chien"</span>),
+    <span class="k">new</span> HashEntry(<span class="s">"age"</span>, <span class="s">30</span>)
+});
+
+<span class="c">// Sorted Set — leaderboard</span>
+<span class="k">await</span> db.SortedSetAddAsync(<span class="s">"leaderboard"</span>, <span class="s">"alice"</span>, <span class="s">1500</span>);
+<span class="k">var</span> top10 = <span class="k">await</span> db.SortedSetRangeByRankAsync(
+    <span class="s">"leaderboard"</span>, <span class="s">0</span>, <span class="s">9</span>, Order.Descending);</pre>
+
+    <h3 style="color: var(--primary); margin: 1.5rem 0 .5rem">Node.js — ioredis</h3>
+    <pre class="code"><span class="c">// npm install ioredis</span>
+<span class="k">import</span> Redis <span class="k">from</span> <span class="s">'ioredis'</span>;
+<span class="k">const</span> redis = <span class="k">new</span> Redis(process.env.REDIS_URL);
+
+<span class="k">await</span> redis.set(<span class="s">'user:5'</span>, <span class="s">'Chien'</span>, <span class="s">'EX'</span>, <span class="s">3600</span>);
+<span class="k">const</span> name = <span class="k">await</span> redis.get(<span class="s">'user:5'</span>);
+
+<span class="c">// Hash</span>
+<span class="k">await</span> redis.hset(<span class="s">'user:5'</span>, { name: <span class="s">'Chien'</span>, age: <span class="s">30</span> });
+<span class="k">const</span> user = <span class="k">await</span> redis.hgetall(<span class="s">'user:5'</span>);
+
+<span class="c">// Pipeline — batch</span>
+<span class="k">const</span> pipe = redis.pipeline();
+<span class="k">for</span> (<span class="k">let</span> i = <span class="s">0</span>; i &lt; <span class="s">100</span>; i++) pipe.set(`k:${i}`, i);
+<span class="k">await</span> pipe.exec();</pre>
+
+    <div class="tip"><strong>Connection tip:</strong> app server nên có <strong>1 connection</strong> dùng chung (singleton). StackExchange.Redis &amp; ioredis đều dùng connection multiplexing — không cần connection pool.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">💡 Bài tập</h2>
+    <ol class="steps">
+      <li><strong>Counter visit:</strong> tạo trang web đếm lượt view bằng <code>INCR page:home:views</code>. Dùng Express/ASP.NET.</li>
+      <li><strong>Cache 5 phút:</strong> wrap DB query — nếu có cache → return, không có → query DB rồi <code>SET ... EX 300</code>.</li>
+      <li><strong>Session store:</strong> sau login lưu user info vào <code>session:{token}</code> với TTL 1 giờ, check trên mỗi request.</li>
+      <li><strong>Leaderboard game:</strong> mỗi trận xong gọi <code>ZINCRBY</code>, trang top 10 gọi <code>ZREVRANGE</code>.</li>
+      <li><strong>Unique visitor hôm nay:</strong> dùng HyperLogLog — <code>PFADD visitors:2026-04-19 {user_id}</code>, cuối ngày <code>PFCOUNT</code>.</li>
+    </ol>
+
+    <div class="tip" style="margin-top:1rem"><strong>Sẵn sàng cho patterns thực tế?</strong> <a href="patterns.html" style="color: var(--primary);">→ Trang Patterns</a> — cache-aside, rate limit, distributed lock, queue.</div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Redis Mastery · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

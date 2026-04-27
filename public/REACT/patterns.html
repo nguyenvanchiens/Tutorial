@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>React Design Patterns - Composition, HOC, Render Props</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">React<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="basics.html">Cơ bản</a>
+      <a href="hooks.html">Hooks</a>
+      <a href="advanced.html">Nâng cao</a>
+      <a href="patterns.html" class="active">Patterns</a>
+      <a href="ecosystem.html">Ecosystem</a>
+      <a href="interview.html">Phỏng vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">LEVEL 4 · SENIOR · ARCHITECTURE</div>
+  <h1>Design <span class="gradient">Patterns</span></h1>
+  <p class="hero-desc">Cách tổ chức component có thể tái sử dụng, dễ test, dễ mở rộng. Khác biệt giữa Junior và Senior nằm ở đây.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">1. Composition — Pattern số 1 của React</h2>
+    <p class="section-sub">React không có inheritance. Mọi thứ là <strong>composition</strong>: ghép các component nhỏ thành component lớn thông qua <code>children</code> và props.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>Containment — slot</h4>
+        <pre class="code"><span class="k">function</span> <span class="n">Dialog</span>({ title, children, footer }) {
+  <span class="k">return</span> (
+    &lt;<span class="t">div</span> className=<span class="s">"dialog"</span>&gt;
+      &lt;<span class="t">header</span>&gt;{title}&lt;/<span class="t">header</span>&gt;
+      &lt;<span class="t">main</span>&gt;{children}&lt;/<span class="t">main</span>&gt;
+      &lt;<span class="t">footer</span>&gt;{footer}&lt;/<span class="t">footer</span>&gt;
+    &lt;/<span class="t">div</span>&gt;
+  );
+}
+
+&lt;<span class="t">Dialog</span>
+  title=<span class="s">"Xác nhận"</span>
+  footer={&lt;<span class="t">Button</span>&gt;OK&lt;/<span class="t">Button</span>&gt;}&gt;
+  &lt;<span class="t">p</span>&gt;Bạn chắc chứ?&lt;/<span class="t">p</span>&gt;
+&lt;/<span class="t">Dialog</span>&gt;</pre>
+      </div>
+
+      <div class="card">
+        <h4>Specialization — "extends" kiểu React</h4>
+        <pre class="code"><span class="k">function</span> <span class="n">WelcomeDialog</span>() {
+  <span class="k">return</span> (
+    &lt;<span class="t">Dialog</span> title=<span class="s">"Chào mừng"</span>&gt;
+      &lt;<span class="t">p</span>&gt;Cảm ơn bạn đã đăng ký&lt;/<span class="t">p</span>&gt;
+    &lt;/<span class="t">Dialog</span>&gt;
+  );
+}
+
+<span class="c">// Thay vì class Welcome extends Dialog</span>
+<span class="c">// → compose: Welcome RENDER Dialog với props cụ thể</span></pre>
+      </div>
+    </div>
+
+    <div class="tip"><strong>Nguyên tắc:</strong> nếu bạn đang nghĩ "kế thừa component" → dừng lại, dùng composition. React không đi theo OOP.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">2. Container vs Presentational</h2>
+    <p class="section-sub">Tách <em>logic</em> (data fetching, state) khỏi <em>UI</em> (render). Giúp test UI độc lập, đổi style dễ dàng.</p>
+
+    <pre class="code"><span class="c">// Presentational — chỉ nhận props, render UI</span>
+<span class="k">function</span> <span class="n">UserList</span>({ users, onDelete }) {
+  <span class="k">return</span> (
+    &lt;<span class="t">ul</span>&gt;
+      {users.map(u =&gt; (
+        &lt;<span class="t">li</span> key={u.id}&gt;{u.name}
+          &lt;<span class="t">button</span> onClick={() =&gt; onDelete(u.id)}&gt;x&lt;/<span class="t">button</span>&gt;
+        &lt;/<span class="t">li</span>&gt;
+      ))}
+    &lt;/<span class="t">ul</span>&gt;
+  );
+}
+
+<span class="c">// Container — quản state, gọi API, truyền xuống</span>
+<span class="k">function</span> <span class="n">UserListContainer</span>() {
+  <span class="k">const</span> { data, mutate } = useQuery(<span class="s">'/users'</span>);
+  <span class="k">const</span> del = (id) =&gt; mutate(del =&gt; del.filter(x =&gt; x.id !== id));
+
+  <span class="k">return</span> &lt;<span class="t">UserList</span> users={data} onDelete={del} /&gt;;
+}</pre>
+
+    <div class="info-box"><strong>2026 update:</strong> với custom hooks, nhiều team gộp lại: 1 component gọi <code>useUsers()</code> hook (logic) rồi render UI. Tách rõ rệt chỉ khi component phức tạp hoặc cần Storybook.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">3. Compound Components</h2>
+    <p class="section-sub">Nhiều component cùng hoạt động như một — chia sẻ state qua Context. User ghép linh hoạt như Lego.</p>
+
+    <pre class="code"><span class="k">const</span> TabsContext = createContext();
+
+<span class="k">function</span> <span class="n">Tabs</span>({ children, defaultTab }) {
+  <span class="k">const</span> [active, setActive] = useState(defaultTab);
+  <span class="k">const</span> value = useMemo(() =&gt; ({ active, setActive }), [active]);
+  <span class="k">return</span> &lt;<span class="t">TabsContext.Provider</span> value={value}&gt;{children}&lt;/<span class="t">TabsContext.Provider</span>&gt;;
+}
+
+<span class="n">Tabs.List</span> = <span class="k">function</span> List({ children }) {
+  <span class="k">return</span> &lt;<span class="t">div</span> className=<span class="s">"tab-list"</span>&gt;{children}&lt;/<span class="t">div</span>&gt;;
+};
+
+<span class="n">Tabs.Tab</span> = <span class="k">function</span> Tab({ id, children }) {
+  <span class="k">const</span> { active, setActive } = useContext(TabsContext);
+  <span class="k">return</span> (
+    &lt;<span class="t">button</span>
+      className={active === id ? <span class="s">'active'</span> : <span class="s">''</span>}
+      onClick={() =&gt; setActive(id)}&gt;
+      {children}
+    &lt;/<span class="t">button</span>&gt;
+  );
+};
+
+<span class="n">Tabs.Panel</span> = <span class="k">function</span> Panel({ id, children }) {
+  <span class="k">const</span> { active } = useContext(TabsContext);
+  <span class="k">return</span> active === id ? &lt;<span class="t">div</span>&gt;{children}&lt;/<span class="t">div</span>&gt; : <span class="k">null</span>;
+};
+
+<span class="c">// Dùng — cực kỳ đẹp</span>
+&lt;<span class="t">Tabs</span> defaultTab=<span class="s">"home"</span>&gt;
+  &lt;<span class="t">Tabs.List</span>&gt;
+    &lt;<span class="t">Tabs.Tab</span> id=<span class="s">"home"</span>&gt;Home&lt;/<span class="t">Tabs.Tab</span>&gt;
+    &lt;<span class="t">Tabs.Tab</span> id=<span class="s">"about"</span>&gt;About&lt;/<span class="t">Tabs.Tab</span>&gt;
+  &lt;/<span class="t">Tabs.List</span>&gt;
+  &lt;<span class="t">Tabs.Panel</span> id=<span class="s">"home"</span>&gt;Nội dung Home&lt;/<span class="t">Tabs.Panel</span>&gt;
+  &lt;<span class="t">Tabs.Panel</span> id=<span class="s">"about"</span>&gt;Nội dung About&lt;/<span class="t">Tabs.Panel</span>&gt;
+&lt;/<span class="t">Tabs</span>&gt;</pre>
+
+    <div class="tip"><strong>Ví dụ thực tế:</strong> Radix UI, Headless UI, shadcn/ui dùng pattern này. Ghép flexible, accessibility sẵn, styling tuỳ ý.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">4. Render Props</h2>
+    <p class="section-sub">Component nhận 1 prop là function → gọi function đó với state/helper để render UI. "Tôi cho bạn dữ liệu, bạn tự render".</p>
+
+    <pre class="code"><span class="k">function</span> <span class="n">Mouse</span>({ render }) {
+  <span class="k">const</span> [pos, setPos] = useState({ x: <span class="s">0</span>, y: <span class="s">0</span> });
+
+  useEffect(() =&gt; {
+    <span class="k">const</span> h = (e) =&gt; setPos({ x: e.clientX, y: e.clientY });
+    window.addEventListener(<span class="s">'mousemove'</span>, h);
+    <span class="k">return</span> () =&gt; window.removeEventListener(<span class="s">'mousemove'</span>, h);
+  }, []);
+
+  <span class="k">return</span> render(pos);
+}
+
+<span class="c">// Dùng</span>
+&lt;<span class="t">Mouse</span> render={({ x, y }) =&gt; (
+  &lt;<span class="t">h1</span>&gt;Chuột tại ({x}, {y})&lt;/<span class="t">h1</span>&gt;
+)} /&gt;
+
+<span class="c">// Hoặc qua children prop</span>
+&lt;<span class="t">Mouse</span>&gt;
+  {({ x, y }) =&gt; &lt;<span class="t">h1</span>&gt;({x}, {y})&lt;/<span class="t">h1</span>&gt;}
+&lt;/<span class="t">Mouse</span>&gt;</pre>
+
+    <div class="info-box"><strong>2026:</strong> Custom hooks phổ biến hơn render props vì đơn giản hơn. Nhưng render props vẫn hữu ích khi cần <em>cấu trúc JSX</em> động (vd: <code>&lt;Popover&gt;</code> truyền vị trí cho trigger).</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">5. Higher-Order Component (HOC)</h2>
+    <p class="section-sub">Function nhận component, trả về component mới (bọc thêm logic). Legacy pattern — custom hooks làm việc này tốt hơn trong function component.</p>
+
+    <pre class="code"><span class="c">// HOC: bọc component để thêm auth check</span>
+<span class="k">function</span> <span class="n">withAuth</span>(Component) {
+  <span class="k">return function</span> WithAuth(props) {
+    <span class="k">const</span> user = useUser();
+    <span class="k">if</span> (!user) <span class="k">return</span> &lt;<span class="t">Login</span> /&gt;;
+    <span class="k">return</span> &lt;<span class="t">Component</span> {...props} user={user} /&gt;;
+  };
+}
+
+<span class="c">// Dùng</span>
+<span class="k">const</span> ProtectedDashboard = withAuth(Dashboard);</pre>
+
+    <div class="warn-box"><strong>Khi nào vẫn dùng HOC?</strong> Khi cần bọc prop injection cho component class (code cũ), hoặc cần 1 pass đồng bộ bên ngoài React tree (vd integration với lib thứ 3 kiểu <code>connect()</code> của Redux cũ). Mặc định 2026: dùng hook.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">6. Controlled vs Uncontrolled</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>Controlled — React nắm state</h4>
+        <pre class="code">&lt;<span class="t">input</span>
+  value={text}
+  onChange={e =&gt; setText(e.target.value)}
+/&gt;</pre>
+        <p>Dễ validate, transform, reset. <strong>Mặc định</strong> cho form thật.</p>
+      </div>
+      <div class="card">
+        <h4>Uncontrolled — DOM nắm state</h4>
+        <pre class="code">&lt;<span class="t">input</span> defaultValue=<span class="s">"abc"</span> ref={inputRef} /&gt;
+
+<span class="c">// Đọc qua ref khi cần</span>
+<span class="k">const</span> value = inputRef.current.value;</pre>
+        <p>Ít code hơn, tốt cho form đơn giản. React Hook Form dùng uncontrolled để perf cao.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">7. Provider Pattern</h2>
+    <p class="section-sub">Bọc app bằng 1 <code>Provider</code> để cung cấp API/state xuống toàn cây. Thường gặp: Theme, Auth, i18n, Query Client.</p>
+
+    <pre class="code"><span class="c">// Gom nhiều provider</span>
+<span class="k">function</span> <span class="n">AppProviders</span>({ children }) {
+  <span class="k">return</span> (
+    &lt;<span class="t">QueryClientProvider</span> client={queryClient}&gt;
+      &lt;<span class="t">ThemeProvider</span>&gt;
+        &lt;<span class="t">AuthProvider</span>&gt;
+          &lt;<span class="t">RouterProvider</span> router={router}&gt;
+            {children}
+          &lt;/<span class="t">RouterProvider</span>&gt;
+        &lt;/<span class="t">AuthProvider</span>&gt;
+      &lt;/<span class="t">ThemeProvider</span>&gt;
+    &lt;/<span class="t">QueryClientProvider</span>&gt;
+  );
+}
+
+<span class="c">// Hook bao ngoài cho tiện</span>
+<span class="k">function</span> <span class="n">useAuth</span>() {
+  <span class="k">const</span> ctx = useContext(AuthContext);
+  <span class="k">if</span> (!ctx) <span class="k">throw new</span> Error(<span class="s">'useAuth phải trong AuthProvider'</span>);
+  <span class="k">return</span> ctx;
+}</pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">8. State Reducer Pattern</h2>
+    <p class="section-sub">Cho phép user tùy biến logic state của component. Hữu ích khi làm thư viện UI.</p>
+
+    <pre class="code"><span class="k">function</span> <span class="n">Toggle</span>({ stateReducer = (s, a) =&gt; a.changes }) {
+  <span class="k">const</span> [state, dispatch] = useReducer(
+    (state, action) =&gt; {
+      <span class="k">const</span> changes = baseReducer(state, action);
+      <span class="k">return</span> stateReducer(state, { ...action, changes });
+    },
+    { on: <span class="k">false</span> }
+  );
+
+  <span class="k">return</span> &lt;<span class="t">button</span> onClick={() =&gt; dispatch({ type: <span class="s">'toggle'</span> })}&gt;
+    {state.on ? <span class="s">'ON'</span> : <span class="s">'OFF'</span>}
+  &lt;/<span class="t">button</span>&gt;;
+}
+
+<span class="c">// User tuỳ biến: cấm tắt sau khi đã mở</span>
+&lt;<span class="t">Toggle</span> stateReducer={(state, { type, changes }) =&gt; {
+  <span class="k">if</span> (type === <span class="s">'toggle'</span> &amp;&amp; state.on) <span class="k">return</span> state;
+  <span class="k">return</span> changes;
+}} /&gt;</pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">9. Folder Structure cho app lớn</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>❌ Theo loại file (by type)</h4>
+        <pre class="code">src/
+  components/
+    UserCard.jsx
+    ProductCard.jsx
+    OrderTable.jsx
+    ...50 files
+  hooks/
+    useUser.js
+    useProduct.js
+    ...30 files
+  utils/
+    ...</pre>
+        <p style="color:var(--muted);font-size:.88rem">Quick nhưng app lớn rối. Mỗi feature nằm rải rác.</p>
+      </div>
+
+      <div class="card">
+        <h4>✅ Theo feature (by feature)</h4>
+        <pre class="code">src/
+  features/
+    auth/
+      components/
+      hooks/
+      api.js
+      types.ts
+      index.js       <span class="c">// public API</span>
+    products/
+      components/
+      hooks/
+      api.js
+    orders/
+      ...
+  shared/
+    components/      <span class="c">// dùng chung thật sự</span>
+    hooks/
+    lib/
+  app/
+    App.jsx
+    router.jsx
+    providers.jsx</pre>
+      </div>
+    </div>
+
+    <div class="tip" style="margin-top:1rem"><strong>Quy tắc:</strong> component dùng riêng 1 feature thì đặt trong feature đó. Chỉ lên <code>shared/</code> khi &ge; 2 feature dùng. Đừng bỏ mọi thứ vào shared từ đầu.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">10. Anti-Patterns cần tránh</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>❌ God Component</h4>
+        <p>1 file 2000 dòng, 20 useState, gọi 5 API. Tách theo responsibility: data hook, presentational component, container.</p>
+      </div>
+      <div class="card">
+        <h4>❌ Prop drilling 5 tầng</h4>
+        <p>Prop đi xuyên qua 5 component chỉ để dùng ở cuối. Dùng Context hoặc kéo state lên state store.</p>
+      </div>
+      <div class="card">
+        <h4>❌ Dùng Redux cho mọi state</h4>
+        <p>Form state, modal open, collapsed sidebar → state cục bộ. Redux cho state <em>liên app</em> và complex (cart toàn site, auth).</p>
+      </div>
+      <div class="card">
+        <h4>❌ Effect chồng effect</h4>
+        <p>1 effect set state A, effect khác phản ứng A set B, B set C… Gộp thành reducer hoặc tính derived state.</p>
+      </div>
+      <div class="card">
+        <h4>❌ Ref hack thay state</h4>
+        <p>Dùng ref để bypass re-render khi bạn thật sự cần render lại. Ref là giá trị không-trigger-render; nếu UI cần update → state.</p>
+      </div>
+      <div class="card">
+        <h4>❌ Tạo component trong render</h4>
+        <pre class="code"><span class="k">function</span> <span class="n">Parent</span>() {
+  <span class="c">// SAI — component mới mỗi render → mất state</span>
+  <span class="k">function</span> <span class="n">Child</span>() { <span class="k">return</span> &lt;<span class="t">div</span>/&gt;; }
+  <span class="k">return</span> &lt;<span class="t">Child</span>/&gt;;
+}</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>ReactJS Mastery · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

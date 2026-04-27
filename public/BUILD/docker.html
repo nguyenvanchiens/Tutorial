@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker — Đóng gói & Triển khai</title>
+    <link rel="stylesheet" href="build.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html">Build<span class="accent">&Deploy</span></a></div>
+            <div class="nav-links">
+                <a href="index.html">🗺️ Tổng quan</a>
+                <a href="git.html">📦 Git</a>
+                <a href="cicd.html">⚙️ CI/CD</a>
+                <a href="jenkins.html">🔴 Jenkins</a>
+                <a href="docker.html" class="active">🐳 Docker</a>
+                <a href="hosting.html">☁️ Hosting</a>
+                <a href="cloud.html">⛅ Cloud</a>
+                <a href="domain.html">🌐 Domain</a>
+                <a href="ssl.html">🔒 SSL</a>
+                <a href="monitoring.html">📊 Monitoring</a>
+                <a href="workflow.html">🔄 Workflow</a>
+            </div>
+            <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <header class="build-hero">
+        <div class="hero-content">
+            <div class="hero-badge">CHƯƠNG 4 · CONTAINERIZATION</div>
+            <h1><span class="gradient-text">Docker</span></h1>
+            <p class="hero-desc">Đóng gói ứng dụng + dependencies vào container chạy nhất quán mọi môi trường.</p>
+        </div>
+    </header>
+
+    <!-- ===== SECTION 4: DOCKER ===== -->
+    <section class="section section-dark" id="docker">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🐳</div>
+                <h2>4. Docker — Đóng Gói & Triển Khai Nhất Quán</h2>
+                <p>"Ở máy tôi chạy được" → Docker giải quyết câu này. Đóng gói TẤT CẢ vào 1 container.</p>
+            </div>
+
+            <!-- ===== HỌC DOCKER KHÔNG CẦN CÀI ===== -->
+            <div class="concept-card" id="no-install" style="border-left: 4px solid #43e97b;">
+                <h3>⚡ Học Docker KHÔNG Cần Cài Lên Máy — 4 Cách</h3>
+                <p>Docker Desktop ngốn ~2.5GB RAM, chạy liên tục trong background làm máy ì. Nếu bạn chỉ muốn <strong>học</strong> hoặc máy yếu, dùng các cách dưới đây — không tốn byte nào bộ nhớ local.</p>
+
+                <div class="compare-grid" style="margin-top: 1rem;">
+                    <!-- Option 1: Play with Docker -->
+                    <div class="compare-card">
+                        <h4>🌐 1. Play with Docker <span style="color:#43e97b; font-size:.75rem;">KHUYÊN CHO NGƯỜI MỚI</span></h4>
+                        <div class="compare-list">
+                            <div class="compare-item"><strong>URL:</strong> <code>labs.play-with-docker.com</code></div>
+                            <div class="compare-item"><strong>Cần:</strong> Tài khoản Docker Hub (miễn phí)</div>
+                            <div class="compare-item"><strong>Session:</strong> 4 giờ / lần, có thể tạo lại</div>
+                            <div class="compare-item"><strong>Tính năng:</strong> Tạo nhiều Linux node, đủ lệnh docker, docker-compose, Swarm cluster</div>
+                            <div class="compare-item"><strong>Dùng khi:</strong> Luyện lệnh, thử Dockerfile, demo multi-container</div>
+                            <div class="compare-item" style="color:#f39c12;"><strong>Hạn chế:</strong> Session ngắn, mất data khi hết giờ. Không deploy production.</div>
+                        </div>
+                    </div>
+
+                    <!-- Option 2: Killercoda -->
+                    <div class="compare-card">
+                        <h4>🎓 2. Killercoda — Scenario tương tác</h4>
+                        <div class="compare-list">
+                            <div class="compare-item"><strong>URL:</strong> <code>killercoda.com/docker</code></div>
+                            <div class="compare-item"><strong>Cần:</strong> Không đăng ký cũng dùng được</div>
+                            <div class="compare-item"><strong>Tính năng:</strong> Có sẵn bài tập theo chủ đề (Docker basics, compose, networking…)</div>
+                            <div class="compare-item"><strong>Dùng khi:</strong> Học có dẫn dắt từng bước, muốn theo kịch bản</div>
+                            <div class="compare-item" style="color:#f39c12;"><strong>Hạn chế:</strong> Mỗi scenario environment riêng, không persist giữa các bài</div>
+                        </div>
+                    </div>
+
+                    <!-- Option 3: GitHub Codespaces -->
+                    <div class="compare-card" style="border: 2px solid #667eea;">
+                        <h4>☁️ 3. GitHub Codespaces <span style="color:#667eea; font-size:.75rem;">KHUYÊN CHO DỰ ÁN THẬT</span></h4>
+                        <div class="compare-list">
+                            <div class="compare-item"><strong>URL:</strong> Bất kỳ repo GitHub → Code → Codespaces → Create</div>
+                            <div class="compare-item"><strong>Cần:</strong> Tài khoản GitHub</div>
+                            <div class="compare-item"><strong>Free tier:</strong> 60h/tháng (Free), 180h/tháng (Pro $4)</div>
+                            <div class="compare-item"><strong>Tính năng:</strong> Cloud VM 2-core + Docker + docker-compose cài sẵn, VS Code browser/desktop</div>
+                            <div class="compare-item"><strong>Dùng khi:</strong> Làm project thật, cần persist code, push git, chạy app lâu</div>
+                            <div class="compare-item" style="color:#43e97b;"><strong>Ưu điểm:</strong> Hoạt động y như máy local mà không tốn tài nguyên máy bạn</div>
+                        </div>
+                    </div>
+
+                    <!-- Option 4: VPS giá rẻ -->
+                    <div class="compare-card">
+                        <h4>💰 4. VPS Giá Rẻ — Học + Deploy luôn</h4>
+                        <div class="compare-list">
+                            <div class="compare-item"><strong>Providers:</strong> Hetzner ($4/tháng), DigitalOcean ($4), Vultr ($2.5)</div>
+                            <div class="compare-item"><strong>Cấu hình tối thiểu:</strong> 1 vCPU, 1-2GB RAM, Ubuntu 22.04</div>
+                            <div class="compare-item"><strong>Cài đặt:</strong> SSH vào → <code>curl -fsSL https://get.docker.com | sh</code></div>
+                            <div class="compare-item"><strong>Dùng khi:</strong> Muốn deploy thật, học sysadmin, demo cho khách</div>
+                            <div class="compare-item" style="color:#f39c12;"><strong>Lưu ý:</strong> Mất tiền tháng, phải biết SSH cơ bản</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tip-box" style="margin-top: 1rem;">
+                    <strong>💡 Lộ trình khuyên dùng:</strong> <strong>Play with Docker</strong> (học lệnh 1-2 tuần) → <strong>GitHub Codespaces</strong> (làm project thật) → <strong>VPS</strong> khi cần deploy production.
+                </div>
+            </div>
+
+            <!-- ===== CÀI LOCAL NHẸ HƠN DOCKER DESKTOP ===== -->
+            <div class="concept-card" id="local-alt" style="border-left: 4px solid #f39c12;">
+                <h3>🪶 Phải Cài Local? — Dùng Podman Desktop Thay Docker Desktop</h3>
+                <p>Nếu vẫn muốn chạy local (offline, dev liên tục), có 2 lựa chọn <strong>nhẹ hơn Docker Desktop 30-40% RAM</strong>:</p>
+
+                <div class="compare-grid">
+                    <div class="compare-card">
+                        <h4>🦭 Podman Desktop <span style="color:#43e97b; font-size:.75rem;">TOP CHOICE 2026</span></h4>
+                        <div class="compare-list">
+                            <div class="compare-item"><strong>URL:</strong> <code>podman-desktop.io</code></div>
+                            <div class="compare-item"><strong>Giấy phép:</strong> Open-source (Apache 2.0), miễn phí kể cả cho doanh nghiệp lớn</div>
+                            <div class="compare-item"><strong>CLI:</strong> <code>podman</code> tương thích 100% lệnh <code>docker</code></div>
+                            <div class="compare-item"><strong>Daemonless:</strong> Không có service chạy ngầm → tiết kiệm RAM rõ rệt</div>
+                            <div class="compare-item"><strong>Rootless mode:</strong> An toàn hơn, không cần root privilege</div>
+                            <div class="compare-item"><strong>RAM idle:</strong> ~1.2-1.5 GB (vs Docker Desktop 2.5GB+)</div>
+                        </div>
+<pre class="code-block" style="margin-top:.75rem;"><span class="c-cmt"># Dùng podman y như docker — chỉ đổi tên lệnh</span>
+podman run -d -p 8080:80 nginx
+podman ps
+podman images
+
+<span class="c-cmt"># Hoặc alias cho thói quen</span>
+alias docker=podman
+alias docker-compose=<span class="c-str">"podman compose"</span></pre>
+                    </div>
+
+                    <div class="compare-card">
+                        <h4>🐄 Rancher Desktop</h4>
+                        <div class="compare-list">
+                            <div class="compare-item"><strong>URL:</strong> <code>rancherdesktop.io</code></div>
+                            <div class="compare-item"><strong>Giấy phép:</strong> Open-source (Apache 2.0)</div>
+                            <div class="compare-item"><strong>Engine:</strong> dockerd (containerd) — CLI docker hoạt động nguyên gốc</div>
+                            <div class="compare-item"><strong>Kèm Kubernetes:</strong> Có k3s built-in → học K8s luôn</div>
+                            <div class="compare-item"><strong>Dùng khi:</strong> Cần học cả Docker + Kubernetes, muốn CLI <code>docker</code> nguyên xi</div>
+                            <div class="compare-item" style="color:#f39c12;"><strong>Hạn chế:</strong> Nặng hơn Podman chút vì kèm K8s</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="warning-box" style="margin-top: 1rem;">
+                    <strong>⚠️ Docker Desktop có thu phí:</strong> Công ty ≥250 nhân viên hoặc doanh thu &gt;$10M/năm phải mua license. Podman Desktop &amp; Rancher Desktop đều miễn phí hoàn toàn, không giới hạn thương mại.
+                </div>
+            </div>
+
+            <!-- ===== SO SÁNH NHANH ===== -->
+            <div class="concept-card" id="compare-tools">
+                <h3>📊 So Sánh Nhanh — Chọn Đúng Công Cụ</h3>
+                <div class="cmd-card" style="overflow-x: auto;">
+                    <table style="width:100%; border-collapse: collapse; color: #e2e8f0; font-size: .9rem;">
+                        <thead>
+                            <tr style="background: rgba(102,126,234,.15);">
+                                <th style="padding:.75rem; text-align:left; border-bottom: 1px solid #2d3148;">Cách dùng</th>
+                                <th style="padding:.75rem; text-align:left; border-bottom: 1px solid #2d3148;">RAM máy bạn</th>
+                                <th style="padding:.75rem; text-align:left; border-bottom: 1px solid #2d3148;">Cần cài</th>
+                                <th style="padding:.75rem; text-align:left; border-bottom: 1px solid #2d3148;">Học cơ bản</th>
+                                <th style="padding:.75rem; text-align:left; border-bottom: 1px solid #2d3148;">Dự án thật</th>
+                                <th style="padding:.75rem; text-align:left; border-bottom: 1px solid #2d3148;">Offline</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">Play with Docker</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148; color:#43e97b;">0 MB</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">Không</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">✅ Tốt nhất</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">❌ Session ngắn</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">❌</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">Killercoda</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148; color:#43e97b;">0 MB</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">Không</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">✅</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">❌</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">❌</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">GitHub Codespaces</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148; color:#43e97b;">0 MB</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">Không</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">✅</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">✅</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">❌</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">VPS giá rẻ</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148; color:#43e97b;">0 MB</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">Không</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">✅</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">✅</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">❌</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;"><strong>Podman Desktop</strong></td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148; color:#f39c12;">~1.2-1.5 GB</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">Có (nhẹ)</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">✅</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">✅</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">✅</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">Rancher Desktop</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148; color:#f39c12;">~1.8 GB</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">Có</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">✅</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">✅ + K8s</td>
+                                <td style="padding:.6rem; border-bottom: 1px solid #2d3148;">✅</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:.6rem;">Docker Desktop</td>
+                                <td style="padding:.6rem; color:#f5576c;">~2.5 GB+</td>
+                                <td style="padding:.6rem;">Có (nặng)</td>
+                                <td style="padding:.6rem;">✅</td>
+                                <td style="padding:.6rem;">✅</td>
+                                <td style="padding:.6rem;">✅</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>📖 Docker Là Gì? — Giải Thích Đơn Giản</h3>
+                <div class="analogy-grid">
+                    <div class="analogy-box bad">
+                        <h4>❌ Không có Docker</h4>
+                        <p>"Máy tôi dùng .NET 8, server dùng .NET 6. Máy tôi Windows, server Linux. Database version khác. Biến môi trường khác. → <strong>Sập.</strong>"</p>
+                    </div>
+                    <div class="analogy-box good">
+                        <h4>✅ Có Docker</h4>
+                        <p>"Đóng gói app + .NET 8 + tất cả dependencies vào 1 container. Container chạy giống nhau trên máy tôi, server dev, staging, production. → <strong>Luôn hoạt động.</strong>"</p>
+                    </div>
+                </div>
+                <div class="docker-concepts">
+                    <div class="docker-concept">
+                        <strong>Image</strong> = Bản thiết kế (blueprint). Chứa code + runtime + config. Không thay đổi.
+                    </div>
+                    <div class="docker-concept">
+                        <strong>Container</strong> = Instance đang chạy từ image. Giống "bật máy ảo" nhưng nhẹ hơn 100x.
+                    </div>
+                    <div class="docker-concept">
+                        <strong>Dockerfile</strong> = File hướng dẫn cách build image. Viết 1 lần, dùng mãi.
+                    </div>
+                    <div class="docker-concept">
+                        <strong>Registry</strong> = Nơi lưu trữ images (Docker Hub, GitHub Container Registry, Azure ACR).
+                    </div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>📝 Dockerfile — Ví Dụ Thực Tế</h3>
+                <div class="cmd-grid">
+                    <div class="cmd-card">
+                        <div class="cmd-label">Dockerfile cho .NET 8 API (Multi-stage build)</div>
+<pre class="code-block"><span class="c-cmt"># Stage 1: Build</span>
+<span class="c-key">FROM</span> mcr.microsoft.com/dotnet/sdk:8.0 <span class="c-key">AS</span> build
+<span class="c-key">WORKDIR</span> /src
+
+<span class="c-cmt"># Copy csproj riêng → cache restore layer</span>
+<span class="c-key">COPY</span> *.csproj .
+<span class="c-key">RUN</span> dotnet restore
+
+<span class="c-cmt"># Copy toàn bộ source → build</span>
+<span class="c-key">COPY</span> . .
+<span class="c-key">RUN</span> dotnet publish -c Release -o /app/publish
+
+<span class="c-cmt"># Stage 2: Runtime (image nhỏ, chỉ chứa runtime)</span>
+<span class="c-key">FROM</span> mcr.microsoft.com/dotnet/aspnet:8.0
+<span class="c-key">WORKDIR</span> /app
+<span class="c-key">COPY</span> --from=build /app/publish .
+
+<span class="c-key">EXPOSE</span> 8080
+<span class="c-key">ENV</span> ASPNETCORE_URLS=http://+:8080
+
+<span class="c-key">ENTRYPOINT</span> ["dotnet", "MyApp.dll"]</pre>
+                    </div>
+
+                    <div class="cmd-card">
+                        <div class="cmd-label">Dockerfile cho Next.js</div>
+<pre class="code-block"><span class="c-cmt"># Stage 1: Install + Build</span>
+<span class="c-key">FROM</span> node:20-alpine <span class="c-key">AS</span> builder
+<span class="c-key">WORKDIR</span> /app
+
+<span class="c-key">COPY</span> package*.json .
+<span class="c-key">RUN</span> npm ci
+
+<span class="c-key">COPY</span> . .
+<span class="c-key">RUN</span> npm run build
+
+<span class="c-cmt"># Stage 2: Runtime</span>
+<span class="c-key">FROM</span> node:20-alpine
+<span class="c-key">WORKDIR</span> /app
+
+<span class="c-key">COPY</span> --from=builder /app/.next/standalone ./
+<span class="c-key">COPY</span> --from=builder /app/.next/static ./.next/static
+<span class="c-key">COPY</span> --from=builder /app/public ./public
+
+<span class="c-key">EXPOSE</span> 3000
+<span class="c-key">CMD</span> ["node", "server.js"]</pre>
+                    </div>
+                </div>
+
+                <div class="tip-box">
+                    <strong>💡 Multi-stage build</strong> giúp image nhỏ gọn: SDK image (~800MB) chỉ dùng lúc build → runtime image (~100MB) dùng khi chạy. Production image nhỏ = deploy nhanh, bảo mật hơn.
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🐙 Docker Compose — Chạy Nhiều Service Cùng Lúc</h3>
+                <p>Web app thường gồm: API + Database + Redis + Nginx. Compose quản lý tất cả.</p>
+                <div class="cmd-card">
+                    <div class="cmd-label">docker-compose.yml — Full stack development</div>
+<pre class="code-block"><span class="c-key">version:</span> <span class="c-str">"3.8"</span>
+
+<span class="c-key">services:</span>
+  <span class="c-key">api:</span>
+    <span class="c-key">build:</span> ./backend
+    <span class="c-key">ports:</span>
+      - <span class="c-str">"5000:8080"</span>
+    <span class="c-key">environment:</span>
+      - <span class="c-str">ConnectionStrings__Default=Server=db;Database=myapp;User=sa;Password=Pass@123</span>
+      - <span class="c-str">ASPNETCORE_ENVIRONMENT=Development</span>
+    <span class="c-key">depends_on:</span>
+      - db
+      - redis
+
+  <span class="c-key">web:</span>
+    <span class="c-key">build:</span> ./frontend
+    <span class="c-key">ports:</span>
+      - <span class="c-str">"3000:3000"</span>
+    <span class="c-key">environment:</span>
+      - <span class="c-str">NEXT_PUBLIC_API_URL=http://localhost:5000</span>
+
+  <span class="c-key">db:</span>
+    <span class="c-key">image:</span> mcr.microsoft.com/mssql/server:2022-latest
+    <span class="c-key">environment:</span>
+      - <span class="c-str">ACCEPT_EULA=Y</span>
+      - <span class="c-str">SA_PASSWORD=Pass@123</span>
+    <span class="c-key">ports:</span>
+      - <span class="c-str">"1433:1433"</span>
+    <span class="c-key">volumes:</span>
+      - <span class="c-str">db-data:/var/opt/mssql</span>
+
+  <span class="c-key">redis:</span>
+    <span class="c-key">image:</span> redis:7-alpine
+    <span class="c-key">ports:</span>
+      - <span class="c-str">"6379:6379"</span>
+
+<span class="c-key">volumes:</span>
+  <span class="c-key">db-data:</span></pre>
+                </div>
+                <div class="cmd-card" style="margin-top: 16px;">
+                    <div class="cmd-label">Docker commands thường dùng</div>
+<pre class="code-block"><span class="c-cmd">docker compose up -d</span>           <span class="c-cmt"># Chạy tất cả services (background)</span>
+<span class="c-cmd">docker compose down</span>             <span class="c-cmt"># Dừng tất cả</span>
+<span class="c-cmd">docker compose logs -f api</span>      <span class="c-cmt"># Xem log service api</span>
+<span class="c-cmd">docker compose build</span>            <span class="c-cmt"># Rebuild images</span>
+<span class="c-cmd">docker ps</span>                       <span class="c-cmt"># List containers đang chạy</span>
+<span class="c-cmd">docker exec -it api bash</span>        <span class="c-cmt"># Vào shell container</span></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="closing-box">
+                <div class="closing-nav">
+                    <a href="index.html" class="closing-btn">🗺️ Tổng quan</a>
+                    <a href="git.html" class="closing-btn">📦 Git</a>
+                    <a href="cicd.html" class="closing-btn">⚙️ CI/CD</a>
+                    <a href="jenkins.html" class="closing-btn">🔴 Jenkins</a>
+                    <a href="hosting.html" class="closing-btn">☁️ Hosting</a>
+                    <a href="cloud.html" class="closing-btn">⛅ Cloud</a>
+                    <a href="domain.html" class="closing-btn">🌐 Domain</a>
+                    <a href="ssl.html" class="closing-btn">🔒 SSL</a>
+                    <a href="monitoring.html" class="closing-btn">📊 Monitoring</a>
+                    <a href="workflow.html" class="closing-btn">🔄 Workflow</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Build & Deploy — Triển khai website từ A→Z cho web developer</p>
+        </div>
+    </footer>
+
+    <script src="build.js"></script>
+</body>
+</html>

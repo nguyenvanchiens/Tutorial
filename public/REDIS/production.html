@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Redis Production — Persistence, HA, Cluster, Security</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">Redis<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="basics.html">Cơ Bản</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="production.html" class="active">Production</a>
+      <a href="interview.html">Phỏng Vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">LEVEL 4 · SENIOR · OPS</div>
+  <h1>Redis <span class="gradient">Production</span></h1>
+  <p class="hero-desc">Persistence, Replication, Sentinel, Cluster, Memory, Security, Monitoring — chạy Redis thật với hàng triệu request/ngày.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">1. Persistence — Không mất data khi restart</h2>
+    <p class="section-sub">Redis nằm trong RAM, restart = mất hết. 2 cơ chế persistence: RDB (snapshot) và AOF (append log). Dùng cả hai cho an toàn tối đa.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>📸 RDB — Snapshot</h3>
+        <p>Định kỳ dump toàn bộ dataset ra file <code>dump.rdb</code>.</p>
+        <ul>
+          <li>File nhỏ gọn, load cực nhanh khi restart</li>
+          <li>Backup &amp; clone dễ (chỉ copy 1 file)</li>
+          <li>Chạy nền, không block</li>
+        </ul>
+        <div class="warn-box" style="margin-top:.5rem"><strong>Nhược:</strong> mất data giữa 2 snapshot (vd mỗi 5 phút). Nếu Redis sập lúc 4:59 sau snapshot lúc 4:55 → mất 4 phút.</div>
+        <pre class="code" style="margin-top:.5rem"><span class="c"># redis.conf</span>
+save <span class="s">3600</span> <span class="s">1</span>       <span class="c"># ≥1 change trong 1h</span>
+save <span class="s">300</span> <span class="s">100</span>      <span class="c"># ≥100 changes trong 5min</span>
+save <span class="s">60</span> <span class="s">10000</span>     <span class="c"># ≥10k changes trong 1min</span>
+dbfilename dump.rdb
+dir /var/lib/redis</pre>
+      </div>
+
+      <div class="card">
+        <h3>📜 AOF — Append Only File</h3>
+        <p>Ghi mọi write command vào file <code>appendonly.aof</code>. Khi restart, replay lại.</p>
+        <ul>
+          <li>Mất data tối đa 1s (hoặc 0s với <code>always</code>)</li>
+          <li>File lớn hơn RDB, Redis tự rewrite định kỳ</li>
+          <li>Restart chậm hơn (phải replay)</li>
+        </ul>
+        <pre class="code" style="margin-top:.5rem"><span class="c"># redis.conf</span>
+appendonly yes
+appendfsync everysec    <span class="c"># khuyên dùng</span>
+<span class="c"># appendfsync always — an toàn tuyệt đối, chậm</span>
+<span class="c"># appendfsync no — OS tự flush, nhanh nhưng risky</span>
+
+auto-aof-rewrite-percentage <span class="s">100</span>
+auto-aof-rewrite-min-size <span class="s">64</span>mb</pre>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <strong>Khuyên dùng:</strong> Bật <strong>cả RDB + AOF</strong>. RDB để backup &amp; restart nhanh, AOF để giảm data loss khi crash. Redis load AOF trước (mới hơn).
+    </div>
+
+    <table class="cmp" style="margin-top:1rem">
+      <tr><th>Chỉ tiêu</th><th>RDB only</th><th>AOF only</th><th>RDB + AOF</th></tr>
+      <tr><td>Data loss tối đa</td><td>Minutes</td><td>1s</td><td>1s</td></tr>
+      <tr><td>Tốc độ restart</td><td>Nhanh</td><td>Chậm</td><td>Chậm (load AOF)</td></tr>
+      <tr><td>Disk footprint</td><td>Nhỏ</td><td>Lớn</td><td>Vừa</td></tr>
+      <tr><td>Khuyên khi</td><td>Cache thuần</td><td>Session/DB quan trọng</td><td>Production default</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">2. Replication — Master-Replica</h2>
+    <p class="section-sub">1 master + N replica đọc. Failover thủ công, đọc scale ngang, backup không ảnh hưởng master.</p>
+
+    <pre class="code"><span class="c"># Trên replica — trỏ về master</span>
+replicaof <span class="s">master.redis.local</span> <span class="s">6379</span>
+replica-read-only yes
+masterauth &lt;password&gt;
+
+<span class="c"># Hoặc runtime</span>
+<span class="cmd">REPLICAOF</span> master.redis.local <span class="s">6379</span>
+
+<span class="c"># Kiểm tra trạng thái</span>
+<span class="cmd">INFO</span> replication</pre>
+
+    <div class="tip"><strong>Dùng khi:</strong> cần scale read (analytic query chạy trên replica), backup định kỳ (dump RDB trên replica để không ảnh hưởng master), disaster recovery (replica ở vùng khác).</div>
+
+    <div class="warn-box"><strong>Replication không phải HA:</strong> master chết → replica <strong>không tự động</strong> lên master. Cần <strong>Sentinel</strong> (mục 3) để tự failover.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">3. Sentinel — High Availability</h2>
+    <p class="section-sub">3+ sentinel node giám sát master, tự promote replica thành master khi master chết. Client hỏi sentinel để biết master hiện tại.</p>
+
+    <pre class="code"><span class="c"># sentinel.conf</span>
+port <span class="s">26379</span>
+sentinel monitor mymaster <span class="s">master.redis.local</span> <span class="s">6379</span> <span class="s">2</span>
+<span class="c"># 2 = quorum, cần ≥2 sentinel đồng ý là master chết mới failover</span>
+
+sentinel down-after-milliseconds mymaster <span class="s">5000</span>
+sentinel failover-timeout mymaster <span class="s">60000</span>
+sentinel parallel-syncs mymaster <span class="s">1</span></pre>
+
+    <pre class="code"><span class="c">// Client (C#) connect qua sentinel</span>
+<span class="k">var</span> config = <span class="k">new</span> ConfigurationOptions {
+    ServiceName = <span class="s">"mymaster"</span>,
+    EndPoints = { <span class="s">"sentinel1:26379"</span>, <span class="s">"sentinel2:26379"</span>, <span class="s">"sentinel3:26379"</span> },
+    CommandMap = CommandMap.Sentinel,
+    Password = <span class="s">"..."</span>,
+};
+<span class="k">var</span> sentinel = ConnectionMultiplexer.SentinelConnect(config);
+<span class="k">var</span> redis = sentinel.GetSentinelMasterConnection(...);</pre>
+
+    <div class="info-box">
+      <strong>Kiến trúc Sentinel chuẩn:</strong>
+      <ul style="padding-left:1.2rem; margin-top:.3rem">
+        <li>3 Redis nodes: 1 master + 2 replica</li>
+        <li>3 Sentinel nodes (số lẻ để quorum)</li>
+        <li>Mỗi node ở 1 máy khác nhau (AZ khác nhau nếu cloud)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">4. Redis Cluster — Sharding ngang</h2>
+    <p class="section-sub">Khi 1 node không đủ RAM/throughput → chia keyspace thành <strong>16384 slots</strong> trên nhiều master, mỗi master có replica riêng.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Hoạt động</h3>
+        <ol style="padding-left:1.2rem; color: var(--muted)">
+          <li>Key → hash(key) mod 16384 = slot số</li>
+          <li>Slot nằm trên node nào → route tới node đó</li>
+          <li>Client (smart client) cache slot→node map</li>
+          <li>Node di chuyển slot → trả MOVED/ASK, client update map</li>
+        </ol>
+      </div>
+      <div class="card">
+        <h3>Kiến trúc tối thiểu</h3>
+        <ul>
+          <li><strong>3 master</strong> (mỗi master giữ ~5461 slots)</li>
+          <li><strong>3 replica</strong> (1 replica / master)</li>
+          <li>Tổng 6 node, chia 3 máy</li>
+        </ul>
+        <pre class="code" style="margin-top:.5rem"><span class="c"># Tạo cluster</span>
+redis-cli --cluster create \
+  <span class="s">10.0.0.1:7000</span> <span class="s">10.0.0.2:7000</span> <span class="s">10.0.0.3:7000</span> \
+  <span class="s">10.0.0.1:7001</span> <span class="s">10.0.0.2:7001</span> <span class="s">10.0.0.3:7001</span> \
+  --cluster-replicas <span class="s">1</span></pre>
+      </div>
+    </div>
+
+    <div class="warn-box" style="margin-top:1rem">
+      <strong>Hạn chế Cluster:</strong>
+      <ul style="padding-left:1.2rem; margin-top:.3rem">
+        <li>Multi-key command chỉ chạy nếu các key cùng slot → dùng <code>{tag}</code>: <code>user:{5}:profile</code>, <code>user:{5}:sessions</code> → cùng hash</li>
+        <li>Transaction (<code>MULTI/EXEC</code>) chỉ trong 1 slot</li>
+        <li>Select DB (<code>SELECT 1</code>) không dùng được, chỉ có DB 0</li>
+        <li>Pub/Sub hoạt động toàn cluster nhưng tốn bandwidth</li>
+      </ul>
+    </div>
+
+    <div class="tip">
+      <strong>Khi nào cần Cluster?</strong> Chỉ khi 1 node đơn thực sự không đủ — RAM &gt;100GB hoặc throughput &gt;100k ops/s. Hầu hết app nhỏ/vừa, 1 master + Sentinel là đủ.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">5. Memory Management &amp; Eviction</h2>
+    <p class="section-sub">Khi Redis đầy RAM, phải quyết định: từ chối write mới, hay xoá key cũ? Cấu hình <code>maxmemory</code> + <code>maxmemory-policy</code>.</p>
+
+    <pre class="code"><span class="c"># redis.conf</span>
+maxmemory <span class="s">4gb</span>
+maxmemory-policy allkeys-lru</pre>
+
+    <table class="cmp">
+      <tr><th>Policy</th><th>Hành vi</th><th>Dùng khi</th></tr>
+      <tr><td><code>noeviction</code></td><td>Từ chối write khi đầy. Read vẫn OK.</td><td>Redis là DB (không được mất)</td></tr>
+      <tr><td><code>allkeys-lru</code></td><td>Xoá key ít dùng nhất (LRU)</td><td><strong>Cache — mặc định</strong></td></tr>
+      <tr><td><code>allkeys-lfu</code></td><td>Xoá key ít access nhất (LFU) — chính xác hơn LRU</td><td>Cache với skew rõ</td></tr>
+      <tr><td><code>volatile-lru</code></td><td>LRU chỉ xoá key có TTL</td><td>Mix cache + persistent data</td></tr>
+      <tr><td><code>volatile-ttl</code></td><td>Xoá key sắp hết TTL trước</td><td>Khi TTL = priority</td></tr>
+      <tr><td><code>allkeys-random</code></td><td>Random</td><td>Hiếm dùng</td></tr>
+    </table>
+
+    <div class="info-box">
+      <strong>Ước lượng maxmemory:</strong> tổng RAM máy × 75%. Chừa 25% cho OS + buffer + RDB fork (snapshot cần copy-on-write, có thể gấp đôi RAM tạm thời).
+    </div>
+
+    <h3 style="color: var(--primary); margin-top: 1.5rem">Giám sát RAM</h3>
+    <pre class="code"><span class="cmd">INFO</span> memory
+<span class="c"># used_memory           — RAM hiện dùng</span>
+<span class="c"># used_memory_peak      — peak từ lúc start</span>
+<span class="c"># used_memory_rss       — RAM OS cấp (có thể lớn hơn used_memory vì fragmentation)</span>
+<span class="c"># mem_fragmentation_ratio — rss/used. &gt;1.5 là fragment nặng</span>
+
+<span class="cmd">MEMORY USAGE</span> user:<span class="s">5</span>
+<span class="c"># Bytes 1 key tiêu</span>
+
+<span class="cmd">MEMORY STATS</span>
+<span class="c"># Chi tiết từng phần</span></pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">6. Security</h2>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>🔑 Authentication</h3>
+        <pre class="code"><span class="c"># redis.conf</span>
+requirepass your-strong-password-here
+
+<span class="c"># Redis 6+ — ACL chi tiết theo user</span>
+<span class="cmd">ACL SETUSER</span> readonly on <span class="s">&gt;readonly_pass</span> ~* &amp;* +get +mget +scan -@all
+<span class="cmd">ACL SETUSER</span> admin on <span class="s">&gt;admin_pass</span> ~* &amp;* +@all</pre>
+        <p style="margin-top:.5rem">ACL pattern: <code>~keys_pattern</code> giới hạn key, <code>+command -command</code> giới hạn lệnh.</p>
+      </div>
+
+      <div class="card">
+        <h3>🔒 TLS</h3>
+        <pre class="code"><span class="c"># redis.conf</span>
+tls-port <span class="s">6380</span>
+port <span class="s">0</span>              <span class="c"># tắt plaintext</span>
+tls-cert-file /etc/redis/redis.crt
+tls-key-file /etc/redis/redis.key
+tls-ca-cert-file /etc/redis/ca.crt
+tls-auth-clients yes   <span class="c"># yêu cầu client cert</span></pre>
+      </div>
+
+      <div class="card">
+        <h3>🛡️ Network</h3>
+        <ul>
+          <li><strong>Bind private IP:</strong> <code>bind 10.0.0.5</code> — không expose 0.0.0.0</li>
+          <li><strong>Firewall:</strong> chỉ mở port 6379 từ app server IP</li>
+          <li><strong>VPC/VPN:</strong> Redis trong private subnet</li>
+          <li><strong>protected-mode yes</strong> — block connect không auth</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>⚠️ Rename lệnh nguy hiểm</h3>
+        <pre class="code"><span class="c"># Đổi tên để attacker khó gọi</span>
+rename-command FLUSHDB <span class="s">""</span>              <span class="c"># vô hiệu</span>
+rename-command FLUSHALL <span class="s">""</span>
+rename-command CONFIG <span class="s">"CFG_xyz123"</span>     <span class="c"># chỉ admin biết</span>
+rename-command KEYS <span class="s">""</span>
+rename-command DEBUG <span class="s">""</span></pre>
+      </div>
+    </div>
+
+    <div class="danger-box">
+      <strong>Cảnh báo thực tế:</strong> Shodan thường xuyên tìm thấy Redis expose public không auth. Attacker dùng <code>CONFIG SET dir</code> + <code>SAVE</code> để ghi SSH key lên server. <strong>Không bao giờ expose Redis ra internet.</strong>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">7. Monitoring &amp; Troubleshooting</h2>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>📊 INFO — số liệu tổng</h3>
+        <pre class="code"><span class="cmd">INFO</span>
+<span class="c"># Key sections:</span>
+<span class="c"># server        — version, uptime</span>
+<span class="c"># clients       — connected, blocked</span>
+<span class="c"># memory        — used, peak, fragmentation</span>
+<span class="c"># stats         — ops/sec, hits/misses</span>
+<span class="c"># replication   — role, slaves</span>
+<span class="c"># cpu           — used_cpu_sys/user</span>
+<span class="c"># commandstats  — calls per command</span>
+<span class="c"># keyspace      — số key mỗi DB</span></pre>
+      </div>
+
+      <div class="card">
+        <h3>🐌 SLOWLOG — lệnh chậm</h3>
+        <pre class="code"><span class="c"># Cấu hình ngưỡng 10ms</span>
+<span class="cmd">CONFIG SET</span> slowlog-log-slower-than <span class="s">10000</span>
+<span class="cmd">CONFIG SET</span> slowlog-max-len <span class="s">128</span>
+
+<span class="c"># Xem 10 lệnh chậm gần nhất</span>
+<span class="cmd">SLOWLOG GET</span> <span class="s">10</span>
+
+<span class="c"># Clear</span>
+<span class="cmd">SLOWLOG RESET</span></pre>
+      </div>
+
+      <div class="card">
+        <h3>🔎 MONITOR — realtime command</h3>
+        <pre class="code"><span class="cmd">MONITOR</span>
+<span class="c"># In ra mọi command realtime</span>
+<span class="c"># ⚠️ CHỈ dùng debug ngắn, ảnh hưởng perf</span></pre>
+      </div>
+
+      <div class="card">
+        <h3>📈 Metrics quan trọng</h3>
+        <ul>
+          <li><code>ops/sec</code> — throughput</li>
+          <li><code>keyspace_hits / (hits + misses)</code> — hit ratio, target &gt;0.9 cho cache</li>
+          <li><code>used_memory_rss / maxmemory</code> — đầy RAM chưa?</li>
+          <li><code>instantaneous_input_kbps</code> — băng thông</li>
+          <li><code>blocked_clients</code> — có client bị block lâu?</li>
+          <li><code>evicted_keys</code> — đang xoá key vì đầy RAM</li>
+          <li><code>latency</code> — dùng <code>LATENCY LATEST</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="color: var(--primary); margin-top: 1rem">Công cụ recommend</h3>
+    <div class="grid grid-3">
+      <div class="card">
+        <h4>Redis Insight</h4>
+        <p>GUI chính thức của Redis Inc. Browser data, slowlog, profiler. Miễn phí.</p>
+      </div>
+      <div class="card">
+        <h4>Prometheus + redis_exporter</h4>
+        <p>Scrape metrics → Grafana dashboard. Stack observability tiêu chuẩn.</p>
+      </div>
+      <div class="card">
+        <h4>RedisBloom / RedisTimeSeries</h4>
+        <p>Module thêm probabilistic data structure + time-series. Cài khi cần.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">8. Benchmarking</h2>
+    <pre class="code"><span class="c"># redis-benchmark đi kèm Redis</span>
+redis-benchmark -h localhost -p <span class="s">6379</span> -n <span class="s">100000</span> -c <span class="s">50</span>
+<span class="c"># -n 100000 = 100k request, -c 50 = 50 client concurrent</span>
+
+<span class="c"># Test 1 command cụ thể</span>
+redis-benchmark -t set,get -n <span class="s">1000000</span>
+
+<span class="c"># Với pipeline</span>
+redis-benchmark -t set -n <span class="s">1000000</span> -P <span class="s">16</span>
+<span class="c"># -P 16 = pipeline 16 command</span></pre>
+
+    <div class="tip"><strong>Baseline:</strong> 1 Redis instance trên AWS t3.small handle ~80-100k ops/s GET/SET đơn giản. Nếu số bạn thấp hơn rất nhiều → kiểm tra network latency, single-command workload, hot key.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">9. Deployment Checklist</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>✅ Trước khi go-live</h3>
+        <ul>
+          <li>Bật persistence (RDB + AOF)</li>
+          <li>Set <code>maxmemory</code> + eviction policy</li>
+          <li>Auth password hoặc ACL</li>
+          <li>Bind private IP + firewall</li>
+          <li>Rename lệnh nguy hiểm</li>
+          <li>TLS nếu qua internet</li>
+          <li>Sentinel hoặc Cluster nếu cần HA</li>
+          <li>Backup RDB định kỳ sang S3</li>
+          <li>Monitoring: ops/s, memory, hit ratio, slowlog</li>
+          <li>Alert: memory &gt;80%, master down, replication lag</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>🚫 Tránh</h3>
+        <ul>
+          <li>Chạy <code>KEYS *</code>, <code>FLUSHALL</code> trên prod</li>
+          <li>Dùng DB 1-15 cho tách data (không tương thích Cluster)</li>
+          <li>Để Redis swap sang disk (RAM cạn = chậm thảm)</li>
+          <li>Chạy Redis chung server với app-CPU nặng</li>
+          <li>Không backup (hoặc backup nhưng chưa test restore)</li>
+          <li>1 client per request — dùng shared connection</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">☁️ Managed Redis — nếu không muốn tự vận hành</h2>
+    <div class="grid grid-3">
+      <div class="card">
+        <h4>Upstash</h4>
+        <p>Serverless, pay-per-request. Free 10k commands/ngày. Có REST API.</p>
+        <p style="color: var(--success); margin-top:.3rem">Tốt cho: startup, edge functions, cost tối ưu.</p>
+      </div>
+      <div class="card">
+        <h4>Redis Cloud (Redis Inc.)</h4>
+        <p>Chính chủ. Free 30MB vĩnh viễn, tier trả phí có HA, cluster, modules.</p>
+        <p style="color: var(--success); margin-top:.3rem">Tốt cho: cần latest features, modules RediSearch/JSON.</p>
+      </div>
+      <div class="card">
+        <h4>AWS ElastiCache / Azure Cache / GCP Memorystore</h4>
+        <p>Tích hợp chặt với ecosystem cloud tương ứng. Replication, backup, monitoring tự động.</p>
+        <p style="color: var(--success); margin-top:.3rem">Tốt cho: đã all-in 1 cloud, cần VPC peering.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Redis Mastery · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

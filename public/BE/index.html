@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>.NET Core Mastery - 20/80 Roadmap</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">.NET<span class="accent">Mastery</span></div>
+            <div class="nav-links">
+                <a href="#overview">Tổng quan</a>
+                <a href="#core-20">Core 20%</a>
+                <a href="#remaining-80">80% Còn lại</a>
+                <a href="#lead-skills">Lead Skills</a>
+                <a href="#quiz" class="nav-quiz-btn">Kiểm tra</a>
+                <a href="wisdom.html" class="nav-wisdom-btn">Kinh nghiệm</a>
+                <a href="ai-era.html" class="nav-wisdom-btn">AI Era</a>
+                <a href="roadmap-detail.html" class="nav-wisdom-btn">Lộ trình A-Z</a>
+                <a href="skill-test.html">Phỏng vấn</a>
+                <a href="advice.html">Lời khuyên</a>
+                <a href="backend-path.html">Backend Path</a>
+            </div>
+            <div class="progress-badge">
+                <span id="totalProgress">0</span>% Hoàn thành
+            </div>
+            <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">PARETO PRINCIPLE FOR .NET DEVELOPERS</div>
+            <h1>Nắm vững <span class="gradient-text">20% Cốt lõi</span><br>Làm chủ <span class="gradient-text">80% Kết quả</span></h1>
+            <p class="hero-desc">Lộ trình học tập có hệ thống dành cho .NET Developer lên Team Lead.<br>Tập trung vào bản chất, không lan man.</p>
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-number">8</span>
+                    <span class="stat-label">Chủ đề cốt lõi</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">12</span>
+                    <span class="stat-label">Chủ đề mở rộng</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">5</span>
+                    <span class="stat-label">Lead Skills</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- OVERVIEW SECTION -->
+    <section id="overview" class="section">
+        <div class="container">
+            <h2 class="section-title">Triết lý 20/80</h2>
+            <div class="philosophy-grid">
+                <div class="philosophy-card core">
+                    <div class="card-icon">🧠</div>
+                    <h3>20% Cốt lõi = Bản chất</h3>
+                    <p>Những kiến thức nền tảng quyết định <strong>80% năng lực</strong> của bạn. Hiểu sâu những thứ này, bạn sẽ tự suy ra được phần còn lại.</p>
+                    <ul>
+                        <li>CLR & Memory Management</li>
+                        <li>Async/Await & Threading</li>
+                        <li>SOLID & Design Patterns</li>
+                        <li>SQL & Database Internals</li>
+                        <li>HTTP & REST Fundamentals</li>
+                        <li>Dependency Injection</li>
+                        <li>Security Fundamentals</li>
+                        <li>Testing Strategy</li>
+                    </ul>
+                </div>
+                <div class="philosophy-card extended">
+                    <div class="card-icon">🚀</div>
+                    <h3>80% Còn lại = Ứng dụng</h3>
+                    <p>Công cụ, framework, pattern áp dụng thực tế. Khi đã vững cốt lõi, những thứ này <strong>học rất nhanh</strong>.</p>
+                    <ul>
+                        <li>Entity Framework Core</li>
+                        <li>Microservices & Docker</li>
+                        <li>Message Queue (RabbitMQ, Kafka)</li>
+                        <li>Caching (Redis, Memory)</li>
+                        <li>CI/CD Pipeline</li>
+                        <li>Logging & Monitoring</li>
+                        <li>gRPC & SignalR</li>
+                        <li>Cloud Services (Azure/AWS)</li>
+                        <li>Performance Optimization</li>
+                        <li>API Gateway & Load Balancing</li>
+                        <li>Domain-Driven Design</li>
+                        <li>Event Sourcing & CQRS</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CORE 20% SECTION -->
+    <section id="core-20" class="section section-dark">
+        <div class="container">
+            <h2 class="section-title">🧠 20% Cốt Lõi — Phải Nắm Chắc</h2>
+            <p class="section-desc">Đây là nền tảng quyết định bạn là developer "biết dùng" hay "hiểu sâu"</p>
+
+            <!-- Topic 1: CLR -->
+            <div class="topic-card" data-topic="clr">
+                <div class="topic-header">
+                    <div class="topic-number">01</div>
+                    <div class="topic-info">
+                        <h3>CLR & Memory Management</h3>
+                        <p class="topic-subtitle">Hiểu máy chạy code của bạn như thế nào</p>
+                    </div>
+                    <div class="topic-progress">
+                        <input type="checkbox" class="topic-check" data-id="clr">
+                    </div>
+                </div>
+                <div class="topic-content">
+                    <div class="why-box">
+                        <h4>🎯 Tại sao quan trọng?</h4>
+                        <p>Nếu không hiểu CLR, bạn không thể giải thích tại sao code chạy chậm, tại sao memory leak, tại sao GC pause. Đây là thứ phân biệt senior và junior.</p>
+                    </div>
+                    <div class="knowledge-grid">
+                        <div class="knowledge-item must-know">
+                            <h5>💎 PHẢI BIẾT</h5>
+                            <ul>
+                                <li><strong>Stack vs Heap</strong> — Value type nằm ở stack, Reference type nằm ở heap. Boxing/Unboxing xảy ra khi chuyển đổi.</li>
+                                <li><strong>Garbage Collector</strong> — Gen 0, Gen 1, Gen 2. GC chỉ thu hồi heap. Large Object Heap (LOH) cho object > 85KB.</li>
+                                <li><strong>IDisposable & using</strong> — Unmanaged resources (file handle, DB connection) KHÔNG được GC quản lý. Phải dispose thủ công.</li>
+                                <li><strong>JIT Compilation</strong> — IL code → Native code tại runtime. Tiered Compilation trong .NET Core.</li>
+                                <li><strong>Value type vs Reference type</strong> — struct vs class. Khi nào dùng struct? Khi data nhỏ, immutable, ngắn hạn.</li>
+                            </ul>
+                        </div>
+                        <div class="knowledge-item good-to-know">
+                            <h5>📝 NÊN BIẾT</h5>
+                            <ul>
+                                <li>Span&lt;T&gt; và Memory&lt;T&gt; để tránh allocation</li>
+                                <li>ArrayPool&lt;T&gt; để reuse arrays</li>
+                                <li>Weak References cho caching</li>
+                                <li>Finalizer và GC.SuppressFinalize</li>
+                                <li>dotMemory / dotTrace profiling</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="code-example">
+                        <h5>💻 Ví dụ thực tế</h5>
+                        <pre><code>// ❌ SAI - Memory leak vì không dispose
+public void ProcessFile()
+{
+    var stream = new FileStream("data.txt", FileMode.Open);
+    // Quên dispose → file bị lock, memory leak
+}
+
+// ✅ ĐÚNG - Dùng using statement
+public void ProcessFile()
+{
+    using var stream = new FileStream("data.txt", FileMode.Open);
+    // Tự động dispose khi ra khỏi scope
+}
+
+// ❌ SAI - Boxing gây allocation không cần thiết
+object boxed = 42; // int → object = BOXING (heap allocation)
+int unboxed = (int)boxed; // UNBOXING
+
+// ✅ ĐÚNG - Dùng generic để tránh boxing
+List&lt;int&gt; numbers = new(); // Không boxing</code></pre>
+                    </div>
+                    <div class="interview-box">
+                        <h5>🔥 Câu hỏi phỏng vấn kinh điển</h5>
+                        <ul>
+                            <li>"Giải thích sự khác nhau giữa Stack và Heap trong .NET?"</li>
+                            <li>"GC hoạt động như thế nào? Khi nào GC chạy?"</li>
+                            <li>"Tại sao cần IDisposable? using statement hoạt động ra sao?"</li>
+                            <li>"struct và class khác nhau thế nào? Khi nào dùng struct?"</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Topic 2: Async/Await -->
+            <div class="topic-card" data-topic="async">
+                <div class="topic-header">
+                    <div class="topic-number">02</div>
+                    <div class="topic-info">
+                        <h3>Async/Await & Threading</h3>
+                        <p class="topic-subtitle">Bản chất của lập trình bất đồng bộ</p>
+                    </div>
+                    <div class="topic-progress">
+                        <input type="checkbox" class="topic-check" data-id="async">
+                    </div>
+                </div>
+                <div class="topic-content">
+                    <div class="why-box">
+                        <h4>🎯 Tại sao quan trọng?</h4>
+                        <p>90% code backend là I/O bound (DB query, HTTP call, file read). Không hiểu async = không tối ưu được throughput = server chịu tải kém.</p>
+                    </div>
+                    <div class="knowledge-grid">
+                        <div class="knowledge-item must-know">
+                            <h5>💎 PHẢI BIẾT</h5>
+                            <ul>
+                                <li><strong>async/await KHÔNG tạo thread mới</strong> — Nó giải phóng thread hiện tại khi chờ I/O. Thread pool thread được trả lại.</li>
+                                <li><strong>Task vs Thread</strong> — Task là abstraction cao hơn, chạy trên ThreadPool. Thread là OS-level.</li>
+                                <li><strong>ConfigureAwait(false)</strong> — Trong library code, dùng để tránh deadlock và không cần capture SynchronizationContext.</li>
+                                <li><strong>Deadlock pattern</strong> — .Result hoặc .Wait() trên async method = DEADLOCK trong ASP.NET (trước .NET Core).</li>
+                                <li><strong>CancellationToken</strong> — Cơ chế cooperative cancellation. LUÔN truyền CancellationToken cho async methods.</li>
+                                <li><strong>ValueTask vs Task</strong> — ValueTask tránh allocation khi result đã sẵn sàng (cache hit, sync completion).</li>
+                            </ul>
+                        </div>
+                        <div class="knowledge-item good-to-know">
+                            <h5>📝 NÊN BIẾT</h5>
+                            <ul>
+                                <li>SemaphoreSlim cho async locking</li>
+                                <li>Channel&lt;T&gt; cho producer-consumer pattern</li>
+                                <li>Parallel.ForEachAsync trong .NET 6+</li>
+                                <li>IAsyncEnumerable&lt;T&gt; cho streaming data</li>
+                                <li>Task.WhenAll vs Task.WhenAny</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="code-example">
+                        <h5>💻 Ví dụ thực tế</h5>
+                        <pre><code>// ❌ SAI - Block async code = Deadlock risk
+public string GetData()
+{
+    return GetDataAsync().Result; // DEADLOCK!
+}
+
+// ✅ ĐÚNG - Async all the way
+public async Task&lt;string&gt; GetDataAsync(CancellationToken ct = default)
+{
+    using var client = new HttpClient();
+    return await client.GetStringAsync("https://api.example.com", ct);
+}
+
+// ❌ SAI - Tạo task không cần thiết cho I/O
+public async Task SaveAsync(Data data)
+{
+    await Task.Run(() => _db.SaveChanges()); // Lãng phí thread!
+}
+
+// ✅ ĐÚNG - Dùng async I/O native
+public async Task SaveAsync(Data data, CancellationToken ct)
+{
+    await _db.SaveChangesAsync(ct); // Thread được giải phóng khi chờ DB
+}
+
+// Chạy song song nhiều tasks
+var tasks = users.Select(u => SendEmailAsync(u, ct));
+await Task.WhenAll(tasks);</code></pre>
+                    </div>
+                    <div class="interview-box">
+                        <h5>🔥 Câu hỏi phỏng vấn kinh điển</h5>
+                        <ul>
+                            <li>"async/await hoạt động như thế nào bên dưới?"</li>
+                            <li>"Tại sao không nên dùng .Result hay .Wait()?"</li>
+                            <li>"Task.Run có phù hợp cho I/O-bound work không? Tại sao?"</li>
+                            <li>"Giải thích CancellationToken và cooperative cancellation?"</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Topic 3: SOLID -->
+            <div class="topic-card" data-topic="solid">
+                <div class="topic-header">
+                    <div class="topic-number">03</div>
+                    <div class="topic-info">
+                        <h3>SOLID Principles & Design Patterns</h3>
+                        <p class="topic-subtitle">Kiến trúc code bền vững</p>
+                    </div>
+                    <div class="topic-progress">
+                        <input type="checkbox" class="topic-check" data-id="solid">
+                    </div>
+                </div>
+                <div class="topic-content">
+                    <div class="why-box">
+                        <h4>🎯 Tại sao quan trọng?</h4>
+                        <p>Là Lead, bạn review code hàng ngày. SOLID giúp bạn nhận ra code smell ngay lập tức và hướng dẫn team viết code dễ maintain, dễ test.</p>
+                    </div>
+                    <div class="knowledge-grid">
+                        <div class="knowledge-item must-know">
+                            <h5>💎 PHẢI BIẾT</h5>
+                            <ul>
+                                <li><strong>S - Single Responsibility</strong> — Mỗi class chỉ có MỘT lý do để thay đổi. UserService không nên gửi email.</li>
+                                <li><strong>O - Open/Closed</strong> — Mở cho mở rộng, đóng cho sửa đổi. Dùng abstraction thay vì if/else chain.</li>
+                                <li><strong>L - Liskov Substitution</strong> — Subclass phải thay thế được parent class mà không break logic.</li>
+                                <li><strong>I - Interface Segregation</strong> — Interface nhỏ, cụ thể tốt hơn interface lớn, chung chung.</li>
+                                <li><strong>D - Dependency Inversion</strong> — Depend on abstractions, not concretions. High-level module không phụ thuộc low-level.</li>
+                            </ul>
+                        </div>
+                        <div class="knowledge-item good-to-know">
+                            <h5>📝 PATTERNS THƯỜNG DÙNG</h5>
+                            <ul>
+                                <li><strong>Repository Pattern</strong> — Abstraction cho data access</li>
+                                <li><strong>Strategy Pattern</strong> — Thay đổi algorithm runtime</li>
+                                <li><strong>Factory Pattern</strong> — Tạo object phức tạp</li>
+                                <li><strong>Mediator (MediatR)</strong> — Decouple request/handler</li>
+                                <li><strong>Decorator Pattern</strong> — Thêm behavior mà không sửa code</li>
+                                <li><strong>Observer Pattern</strong> — Event-driven communication</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="code-example">
+                        <h5>💻 Ví dụ thực tế</h5>
+                        <pre><code>// ❌ Vi phạm SRP - Class làm quá nhiều việc
+public class UserService
+{
+    public void Register(User user) { /* save to DB */ }
+    public void SendWelcomeEmail(User user) { /* gửi email */ }
+    public void GenerateReport(User user) { /* tạo report */ }
+}
+
+// ✅ Tách responsibility
+public class UserService
+{
+    private readonly IEmailService _email;
+    private readonly IUserRepository _repo;
+
+    public async Task RegisterAsync(User user, CancellationToken ct)
+    {
+        await _repo.AddAsync(user, ct);
+        await _email.SendWelcomeAsync(user, ct);
+    }
+}
+
+// ❌ Vi phạm OCP - Thêm loại mới phải sửa code cũ
+public decimal CalculateDiscount(string customerType)
+{
+    if (customerType == "Gold") return 0.2m;
+    if (customerType == "Silver") return 0.1m;
+    // Thêm loại mới = sửa method này
+}
+
+// ✅ Open/Closed - Mở rộng bằng abstraction
+public interface IDiscountStrategy
+{
+    decimal Calculate(Order order);
+}
+public class GoldDiscount : IDiscountStrategy
+{
+    public decimal Calculate(Order order) => order.Total * 0.2m;
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Topic 4: SQL & Database -->
+            <div class="topic-card" data-topic="sql">
+                <div class="topic-header">
+                    <div class="topic-number">04</div>
+                    <div class="topic-info">
+                        <h3>SQL & Database Internals</h3>
+                        <p class="topic-subtitle">Hiểu database không chỉ là viết query</p>
+                    </div>
+                    <div class="topic-progress">
+                        <input type="checkbox" class="topic-check" data-id="sql">
+                    </div>
+                </div>
+                <div class="topic-content">
+                    <div class="why-box">
+                        <h4>🎯 Tại sao quan trọng?</h4>
+                        <p>80% performance issues đến từ database. Biết viết query thì ai cũng biết, nhưng hiểu TẠI SAO query chậm, INDEX hoạt động thế nào mới là bản chất.</p>
+                    </div>
+                    <div class="knowledge-grid">
+                        <div class="knowledge-item must-know">
+                            <h5>💎 PHẢI BIẾT</h5>
+                            <ul>
+                                <li><strong>Index B-Tree</strong> — Index là cây cân bằng. Clustered index = thứ tự vật lý của data. Non-clustered = con trỏ đến data.</li>
+                                <li><strong>Execution Plan</strong> — PHẢI biết đọc execution plan. Table Scan (xấu) vs Index Seek (tốt).</li>
+                                <li><strong>Transaction & Isolation Level</strong> — READ COMMITTED (default), READ UNCOMMITTED, REPEATABLE READ, SERIALIZABLE. Hiểu dirty read, phantom read.</li>
+                                <li><strong>N+1 Query Problem</strong> — Lỗi phổ biến nhất khi dùng ORM. 1 query lấy list + N query lấy detail.</li>
+                                <li><strong>Normalization vs Denormalization</strong> — Khi nào chuẩn hóa (giảm redundancy), khi nào phi chuẩn hóa (tăng read performance).</li>
+                                <li><strong>Deadlock</strong> — 2 transactions lock lẫn nhau. Cách phòng tránh: lock ordering, keep transactions short.</li>
+                            </ul>
+                        </div>
+                        <div class="knowledge-item good-to-know">
+                            <h5>📝 NÊN BIẾT</h5>
+                            <ul>
+                                <li>Covering Index — Include columns trong index</li>
+                                <li>Partitioning — Chia table lớn thành phần nhỏ</li>
+                                <li>Query Store — Monitor query performance</li>
+                                <li>Temporal Tables — Lưu lịch sử thay đổi</li>
+                                <li>Row-level Security</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="code-example">
+                        <h5>💻 Ví dụ thực tế</h5>
+                        <pre><code>-- ❌ SAI - Full table scan, không dùng index
+SELECT * FROM Orders WHERE YEAR(CreatedDate) = 2024;
+-- Hàm YEAR() khiến SQL không dùng được index trên CreatedDate
+
+-- ✅ ĐÚNG - Sargable query, dùng được index
+SELECT * FROM Orders
+WHERE CreatedDate >= '2024-01-01' AND CreatedDate < '2025-01-01';
+
+-- ❌ SAI - SELECT * lấy hết columns
+SELECT * FROM Users WHERE Status = 'Active';
+
+-- ✅ ĐÚNG - Chỉ lấy columns cần thiết
+SELECT Id, Name, Email FROM Users WHERE Status = 'Active';
+
+-- Covering Index - tránh Key Lookup
+CREATE NONCLUSTERED INDEX IX_Users_Status
+ON Users(Status) INCLUDE (Id, Name, Email);
+
+-- Kiểm tra Execution Plan
+SET STATISTICS IO ON;
+SET STATISTICS TIME ON;</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Topic 5: HTTP & REST -->
+            <div class="topic-card" data-topic="http">
+                <div class="topic-header">
+                    <div class="topic-number">05</div>
+                    <div class="topic-info">
+                        <h3>HTTP Protocol & REST API Design</h3>
+                        <p class="topic-subtitle">Ngôn ngữ giao tiếp của web</p>
+                    </div>
+                    <div class="topic-progress">
+                        <input type="checkbox" class="topic-check" data-id="http">
+                    </div>
+                </div>
+                <div class="topic-content">
+                    <div class="why-box">
+                        <h4>🎯 Tại sao quan trọng?</h4>
+                        <p>Mọi API bạn viết đều dựa trên HTTP. Hiểu HTTP sâu giúp bạn debug nhanh, design API đúng chuẩn, và xử lý edge cases.</p>
+                    </div>
+                    <div class="knowledge-grid">
+                        <div class="knowledge-item must-know">
+                            <h5>💎 PHẢI BIẾT</h5>
+                            <ul>
+                                <li><strong>HTTP Methods semantics</strong> — GET (idempotent, safe), POST (create), PUT (replace), PATCH (partial update), DELETE.</li>
+                                <li><strong>Status Codes</strong> — 200 OK, 201 Created, 204 No Content, 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 409 Conflict, 429 Too Many Requests, 500 Internal Server Error.</li>
+                                <li><strong>Idempotency</strong> — GET, PUT, DELETE là idempotent. POST không phải. Tại sao quan trọng? Retry logic, distributed systems.</li>
+                                <li><strong>Content Negotiation</strong> — Accept header, Content-Type header. JSON vs XML.</li>
+                                <li><strong>CORS</strong> — Cross-Origin Resource Sharing. Preflight request (OPTIONS). Cách cấu hình trong ASP.NET Core.</li>
+                                <li><strong>REST Maturity Model</strong> — Level 0 (RPC) → Level 1 (Resources) → Level 2 (HTTP Verbs) → Level 3 (HATEOAS).</li>
+                            </ul>
+                        </div>
+                        <div class="knowledge-item good-to-know">
+                            <h5>📝 NÊN BIẾT</h5>
+                            <ul>
+                                <li>HTTP/2 multiplexing & server push</li>
+                                <li>ETag & Conditional requests (304)</li>
+                                <li>Rate Limiting strategies</li>
+                                <li>API Versioning (URL vs Header)</li>
+                                <li>Problem Details (RFC 7807)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="code-example">
+                        <h5>💻 Ví dụ thực tế</h5>
+                        <pre><code>// ✅ RESTful API Design trong ASP.NET Core
+[ApiController]
+[Route("api/[controller]")]
+public class OrdersController : ControllerBase
+{
+    // GET api/orders — Lấy danh sách
+    [HttpGet]
+    public async Task&lt;ActionResult&lt;PagedResult&lt;OrderDto&gt;&gt;&gt;
+        GetOrders([FromQuery] OrderQuery query, CancellationToken ct)
+    {
+        var result = await _service.GetPagedAsync(query, ct);
+        return Ok(result);
+    }
+
+    // GET api/orders/123 — Lấy chi tiết
+    [HttpGet("{id}")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(404)]
+    public async Task&lt;ActionResult&lt;OrderDto&gt;&gt; GetOrder(int id, CancellationToken ct)
+    {
+        var order = await _service.GetByIdAsync(id, ct);
+        return order is null ? NotFound() : Ok(order);
+    }
+
+    // POST api/orders — Tạo mới, return 201 + Location header
+    [HttpPost]
+    [ProducesResponseType(201)]
+    public async Task&lt;ActionResult&lt;OrderDto&gt;&gt; CreateOrder(
+        CreateOrderRequest request, CancellationToken ct)
+    {
+        var order = await _service.CreateAsync(request, ct);
+        return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, order);
+    }
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Topic 6: DI -->
+            <div class="topic-card" data-topic="di">
+                <div class="topic-header">
+                    <div class="topic-number">06</div>
+                    <div class="topic-info">
+                        <h3>Dependency Injection & IoC</h3>
+                        <p class="topic-subtitle">Xương sống của ASP.NET Core</p>
+                    </div>
+                    <div class="topic-progress">
+                        <input type="checkbox" class="topic-check" data-id="di">
+                    </div>
+                </div>
+                <div class="topic-content">
+                    <div class="why-box">
+                        <h4>🎯 Tại sao quan trọng?</h4>
+                        <p>DI là trái tim của ASP.NET Core. Mọi thứ đều đi qua DI container. Hiểu sai lifetime = memory leak, hiểu sai scope = bug khó debug.</p>
+                    </div>
+                    <div class="knowledge-grid">
+                        <div class="knowledge-item must-know">
+                            <h5>💎 PHẢI BIẾT</h5>
+                            <ul>
+                                <li><strong>3 Lifetimes</strong> — Transient (mỗi lần inject = instance mới), Scoped (1 per request), Singleton (1 per app).</li>
+                                <li><strong>Captive Dependency</strong> — Singleton chứa Scoped = BUG! Scoped service bị giữ mãi trong singleton.</li>
+                                <li><strong>Constructor Injection</strong> — Cách chính để inject. Không dùng property injection, không dùng Service Locator.</li>
+                                <li><strong>IServiceProvider</strong> — Khi nào cần resolve manually (factory pattern, background service).</li>
+                                <li><strong>Options Pattern</strong> — IOptions&lt;T&gt;, IOptionsSnapshot&lt;T&gt;, IOptionsMonitor&lt;T&gt; cho configuration.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="code-example">
+                        <h5>💻 Ví dụ thực tế</h5>
+                        <pre><code>// Registration
+builder.Services.AddScoped&lt;IOrderService, OrderService&gt;();
+builder.Services.AddSingleton&lt;ICacheService, RedisCacheService&gt;();
+builder.Services.AddTransient&lt;IEmailService, SmtpEmailService&gt;();
+
+// ❌ SAI - Captive Dependency (Singleton giữ Scoped)
+public class CacheService // Singleton
+{
+    private readonly IOrderService _orderService; // Scoped bị capture!
+    public CacheService(IOrderService orderService)
+    {
+        _orderService = orderService; // Bug: same instance mãi mãi
+    }
+}
+
+// ✅ ĐÚNG - Dùng IServiceScopeFactory
+public class CacheService
+{
+    private readonly IServiceScopeFactory _scopeFactory;
+    public CacheService(IServiceScopeFactory scopeFactory)
+    {
+        _scopeFactory = scopeFactory;
+    }
+
+    public async Task RefreshAsync(CancellationToken ct)
+    {
+        using var scope = _scopeFactory.CreateScope();
+        var orderService = scope.ServiceProvider
+            .GetRequiredService&lt;IOrderService&gt;();
+        // Scoped service được tạo và dispose đúng cách
+    }
+}
+
+// Options Pattern
+builder.Services.Configure&lt;SmtpSettings&gt;(
+    builder.Configuration.GetSection("Smtp"));
+
+public class EmailService
+{
+    private readonly SmtpSettings _settings;
+    public EmailService(IOptions&lt;SmtpSettings&gt; options)
+    {
+        _settings = options.Value;
+    }
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Topic 7: Security -->
+            <div class="topic-card" data-topic="security">
+                <div class="topic-header">
+                    <div class="topic-number">07</div>
+                    <div class="topic-info">
+                        <h3>Security Fundamentals</h3>
+                        <p class="topic-subtitle">Bảo mật không phải optional</p>
+                    </div>
+                    <div class="topic-progress">
+                        <input type="checkbox" class="topic-check" data-id="security">
+                    </div>
+                </div>
+                <div class="topic-content">
+                    <div class="why-box">
+                        <h4>🎯 Tại sao quan trọng?</h4>
+                        <p>Là Lead, bạn chịu trách nhiệm về security của cả team. Một lỗ hổng SQL Injection có thể phá hủy cả công ty.</p>
+                    </div>
+                    <div class="knowledge-grid">
+                        <div class="knowledge-item must-know">
+                            <h5>💎 PHẢI BIẾT</h5>
+                            <ul>
+                                <li><strong>Authentication vs Authorization</strong> — AuthN = "Bạn là ai?" (JWT, Cookie). AuthZ = "Bạn được làm gì?" (Roles, Claims, Policies).</li>
+                                <li><strong>JWT Token</strong> — Header.Payload.Signature. Access Token (ngắn hạn) + Refresh Token (dài hạn). KHÔNG lưu sensitive data trong payload (nó chỉ Base64).</li>
+                                <li><strong>OWASP Top 10</strong> — SQL Injection, XSS, CSRF, Broken Auth, Security Misconfiguration, etc.</li>
+                                <li><strong>Password Hashing</strong> — KHÔNG dùng MD5/SHA. Dùng BCrypt/Argon2/PBKDF2 với salt.</li>
+                                <li><strong>HTTPS & TLS</strong> — Tại sao bắt buộc. HSTS header. Certificate pinning.</li>
+                                <li><strong>Input Validation</strong> — LUÔN validate ở server. Client validation chỉ là UX.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="code-example">
+                        <h5>💻 Ví dụ thực tế</h5>
+                        <pre><code>// ❌ SAI - SQL Injection
+var query = $"SELECT * FROM Users WHERE Name = '{userName}'";
+// Input: ' OR 1=1 -- → Lấy được TẤT CẢ users!
+
+// ✅ ĐÚNG - Parameterized query
+var query = "SELECT * FROM Users WHERE Name = @name";
+command.Parameters.AddWithValue("@name", userName);
+
+// JWT Authentication trong ASP.NET Core
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ClockSkew = TimeSpan.Zero // Không cho phép token hết hạn
+        };
+    });
+
+// Authorization Policy
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireRole("Admin")
+              .RequireClaim("department", "IT"));
+});
+
+[Authorize(Policy = "AdminOnly")]
+[HttpDelete("{id}")]
+public async Task&lt;IActionResult&gt; DeleteUser(int id, CancellationToken ct)
+{
+    // Chỉ Admin trong IT department mới xóa được
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Topic 8: Testing -->
+            <div class="topic-card" data-topic="testing">
+                <div class="topic-header">
+                    <div class="topic-number">08</div>
+                    <div class="topic-info">
+                        <h3>Testing Strategy</h3>
+                        <p class="topic-subtitle">Code không có test = code tạm thời</p>
+                    </div>
+                    <div class="topic-progress">
+                        <input type="checkbox" class="topic-check" data-id="testing">
+                    </div>
+                </div>
+                <div class="topic-content">
+                    <div class="why-box">
+                        <h4>🎯 Tại sao quan trọng?</h4>
+                        <p>Là Lead, bạn phải đảm bảo team viết test. Không có test = mỗi lần deploy là một canh bạc. Test tốt = team tự tin refactor và ship nhanh.</p>
+                    </div>
+                    <div class="knowledge-grid">
+                        <div class="knowledge-item must-know">
+                            <h5>💎 PHẢI BIẾT</h5>
+                            <ul>
+                                <li><strong>Test Pyramid</strong> — Unit Test (nhiều, nhanh) → Integration Test (vừa) → E2E Test (ít, chậm).</li>
+                                <li><strong>AAA Pattern</strong> — Arrange (setup) → Act (thực hiện) → Assert (kiểm tra). Mỗi test chỉ test MỘT behavior.</li>
+                                <li><strong>Mocking</strong> — Mock external dependencies (DB, API), KHÔNG mock internal logic. Dùng Moq hoặc NSubstitute.</li>
+                                <li><strong>Integration Test</strong> — WebApplicationFactory trong ASP.NET Core. Test real HTTP pipeline.</li>
+                                <li><strong>Test Naming</strong> — MethodName_Scenario_ExpectedResult. Ví dụ: CreateOrder_WhenOutOfStock_ThrowsException.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="code-example">
+                        <h5>💻 Ví dụ thực tế</h5>
+                        <pre><code>// Unit Test với xUnit + Moq
+public class OrderServiceTests
+{
+    private readonly Mock&lt;IOrderRepository&gt; _repoMock = new();
+    private readonly Mock&lt;IEmailService&gt; _emailMock = new();
+    private readonly OrderService _sut; // System Under Test
+
+    public OrderServiceTests()
+    {
+        _sut = new OrderService(_repoMock.Object, _emailMock.Object);
+    }
+
+    [Fact]
+    public async Task CreateOrder_WhenValid_SavesAndSendsEmail()
+    {
+        // Arrange
+        var request = new CreateOrderRequest { ProductId = 1, Quantity = 2 };
+        _repoMock.Setup(r => r.AddAsync(It.IsAny&lt;Order&gt;(), default))
+                 .ReturnsAsync(new Order { Id = 1 });
+
+        // Act
+        var result = await _sut.CreateOrderAsync(request);
+
+        // Assert
+        Assert.NotNull(result);
+        _repoMock.Verify(r => r.AddAsync(It.IsAny&lt;Order&gt;(), default), Times.Once);
+        _emailMock.Verify(e => e.SendOrderConfirmationAsync(
+            It.IsAny&lt;Order&gt;(), default), Times.Once);
+    }
+
+    [Fact]
+    public async Task CreateOrder_WhenOutOfStock_ThrowsException()
+    {
+        // Arrange
+        _repoMock.Setup(r => r.CheckStockAsync(1, default))
+                 .ReturnsAsync(0);
+
+        // Act & Assert
+        await Assert.ThrowsAsync&lt;OutOfStockException&gt;(
+            () => _sut.CreateOrderAsync(new() { ProductId = 1 }));
+    }
+}
+
+// Integration Test
+public class OrdersApiTests : IClassFixture&lt;WebApplicationFactory&lt;Program&gt;&gt;
+{
+    private readonly HttpClient _client;
+
+    public OrdersApiTests(WebApplicationFactory&lt;Program&gt; factory)
+    {
+        _client = factory.CreateClient();
+    }
+
+    [Fact]
+    public async Task GetOrders_ReturnsOk()
+    {
+        var response = await _client.GetAsync("/api/orders");
+        response.EnsureSuccessStatusCode();
+    }
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 80% REMAINING SECTION -->
+    <section id="remaining-80" class="section">
+        <div class="container">
+            <h2 class="section-title">🚀 80% Còn Lại — Học Nhanh Khi Đã Vững Gốc</h2>
+            <p class="section-desc">Khi đã nắm vững 20% cốt lõi, những kiến thức này bạn sẽ tiếp thu rất nhanh</p>
+
+            <div class="extended-grid">
+                <div class="extended-card" data-topic="efcore">
+                    <input type="checkbox" class="topic-check" data-id="efcore">
+                    <div class="extended-icon">🗄️</div>
+                    <h4>Entity Framework Core</h4>
+                    <div class="extended-details">
+                        <p><strong>Cốt lõi liên quan:</strong> SQL & Database</p>
+                        <ul>
+                            <li>DbContext lifecycle & change tracking</li>
+                            <li>Migration strategies</li>
+                            <li>Lazy vs Eager vs Explicit loading</li>
+                            <li>Raw SQL & Compiled Queries</li>
+                            <li>Global Query Filters</li>
+                            <li>Owned types & Value converters</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="extended-card" data-topic="microservices">
+                    <input type="checkbox" class="topic-check" data-id="microservices">
+                    <div class="extended-icon">🐳</div>
+                    <h4>Microservices & Docker</h4>
+                    <div class="extended-details">
+                        <p><strong>Cốt lõi liên quan:</strong> HTTP, DI, Design Patterns</p>
+                        <ul>
+                            <li>Docker & Docker Compose</li>
+                            <li>Service communication patterns</li>
+                            <li>Circuit Breaker (Polly)</li>
+                            <li>Service Discovery</li>
+                            <li>Distributed Transactions (Saga)</li>
+                            <li>Health Checks</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="extended-card" data-topic="messaging">
+                    <input type="checkbox" class="topic-check" data-id="messaging">
+                    <div class="extended-icon">📨</div>
+                    <h4>Message Queue</h4>
+                    <div class="extended-details">
+                        <p><strong>Cốt lõi liên quan:</strong> Async/Await, Design Patterns</p>
+                        <ul>
+                            <li>RabbitMQ vs Kafka — khi nào dùng gì</li>
+                            <li>Publish/Subscribe pattern</li>
+                            <li>Dead Letter Queue</li>
+                            <li>Idempotent consumers</li>
+                            <li>MassTransit / CAP library</li>
+                            <li>Outbox Pattern</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="extended-card" data-topic="caching">
+                    <input type="checkbox" class="topic-check" data-id="caching">
+                    <div class="extended-icon">⚡</div>
+                    <h4>Caching Strategies</h4>
+                    <div class="extended-details">
+                        <p><strong>Cốt lõi liên quan:</strong> Memory Management, HTTP</p>
+                        <ul>
+                            <li>Redis vs In-Memory Cache</li>
+                            <li>Cache-Aside pattern</li>
+                            <li>Cache Invalidation strategies</li>
+                            <li>Distributed Cache (IDistributedCache)</li>
+                            <li>Response Caching & Output Caching</li>
+                            <li>Cache Stampede prevention</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="extended-card" data-topic="cicd">
+                    <input type="checkbox" class="topic-check" data-id="cicd">
+                    <div class="extended-icon">🔄</div>
+                    <h4>CI/CD Pipeline</h4>
+                    <div class="extended-details">
+                        <p><strong>Cốt lõi liên quan:</strong> Testing, Security</p>
+                        <ul>
+                            <li>GitHub Actions / Azure DevOps</li>
+                            <li>Build → Test → Publish → Deploy</li>
+                            <li>Environment management</li>
+                            <li>Blue/Green & Canary deployments</li>
+                            <li>Infrastructure as Code</li>
+                            <li>Secret management</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="extended-card" data-topic="logging">
+                    <input type="checkbox" class="topic-check" data-id="logging">
+                    <div class="extended-icon">📊</div>
+                    <h4>Logging & Monitoring</h4>
+                    <div class="extended-details">
+                        <p><strong>Cốt lõi liên quan:</strong> HTTP, Security</p>
+                        <ul>
+                            <li>Structured Logging (Serilog)</li>
+                            <li>Correlation ID & Distributed Tracing</li>
+                            <li>ELK Stack / Seq</li>
+                            <li>Application Insights / Prometheus</li>
+                            <li>Health monitoring & Alerting</li>
+                            <li>Log levels strategy</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="extended-card" data-topic="grpc">
+                    <input type="checkbox" class="topic-check" data-id="grpc">
+                    <div class="extended-icon">🔌</div>
+                    <h4>gRPC & SignalR</h4>
+                    <div class="extended-details">
+                        <p><strong>Cốt lõi liên quan:</strong> HTTP, Async/Await</p>
+                        <ul>
+                            <li>gRPC vs REST — khi nào dùng gì</li>
+                            <li>Protocol Buffers (Protobuf)</li>
+                            <li>Streaming (Server, Client, Bidirectional)</li>
+                            <li>SignalR real-time communication</li>
+                            <li>WebSocket fundamentals</li>
+                            <li>Hub & Group management</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="extended-card" data-topic="cloud">
+                    <input type="checkbox" class="topic-check" data-id="cloud">
+                    <div class="extended-icon">☁️</div>
+                    <h4>Cloud Services</h4>
+                    <div class="extended-details">
+                        <p><strong>Cốt lõi liên quan:</strong> Tất cả</p>
+                        <ul>
+                            <li>Azure App Service / AWS ECS</li>
+                            <li>Azure SQL / RDS</li>
+                            <li>Azure Service Bus / SQS+SNS</li>
+                            <li>Blob Storage / S3</li>
+                            <li>Key Vault / Secrets Manager</li>
+                            <li>Azure Functions / Lambda</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="extended-card" data-topic="performance">
+                    <input type="checkbox" class="topic-check" data-id="performance">
+                    <div class="extended-icon">🏎️</div>
+                    <h4>Performance Optimization</h4>
+                    <div class="extended-details">
+                        <p><strong>Cốt lõi liên quan:</strong> CLR, Async, SQL</p>
+                        <ul>
+                            <li>BenchmarkDotNet profiling</li>
+                            <li>Memory allocation reduction</li>
+                            <li>Minimal API vs Controllers</li>
+                            <li>Response compression</li>
+                            <li>Connection pooling</li>
+                            <li>Async streaming</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="extended-card" data-topic="gateway">
+                    <input type="checkbox" class="topic-check" data-id="gateway">
+                    <div class="extended-icon">🌐</div>
+                    <h4>API Gateway & Load Balancing</h4>
+                    <div class="extended-details">
+                        <p><strong>Cốt lõi liên quan:</strong> HTTP, Security</p>
+                        <ul>
+                            <li>YARP / Ocelot</li>
+                            <li>Rate limiting & Throttling</li>
+                            <li>Request aggregation</li>
+                            <li>Load balancing algorithms</li>
+                            <li>Reverse proxy patterns</li>
+                            <li>SSL termination</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="extended-card" data-topic="ddd">
+                    <input type="checkbox" class="topic-check" data-id="ddd">
+                    <div class="extended-icon">🏗️</div>
+                    <h4>Domain-Driven Design</h4>
+                    <div class="extended-details">
+                        <p><strong>Cốt lõi liên quan:</strong> SOLID, Design Patterns</p>
+                        <ul>
+                            <li>Bounded Context & Ubiquitous Language</li>
+                            <li>Aggregate Root & Entity</li>
+                            <li>Value Object & Domain Event</li>
+                            <li>Repository & Specification pattern</li>
+                            <li>Anti-corruption Layer</li>
+                            <li>Strategic vs Tactical DDD</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="extended-card" data-topic="eventsourcing">
+                    <input type="checkbox" class="topic-check" data-id="eventsourcing">
+                    <div class="extended-icon">📜</div>
+                    <h4>Event Sourcing & CQRS</h4>
+                    <div class="extended-details">
+                        <p><strong>Cốt lõi liên quan:</strong> SQL, Design Patterns, Async</p>
+                        <ul>
+                            <li>Command vs Query separation</li>
+                            <li>Event Store & Event replay</li>
+                            <li>Projections & Read models</li>
+                            <li>MediatR implementation</li>
+                            <li>Eventual consistency</li>
+                            <li>Snapshots for performance</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LEAD SKILLS SECTION -->
+    <section id="lead-skills" class="section section-dark">
+        <div class="container">
+            <h2 class="section-title">👑 Kỹ Năng Team Lead</h2>
+            <p class="section-desc">Technical skills chỉ là 50%. Phần còn lại là leadership.</p>
+
+            <div class="lead-grid">
+                <div class="lead-card">
+                    <div class="lead-icon">📋</div>
+                    <h4>Code Review</h4>
+                    <p>Review không phải để bắt lỗi, mà để nâng level cả team.</p>
+                    <ul>
+                        <li>Tập trung vào logic & design, không nitpick style</li>
+                        <li>Giải thích TẠI SAO, không chỉ nói SAI</li>
+                        <li>Dùng PR template & checklist</li>
+                        <li>Automate được gì thì automate (linter, formatter)</li>
+                    </ul>
+                </div>
+
+                <div class="lead-card">
+                    <div class="lead-icon">🏛️</div>
+                    <h4>Architecture Decision</h4>
+                    <p>Chọn đúng architecture cho đúng bài toán.</p>
+                    <ul>
+                        <li>Monolith → Modular Monolith → Microservices</li>
+                        <li>ADR (Architecture Decision Records)</li>
+                        <li>Trade-off analysis (CAP theorem)</li>
+                        <li>KISS > YAGNI > DRY (thứ tự ưu tiên)</li>
+                    </ul>
+                </div>
+
+                <div class="lead-card">
+                    <div class="lead-icon">👥</div>
+                    <h4>Team Management</h4>
+                    <p>Giỏi code mà không lead được người thì vẫn thất bại.</p>
+                    <ul>
+                        <li>1-on-1 meetings định kỳ</li>
+                        <li>Delegate đúng người đúng việc</li>
+                        <li>Tạo coding standards & conventions</li>
+                        <li>Mentoring & knowledge sharing</li>
+                    </ul>
+                </div>
+
+                <div class="lead-card">
+                    <div class="lead-icon">📐</div>
+                    <h4>Technical Estimation</h4>
+                    <p>Estimate sai = team OT, stakeholder mất niềm tin.</p>
+                    <ul>
+                        <li>Break down tasks nhỏ (max 1-2 ngày)</li>
+                        <li>Thêm buffer 20-30% cho unknowns</li>
+                        <li>Planning Poker với team</li>
+                        <li>Track velocity để cải thiện estimation</li>
+                    </ul>
+                </div>
+
+                <div class="lead-card">
+                    <div class="lead-icon">🚨</div>
+                    <h4>Incident Management</h4>
+                    <p>Production down lúc 2h sáng — bạn làm gì?</p>
+                    <ul>
+                        <li>Runbook & Playbook cho common issues</li>
+                        <li>Blameless post-mortem</li>
+                        <li>Monitoring & Alerting setup</li>
+                        <li>On-call rotation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- QUIZ SECTION -->
+    <section id="quiz" class="section">
+        <div class="container">
+            <h2 class="section-title">🧪 Kiểm Tra Kiến Thức</h2>
+            <p class="section-desc">Chọn chủ đề và thử sức. Mỗi bài gồm 10 câu hỏi, có giải thích đáp án chi tiết.</p>
+
+            <!-- Quiz Topic Selection -->
+            <div class="quiz-selector" id="quizSelector">
+                <div class="quiz-topic-btn" data-quiz="clr">
+                    <span class="qt-icon">🧠</span>
+                    <span class="qt-name">CLR & Memory</span>
+                    <span class="qt-score" id="score-clr"></span>
+                </div>
+                <div class="quiz-topic-btn" data-quiz="async">
+                    <span class="qt-icon">⚡</span>
+                    <span class="qt-name">Async/Await</span>
+                    <span class="qt-score" id="score-async"></span>
+                </div>
+                <div class="quiz-topic-btn" data-quiz="solid">
+                    <span class="qt-icon">🏗️</span>
+                    <span class="qt-name">SOLID & Patterns</span>
+                    <span class="qt-score" id="score-solid"></span>
+                </div>
+                <div class="quiz-topic-btn" data-quiz="sql">
+                    <span class="qt-icon">🗄️</span>
+                    <span class="qt-name">SQL & Database</span>
+                    <span class="qt-score" id="score-sql"></span>
+                </div>
+                <div class="quiz-topic-btn" data-quiz="http">
+                    <span class="qt-icon">🌐</span>
+                    <span class="qt-name">HTTP & REST</span>
+                    <span class="qt-score" id="score-http"></span>
+                </div>
+                <div class="quiz-topic-btn" data-quiz="di">
+                    <span class="qt-icon">💉</span>
+                    <span class="qt-name">Dependency Injection</span>
+                    <span class="qt-score" id="score-di"></span>
+                </div>
+                <div class="quiz-topic-btn" data-quiz="security">
+                    <span class="qt-icon">🔒</span>
+                    <span class="qt-name">Security</span>
+                    <span class="qt-score" id="score-security"></span>
+                </div>
+                <div class="quiz-topic-btn" data-quiz="testing">
+                    <span class="qt-icon">🧪</span>
+                    <span class="qt-name">Testing</span>
+                    <span class="qt-score" id="score-testing"></span>
+                </div>
+                <div class="quiz-topic-btn quiz-all-btn" data-quiz="all">
+                    <span class="qt-icon">🎯</span>
+                    <span class="qt-name">Thi tổng hợp (Random 20 câu)</span>
+                    <span class="qt-score" id="score-all"></span>
+                </div>
+            </div>
+
+            <!-- Quiz Area -->
+            <div class="quiz-area" id="quizArea" style="display:none;">
+                <div class="quiz-header">
+                    <div class="quiz-info">
+                        <h3 id="quizTitle">Đang thi...</h3>
+                        <span class="quiz-counter">Câu <span id="qCurrent">1</span>/<span id="qTotal">10</span></span>
+                    </div>
+                    <div class="quiz-timer" id="quizTimer">
+                        <span class="timer-icon">⏱️</span>
+                        <span id="timerDisplay">00:00</span>
+                    </div>
+                    <button class="quiz-close-btn" id="quizCloseBtn" title="Đóng">✕</button>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="quiz-progress-bar">
+                    <div class="quiz-progress-fill" id="quizProgressFill"></div>
+                </div>
+
+                <!-- Question -->
+                <div class="quiz-question" id="quizQuestion">
+                    <div class="question-text" id="questionText"></div>
+                    <pre class="question-code" id="questionCode" style="display:none;"><code id="questionCodeContent"></code></pre>
+                    <div class="quiz-options" id="quizOptions"></div>
+                    <div class="quiz-explanation" id="quizExplanation" style="display:none;">
+                        <h5 id="explanationTitle"></h5>
+                        <p id="explanationText"></p>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="quiz-nav">
+                    <button class="quiz-btn quiz-btn-secondary" id="btnPrev" disabled>← Câu trước</button>
+                    <button class="quiz-btn quiz-btn-primary" id="btnNext">Câu tiếp →</button>
+                    <button class="quiz-btn quiz-btn-submit" id="btnSubmit" style="display:none;">Nộp bài</button>
+                </div>
+            </div>
+
+            <!-- Quiz Result -->
+            <div class="quiz-result" id="quizResult" style="display:none;">
+                <div class="result-circle">
+                    <svg viewBox="0 0 120 120">
+                        <circle cx="60" cy="60" r="54" class="result-bg"/>
+                        <circle cx="60" cy="60" r="54" class="result-fill" id="resultCircle"/>
+                    </svg>
+                    <div class="result-score">
+                        <span id="resultPercent">0</span>%
+                    </div>
+                </div>
+                <h3 id="resultTitle">Kết quả</h3>
+                <p id="resultMessage"></p>
+                <div class="result-stats">
+                    <div class="result-stat correct">
+                        <span class="rs-number" id="resultCorrect">0</span>
+                        <span class="rs-label">Đúng</span>
+                    </div>
+                    <div class="result-stat wrong">
+                        <span class="rs-number" id="resultWrong">0</span>
+                        <span class="rs-label">Sai</span>
+                    </div>
+                    <div class="result-stat time">
+                        <span class="rs-number" id="resultTime">00:00</span>
+                        <span class="rs-label">Thời gian</span>
+                    </div>
+                </div>
+
+                <!-- Review Answers -->
+                <div class="result-review" id="resultReview"></div>
+
+                <div class="result-actions">
+                    <button class="quiz-btn quiz-btn-primary" id="btnRetry">Thi lại</button>
+                    <button class="quiz-btn quiz-btn-secondary" id="btnBackToTopics">Chọn chủ đề khác</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Built for .NET Team Leads who want to master the fundamentals.</p>
+            <p class="footer-quote">"Người giỏi không phải người biết nhiều, mà là người hiểu sâu những thứ cốt lõi." — Pareto Principle</p>
+        </div>
+    </footer>
+
+    <script src="nav.js"></script>
+    <script src="app.js"></script>
+    <script src="quiz.js"></script>
+</body>
+</html>

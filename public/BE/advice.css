@@ -1,0 +1,754 @@
+/* ===== ADVICE PAGE STYLES ===== */
+
+/* Hero */
+.adv-hero {
+    padding: 160px 24px 80px;
+    text-align: center;
+    background: radial-gradient(ellipse at center top, rgba(0, 210, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 20% 80%, rgba(108, 92, 231, 0.08) 0%, transparent 40%);
+}
+
+.gradient-text-adv {
+    background: linear-gradient(135deg, #00D2FF, #6C5CE7, #00E676);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.adv-stat {
+    background: linear-gradient(135deg, #00D2FF, #6C5CE7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ===== MINDSET CARDS ===== */
+.adv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 24px;
+}
+
+.adv-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    transition: var(--transition);
+    position: relative;
+}
+
+.adv-card:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+}
+
+.adv-card-gold {
+    border-color: rgba(255, 215, 0, 0.3);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), rgba(108, 92, 231, 0.05));
+    grid-column: 1 / -1;
+}
+
+.adv-card-gold:hover {
+    border-color: rgba(255, 215, 0, 0.6);
+}
+
+.adv-card-icon {
+    font-size: 2rem;
+    margin-bottom: 12px;
+}
+
+.adv-card h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text);
+}
+
+.adv-card p {
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 16px;
+}
+
+.adv-quote {
+    padding: 16px;
+    background: rgba(108, 92, 231, 0.08);
+    border-left: 3px solid var(--primary);
+    border-radius: 0 8px 8px 0;
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.adv-action {
+    padding: 12px 16px;
+    background: rgba(0, 210, 255, 0.08);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    color: var(--accent);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* ===== CAREER STAGES ===== */
+.adv-stage {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 32px;
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.adv-stage:hover {
+    box-shadow: var(--shadow);
+}
+
+.adv-stage-header {
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+}
+
+.adv-stage-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.08;
+    z-index: 0;
+}
+
+.fresher-accent { background: linear-gradient(135deg, rgba(0, 210, 255, 0.12), transparent 60%); }
+.fresher-accent .adv-stage-badge { background: rgba(0, 210, 255, 0.15); color: #00D2FF; }
+
+.junior-accent { background: linear-gradient(135deg, rgba(0, 230, 118, 0.12), transparent 60%); }
+.junior-accent .adv-stage-badge { background: rgba(0, 230, 118, 0.15); color: #00E676; }
+
+.mid-accent { background: linear-gradient(135deg, rgba(108, 92, 231, 0.12), transparent 60%); }
+.mid-accent .adv-stage-badge { background: rgba(108, 92, 231, 0.15); color: #6C5CE7; }
+
+.senior-accent { background: linear-gradient(135deg, rgba(255, 183, 77, 0.12), transparent 60%); }
+.senior-accent .adv-stage-badge { background: rgba(255, 183, 77, 0.15); color: #FFB74D; }
+
+.lead-accent { background: linear-gradient(135deg, rgba(255, 82, 82, 0.12), transparent 60%); }
+.lead-accent .adv-stage-badge { background: rgba(255, 82, 82, 0.15); color: #FF5252; }
+
+.adv-stage-badge {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+}
+
+.adv-stage-header h3 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.adv-stage-time {
+    font-weight: 400;
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+
+.adv-stage-motto {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 1.05rem;
+}
+
+.adv-stage-body {
+    padding: 32px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 32px;
+}
+
+.adv-stage-col h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--text);
+}
+
+.adv-stage-col ul {
+    list-style: none;
+    padding: 0;
+}
+
+.adv-stage-col li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    font-size: 0.92rem;
+}
+
+.adv-stage-col li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.adv-stage-col li strong {
+    color: var(--text);
+}
+
+.adv-stage-kpi {
+    grid-column: 1 / -1;
+    padding: 20px 24px;
+    background: rgba(0, 230, 118, 0.06);
+    border: 1px solid rgba(0, 230, 118, 0.15);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    line-height: 1.6;
+    font-size: 0.92rem;
+}
+
+.adv-stage-kpi strong {
+    color: var(--success);
+}
+
+/* ===== LEARNING METHODS ===== */
+.adv-learn-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 24px;
+}
+
+.adv-learn-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    transition: var(--transition);
+    position: relative;
+}
+
+.adv-learn-card:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-hover);
+}
+
+.adv-learn-num {
+    font-size: 3rem;
+    font-weight: 900;
+    color: rgba(0, 210, 255, 0.15);
+    font-family: 'JetBrains Mono', monospace;
+    position: absolute;
+    top: 16px;
+    right: 24px;
+}
+
+.adv-learn-card h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text);
+    padding-right: 50px;
+}
+
+.adv-learn-card p {
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 16px;
+    font-size: 0.92rem;
+}
+
+.adv-learn-tip {
+    padding: 12px 16px;
+    background: rgba(0, 230, 118, 0.06);
+    border: 1px solid rgba(0, 230, 118, 0.12);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.adv-learn-tip strong {
+    color: var(--success);
+}
+
+/* ===== SKILLS TO ACCUMULATE ===== */
+.adv-skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 24px;
+}
+
+.adv-skill-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    transition: var(--transition);
+}
+
+.adv-skill-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.adv-skill-icon {
+    font-size: 2rem;
+    margin-bottom: 12px;
+}
+
+.adv-skill-card h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.adv-skill-card p {
+    color: var(--text-muted);
+    line-height: 1.7;
+    font-size: 0.92rem;
+    margin-bottom: 16px;
+}
+
+.adv-skill-invest {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.adv-invest-label {
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+}
+
+.adv-invest-bar {
+    flex: 0 0 80px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.adv-invest-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+/* ===== COMMON MISTAKES ===== */
+.adv-mistakes-list {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.adv-mistake {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 32px;
+    padding: 28px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: var(--transition);
+}
+
+.adv-mistake:hover {
+    border-color: var(--danger);
+    box-shadow: 0 4px 24px rgba(255, 82, 82, 0.1);
+}
+
+.adv-mistake-num {
+    font-size: 2.5rem;
+    font-weight: 900;
+    font-family: 'JetBrains Mono', monospace;
+    color: rgba(255, 82, 82, 0.25);
+    flex-shrink: 0;
+    line-height: 1;
+    padding-top: 4px;
+}
+
+.adv-mistake-content h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text);
+}
+
+.adv-mistake-content p {
+    color: var(--text-muted);
+    line-height: 1.7;
+    font-size: 0.92rem;
+    margin-bottom: 12px;
+}
+
+.adv-fix {
+    padding: 12px 16px;
+    background: rgba(0, 230, 118, 0.06);
+    border-left: 3px solid var(--success);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.adv-fix strong {
+    color: var(--success);
+}
+
+/* ===== SOFT SKILLS ===== */
+.adv-soft-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+.adv-soft-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    transition: var(--transition);
+}
+
+.adv-soft-card:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-hover);
+}
+
+.adv-soft-card h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.adv-soft-body p {
+    color: var(--text-muted);
+    line-height: 1.7;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+}
+
+.adv-soft-body p strong {
+    color: var(--text);
+}
+
+.adv-soft-level {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.adv-soft-level strong {
+    color: var(--accent);
+}
+
+/* ===== GOLDEN RULES ===== */
+.adv-golden-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.adv-golden-card {
+    display: flex;
+    gap: 20px;
+    padding: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: var(--transition);
+    align-items: flex-start;
+}
+
+.adv-golden-card:hover {
+    border-color: rgba(255, 215, 0, 0.4);
+    box-shadow: 0 4px 24px rgba(255, 215, 0, 0.08);
+}
+
+.adv-golden-num {
+    font-size: 1.8rem;
+    font-weight: 900;
+    font-family: 'JetBrains Mono', monospace;
+    background: linear-gradient(135deg, #FFD700, #FFA000);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    flex-shrink: 0;
+    line-height: 1.2;
+}
+
+.adv-golden-text h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text);
+}
+
+.adv-golden-text p {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    line-height: 1.6;
+}
+
+/* ===== CLOSING ===== */
+.adv-closing {
+    text-align: center;
+    padding: 48px 0;
+}
+
+.adv-closing-quote {
+    font-size: 1.3rem;
+    font-weight: 300;
+    line-height: 2;
+    color: var(--text);
+    margin-bottom: 40px;
+    font-style: italic;
+}
+
+.adv-closing-nav {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.adv-closing-btn {
+    padding: 14px 28px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-weight: 600;
+    transition: var(--transition);
+    font-size: 0.95rem;
+}
+
+.adv-closing-btn:hover {
+    border-color: var(--primary);
+    background: rgba(108, 92, 231, 0.1);
+    transform: translateY(-2px);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .adv-hero { padding: 120px 16px 60px; }
+    .adv-hero h1 { font-size: 2rem; }
+
+    .adv-grid,
+    .adv-learn-grid,
+    .adv-skills-grid,
+    .adv-soft-grid,
+    .adv-golden-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .adv-card-gold { grid-column: 1; }
+
+    .adv-stage-body {
+        grid-template-columns: 1fr;
+    }
+
+    .adv-stage-header h3 { font-size: 1.3rem; }
+
+    .adv-mistake {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .adv-mistake-num { font-size: 1.5rem; }
+
+    .adv-golden-card { flex-direction: column; gap: 8px; }
+
+    .adv-closing-quote { font-size: 1.05rem; }
+    .adv-closing-nav { flex-direction: column; align-items: center; }
+}
+
+    .adv-survival-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+    .adv-hero h1 { font-size: 1.6rem; }
+    .hero-stats { flex-direction: column; gap: 12px; }
+    .adv-stage-header { padding: 20px; }
+    .adv-stage-body { padding: 20px; }
+    .adv-learn-num { font-size: 2rem; }
+    .adv-survival-card { padding: 20px; }
+}
+
+
+/* ===== SURVIVAL SECTION — Lời khuyên sống còn Backend ===== */
+.adv-survival-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+    gap: 24px;
+}
+
+.adv-survival-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+.adv-survival-card:hover {
+    border-color: rgba(108, 92, 231, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Viền trái theo mức độ nghiêm trọng */
+.adv-survival-card.survival-critical {
+    border-left: 4px solid #EF4444;
+}
+.adv-survival-card.survival-danger {
+    border-left: 4px solid #F59E0B;
+}
+.adv-survival-card.survival-warning {
+    border-left: 4px solid #6C5CE7;
+}
+.adv-survival-card.survival-info {
+    border-left: 4px solid #00D2FF;
+}
+
+/* Badge mức độ */
+.adv-survival-badge {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+.survival-critical .adv-survival-badge {
+    background: rgba(239, 68, 68, 0.15);
+    color: #F87171;
+}
+.survival-danger .adv-survival-badge {
+    background: rgba(245, 158, 11, 0.15);
+    color: #FBBF24;
+}
+.survival-warning .adv-survival-badge {
+    background: rgba(108, 92, 231, 0.15);
+    color: #A78BFA;
+}
+.survival-info .adv-survival-badge {
+    background: rgba(0, 210, 255, 0.15);
+    color: #67E8F9;
+}
+
+.adv-survival-card h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text);
+    line-height: 1.4;
+}
+
+.adv-survival-card > p {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 16px;
+}
+
+/* Story box — câu chuyện thực tế */
+.adv-survival-story {
+    padding: 14px 16px;
+    background: rgba(239, 68, 68, 0.06);
+    border-left: 3px solid rgba(239, 68, 68, 0.3);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+.adv-survival-story strong { color: #F87171; }
+
+/* Rule box — quy tắc rút ra */
+.adv-survival-rule {
+    padding: 12px 16px;
+    background: rgba(108, 92, 231, 0.06);
+    border-left: 3px solid rgba(108, 92, 231, 0.3);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.84rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-top: 12px;
+    font-style: italic;
+}
+.adv-survival-rule strong { color: var(--primary); font-style: normal; }
+
+/* Checklist */
+.adv-survival-checklist {
+    padding: 14px 16px;
+    background: rgba(0, 210, 255, 0.04);
+    border: 1px solid rgba(0, 210, 255, 0.1);
+    border-radius: 8px;
+    font-size: 0.84rem;
+    margin-bottom: 12px;
+}
+.adv-survival-checklist > strong {
+    display: block;
+    color: var(--accent);
+    margin-bottom: 8px;
+    font-size: 0.82rem;
+}
+.adv-survival-checklist ul {
+    list-style: none;
+    padding: 0;
+}
+.adv-survival-checklist li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 6px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+.adv-survival-checklist li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--accent-green);
+    font-weight: 700;
+}
+.adv-survival-checklist li strong { color: var(--text); }
+
+/* Code/technical box */
+.adv-survival-code {
+    padding: 14px 16px;
+    background: rgba(0, 210, 255, 0.04);
+    border: 1px solid rgba(0, 210, 255, 0.1);
+    border-radius: 8px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 12px;
+}
+.adv-survival-code strong { color: var(--text); }
+.adv-survival-code code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    background: rgba(108, 92, 231, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--accent);
+}

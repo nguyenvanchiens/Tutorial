@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domain & DNS</title>
+    <link rel="stylesheet" href="build.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html">Build<span class="accent">&Deploy</span></a></div>
+            <div class="nav-links">
+                <a href="index.html">🗺️ Tổng quan</a>
+                <a href="git.html">📦 Git</a>
+                <a href="cicd.html">⚙️ CI/CD</a>
+                <a href="jenkins.html">🔴 Jenkins</a>
+                <a href="docker.html">🐳 Docker</a>
+                <a href="hosting.html">☁️ Hosting</a>
+                <a href="cloud.html">⛅ Cloud</a>
+                <a href="domain.html" class="active">🌐 Domain</a>
+                <a href="ssl.html">🔒 SSL</a>
+                <a href="monitoring.html">📊 Monitoring</a>
+                <a href="workflow.html">🔄 Workflow</a>
+            </div>
+            <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <header class="build-hero">
+        <div class="hero-content">
+            <div class="hero-badge">CHƯƠNG 7 · DOMAIN</div>
+            <h1>Domain & <span class="gradient-text">DNS</span></h1>
+            <p class="hero-desc">Từ IP đến tên miền — mua domain, cấu hình DNS, trỏ về server.</p>
+        </div>
+    </header>
+
+    <!-- ===== SECTION 7: DOMAIN & DNS ===== -->
+    <section class="section" id="domain">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🌐</div>
+                <h2>7. Domain & DNS — Từ IP Đến Tên Miền</h2>
+                <p>Không ai nhớ 104.21.34.56 — nhưng ai cũng nhớ google.com. DNS chính là "danh bạ" internet.</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>📖 DNS Hoạt Động Thế Nào?</h3>
+                <div class="dns-flow">
+                    <div class="dns-step">
+                        <div class="dns-num">1</div>
+                        <div class="dns-info">
+                            <strong>User gõ myapp.com</strong>
+                            <p>Browser hỏi: "IP của myapp.com là gì?"</p>
+                        </div>
+                    </div>
+                    <div class="dns-step">
+                        <div class="dns-num">2</div>
+                        <div class="dns-info">
+                            <strong>DNS Resolver tìm kiếm</strong>
+                            <p>Hỏi lần lượt: Cache → Root DNS → .com DNS → Authoritative DNS</p>
+                        </div>
+                    </div>
+                    <div class="dns-step">
+                        <div class="dns-num">3</div>
+                        <div class="dns-info">
+                            <strong>Trả về IP: 104.21.34.56</strong>
+                            <p>Browser biết server nào cần connect đến</p>
+                        </div>
+                    </div>
+                    <div class="dns-step">
+                        <div class="dns-num">4</div>
+                        <div class="dns-info">
+                            <strong>Browser connect tới server</strong>
+                            <p>Gửi HTTP request đến IP, nhận response → hiển thị website</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>📋 DNS Records — Các Loại Quan Trọng</h3>
+                <div class="dns-records">
+                    <div class="dns-record">
+                        <div class="dns-type">A</div>
+                        <div class="dns-detail">
+                            <strong>Domain → IPv4</strong>
+                            <p><code>myapp.com → 104.21.34.56</code> — Record cơ bản nhất, trỏ domain đến IP server.</p>
+                        </div>
+                    </div>
+                    <div class="dns-record">
+                        <div class="dns-type">CNAME</div>
+                        <div class="dns-detail">
+                            <strong>Domain → Domain khác</strong>
+                            <p><code>www.myapp.com → myapp.com</code> — Alias, trỏ subdomain đến domain chính. Dùng nhiều cho Vercel, Netlify.</p>
+                        </div>
+                    </div>
+                    <div class="dns-record">
+                        <div class="dns-type">NS</div>
+                        <div class="dns-detail">
+                            <strong>Nameserver</strong>
+                            <p>Chỉ định DNS server quản lý domain. VD: chuyển sang Cloudflare DNS.</p>
+                        </div>
+                    </div>
+                    <div class="dns-record">
+                        <div class="dns-type">MX</div>
+                        <div class="dns-detail">
+                            <strong>Mail server</strong>
+                            <p>Email @myapp.com gửi đến server nào. Cần khi dùng Google Workspace, Zoho.</p>
+                        </div>
+                    </div>
+                    <div class="dns-record">
+                        <div class="dns-type">TXT</div>
+                        <div class="dns-detail">
+                            <strong>Text record</strong>
+                            <p>Xác minh domain ownership (Google, Let's Encrypt), SPF/DKIM cho email.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🛒 Mua Domain Ở Đâu?</h3>
+                <div class="tools-grid">
+                    <div class="tool-card tool-rec">
+                        <div class="tool-badge">⭐ KHUYÊN DÙNG</div>
+                        <h4>Cloudflare Registrar</h4>
+                        <p>Giá gốc (at cost), không markup. DNS nhanh nhất. Free DDoS protection, CDN.</p>
+                    </div>
+                    <div class="tool-card tool-rec">
+                        <div class="tool-badge">⭐ KHUYÊN DÙNG</div>
+                        <h4>Namecheap</h4>
+                        <p>Giá tốt, UI dễ dùng, privacy protection miễn phí. Phổ biến nhất cho developer.</p>
+                    </div>
+                    <div class="tool-card">
+                        <h4>Google Domains → Squarespace</h4>
+                        <p>Đã chuyển sang Squarespace. Giá hợp lý, tích hợp Google Workspace.</p>
+                    </div>
+                    <div class="tool-card">
+                        <h4>Tenten.vn / PA Vietnam</h4>
+                        <p>Domain .vn, .com.vn. Cần cho doanh nghiệp Việt Nam, thanh toán nội địa.</p>
+                    </div>
+                </div>
+                <div class="warning-box">
+                    <strong>⚠️ TRÁNH GoDaddy</strong> — giá rẻ năm đầu nhưng renew cắt cổ. Upsell liên tục. Developer hầu hết chuyển sang Cloudflare/Namecheap.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="closing-box">
+                <div class="closing-nav">
+                    <a href="index.html" class="closing-btn">🗺️ Tổng quan</a>
+                    <a href="git.html" class="closing-btn">📦 Git</a>
+                    <a href="cicd.html" class="closing-btn">⚙️ CI/CD</a>
+                    <a href="jenkins.html" class="closing-btn">🔴 Jenkins</a>
+                    <a href="docker.html" class="closing-btn">🐳 Docker</a>
+                    <a href="hosting.html" class="closing-btn">☁️ Hosting</a>
+                    <a href="cloud.html" class="closing-btn">⛅ Cloud</a>
+                    <a href="ssl.html" class="closing-btn">🔒 SSL</a>
+                    <a href="monitoring.html" class="closing-btn">📊 Monitoring</a>
+                    <a href="workflow.html" class="closing-btn">🔄 Workflow</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Build & Deploy — Triển khai website từ A→Z cho web developer</p>
+        </div>
+    </footer>
+
+    <script src="build.js"></script>
+</body>
+</html>

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trắc Nghiệm Git & Sourcetree — 100 Câu Hỏi</title>
+<style>
+  :root {
+    --primary: #667eea;
+    --accent: #f5576c;
+    --bg: #0f1117;
+    --card: #1a1d2e;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --border: #2d3148;
+    --success: #43e97b;
+    --warn: #f39c12;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; padding: 2rem; }
+
+  .hero { text-align: center; margin-bottom: 2rem; }
+  .hero h1 { font-size: 2.2rem; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero p { color: var(--muted); margin-top: .5rem; font-size: 1.05rem; }
+
+  .scoreboard { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; position: sticky; top: 0; z-index: 100; }
+  .score-item { text-align: center; }
+  .score-item .num { font-size: 1.8rem; font-weight: 700; }
+  .score-item .lbl { font-size: .75rem; color: var(--muted); }
+  .score-item.correct .num { color: var(--success); }
+  .score-item.wrong .num { color: var(--accent); }
+  .score-item.total .num { color: var(--primary); }
+  .progress-bar-wrap { flex: 1; min-width: 200px; }
+  .progress-bar-bg { background: #2d3148; border-radius: 8px; height: 10px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; border-radius: 8px; background: linear-gradient(90deg, var(--primary), var(--success)); transition: width .3s; }
+  .progress-text { font-size: .75rem; color: var(--muted); margin-top: 4px; text-align: center; }
+  .btn-reset { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 8px 16px; cursor: pointer; font-size: .85rem; margin-left: auto; }
+  .btn-reset:hover { opacity: .85; }
+
+  .filter-bar { display: flex; gap: 6px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .filter-btn { background: var(--card); border: 1px solid var(--border); color: var(--muted); border-radius: 6px; padding: 6px 14px; cursor: pointer; font-size: .82rem; transition: all .2s; }
+  .filter-btn:hover { border-color: var(--primary); color: var(--text); }
+  .filter-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+  .q-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; transition: border-color .3s; }
+  .q-card.answered-correct { border-color: var(--success); }
+  .q-card.answered-wrong { border-color: var(--accent); }
+  .q-header { display: flex; align-items: center; gap: 10px; margin-bottom: .75rem; }
+  .q-num { background: var(--primary); color: #fff; min-width: 2rem; height: 2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .8rem; font-weight: 700; flex-shrink: 0; }
+  .q-card.answered-correct .q-num { background: var(--success); }
+  .q-card.answered-wrong .q-num { background: var(--accent); }
+  .q-tag { font-size: .65rem; padding: 2px 8px; border-radius: 10px; background: #2d3148; color: var(--muted); }
+  .q-tag.basic { background: rgba(67,233,123,.12); color: var(--success); }
+  .q-tag.medium { background: rgba(243,156,18,.12); color: var(--warn); }
+  .q-tag.hard { background: rgba(245,87,108,.12); color: var(--accent); }
+  .q-text { font-size: .95rem; margin-bottom: .75rem; }
+  .q-text code { background: #2d3148; padding: 1px 5px; border-radius: 3px; font-size: .88rem; color: #f8d06b; }
+
+  .q-options { display: flex; flex-direction: column; gap: 6px; }
+  .q-opt { background: #252736; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: .88rem; color: var(--muted); transition: all .2s; display: flex; align-items: center; gap: 8px; }
+  .q-opt:hover:not(.disabled) { border-color: var(--primary); color: var(--text); }
+  .q-opt .letter { background: #2d3148; min-width: 1.6rem; height: 1.6rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .75rem; font-weight: 600; flex-shrink: 0; }
+  .q-opt.correct { border-color: var(--success); background: rgba(67,233,123,.08); color: var(--text); }
+  .q-opt.correct .letter { background: var(--success); color: #fff; }
+  .q-opt.wrong { border-color: var(--accent); background: rgba(245,87,108,.08); color: var(--text); }
+  .q-opt.wrong .letter { background: var(--accent); color: #fff; }
+  .q-opt.disabled { cursor: default; opacity: .7; }
+  .q-opt.disabled.correct { opacity: 1; }
+
+  .q-explain { margin-top: .75rem; padding: 10px 14px; background: rgba(102,126,234,.06); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; font-size: .85rem; color: var(--muted); display: none; }
+  .q-explain.show { display: block; }
+  .q-explain strong { color: var(--success); }
+
+  @media (max-width: 600px) {
+    body { padding: 1rem; }
+    .hero h1 { font-size: 1.5rem; }
+    .scoreboard { flex-direction: column; text-align: center; }
+  }
+
+  /* ===== Visual question mockups ===== */
+  .vq { background: #1e1e2e; border: 2px solid var(--border); border-radius: 8px; overflow: hidden; margin: .5rem 0 .75rem; font-size: .78rem; }
+  .vq-bar { background: #2b2d3a; padding: 4px 10px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--border); }
+  .vq-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .vq-dot.r { background:#ff5f57; } .vq-dot.y { background:#ffbd2e; } .vq-dot.g { background:#28c840; }
+  .vq-bar span { color: var(--muted); font-size: .7rem; margin-left: 6px; }
+  .vq-toolbar { background: #252736; padding: 4px 8px; display: flex; gap: 3px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .vq-btn { background: #3a3d52; color: var(--text); border: 1px solid #4a4d62; border-radius: 3px; padding: 2px 8px; font-size: .68rem; }
+  .vq-btn.hl { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .vq-btn .badge { background: var(--accent); color: #fff; border-radius: 6px; padding: 0 4px; font-size: .58rem; margin-left: 2px; }
+  .vq-body { display: flex; min-height: 120px; }
+  .vq-side { width: 130px; background: #1a1c2a; border-right: 1px solid var(--border); padding: 4px 0; flex-shrink: 0; font-size: .68rem; }
+  .vq-si { padding: 2px 8px; color: var(--muted); }
+  .vq-si.act { color: var(--primary); font-weight: 600; background: rgba(102,126,234,.1); }
+  .vq-si.cur { color: var(--success); font-weight: 600; }
+  .vq-si.child { padding-left: 20px; font-size: .65rem; }
+  .vq-sg { padding: 4px 8px 1px; color: #555; font-size: .6rem; text-transform: uppercase; letter-spacing: .5px; }
+  .vq-main { flex: 1; padding: 6px; overflow: hidden; }
+  .vq-row { display: flex; align-items: center; padding: 2px 0; font-size: .7rem; gap: 6px; border-bottom: 1px solid rgba(45,49,72,.4); }
+  .vq-row.sel { background: rgba(102,126,234,.12); }
+  .vq-gdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .vq-tag { color: #fff; border-radius: 2px; padding: 0 5px; font-size: .58rem; display: inline-block; }
+  .vq-msg { flex: 1; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vq-auth { color: var(--muted); font-size: .62rem; width: 60px; flex-shrink: 0; }
+  .vq-date { color: #555; font-size: .62rem; width: 70px; flex-shrink: 0; text-align: right; }
+
+  .vq-fs { padding: 6px; }
+  .vq-fh { color: var(--primary); font-size: .7rem; font-weight: 600; padding: 2px 0; display: flex; justify-content: space-between; }
+  .vq-fh .link { color: var(--success); font-size: .62rem; }
+  .vq-fr { display: flex; align-items: center; gap: 4px; padding: 2px 4px; font-size: .68rem; border-bottom: 1px solid rgba(45,49,72,.3); }
+  .vq-cb { width: 12px; height: 12px; border: 1px solid var(--muted); border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: .5rem; flex-shrink: 0; }
+  .vq-cb.ck { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .vq-fi { font-size: .6rem; font-weight: 700; }
+  .vq-fi.a { color: var(--success); } .vq-fi.m { color: var(--warn); } .vq-fi.d { color: var(--accent); } .vq-fi.c { color: var(--warn); }
+  .vq-fn { color: var(--text); flex: 1; }
+  .vq-fp { color: #555; font-size: .6rem; }
+
+  .vq-diff { border: 1px solid var(--border); border-radius: 4px; margin: 4px 0; overflow: hidden; font-family: 'Cascadia Code','Consolas',monospace; font-size: .66rem; }
+  .vq-dh { background: #252736; padding: 2px 8px; color: var(--muted); font-size: .62rem; }
+  .vq-dl { padding: 0 8px; display: flex; }
+  .vq-dl .ln { color: #555; width: 25px; text-align: right; padding-right: 6px; flex-shrink: 0; }
+  .vq-dl .c { flex: 1; white-space: pre; }
+  .vq-dl.add { background: rgba(67,233,123,.06); } .vq-dl.add .c { color: var(--success); }
+  .vq-dl.del { background: rgba(245,87,108,.06); } .vq-dl.del .c { color: var(--accent); }
+  .vq-dl.ctx .c { color: var(--muted); }
+
+  .vq-commit-area { border-top: 1px solid var(--border); padding: 6px; background: #1a1c2a; }
+  .vq-ci { background: #252736; border: 1px solid var(--border); border-radius: 3px; padding: 4px 6px; color: var(--text); font-size: .68rem; width: 100%; }
+  .vq-ca { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+  .vq-cbtn { background: var(--primary); color: #fff; border-radius: 3px; padding: 3px 12px; font-size: .68rem; }
+
+  .vq-ctx-menu { background: #2b2d3a; border: 1px solid var(--border); border-radius: 5px; padding: 3px 0; width: 190px; box-shadow: 0 4px 12px rgba(0,0,0,.4); font-size: .7rem; }
+  .vq-ctx-item { padding: 3px 10px; color: var(--muted); }
+  .vq-ctx-item.hl { background: rgba(102,126,234,.12); color: var(--text); font-weight: 600; }
+  .vq-ctx-sep { height: 1px; background: var(--border); margin: 2px 0; }
+
+  .vq-alert { padding: 6px 10px; border-radius: 4px; font-size: .7rem; margin: 4px; }
+  .vq-alert.warn { background: rgba(245,87,108,.1); border: 1px solid var(--accent); color: var(--accent); }
+  .vq-alert.info { background: rgba(102,126,234,.1); border: 1px solid var(--primary); color: var(--primary); }
+
+  .vq-arrow { font-size: 1.2rem; color: var(--accent); }
+
+  @media (max-width: 600px) {
+    .vq-body { flex-direction: column; }
+    .vq-side { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+    .vq-auth, .vq-date { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Trắc Nghiệm Git & Sourcetree</h1>
+  <p>119 câu hỏi thiên về thao tác trên Sourcetree (có câu hỏi hình ảnh!) — chọn đáp án và xem giải thích ngay!</p>
+</div>
+
+<div class="scoreboard" id="scoreboard">
+  <div class="score-item correct"><div class="num" id="sc-correct">0</div><div class="lbl">Đúng</div></div>
+  <div class="score-item wrong"><div class="num" id="sc-wrong">0</div><div class="lbl">Sai</div></div>
+  <div class="score-item total"><div class="num" id="sc-total">0</div><div class="lbl">/ 119</div></div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="sc-bar" style="width:0%"></div></div>
+    <div class="progress-text" id="sc-pct">0% hoàn thành</div>
+  </div>
+  <button class="btn-reset" onclick="resetAll()">Làm lại</button>
+</div>
+
+<div class="filter-bar" id="filterBar">
+  <button class="filter-btn active" data-cat="all">Tất cả (119)</button>
+  <button class="filter-btn" data-cat="basic">Giao diện & Cơ bản</button>
+  <button class="filter-btn" data-cat="stage">Stage & Commit</button>
+  <button class="filter-btn" data-cat="branch">Branch</button>
+  <button class="filter-btn" data-cat="merge">Merge & Rebase</button>
+  <button class="filter-btn" data-cat="remote">Push / Pull / Fetch</button>
+  <button class="filter-btn" data-cat="undo">Undo & Reset</button>
+  <button class="filter-btn" data-cat="stash">Stash & Tag</button>
+  <button class="filter-btn" data-cat="pr">Pull Request</button>
+  <button class="filter-btn" data-cat="visual">Câu hỏi hình ảnh</button>
+  <button class="filter-btn" data-cat="advanced">Nâng cao</button>
+</div>
+
+<div id="quizContainer"></div>
+
+<script>
+const QUESTIONS = [
+  // ===== GIAO DIỆN & CƠ BẢN (1-12) =====
+  { q: "Khi mở Sourcetree lần đầu, làm thế nào để kết nối với tài khoản GitHub?", opts: ["Vào <code>Tools > Options > Authentication</code> → Add → chọn GitHub → đăng nhập OAuth hoặc nhập Token", "Nhấn nút Clone trên toolbar", "Tạo file cấu hình thủ công", "Đăng nhập trực tiếp trên màn hình chính"], ans: 0, cat: "basic", diff: "basic", explain: "Phải kết nối tài khoản trước thì Sourcetree mới clone, push, pull được repo private trên GitHub." },
+  { q: "Phím tắt <code>Ctrl+1</code> trong Sourcetree mở tab gì?", opts: ["History", "Search", "File Status", "Settings"], ans: 2, cat: "basic", diff: "basic", explain: "<code>Ctrl+1</code> = File Status, <code>Ctrl+2</code> = History, <code>Ctrl+3</code> = Search. Đây là 3 tab chính trong Workspace." },
+  { q: "Trong Sourcetree, khu vực sidebar bên trái hiển thị những gì?", opts: ["Chỉ danh sách file", "Branches, Remotes, Tags, Stashes, và Submodules", "Chỉ danh sách commit", "Cài đặt Sourcetree"], ans: 1, cat: "basic", diff: "basic", explain: "Sidebar trái là nơi quản lý tất cả nhánh (local + remote), tag, stash. Double-click vào branch để checkout." },
+  { q: "Trong Sourcetree, muốn clone repo từ GitHub thì thao tác thế nào?", opts: ["Kéo thả URL vào Sourcetree", "Nhấn <code>File > Clone / New</code> hoặc nút <strong>+ Clone</strong> → dán URL → chọn thư mục → Clone", "Nhấn nút Pull", "Vào Settings > Clone"], ans: 1, cat: "basic", diff: "basic", explain: "Có thể dùng URL HTTPS hoặc SSH. Sau khi clone, repo sẽ hiện trong danh sách tab bên trái." },
+  { q: "Phím tắt nào mở terminal tại thư mục repo trong Sourcetree?", opts: ["<code>Ctrl+T</code>", "<code>Ctrl+Shift+O</code>", "<code>F12</code>", "<code>Ctrl+Enter</code>"], ans: 1, cat: "basic", diff: "basic", explain: "Mở terminal/cmd ngay tại thư mục gốc của repo. Tiện khi cần chạy lệnh nâng cao mà Sourcetree chưa hỗ trợ giao diện." },
+  { q: "Trong tab History của Sourcetree, đường nối nhiều màu sắc giữa các commit thể hiện gì?", opts: ["Mức độ quan trọng của commit", "Sơ đồ các nhánh (branch graph) — mỗi màu là một nhánh khác nhau", "Trạng thái lỗi của commit", "Thời gian commit"], ans: 1, cat: "basic", diff: "basic", explain: "Branch graph giúp bạn nhìn trực quan đường đi của các nhánh: tách ra khi nào, merge lại ở đâu." },
+  { q: "Trong Sourcetree, làm sao mở repo đã có sẵn trên máy (không clone)?", opts: ["<code>File > Open</code> hoặc kéo thả thư mục vào Sourcetree", "Chỉ có thể clone từ remote", "Nhấn nút Fetch", "Vào Settings > Import"], ans: 0, cat: "basic", diff: "basic", explain: "Sourcetree nhận diện tự động thư mục nào có <code>.git</code> bên trong và hiển thị nó như một repo." },
+  { q: "Trong Sourcetree, icon nào trên toolbar dùng để mở File Explorer tại thư mục repo?", opts: ["Nút Settings", "Nút Explorer (hoặc <code>Ctrl+Shift+E</code>)", "Nút Terminal", "Nút Search"], ans: 1, cat: "basic", diff: "basic", explain: "Tiện để mở thư mục code trong Windows Explorer khi cần copy file hoặc kiểm tra thủ công." },
+  { q: "Khi một repo trong Sourcetree hiện số <strong>2↑</strong> bên cạnh nút Push, nghĩa là gì?", opts: ["Có 2 file thay đổi", "Có 2 commit local chưa push lên remote", "Có 2 branch", "Có 2 conflict"], ans: 1, cat: "basic", diff: "basic", explain: "Mũi tên lên (↑) = commit ahead (chưa push). Mũi tên xuống (↓) = commit behind (remote có commit mới chưa pull)." },
+  { q: "Làm sao để cấu hình tên và email hiển thị khi commit trong Sourcetree?", opts: ["Sửa file .gitignore", "Vào <code>Tools > Options > General</code> → nhập Full Name và Email", "Nhập trong commit message", "Tạo file .gitconfig thủ công"], ans: 1, cat: "basic", diff: "basic", explain: "Tên và email này sẽ xuất hiện trong mỗi commit. Hãy dùng email trùng với GitHub để commit được liên kết đúng tài khoản." },
+  { q: "Trong Sourcetree, tab <strong>Search</strong> (<code>Ctrl+3</code>) cho phép tìm kiếm theo những tiêu chí nào?", opts: ["Chỉ tên file", "Commit message, author, hash SHA, nội dung file thay đổi", "Chỉ tên branch", "Chỉ ngày tháng"], ans: 1, cat: "basic", diff: "medium", explain: "Search rất mạnh — tìm được commit theo nhiều tiêu chí. Hữu ích khi cần tìm 'ai đã sửa dòng code này' hoặc 'commit nào thêm tính năng X'." },
+  { q: "Sourcetree hỗ trợ những hệ điều hành nào?", opts: ["Chỉ Windows", "Windows và macOS", "Windows, macOS và Linux", "Chỉ macOS"], ans: 1, cat: "basic", diff: "basic", explain: "Sourcetree là phần mềm miễn phí của Atlassian, hỗ trợ Windows và macOS. Linux có thể dùng GitKraken hoặc CLI." },
+
+  // ===== STAGE & COMMIT (13-24) =====
+  { q: "Trong Sourcetree, icon <strong style='color:#43e97b'>A</strong> (xanh), <strong style='color:#f39c12'>M</strong> (vàng), <strong style='color:#f5576c'>D</strong> (đỏ) bên cạnh file nghĩa là gì?", opts: ["A = Approved, M = Merged, D = Done", "A = Added (file mới), M = Modified (đã sửa), D = Deleted (đã xóa)", "A = Active, M = Main, D = Draft", "Mức độ ưu tiên: cao, trung, thấp"], ans: 1, cat: "stage", diff: "basic", explain: "Đây là trạng thái file trong tab File Status. Thêm icon <strong>R</strong> = Renamed, <strong>C</strong> = Conflict." },
+  { q: "Trong Sourcetree, muốn đưa file vào staging area (chuẩn bị commit) thì làm thế nào?", opts: ["Tick checkbox bên cạnh file trong vùng Unstaged, hoặc nhấn <strong>Stage All</strong>", "Double-click vào file", "Nhấn nút Push", "Kéo file vào vùng commit message"], ans: 0, cat: "stage", diff: "basic", explain: "File từ vùng Unstaged sẽ được chuyển lên vùng Staged. Chỉ file ở Staged mới được đưa vào commit." },
+  { q: "Bạn đã stage 3 file nhưng muốn bỏ 1 file ra khỏi staging. Làm thế nào trong Sourcetree?", opts: ["Phải unstage tất cả rồi stage lại", "Bỏ tick checkbox của file đó trong vùng Staged, hoặc click phải → Unstage", "Xóa file đó", "Không thể bỏ từng file"], ans: 1, cat: "stage", diff: "basic", explain: "Sourcetree cho phép stage/unstage từng file riêng lẻ. Rất tiện khi chỉ muốn commit một phần thay đổi." },
+  { q: "Trong Sourcetree, khi click vào file trong File Status, vùng bên phải hiển thị gì?", opts: ["Nội dung file đầy đủ", "Diff — hiện dòng thêm (xanh +) và dòng xóa (đỏ -) so với commit trước", "Lịch sử commit của file", "Thông tin author"], ans: 1, cat: "stage", diff: "basic", explain: "Diff giúp bạn review chính xác thay đổi gì trước khi commit. Dòng xanh = thêm mới, dòng đỏ = đã xóa." },
+  { q: "Sau khi stage file xong, bước tiếp theo để commit trong Sourcetree là gì?", opts: ["Nhấn nút Push", "Nhập commit message ở ô phía dưới → nhấn nút <strong>Commit</strong> (hoặc <code>Ctrl+Enter</code>)", "Nhấn nút Fetch", "Click phải → Commit"], ans: 1, cat: "stage", diff: "basic", explain: "Commit message nên ngắn gọn, mô tả thay đổi. Ví dụ: <code>feat: thêm trang dashboard</code> hoặc <code>fix: sửa lỗi sidebar mobile</code>." },
+  { q: "Trong Sourcetree, tick checkbox <strong>'Push immediately'</strong> khi commit có tác dụng gì?", opts: ["Tự động tạo Pull Request", "Sau khi commit xong, tự động push commit lên remote luôn", "Push trước rồi mới commit", "Không có tác dụng gì"], ans: 1, cat: "stage", diff: "basic", explain: "Tiện nếu bạn làm việc một mình. Nhưng khi làm team, nên review commit trước khi push." },
+  { q: "Commit trong Sourcetree chỉ lưu ở đâu?", opts: ["Lên GitHub ngay", "Chỉ lưu trên máy local — phải Push mới lên remote/GitHub", "Lưu cả local và remote", "Lưu trong staging area"], ans: 1, cat: "stage", diff: "basic", explain: "Đây là khái niệm quan trọng: Commit = lưu local. Push = đẩy lên remote. Hai bước tách biệt." },
+  { q: "Trong Sourcetree, làm sao để xem nội dung thay đổi của 1 commit cũ trong History?", opts: ["Click vào commit đó trong tab History → phần dưới hiện danh sách file changed và diff", "Phải checkout về commit đó", "Nhấn nút Diff trên toolbar", "Không xem được commit cũ"], ans: 0, cat: "stage", diff: "basic", explain: "Click vào bất kỳ commit nào trong History, Sourcetree sẽ hiện danh sách file thay đổi bên dưới và diff bên phải." },
+  { q: "Bạn vừa commit nhưng quên thêm 1 file. Trong Sourcetree, cách sửa nhanh nhất là gì?", opts: ["Tạo commit mới", "Stage file thiếu → tick <strong>'Amend last commit'</strong> ở ô commit message → Commit", "Xóa commit rồi làm lại", "Push rồi sửa trên GitHub"], ans: 1, cat: "stage", diff: "medium", explain: "Amend gộp thay đổi mới vào commit cuối (thay đổi hash). CHỈ dùng khi commit chưa push, nếu không sẽ gây conflict cho người khác." },
+  { q: "Trong Sourcetree, cách xem ai viết dòng code nào trong file (blame/annotate)?", opts: ["Tab History → Search", "Click phải vào file → <strong>Annotate</strong>", "Nhấn <code>Ctrl+B</code>", "Không hỗ trợ tính năng này"], ans: 1, cat: "stage", diff: "medium", explain: "Annotate hiện mỗi dòng kèm tên author, ngày, hash commit. Rất tiện để truy vết 'ai sửa dòng này và trong commit nào'." },
+  { q: "Quy tắc viết commit message theo Conventional Commits là gì?", opts: ["Viết càng dài càng tốt", "Bắt đầu bằng type: <code>feat:</code>, <code>fix:</code>, <code>docs:</code>, <code>refactor:</code>... rồi mô tả ngắn gọn", "Chỉ ghi số ticket", "Viết bằng tiếng Anh bắt buộc"], ans: 1, cat: "stage", diff: "medium", explain: "Ví dụ: <code>feat: thêm chức năng login</code>, <code>fix: sửa lỗi hiển thị sidebar</code>. Giúp đọc lịch sử dễ hiểu hơn." },
+  { q: "Trong Sourcetree, có thể stage chỉ một phần thay đổi (hunk) trong file không?", opts: ["Không, phải stage cả file", "Có — click vào file, trong vùng diff chọn từng hunk hoặc từng dòng để stage riêng", "Chỉ được trên macOS", "Phải dùng terminal"], ans: 1, cat: "stage", diff: "medium", explain: "Rất hữu ích khi 1 file có nhiều thay đổi nhưng bạn chỉ muốn commit một phần. Click nút 'Stage hunk' hoặc 'Stage lines'." },
+
+  // ===== BRANCH (25-38) =====
+  { q: "Trong Sourcetree, cách tạo branch mới là gì?", opts: ["Click phải vào commit → Tag", "Nhấn nút <strong>Branch</strong> trên toolbar → nhập tên → tick 'Checkout New Branch' → Create Branch", "Kéo thả commit sang sidebar", "Nhấn nút Merge"], ans: 1, cat: "branch", diff: "basic", explain: "Tick 'Checkout New Branch' để tự động chuyển sang branch vừa tạo. Không tick thì tạo xong vẫn ở branch cũ." },
+  { q: "Trong Sourcetree, làm sao để chuyển sang branch khác (checkout)?", opts: ["Nhấn nút Branch trên toolbar", "Double-click vào tên branch trong sidebar trái", "Nhấn nút Switch", "Kéo thả branch"], ans: 1, cat: "branch", diff: "basic", explain: "Branch hiện tại được đánh dấu <strong>chữ đậm</strong> và có icon tròn. Double-click branch khác để chuyển." },
+  { q: "Khi đang có thay đổi chưa commit mà double-click sang branch khác, Sourcetree sẽ làm gì?", opts: ["Tự động commit rồi chuyển", "Tự xóa thay đổi", "Nếu không conflict: thay đổi đi theo sang branch mới. Nếu conflict: Sourcetree từ chối, yêu cầu commit hoặc stash trước", "Tự tạo stash"], ans: 2, cat: "branch", diff: "medium", explain: "Đây là hành vi của Git: thay đổi chưa commit 'đi theo' working directory. Nên commit hoặc stash trước khi chuyển branch." },
+  { q: "Trong sidebar Sourcetree, branch có icon tròn đặc (<strong>●</strong>) nghĩa là gì?", opts: ["Branch đã merge", "Đó là branch hiện tại đang checkout", "Branch có conflict", "Branch đã push"], ans: 1, cat: "branch", diff: "basic", explain: "Icon tròn đặc + chữ đậm = branch bạn đang đứng. Các branch khác hiện icon tròn rỗng (○)." },
+  { q: "Cách xóa branch trong Sourcetree?", opts: ["Kéo branch vào thùng rác", "Click phải vào branch trong sidebar → <strong>Delete branch</strong>", "Nhấn nút Delete trên toolbar", "Double-click rồi nhấn Delete"], ans: 1, cat: "branch", diff: "basic", explain: "Nếu branch chưa merge, cần tick <strong>Force delete</strong>. Xóa remote branch: click phải branch dưới Remotes/origin → Delete." },
+  { q: "Nên đặt tên branch theo quy tắc nào?", opts: ["Đặt tên gì cũng được", "<code>feature/tên-tính-năng</code>, <code>bugfix/mô-tả-lỗi</code>, <code>hotfix/vấn-đề-gấp</code>", "Chỉ dùng số", "Đặt theo tên người code"], ans: 1, cat: "branch", diff: "basic", explain: "Quy tắc đặt tên giúp cả team hiểu mục đích branch ngay khi nhìn tên. <code>feature/</code> = tính năng mới, <code>bugfix/</code> = sửa lỗi." },
+  { q: "Trong Sourcetree, branch hiện dưới mục <strong>Remotes > origin</strong> trong sidebar có ý nghĩa gì?", opts: ["Branch local", "Branch đang tồn tại trên remote (GitHub) — là bản sao thông tin, không phải code local", "Branch đã xóa", "Branch đang conflict"], ans: 1, cat: "branch", diff: "medium", explain: "Remote branch là 'ảnh chụp' từ lần fetch/pull gần nhất. Nhấn Fetch để cập nhật danh sách remote branch mới nhất." },
+  { q: "Trong Sourcetree, cách đổi tên branch local?", opts: ["Double-click vào tên branch", "Click phải branch → <strong>Rename</strong>", "Không đổi tên được, phải xóa tạo lại", "Nhấn F2"], ans: 1, cat: "branch", diff: "basic", explain: "Chỉ đổi tên branch local. Nếu branch đã push, remote vẫn giữ tên cũ — cần xóa remote branch cũ và push branch mới." },
+  { q: "Detached HEAD là gì? Khi nào gặp trong Sourcetree?", opts: ["Khi mất kết nối internet", "Khi double-click vào 1 commit cụ thể (không phải branch) — HEAD trỏ thẳng vào commit, không thuộc branch nào", "Khi branch bị xóa", "Khi merge bị lỗi"], ans: 1, cat: "branch", diff: "hard", explain: "Commit mới tạo ở trạng thái này sẽ 'mồ côi'. Cần tạo branch mới từ đó (<code>Branch > Create Branch</code>) để giữ lại." },
+  { q: "Trong Sourcetree, khi nhìn History thấy <span style='background:#667eea;color:#fff;padding:1px 6px;border-radius:3px;font-size:.75rem'>main</span> và <span style='background:#e74c3c;color:#fff;padding:1px 6px;border-radius:3px;font-size:.75rem'>origin/main</span> ở 2 commit khác nhau, nghĩa là gì?", opts: ["Bình thường, không sao", "Local branch <code>main</code> và remote branch <code>origin/main</code> đang lệch nhau — cần push hoặc pull để đồng bộ", "Có conflict", "Branch bị hỏng"], ans: 1, cat: "branch", diff: "medium", explain: "Nếu main ở trước (ahead) → cần Push. Nếu origin/main ở trước (behind) → cần Pull." },
+  { q: "Lệnh <code>git branch --merged</code> tương đương thao tác nào trong Sourcetree?", opts: ["Nhấn nút Merge", "Nhìn trong History: branch nào đã có đường merge về branch hiện tại → an toàn để xóa", "Nhấn nút Filter", "Không có tương đương"], ans: 1, cat: "branch", diff: "medium", explain: "Trong Sourcetree, xem graph trong History: nếu branch đã merge (có đường nối về main), có thể xóa branch đó." },
+  { q: "Upstream tracking branch là gì? Thiết lập trong Sourcetree thế nào?", opts: ["Branch chính của repo", "Liên kết branch local ↔ remote — khi Push lần đầu, Sourcetree hỏi có muốn set upstream, nhấn OK", "Branch được bảo vệ", "Branch tạm thời"], ans: 1, cat: "branch", diff: "medium", explain: "Khi đã set upstream, nút Push/Pull không cần chọn remote/branch nữa — Sourcetree tự biết đẩy/kéo ở đâu." },
+  { q: "Trong Sourcetree, nhấn <code>Ctrl+Shift+B</code> mở gì?", opts: ["Dialog tìm kiếm branch", "Dialog tạo branch mới", "Dialog tìm file", "Dialog cài đặt"], ans: 1, cat: "branch", diff: "basic", explain: "Phím tắt nhanh để tạo branch. Tương đương nhấn nút Branch trên toolbar." },
+  { q: "Trong Sourcetree, mục <strong>Tags</strong> trong sidebar dùng để làm gì?", opts: ["Đánh dấu branch quan trọng", "Hiển thị danh sách tag (đánh dấu phiên bản) — click vào tag để xem commit tương ứng", "Đánh dấu file yêu thích", "Gắn nhãn cho stash"], ans: 1, cat: "branch", diff: "basic", explain: "Tag thường dùng đánh dấu release: <code>v1.0.0</code>, <code>v2.0.0</code>. Tạo tag: click phải commit → Tag." },
+
+  // ===== MERGE & REBASE (39-55) =====
+  { q: "Trong Sourcetree, cách merge branch <code>feature</code> vào <code>main</code>?", opts: ["Click phải feature → Merge", "Checkout sang <code>main</code> (double-click) → click phải branch <code>feature</code> → <strong>Merge feature into current branch</strong>", "Kéo thả feature vào main", "Nhấn nút Merge trên toolbar"], ans: 1, cat: "merge", diff: "basic", explain: "Luôn phải checkout sang branch NHẬN trước (main), rồi mới merge branch khác vào. Đây là quy tắc quan trọng!" },
+  { q: "Sau khi merge trong Sourcetree, bạn thấy commit mới có message 'Merge branch feature into main'. Đây gọi là gì?", opts: ["Fast-forward merge", "Merge commit — commit đặc biệt có 2 parent, ghi nhận việc gộp nhánh", "Cherry-pick", "Rebase"], ans: 1, cat: "merge", diff: "basic", explain: "Merge commit giữ lại lịch sử rằng branch feature đã tồn tại và được merge vào. Nhìn graph sẽ thấy 2 đường nối lại." },
+  { q: "Fast-forward merge khác merge thường thế nào? Khi nào Sourcetree tự dùng fast-forward?", opts: ["Không khác gì", "Khi main KHÔNG có commit mới kể từ lúc tạo feature → Git chỉ dời pointer main tới, không tạo merge commit", "Khi có conflict", "Khi merge từ remote"], ans: 1, cat: "merge", diff: "medium", explain: "Fast-forward xảy ra khi lịch sử thẳng hàng. Nếu muốn luôn tạo merge commit, chọn <code>--no-ff</code> trong dialog merge." },
+  { q: "Trong Sourcetree, khi merge bị conflict, file conflict hiện icon gì?", opts: ["Icon A (xanh)", "Icon <strong style='color:#f39c12'>!</strong> hoặc <strong style='color:#f39c12'>C</strong> (vàng/cam) — biểu thị Conflict", "Icon D (đỏ)", "Không có icon đặc biệt"], ans: 1, cat: "merge", diff: "basic", explain: "File conflict sẽ có màu vàng/cam nổi bật trong danh sách. Phải resolve tất cả trước khi commit." },
+  { q: "Trong Sourcetree, cách resolve merge conflict là gì?", opts: ["Nhấn nút Resolve trên toolbar", "Click phải file conflict → <strong>Resolve Conflicts</strong> → chọn Mine/Theirs hoặc mở External Merge Tool", "Xóa file bị conflict", "Chạy lại merge"], ans: 1, cat: "merge", diff: "basic", explain: "<strong>Mine</strong> = giữ code bên bạn (branch hiện tại). <strong>Theirs</strong> = lấy code bên branch kia. External tool cho phép merge thủ công từng dòng." },
+  { q: "Chọn <strong>Mine</strong> khi resolve conflict trong Sourcetree nghĩa là gì?", opts: ["Giữ code từ branch bạn đang merge vào (branch kia)", "Giữ code từ branch hiện tại (branch bạn đang đứng)", "Gộp cả hai", "Xóa cả hai phiên bản"], ans: 1, cat: "merge", diff: "basic", explain: "Mine = của tôi = branch hiện tại. Theirs = của họ = branch đang merge vào. Nhớ: 'tôi đang đứng ở đây'." },
+  { q: "Sau khi resolve tất cả conflict, bước cuối cùng trong Sourcetree là gì?", opts: ["Nhấn nút Merge lại", "Stage các file đã resolve → nhập message → <strong>Commit</strong>", "Push ngay", "Nhấn nút Resolve Complete"], ans: 1, cat: "merge", diff: "basic", explain: "Sau khi resolve, file chuyển sang trạng thái Modified. Stage rồi commit bình thường — commit đó chính là merge commit." },
+  { q: "Muốn dùng VS Code làm merge tool trong Sourcetree, cấu hình ở đâu?", opts: ["Không được dùng external tool", "Vào <code>Tools > Options > Diff > External Diff/Merge Tool</code> → chọn Custom → trỏ đến VS Code", "Cài plugin VS Code cho Sourcetree", "Chỉ dùng được merge tool mặc định"], ans: 1, cat: "merge", diff: "medium", explain: "VS Code có merge tool rất trực quan: hiện 3 panel (mine, theirs, result). Hoặc dùng P4Merge, KDiff3, Beyond Compare." },
+  { q: "Trong Sourcetree, <strong>Rebase</strong> thực hiện thế nào?", opts: ["Nhấn nút Rebase trên toolbar", "Click phải vào branch đích (vd: main) → <strong>Rebase current changes onto main</strong>", "Kéo thả branch", "Vào menu Merge > Rebase"], ans: 1, cat: "merge", diff: "medium", explain: "Rebase 'chơi lại' commit của branch bạn lên đầu branch đích. Lịch sử thẳng hàng hơn merge." },
+  { q: "Tại sao KHÔNG nên rebase branch đã push và người khác đang dùng?", opts: ["Rebase chậm", "Vì rebase viết lại lịch sử (thay đổi hash) — người khác pull sẽ bị conflict hoặc mất commit", "Vì rebase xóa branch", "GitHub không hỗ trợ rebase"], ans: 1, cat: "merge", diff: "hard", explain: "Chỉ rebase branch CÁ NHÂN chưa share. Nếu branch đã push, dùng merge an toàn hơn." },
+  { q: "Interactive Rebase trong Sourcetree cho phép làm gì?", opts: ["Merge tương tác", "Click phải commit → 'Rebase interactively' → gộp (squash), sửa message, xóa, đổi thứ tự commit", "Chọn branch để rebase", "Rebase với remote"], ans: 1, cat: "merge", diff: "hard", explain: "Cực kỳ mạnh để dọn dẹp lịch sử trước khi push. Ví dụ: gộp 5 commit nhỏ thành 1 commit gọn gàng." },
+  { q: "Squash trong Interactive Rebase nghĩa là gì?", opts: ["Xóa commit", "Gộp commit này vào commit trước đó — giữ thay đổi nhưng chỉ còn 1 commit", "Tách commit thành 2", "Đổi tên commit"], ans: 1, cat: "merge", diff: "medium", explain: "Ví dụ: bạn có 3 commit 'WIP', 'WIP 2', 'done login' → squash thành 1 commit 'feat: thêm trang login'." },
+  { q: "Trong Sourcetree, lệnh <strong>Cherry Pick</strong> dùng thế nào?", opts: ["Nhấn nút Cherry trên toolbar", "Click phải vào 1 commit bất kỳ trong History → <strong>Cherry Pick</strong> → commit đó được copy sang branch hiện tại", "Kéo commit sang branch khác", "Chỉ dùng được qua terminal"], ans: 1, cat: "merge", diff: "medium", explain: "Cherry pick tạo commit mới (hash khác) với cùng thay đổi. Tiện khi chỉ cần 1-2 commit từ branch khác, không muốn merge cả branch." },
+  { q: "Khi merge bị conflict, nhấn <code>Merge --abort</code> (hoặc nút Abort) trong Sourcetree sẽ làm gì?", opts: ["Xóa branch", "Hủy merge, quay về trạng thái trước khi bắt đầu merge — mọi thứ nguyên vẹn", "Xóa conflict rồi merge lại", "Force merge bỏ qua conflict"], ans: 1, cat: "merge", diff: "basic", explain: "An toàn để hủy merge khi conflict quá phức tạp. Bạn có thể thảo luận với team rồi merge lại sau." },
+  { q: "Khi nhìn History trong Sourcetree, merge commit có gì đặc biệt?", opts: ["Không khác gì commit thường", "Có 2 đường (parent) nối vào — thể hiện việc gộp 2 nhánh lại", "Có icon đặc biệt", "Luôn ở đầu danh sách"], ans: 1, cat: "merge", diff: "basic", explain: "Commit thường có 1 parent (commit trước nó). Merge commit có 2 parent (1 từ mỗi branch). Graph hiện 2 đường hội tụ." },
+  { q: "3-way merge là gì? Sourcetree xử lý thế nào?", opts: ["Merge 3 branch", "Git so sánh 3 điểm: commit chung gần nhất + commit cuối mỗi branch. Khi conflict, Sourcetree mở merge tool hiện cả 3 phiên bản", "Merge 3 lần", "Merge cần 3 người approve"], ans: 1, cat: "merge", diff: "hard", explain: "External merge tool (VS Code, P4Merge) hiện: BASE (bản gốc), MINE (bên bạn), THEIRS (bên kia) và OUTPUT (kết quả) để bạn chọn." },
+  { q: "Merge xong, muốn xóa branch đã merge trong Sourcetree thì làm sao?", opts: ["Branch tự xóa sau merge", "Click phải branch trong sidebar → <strong>Delete branch</strong>. Tick 'Force delete' nếu cần", "Nhấn nút Clean trên toolbar", "Phải xóa trên GitHub trước"], ans: 1, cat: "merge", diff: "basic", explain: "Branch đã merge thì xóa an toàn (<code>-d</code>). Xóa cả remote: click phải branch dưới Remotes → Delete." },
+
+  // ===== PUSH / PULL / FETCH (56-68) =====
+  { q: "Trong Sourcetree, nút <strong>Push</strong> trên toolbar dùng để làm gì?", opts: ["Tải code từ remote về", "Đẩy các commit local lên remote (GitHub)", "Tạo branch mới trên remote", "Đồng bộ 2 chiều"], ans: 1, cat: "remote", diff: "basic", explain: "Push chỉ đẩy commit đã có ở local lên remote. Phải commit trước rồi mới push." },
+  { q: "Trong Sourcetree, nút <strong>Pull</strong> làm gì?", opts: ["Chỉ kiểm tra thay đổi trên remote", "Tải commit mới từ remote về VÀ merge vào branch hiện tại", "Đẩy code lên remote", "Tạo Pull Request"], ans: 1, cat: "remote", diff: "basic", explain: "Pull = Fetch + Merge. Nếu remote có commit mới, chúng sẽ được merge vào branch local của bạn." },
+  { q: "Nút <strong>Fetch</strong> trong Sourcetree khác gì nút Pull?", opts: ["Giống nhau", "Fetch chỉ TẢI thông tin từ remote (không merge) — an toàn, không thay đổi code local", "Fetch nhanh hơn Pull", "Fetch chỉ tải 1 branch, Pull tải tất cả"], ans: 1, cat: "remote", diff: "basic", explain: "Fetch an toàn để kiểm tra: 'remote có gì mới không?'. Sau khi fetch, bạn xem History rồi quyết định merge/pull." },
+  { q: "Khi Push bị rejected (Sourcetree báo lỗi non-fast-forward), nguyên nhân là gì?", opts: ["Mất mạng", "Remote có commit mới mà bạn chưa Pull — cần Pull trước rồi Push lại", "Branch bị khóa", "File quá lớn"], ans: 1, cat: "remote", diff: "basic", explain: "Git từ chối vì push sẽ ghi đè commit trên remote. Pull về → merge/resolve nếu cần → Push lại." },
+  { q: "Trong Sourcetree, khi Push lần đầu cho branch mới, dialog Push hỏi gì?", opts: ["Không hỏi gì, tự push", "Hỏi bạn muốn push lên remote nào và có set upstream tracking không", "Hỏi mật khẩu GitHub", "Hỏi có tạo PR không"], ans: 1, cat: "remote", diff: "basic", explain: "Nên tick set upstream. Sau đó, Push/Pull cho branch này không cần chọn remote nữa — tự biết." },
+  { q: "Trong Sourcetree, <strong>Pull with Rebase</strong> khác Pull thường thế nào?", opts: ["Nhanh hơn", "Thay vì tạo merge commit, nó rebase commit local lên đầu remote — lịch sử thẳng hàng hơn", "Pull chỉ 1 file", "Pull từ remote khác"], ans: 1, cat: "remote", diff: "medium", explain: "Tránh tạo merge commit 'Merge remote-tracking branch' không cần thiết. Nhiều team dùng Pull Rebase làm mặc định." },
+  { q: "<strong>Force Push</strong> trong Sourcetree nguy hiểm thế nào?", opts: ["Không nguy hiểm", "Ghi đè lịch sử remote — commit của người khác có thể bị MẤT", "Chỉ push nhanh hơn", "Giống push thường"], ans: 1, cat: "remote", diff: "medium", explain: "TUYỆT ĐỐI TRÁNH force push trên branch chung (main, develop). Chỉ force push branch cá nhân sau rebase nếu bắt buộc." },
+  { q: "Trong dialog Push của Sourcetree, tick <strong>'Push all tags'</strong> để làm gì?", opts: ["Push tất cả branch", "Đẩy tất cả tag local lên remote — vì Push bình thường KHÔNG push tag", "Đánh tag cho commit mới nhất", "Xóa tag cũ trên remote"], ans: 1, cat: "remote", diff: "medium", explain: "Tag phải push riêng. Tick 'Push all tags' hoặc chỉ push 1 tag: click phải tag → Push to origin." },
+  { q: "Trong Sourcetree, mục <strong>Remotes > origin</strong> trong sidebar nghĩa là gì?", opts: ["Branch chính", "<code>origin</code> là tên mặc định của remote server (GitHub URL) mà bạn clone về", "Thư mục gốc của repo", "Branch đầu tiên"], ans: 1, cat: "remote", diff: "basic", explain: "Có thể thêm nhiều remote (vd: <code>upstream</code> cho repo gốc khi fork). Xem URL: <code>Repository > Repository Settings > Remotes</code>." },
+  { q: "Fetch rồi nhìn History, thấy <span style='background:#e74c3c;color:#fff;padding:1px 6px;border-radius:3px;font-size:.75rem'>origin/main</span> ở phía trước <span style='background:#667eea;color:#fff;padding:1px 6px;border-radius:3px;font-size:.75rem'>main</span>. Bạn cần làm gì?", opts: ["Push lên remote", "<strong>Pull</strong> để cập nhật local main cho khớp với remote", "Tạo branch mới", "Xóa branch main"], ans: 1, cat: "remote", diff: "basic", explain: "origin/main ở trước = remote có commit mới hơn local. Pull về để cập nhật." },
+  { q: "Khi Fork repo người khác, trong Sourcetree cần thêm remote gì?", opts: ["Không cần thêm", "Thêm remote <strong>upstream</strong> trỏ về repo gốc — để Fetch cập nhật từ repo gốc về fork của mình", "Thêm remote origin thứ 2", "Thêm remote backup"], ans: 1, cat: "remote", diff: "medium", explain: "Thêm tại <code>Repository > Repository Settings > Remotes > Add</code>. Fetch upstream → merge upstream/main vào local." },
+  { q: "Trong Sourcetree, <code>Fetch --prune</code> dùng để?", opts: ["Fetch nhanh hơn", "Xóa các remote tracking branch mà branch tương ứng trên remote đã bị xóa", "Fetch chỉ file mới", "Xóa stash cũ"], ans: 1, cat: "remote", diff: "medium", explain: "Sau khi merge PR và xóa branch trên GitHub, local vẫn giữ reference cũ. Prune dọn dẹp chúng." },
+  { q: "Nhấn nút Pull nhưng Sourcetree báo 'There is no tracking information for the current branch'. Tại sao?", opts: ["Remote bị lỗi", "Branch local chưa được set upstream — cần Push lần đầu với set upstream hoặc set thủ công", "Branch đã bị xóa trên remote", "Mất kết nối mạng"], ans: 1, cat: "remote", diff: "medium", explain: "Sourcetree không biết Pull từ đâu. Fix: Push branch lên (tick set upstream) hoặc click phải branch → Set tracking." },
+
+  // ===== UNDO & RESET (69-80) =====
+  { q: "Trong Sourcetree, file đang modified nhưng bạn muốn hủy thay đổi, về lại bản commit cuối. Làm thế nào?", opts: ["Nhấn nút Undo trên toolbar", "Click phải file trong File Status → <strong>Discard</strong> (hoặc Reset)", "Xóa file rồi pull lại", "Nhấn Ctrl+Z"], ans: 1, cat: "undo", diff: "basic", explain: "Discard = hủy thay đổi vĩnh viễn, file quay về trạng thái commit cuối. KHÔNG khôi phục được nên cẩn thận!" },
+  { q: "Trong Sourcetree, <strong>Discard All</strong> sẽ làm gì?", opts: ["Xóa tất cả commit", "Hủy TẤT CẢ thay đổi chưa commit — tất cả file về trạng thái commit cuối", "Xóa tất cả branch", "Unstage tất cả file"], ans: 1, cat: "undo", diff: "basic", explain: "Rất nguy hiểm nếu nhấn nhầm! Thay đổi bị mất vĩnh viễn. Nên commit hoặc stash trước nếu không chắc chắn." },
+  { q: "Muốn undo commit cuối (giữ thay đổi) trong Sourcetree, dùng Reset mode nào?", opts: ["Hard", "Mixed — undo commit, thay đổi giữ trong working directory (unstaged)", "Soft — undo commit, thay đổi giữ trong staging area (staged)", "Cả B và C đều đúng, tùy mục đích"], ans: 3, cat: "undo", diff: "medium", explain: "<strong>Soft:</strong> thay đổi vẫn staged, sẵn sàng commit lại. <strong>Mixed:</strong> thay đổi ở working dir, cần stage lại. <strong>Hard:</strong> xóa sạch!" },
+  { q: "Trong Sourcetree, cách thực hiện Reset là gì?", opts: ["Nhấn nút Reset trên toolbar", "Click phải vào commit muốn quay về trong History → <strong>Reset current branch to this commit</strong> → chọn Soft/Mixed/Hard", "Nhấn Ctrl+Z nhiều lần", "Kéo HEAD về commit cũ"], ans: 1, cat: "undo", diff: "medium", explain: "Luôn cẩn thận chọn đúng mode. Nếu chọn Hard, mọi thay đổi sau commit đó sẽ BỊ MẤT." },
+  { q: "<strong>Reset Hard</strong> khác gì <strong>Reset Mixed</strong>?", opts: ["Giống nhau", "Hard: XÓA SẠCH mọi thay đổi sau commit đích. Mixed: giữ thay đổi trong working directory", "Hard nhanh hơn", "Mixed xóa sạch hơn"], ans: 1, cat: "undo", diff: "medium", explain: "Hard = quay ngược thời gian hoàn toàn. Mixed = quay về nhưng giữ code — bạn có thể review lại trước khi quyết định." },
+  { q: "Trong Sourcetree, <strong>Reverse commit</strong> (Revert) khác <strong>Reset</strong> thế nào?", opts: ["Giống nhau", "Revert tạo commit MỚI đảo ngược thay đổi (an toàn, không xóa lịch sử). Reset dời HEAD về quá khứ (viết lại lịch sử)", "Revert xóa commit, Reset giữ commit", "Reset an toàn hơn Revert"], ans: 1, cat: "undo", diff: "medium", explain: "Revert AN TOÀN cho branch đã push — vì không thay đổi lịch sử cũ. Reset chỉ dùng cho commit chưa push." },
+  { q: "Trong Sourcetree, cách Revert (đảo ngược) 1 commit?", opts: ["Nhấn nút Undo", "Click phải commit trong History → <strong>Reverse commit</strong>", "Xóa commit trong History", "Double-click commit"], ans: 1, cat: "undo", diff: "basic", explain: "Sourcetree tạo commit mới làm ngược lại thay đổi. Ví dụ: commit cũ thêm 10 dòng → revert sẽ xóa 10 dòng đó." },
+  { q: "Bạn lỡ Reset Hard xóa mất commit quan trọng. Có cách nào cứu trong Sourcetree?", opts: ["Không có cách nào", "Mở terminal (<code>Ctrl+Shift+O</code>) → chạy <code>git reflog</code> → tìm hash commit → Reset về đó", "Pull từ remote nếu đã push", "Cả B và C đều có thể cứu được"], ans: 3, cat: "undo", diff: "hard", explain: "<strong>Reflog</strong> lưu lịch sử mọi thay đổi HEAD trong 30-90 ngày — kể cả commit bị reset. Nếu đã push, pull lại cũng được." },
+  { q: "Trong Sourcetree, <strong>Amend last commit</strong> dùng khi nào?", opts: ["Khi muốn undo tất cả commit", "Khi muốn sửa commit cuối: thêm file, sửa message — nhưng CHỈ khi commit chưa push", "Khi muốn merge", "Bất kỳ lúc nào"], ans: 1, cat: "undo", diff: "medium", explain: "Tick checkbox 'Amend last commit' ở ô commit message. Commit cuối sẽ được thay thế (hash thay đổi). KHÔNG dùng nếu đã push!" },
+  { q: "Bạn muốn xóa tất cả file untracked (file mới chưa bao giờ commit). Trong Sourcetree?", opts: ["Nhấn Delete trên keyboard", "Click phải file → <strong>Remove</strong>, hoặc mở terminal chạy <code>git clean -fd</code>", "Nhấn Discard All (không xóa untracked)", "Drag file ra ngoài Sourcetree"], ans: 1, cat: "undo", diff: "medium", explain: "Discard All chỉ hủy thay đổi file đã tracked. File untracked cần Remove riêng hoặc dùng <code>git clean</code>." },
+  { q: "Trong Sourcetree, muốn khôi phục 1 file từ commit cũ mà không undo cả commit, làm sao?", opts: ["Không được", "Click phải file trong commit cũ (History) → <strong>Reset to this commit</strong> (chỉ file đó)", "Copy nội dung thủ công", "Checkout về commit cũ rồi copy file"], ans: 1, cat: "undo", diff: "hard", explain: "Sourcetree cho phép reset từng file riêng lẻ từ commit bất kỳ mà không ảnh hưởng file khác." },
+  { q: "Revert một merge commit có gì đặc biệt?", opts: ["Giống revert commit thường", "Cần chỉ định giữ parent nào — trong Sourcetree, dialog sẽ hỏi bạn chọn mainline parent", "Không thể revert merge commit", "Phải xóa branch trước"], ans: 1, cat: "undo", diff: "hard", explain: "Merge commit có 2 parent. Revert cần biết giữ bên nào: parent 1 (thường là branch nhận) hay parent 2 (branch merge vào)." },
+
+  // ===== STASH & TAG (81-90) =====
+  { q: "Trong Sourcetree, nút <strong>Stash</strong> trên toolbar dùng khi nào?", opts: ["Khi muốn commit nhanh", "Khi đang code dở, cần chuyển branch gấp mà chưa muốn commit — Stash cất thay đổi tạm", "Khi muốn push", "Khi muốn xóa thay đổi"], ans: 1, cat: "stash", diff: "basic", explain: "Stash = cất vào ngăn kéo. Working directory sạch sẽ, bạn thoải mái chuyển branch. Xong việc quay lại lấy ra." },
+  { q: "Khi nhấn Stash trong Sourcetree, dialog hỏi gì?", opts: ["Chọn branch", "Nhập tên mô tả cho stash (vd: 'WIP: đang làm form login') và các tùy chọn", "Chọn file để stash", "Nhập commit message"], ans: 1, cat: "stash", diff: "basic", explain: "Tên mô tả giúp bạn nhớ stash chứa gì. Tùy chọn: giữ staged files, bao gồm untracked files." },
+  { q: "Stash mặc định trong Sourcetree có lưu file untracked (file mới chưa add) không?", opts: ["Có, lưu tất cả", "Không — mặc định chỉ lưu file đã tracked có thay đổi. Muốn lưu untracked phải tick tùy chọn", "Tùy cấu hình", "Chỉ lưu file staged"], ans: 1, cat: "stash", diff: "medium", explain: "Tick checkbox 'Include untracked files' trong dialog stash nếu muốn cất cả file mới." },
+  { q: "Trong sidebar Sourcetree, mục <strong>Stashes</strong> hiện danh sách stash. Click phải vào 1 stash có những lựa chọn nào?", opts: ["Chỉ có Delete", "<strong>Apply Stash</strong> (lấy ra, giữ stash), <strong>Pop Stash</strong> (lấy ra + xóa stash), <strong>Delete Stash</strong>", "Chỉ có Apply", "Chỉ có Pop"], ans: 1, cat: "stash", diff: "basic", explain: "Apply = lấy ra nhưng stash vẫn còn (có thể apply lên nhiều branch). Pop = lấy ra và xóa stash luôn." },
+  { q: "Stash Pop bị conflict trong Sourcetree thì sao?", opts: ["Stash bị mất luôn", "Stash KHÔNG bị xóa (khác với pop thành công) — resolve conflict rồi xóa stash thủ công", "Sourcetree tự resolve", "Phải tạo branch mới"], ans: 1, cat: "stash", diff: "hard", explain: "Đây là khác biệt quan trọng: Pop thành công = stash bị xóa. Pop conflict = stash vẫn an toàn." },
+  { q: "Trong Sourcetree, cách tạo Tag cho 1 commit?", opts: ["Nhấn nút Tag trên toolbar rồi chọn commit", "Click phải commit trong History → <strong>Tag</strong> → nhập tên tag (vd: <code>v1.0.0</code>)", "Cả A và B đều đúng", "Double-click commit → nhập tag"], ans: 2, cat: "stash", diff: "basic", explain: "Nút Tag trên toolbar tạo tag cho commit hiện tại. Click phải trong History tạo tag cho commit bất kỳ." },
+  { q: "Tag lightweight khác tag annotated thế nào trong Sourcetree?", opts: ["Giống nhau", "Lightweight: chỉ pointer đến commit. Annotated: có message, author, date — nên dùng cho release", "Lightweight cho remote, annotated cho local", "Annotated tự push lên remote"], ans: 1, cat: "stash", diff: "medium", explain: "Khi tạo tag trong Sourcetree, nhập message → thành annotated tag. Để trống message → lightweight." },
+  { q: "Tạo tag xong, nhấn Push nhưng tag không lên GitHub. Tại sao?", opts: ["Tag tự lên khi push", "Push bình thường KHÔNG push tag — phải tick 'Push all tags' trong dialog Push hoặc push tag riêng", "Tag chỉ dùng local", "GitHub không hỗ trợ tag"], ans: 1, cat: "stash", diff: "medium", explain: "Hoặc click phải tag trong sidebar → Push to origin để push 1 tag cụ thể." },
+  { q: "Trong Sourcetree, cách xóa tag đã push lên remote?", opts: ["Chỉ cần xóa tag local", "Click phải tag → Delete → tick <strong>'Remove tag from all remotes'</strong>", "Xóa trên GitHub UI", "Cả B và C đều được"], ans: 3, cat: "stash", diff: "medium", explain: "Xóa local: click phải → Delete. Xóa remote: tick option trong Sourcetree hoặc xóa trên GitHub Releases." },
+  { q: "Muốn xem nội dung stash trước khi apply, làm thế nào trong Sourcetree?", opts: ["Không xem được", "Click vào stash trong sidebar → phần dưới hiện danh sách file và diff giống khi xem commit", "Mở terminal chạy git stash show", "Cả B và C đều đúng"], ans: 3, cat: "stash", diff: "basic", explain: "Sourcetree hiện stash giống commit: danh sách file bên trái, diff bên phải. Hoặc terminal: <code>git stash show -p stash@{0}</code>." },
+
+  // ===== PULL REQUEST (91-96) =====
+  { q: "Pull Request (PR) tạo ở đâu — trong Sourcetree hay GitHub?", opts: ["Trong Sourcetree", "Trên <strong>GitHub</strong> (hoặc GitLab/Bitbucket) — PR là tính năng của platform, không phải Git", "Trong cả hai", "Trong terminal"], ans: 1, cat: "pr", diff: "basic", explain: "Sourcetree dùng để push branch. PR tạo trên giao diện web GitHub để review và merge code." },
+  { q: "Quy trình tạo PR từ Sourcetree + GitHub thường thế nào?", opts: ["Commit → tạo PR → push", "Tạo branch → code → commit → Push branch lên GitHub → vào GitHub tạo PR → review → merge", "Push main → tạo PR", "Clone → commit → PR"], ans: 1, cat: "pr", diff: "basic", explain: "Sau khi push branch, GitHub tự hiện banner 'Compare & pull request'. Nhấn vào để tạo PR nhanh." },
+  { q: "Trên GitHub, <strong>Squash and merge</strong> PR nghĩa là gì?", opts: ["Merge bình thường", "Gộp TẤT CẢ commit trong PR thành 1 commit rồi merge vào base branch", "Merge 2 PR cùng lúc", "Merge và xóa repo"], ans: 1, cat: "pr", diff: "medium", explain: "Lịch sử main sạch: mỗi PR là 1 commit gọn gàng. Nhưng mất chi tiết các commit nhỏ bên trong." },
+  { q: "Reviewer request changes trên PR. Bạn sửa code trong Sourcetree rồi làm gì?", opts: ["Tạo PR mới", "Commit thay đổi → Push lên cùng branch → PR trên GitHub <strong>tự cập nhật</strong> commit mới", "Close PR rồi tạo lại", "Merge rồi sửa sau"], ans: 1, cat: "pr", diff: "basic", explain: "PR liên kết với branch. Mọi commit push lên branch đó sẽ tự hiện trong PR. Không cần tạo PR lại." },
+  { q: "PR đang conflict với base branch. Cách resolve trong Sourcetree?", opts: ["GitHub tự resolve", "Checkout branch PR → Pull/Merge base branch (main) vào → resolve conflict → commit → push. PR tự hết conflict", "Xóa PR tạo lại", "Đợi conflict tự hết"], ans: 1, cat: "pr", diff: "medium", explain: "Ví dụ: checkout feature → click phải main → Merge main into current → resolve → commit → push. PR sẽ hiện 'No conflicts'." },
+  { q: "Draft PR (PR nháp) trên GitHub dùng để làm gì?", opts: ["PR sẽ tự merge", "Đánh dấu PR chưa sẵn sàng merge — share code sớm để nhận feedback, nhưng nút Merge bị khóa", "PR chỉ mình bạn thấy", "PR không cần review"], ans: 1, cat: "pr", diff: "basic", explain: "Tạo Draft PR khi code chưa xong. Nhấn 'Ready for review' khi hoàn tất. Tránh ai nhấn merge nhầm." },
+
+  // ===== NÂNG CAO (97-100) =====
+  { q: "Trong Sourcetree, <strong>Submodule</strong> dùng để làm gì?", opts: ["Chia branch thành module", "Nhúng repo Git khác vào repo hiện tại — quản lý tại <code>Repository > Add Submodule</code>", "Tạo module npm", "Chia file thành phần nhỏ"], ans: 1, cat: "advanced", diff: "hard", explain: "Submodule giữ repo con ở commit cố định trong repo cha. Thường dùng cho shared libraries. Hiện trong sidebar dưới 'Submodules'." },
+  { q: "Git hooks là gì? Có liên quan đến Sourcetree không?", opts: ["Kết nối Sourcetree với cloud", "Script tự chạy khi xảy ra sự kiện Git (pre-commit, pre-push...). Sourcetree trigger hooks khi bạn commit/push", "Webhook của GitHub", "Không liên quan"], ans: 1, cat: "advanced", diff: "medium", explain: "Ví dụ: pre-commit hook chạy lint tự động. Nếu hook fail, commit bị chặn. Cấu hình trong <code>.git/hooks/</code> hoặc dùng Husky." },
+  { q: "Trong Sourcetree, <strong>Custom Actions</strong> (<code>Tools > Options > Custom Actions</code>) dùng để?", opts: ["Tùy chỉnh giao diện Sourcetree", "Tạo nút hoặc phím tắt riêng chạy lệnh Git tùy ý — mở rộng Sourcetree với thao tác bạn hay dùng", "Cấu hình remote", "Tạo macro cho commit"], ans: 1, cat: "advanced", diff: "medium", explain: "Ví dụ: tạo Custom Action chạy <code>git log --oneline --graph --all</code> với phím tắt riêng." },
+  { q: "Khi nhìn History trong Sourcetree thấy graph rất phức tạp nhiều nhánh chồng chéo, cách nào để xem dễ hơn?", opts: ["Không có cách nào", "Dùng filter: chọn 1 branch cụ thể, hoặc nhấn 'Current Branch' để chỉ xem branch hiện tại", "Xóa bớt branch", "Zoom in graph"], ans: 1, cat: "advanced", diff: "medium", explain: "Trong toolbar History có dropdown filter branch. Chọn branch cần xem để graph đỡ rối. Hoặc dùng Search (<code>Ctrl+3</code>) để tìm commit cụ thể." },
+
+  // ===== CÂU HỎI HÌNH ẢNH (V1-V20) =====
+  { q: 'Nhìn vào toolbar dưới đây. Số <strong>3↑</strong> trên nút Push có ý nghĩa gì?<div class="vq"><div class="vq-bar"><span class="vq-dot r"></span><span class="vq-dot y"></span><span class="vq-dot g"></span><span>Sourcetree — my-project</span></div><div class="vq-toolbar"><div class="vq-btn">📥 Clone</div><div class="vq-btn hl">Commit</div><div class="vq-btn">⬆ Push <span class="badge">3↑</span></div><div class="vq-btn">⬇ Pull</div><div class="vq-btn">🔄 Fetch</div><div class="vq-btn">🌿 Branch</div><div class="vq-btn">🔀 Merge</div><div class="vq-btn">📦 Stash</div></div></div>', opts: ["Có 3 file thay đổi", "Có 3 commit local chưa được push lên remote", "Có 3 branch", "Có 3 conflict cần resolve"], ans: 1, cat: "visual", diff: "basic", explain: "Số trên nút Push cho biết bạn có bao nhiêu commit <strong>ahead</strong> (chưa push). Nhấn Push để đẩy 3 commit này lên GitHub." },
+
+  { q: 'Nhìn vào sidebar dưới đây. Branch nào đang được checkout (branch hiện tại)?<div class="vq"><div class="vq-body" style="min-height:auto"><div class="vq-side" style="width:100%;border:none"><div class="vq-sg">Branches</div><div class="vq-si">○ develop</div><div class="vq-si cur">● <strong>feature/login</strong></div><div class="vq-si">○ main</div><div class="vq-si">○ bugfix/header</div><div class="vq-sg">Remotes</div><div class="vq-si">▸ origin</div></div></div></div>', opts: ["develop", "main", "feature/login", "bugfix/header"], ans: 2, cat: "visual", diff: "basic", explain: "Branch có icon <strong>●</strong> (tròn đặc) và <strong>chữ đậm</strong> là branch đang checkout. Ở đây là <code>feature/login</code>." },
+
+  { q: 'Nhìn vào File Status dưới đây. Bạn thấy 3 icon A, M, D. Chúng có ý nghĩa gì?<div class="vq"><div class="vq-fs"><div class="vq-fh">Unstaged files <span class="link">Stage All</span></div><div class="vq-fr"><div class="vq-cb"></div><span class="vq-fi a">A</span><span class="vq-fn">LoginPage.jsx</span><span class="vq-fp">src/pages/</span></div><div class="vq-fr"><div class="vq-cb"></div><span class="vq-fi m">M</span><span class="vq-fn">App.jsx</span><span class="vq-fp">src/</span></div><div class="vq-fr"><div class="vq-cb"></div><span class="vq-fi d">D</span><span class="vq-fn">old-nav.css</span><span class="vq-fp">src/styles/</span></div></div></div>', opts: ["A = Approved, M = Merged, D = Done", "A = Added (file mới), M = Modified (đã sửa), D = Deleted (đã xóa)", "A = Auto, M = Manual, D = Draft", "Mức độ ưu tiên"], ans: 1, cat: "visual", diff: "basic", explain: "<strong style='color:#43e97b'>A</strong> = file mới thêm. <strong style='color:#f39c12'>M</strong> = file sửa đổi. <strong style='color:#f5576c'>D</strong> = file đã xóa. Tick checkbox để stage từng file." },
+
+  { q: 'Nhìn vào History bên dưới. Tag <span style="background:#667eea;color:#fff;padding:0 5px;border-radius:2px;font-size:.7rem">main</span> và <span style="background:#e74c3c;color:#fff;padding:0 5px;border-radius:2px;font-size:.7rem">origin/main</span> đang ở 2 vị trí khác nhau. Điều này có nghĩa gì?<div class="vq"><div class="vq-main" style="padding:8px"><div class="vq-row sel"><div class="vq-gdot" style="background:#667eea"></div><span class="vq-tag" style="background:#667eea">main</span><span class="vq-msg">feat: thêm sidebar component</span><span class="vq-auth">Bạn</span><span class="vq-date">1 giờ trước</span></div><div class="vq-row"><div class="vq-gdot" style="background:#667eea"></div><span class="vq-msg">fix: sửa lỗi responsive</span><span class="vq-auth">Bạn</span><span class="vq-date">3 giờ trước</span></div><div class="vq-row"><div class="vq-gdot" style="background:#667eea"></div><span class="vq-tag" style="background:#e74c3c">origin/main</span><span class="vq-msg">docs: cập nhật README</span><span class="vq-auth">Bạn</span><span class="vq-date">Hôm qua</span></div></div></div>', opts: ["Bình thường, không cần làm gì", "Local main đang ahead 2 commit so với remote — cần <strong>Push</strong> để đồng bộ", "Remote có commit mới — cần Pull", "Có conflict giữa local và remote"], ans: 1, cat: "visual", diff: "medium", explain: "<code>main</code> ở trên (mới hơn) và <code>origin/main</code> ở dưới (cũ hơn) → bạn có 2 commit chưa push. Nhấn <strong>Push</strong>." },
+
+  { q: 'Bạn đang merge và Sourcetree hiện màn hình như bên dưới. Bạn cần làm gì tiếp?<div class="vq"><div class="vq-alert warn">⚠ Merge conflict — 2 files cần resolve trước khi commit</div><div class="vq-fs"><div class="vq-fh">Conflicted files</div><div class="vq-fr"><div class="vq-cb" style="border-color:#f39c12">⚠</div><span class="vq-fi c">C</span><span class="vq-fn">App.jsx</span><span class="vq-fp">src/</span></div><div class="vq-fr"><div class="vq-cb" style="border-color:#f39c12">⚠</div><span class="vq-fi c">C</span><span class="vq-fn">styles.css</span><span class="vq-fp">src/</span></div></div></div>', opts: ["Nhấn Push ngay", "Nhấn Abort để hủy merge", "Click phải từng file conflict → <strong>Resolve Conflicts</strong> → chọn Mine/Theirs hoặc sửa thủ công → stage → commit", "Xóa 2 file bị conflict"], ans: 2, cat: "visual", diff: "basic", explain: "Icon <strong style='color:#f39c12'>C</strong> = Conflict. Phải resolve từng file: chọn giữ bên nào hoặc merge thủ công. Xong thì stage + commit." },
+
+  { q: 'Nhìn vào diff bên dưới. Dòng <span style="color:#43e97b">xanh (+)</span> và dòng <span style="color:#f5576c">đỏ (-)</span> có ý nghĩa gì?<div class="vq"><div class="vq-diff"><div class="vq-dh">src/App.jsx — 2 thêm, 1 xóa</div><div class="vq-dl ctx"><span class="ln">7</span><span class="c"> import Sidebar from \'./Sidebar\'</span></div><div class="vq-dl del"><span class="ln">8</span><span class="c">-import OldNav from \'./OldNav\'</span></div><div class="vq-dl add"><span class="ln">8</span><span class="c">+import NewNav from \'./NewNav\'</span></div><div class="vq-dl add"><span class="ln">9</span><span class="c">+import Footer from \'./Footer\'</span></div><div class="vq-dl ctx"><span class="ln">10</span><span class="c"> export default function App() {</span></div></div></div>', opts: ["Xanh = file cũ, đỏ = file mới", "Xanh (+) = dòng được THÊM mới, đỏ (-) = dòng bị XÓA", "Xanh = không lỗi, đỏ = có lỗi", "Xanh = staged, đỏ = unstaged"], ans: 1, cat: "visual", diff: "basic", explain: "Diff hiện chính xác thay đổi: xóa import OldNav, thêm import NewNav và Footer. Dòng trắng = không thay đổi." },
+
+  { q: 'Nhìn vào giao diện bên dưới. Vùng ô nhập phía dưới dùng để làm gì?<div class="vq"><div class="vq-fs"><div class="vq-fh">Staged files <span class="link">Unstage All</span></div><div class="vq-fr"><div class="vq-cb ck">✓</div><span class="vq-fi m">M</span><span class="vq-fn">App.jsx</span></div><div class="vq-fr"><div class="vq-cb ck">✓</div><span class="vq-fi a">A</span><span class="vq-fn">Dashboard.jsx</span></div></div><div class="vq-commit-area"><div class="vq-ci">feat: thêm Dashboard component</div><div class="vq-ca"><label style="font-size:.62rem;color:var(--muted)"><input type="checkbox" disabled> Push immediately</label><div class="vq-cbtn">Commit</div></div></div></div>', opts: ["Ô tìm kiếm commit", "Ô nhập <strong>commit message</strong> — mô tả thay đổi, sau đó nhấn Commit", "Ô nhập tên branch mới", "Ô nhập URL remote"], ans: 1, cat: "visual", diff: "basic", explain: "Sau khi stage file (tick checkbox), nhập message mô tả → nhấn <strong>Commit</strong>. Tick 'Push immediately' nếu muốn push luôn." },
+
+  { q: 'Nhìn vào context menu dưới đây (click phải vào branch <code>feature/login</code>). Bạn muốn gộp branch này vào branch hiện tại. Chọn mục nào?<div class="vq"><div class="vq-ctx-menu"><div class="vq-ctx-item">Checkout feature/login</div><div class="vq-ctx-item hl">Merge feature/login into current branch</div><div class="vq-ctx-item">Rebase current changes onto feature/login</div><div class="vq-ctx-sep"></div><div class="vq-ctx-item">Rename...</div><div class="vq-ctx-item">Delete feature/login</div><div class="vq-ctx-sep"></div><div class="vq-ctx-item">Push to origin</div></div></div>', opts: ["Checkout feature/login", "Merge feature/login into current branch", "Rebase current changes onto feature/login", "Delete feature/login"], ans: 1, cat: "visual", diff: "basic", explain: "<strong>Merge ... into current branch</strong> = gộp branch đó vào branch bạn đang đứng. Nhớ checkout sang branch nhận (vd: main) trước!" },
+
+  { q: 'Nhìn context menu dưới đây (click phải vào 1 commit trong History). Bạn muốn đảo ngược thay đổi của commit này một cách an toàn. Chọn mục nào?<div class="vq"><div class="vq-ctx-menu"><div class="vq-ctx-item">Checkout this commit</div><div class="vq-ctx-item">Cherry Pick...</div><div class="vq-ctx-item hl">Reverse commit...</div><div class="vq-ctx-item">Reset current branch to this commit</div><div class="vq-ctx-sep"></div><div class="vq-ctx-item">Tag...</div><div class="vq-ctx-item">Create branch at this commit</div><div class="vq-ctx-sep"></div><div class="vq-ctx-item">Rebase interactively...</div></div></div>', opts: ["Reset current branch to this commit", "Reverse commit (Revert) — tạo commit mới đảo ngược thay đổi, an toàn", "Cherry Pick", "Checkout this commit"], ans: 1, cat: "visual", diff: "medium", explain: "<strong>Reverse commit</strong> = Revert, tạo commit mới đảo ngược. An toàn vì không xóa lịch sử. <strong>Reset</strong> thì nguy hiểm hơn — dời HEAD về quá khứ." },
+
+  { q: 'Nhìn vào màn hình dưới đây. Tại sao nút Push hiện <span class="badge" style="background:#e74c3c;color:#fff;padding:0 5px;border-radius:6px;font-size:.7rem">rejected</span>?<div class="vq"><div class="vq-alert warn">⚠ Push rejected — non-fast-forward. Remote chứa commit mà bạn chưa có ở local.</div><div class="vq-main" style="padding:8px"><div class="vq-row"><div class="vq-gdot" style="background:#667eea"></div><span class="vq-tag" style="background:#667eea">main</span><span class="vq-msg">feat: thêm form login</span><span class="vq-date">Bạn - 1h</span></div><div class="vq-row"><div class="vq-gdot" style="background:#e74c3c"></div><span class="vq-tag" style="background:#e74c3c">origin/main</span><span class="vq-msg">fix: hotfix by teammate</span><span class="vq-date">Đồng nghiệp - 2h</span></div></div></div>', opts: ["Mất kết nối internet", "Remote có commit mới (từ đồng nghiệp) mà bạn chưa Pull — cần <strong>Pull trước rồi Push lại</strong>", "Branch bị khóa bởi admin", "File quá lớn"], ans: 1, cat: "visual", diff: "medium", explain: "Git từ chối push vì sẽ ghi đè commit của đồng nghiệp. Giải pháp: Pull (merge hoặc rebase) rồi Push lại." },
+
+  { q: 'Nhìn vào dialog Stash bên dưới. Checkbox "Include untracked files" có tác dụng gì?<div class="vq"><div style="padding:10px"><div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px;max-width:320px;margin:0 auto"><div style="color:var(--text);font-weight:600;font-size:.8rem;margin-bottom:6px">📦 Stash Changes</div><div style="font-size:.68rem;color:var(--muted);margin-bottom:4px">Tên mô tả:</div><div style="background:#252736;border:1px solid var(--border);border-radius:3px;padding:4px 6px;color:var(--text);font-size:.72rem;margin-bottom:8px">WIP: đang làm form login</div><div style="display:flex;flex-direction:column;gap:4px;font-size:.65rem;color:var(--muted)"><label><input type="checkbox" disabled> Keep staged changes</label><label><input type="checkbox" checked disabled> <strong style="color:var(--warn)">Include untracked files</strong></label></div></div></div></div>', opts: ["Stash cả file đã commit", "Stash bao gồm cả file MỚI chưa từng git add (untracked) — mặc định stash bỏ qua chúng", "Stash nhanh hơn", "Xóa file untracked"], ans: 1, cat: "visual", diff: "medium", explain: "Mặc định stash chỉ lưu file đã tracked. Tick này để cất cả file mới (chưa add lần nào). Rất cần khi bạn vừa tạo file mới." },
+
+  { q: 'Nhìn diff conflict bên dưới. Phần nào là code CỦA BẠN và phần nào là code CỦA NGƯỜI KHÁC?<div class="vq"><div class="vq-diff"><div class="vq-dh">src/config.js — CONFLICT</div><div class="vq-dl ctx"><span class="ln">5</span><span class="c"> const API_URL =</span></div><div class="vq-dl" style="background:rgba(245,87,108,.12)"><span class="ln"></span><span class="c" style="color:var(--accent)">&#60;&#60;&#60;&#60;&#60;&#60;&#60; HEAD</span></div><div class="vq-dl add"><span class="ln">6</span><span class="c">  "https://api.myapp.com/v2"</span></div><div class="vq-dl" style="background:rgba(148,163,184,.08)"><span class="ln"></span><span class="c" style="color:var(--muted)">=======</span></div><div class="vq-dl del"><span class="ln">6</span><span class="c">  "https://api.myapp.com/v3"</span></div><div class="vq-dl" style="background:rgba(245,87,108,.12)"><span class="ln"></span><span class="c" style="color:var(--accent)">&#62;&#62;&#62;&#62;&#62;&#62;&#62; feature/upgrade-api</span></div></div></div>', opts: ["Phần trên (v2) = người khác, phần dưới (v3) = của bạn", "Phần giữa <code>&lt;&lt;&lt; HEAD</code> và <code>===</code> là code CỦA BẠN (branch hiện tại). Phần giữa <code>===</code> và <code>&gt;&gt;&gt;</code> là code NGƯỜI KHÁC", "Cả hai đều là của bạn", "Không phân biệt được"], ans: 1, cat: "visual", diff: "medium", explain: "<strong>HEAD</strong> = branch bạn đang đứng (của bạn). Phần dưới <code>=======</code> là từ branch đang merge vào. Chọn giữ bên nào hoặc kết hợp cả hai." },
+
+  { q: 'Nhìn vào History dưới đây. Commit nào là <strong>merge commit</strong>?<div class="vq"><div class="vq-main" style="padding:8px"><div class="vq-row sel"><div class="vq-gdot" style="background:#667eea"></div><span class="vq-tag" style="background:#667eea">main</span><span class="vq-msg">Merge branch \'feature/dashboard\' into main</span><span class="vq-date">1 giờ trước</span></div><div class="vq-row"><div class="vq-gdot" style="background:#43e97b"></div><span class="vq-msg">feat: thêm chart component</span><span class="vq-date">2 giờ trước</span></div><div class="vq-row"><div class="vq-gdot" style="background:#43e97b"></div><span class="vq-tag" style="background:#43e97b">feature/dashboard</span><span class="vq-msg">feat: tạo trang dashboard</span><span class="vq-date">3 giờ trước</span></div><div class="vq-row"><div class="vq-gdot" style="background:#667eea"></div><span class="vq-msg">fix: sửa lỗi header</span><span class="vq-date">Hôm qua</span></div></div></div>', opts: ["feat: thêm chart component", "Merge branch 'feature/dashboard' into main — commit có 2 parent, ghi nhận việc gộp nhánh", "fix: sửa lỗi header", "feat: tạo trang dashboard"], ans: 1, cat: "visual", diff: "basic", explain: "Merge commit có message bắt đầu bằng 'Merge branch...' và trong graph có 2 đường nối vào nó (2 parent)." },
+
+  { q: 'Bạn thấy màn hình Reset dưới đây. Mode nào an toàn nhất nếu bạn muốn undo commit nhưng GIỮ code?<div class="vq"><div style="padding:10px"><div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px;max-width:350px;margin:0 auto"><div style="color:var(--text);font-weight:600;font-size:.8rem;margin-bottom:8px">Reset current branch to this commit</div><div style="font-size:.7rem;color:var(--muted);margin-bottom:8px">Commit: <code>abc1234</code> — "feat: thêm login page"</div><div style="display:flex;flex-direction:column;gap:6px;font-size:.72rem"><label style="color:var(--success)"><input type="radio" name="x" disabled> <strong>Soft</strong> — giữ thay đổi trong staging area</label><label style="color:var(--warn)"><input type="radio" name="x" disabled> <strong>Mixed</strong> — giữ thay đổi trong working directory (unstaged)</label><label style="color:var(--accent)"><input type="radio" name="x" disabled> <strong>Hard</strong> — XÓA SẠCH mọi thay đổi ⚠</label></div></div></div></div>', opts: ["Hard — nhanh gọn nhất", "Soft — undo commit nhưng thay đổi vẫn staged, sẵn sàng commit lại", "Mixed — undo commit, thay đổi ở working dir", "Cả Soft và Mixed đều an toàn, tùy bạn muốn giữ staged hay không"], ans: 3, cat: "visual", diff: "medium", explain: "<strong>Soft:</strong> code vẫn staged → commit lại ngay. <strong>Mixed:</strong> code ở working dir → cần stage lại. <strong>Hard:</strong> MẤT HẾT! Chỉ dùng khi thực sự muốn xóa." },
+
+  { q: 'Nhìn context menu dưới đây (click phải vào file trong commit cũ). Bạn muốn lấy phiên bản cũ của file này. Chọn mục nào?<div class="vq"><div class="vq-ctx-menu"><div class="vq-ctx-item">Open Selected File</div><div class="vq-ctx-item">Log Selected</div><div class="vq-ctx-sep"></div><div class="vq-ctx-item hl">Reset to this commit</div><div class="vq-ctx-item">Annotate Selected</div><div class="vq-ctx-sep"></div><div class="vq-ctx-item">Copy file path</div></div></div>', opts: ["Open Selected File — chỉ xem, không khôi phục", "Reset to this commit — khôi phục file này về phiên bản tại commit đó", "Log Selected — xem lịch sử file", "Annotate Selected — xem blame"], ans: 1, cat: "visual", diff: "medium", explain: "<strong>Reset to this commit</strong> cho 1 file cụ thể sẽ khôi phục file về phiên bản đó mà KHÔNG ảnh hưởng file khác. Rất tiện!" },
+
+  { q: 'Nhìn vào Stash list trong sidebar. Bạn muốn lấy lại code nhưng KHÔNG xóa stash (để dùng lại). Chọn gì?<div class="vq"><div style="padding:8px"><div class="vq-ctx-menu"><div style="padding:4px 10px;font-size:.72rem;color:var(--text);font-weight:600">stash@{0}: WIP form login</div><div class="vq-ctx-sep"></div><div class="vq-ctx-item hl">Apply Stash</div><div class="vq-ctx-item">Pop Stash</div><div class="vq-ctx-item" style="color:var(--accent)">Delete Stash</div></div></div></div>', opts: ["Pop Stash — lấy ra và xóa stash", "Apply Stash — lấy ra nhưng GIỮ stash (có thể apply lên branch khác nữa)", "Delete Stash — xóa stash", "Không phân biệt Apply và Pop"], ans: 1, cat: "visual", diff: "basic", explain: "<strong>Apply</strong> = lấy code ra, stash vẫn còn. <strong>Pop</strong> = lấy code ra + xóa stash. Dùng Apply khi muốn áp dụng cùng stash cho nhiều branch." },
+
+  { q: 'Nhìn vào toolbar và dialog dưới đây. Tại sao dialog Pull hiện tùy chọn "Rebase instead of merge"?<div class="vq"><div style="padding:10px"><div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px;max-width:340px;margin:0 auto"><div style="color:var(--text);font-weight:600;font-size:.8rem;margin-bottom:8px">⬇ Pull from remote</div><div style="font-size:.7rem;color:var(--muted);margin-bottom:4px">Remote: origin &nbsp; Branch: main</div><div style="display:flex;flex-direction:column;gap:4px;font-size:.68rem;color:var(--muted);margin-top:6px"><label><input type="checkbox" disabled> Commit merged changes immediately</label><label><input type="checkbox" checked disabled> <strong style="color:var(--warn)">Rebase instead of merge</strong></label></div></div></div></div>', opts: ["Bắt buộc phải tick", "Thay vì tạo merge commit khi pull, nó rebase commit local lên đầu remote — lịch sử thẳng hàng, không có merge commit thừa", "Pull nhanh hơn", "Xóa commit cũ trước khi pull"], ans: 1, cat: "visual", diff: "medium", explain: "Pull thường = fetch + merge (tạo merge commit). Pull Rebase = fetch + rebase (lịch sử linear). Nhiều team dùng cách này để History sạch." },
+
+  { q: 'Nhìn graph dưới đây. Thao tác nào đã tạo ra hình dạng này?<div class="vq"><div style="padding:12px"><svg width="100%" height="100" viewBox="0 0 400 100" style="max-width:400px"><line x1="30" y1="30" x2="370" y2="30" stroke="#667eea" stroke-width="2.5"/><line x1="120" y1="30" x2="150" y2="70" stroke="#43e97b" stroke-width="2"/><line x1="150" y1="70" x2="280" y2="70" stroke="#43e97b" stroke-width="2"/><line x1="280" y1="70" x2="310" y2="30" stroke="#43e97b" stroke-width="2" stroke-dasharray="5,3"/><circle cx="30" cy="30" r="5" fill="#667eea"/><circle cx="120" cy="30" r="5" fill="#667eea"/><circle cx="310" cy="30" r="6" fill="#667eea" stroke="#fff" stroke-width="1.5"/><circle cx="370" cy="30" r="6" fill="#667eea" stroke="#fff" stroke-width="1.5"/><circle cx="150" cy="70" r="4" fill="#43e97b"/><circle cx="220" cy="70" r="4" fill="#43e97b"/><circle cx="280" cy="70" r="4" fill="#43e97b"/><text x="30" y="18" fill="#667eea" font-size="9" font-weight="bold">main</text><text x="200" y="90" fill="#43e97b" font-size="9" font-weight="bold">feature</text><text x="300" y="18" fill="#94a3b8" font-size="8">merge</text></svg></div></div>', opts: ["Rebase feature lên main", "Tạo branch feature từ main → code 3 commit → merge feature về main", "Cherry pick 3 commit", "Stash rồi apply"], ans: 1, cat: "visual", diff: "basic", explain: "Graph cho thấy: nhánh feature tách ra (3 commit xanh lá), rồi nét đứt = merge về main. Đây là workflow chuẩn: branch → code → merge." },
+
+  { q: 'Nhìn vào trạng thái dưới đây. Sourcetree hiện thông báo gì và bạn cần làm gì?<div class="vq"><div class="vq-alert info">ℹ Your branch is behind \'origin/main\' by 5 commits. Pull to update.</div><div class="vq-toolbar"><div class="vq-btn">Commit</div><div class="vq-btn">⬆ Push</div><div class="vq-btn hl">⬇ Pull <span class="badge">5↓</span></div><div class="vq-btn">🔄 Fetch</div></div></div>', opts: ["Cần Push 5 commit lên remote", "Branch local đang ĐỨNG SAU remote 5 commit — cần <strong>Pull</strong> để cập nhật code mới từ GitHub", "Có 5 file conflict", "Cần tạo 5 branch mới"], ans: 1, cat: "visual", diff: "basic", explain: "Behind 5 commits = remote có 5 commit mới mà local chưa có. Nhấn <strong>Pull</strong> (hoặc Pull Rebase) để cập nhật." },
+];
+
+// ===== APP LOGIC =====
+let answered = {};
+let filterCat = 'all';
+window._selected = {};
+
+function loadState() {
+  try { answered = JSON.parse(localStorage.getItem('git-quiz-answered') || '{}'); } catch(e) { answered = {}; }
+  try { window._selected = JSON.parse(localStorage.getItem('git-quiz-selected') || '{}'); } catch(e) { window._selected = {}; }
+}
+function saveState() {
+  localStorage.setItem('git-quiz-answered', JSON.stringify(answered));
+  localStorage.setItem('git-quiz-selected', JSON.stringify(window._selected));
+}
+
+function updateScore() {
+  const correct = Object.values(answered).filter(v => v === true).length;
+  const wrong = Object.values(answered).filter(v => v === false).length;
+  const total = correct + wrong;
+  document.getElementById('sc-correct').textContent = correct;
+  document.getElementById('sc-wrong').textContent = wrong;
+  document.getElementById('sc-total').textContent = total;
+  const pct = Math.round((total / QUESTIONS.length) * 100);
+  document.getElementById('sc-bar').style.width = pct + '%';
+  document.getElementById('sc-pct').textContent = pct + '% hoàn thành (' + correct + ' đúng / ' + QUESTIONS.length + ' câu)';
+}
+
+function selectAnswer(qIdx, optIdx) {
+  if (answered[qIdx] !== undefined) return;
+  const q = QUESTIONS[qIdx];
+  const isCorrect = optIdx === q.ans;
+  answered[qIdx] = isCorrect;
+  window._selected[qIdx] = optIdx;
+  saveState();
+  renderQuestion(qIdx);
+  updateScore();
+}
+
+function renderQuestion(idx) {
+  const q = QUESTIONS[idx];
+  const el = document.getElementById('q-' + idx);
+  if (!el) return;
+  const state = answered[idx];
+  const isAnswered = state !== undefined;
+  const selectedOpt = window._selected[idx];
+
+  el.className = 'q-card' + (isAnswered ? (state ? ' answered-correct' : ' answered-wrong') : '');
+
+  const diffLabel = { basic: 'Cơ bản', medium: 'Trung bình', hard: 'Nâng cao' };
+  let html = '<div class="q-header">' +
+    '<span class="q-num">' + (idx + 1) + '</span>' +
+    '<span class="q-tag ' + q.diff + '">' + diffLabel[q.diff] + '</span>' +
+    '</div>' +
+    '<div class="q-text">' + q.q + '</div>' +
+    '<div class="q-options">';
+
+  var letters = ['A', 'B', 'C', 'D'];
+  q.opts.forEach(function(opt, oi) {
+    var cls = 'q-opt';
+    if (isAnswered) {
+      cls += ' disabled';
+      if (oi === q.ans) cls += ' correct';
+      else if (selectedOpt === oi && oi !== q.ans) cls += ' wrong';
+    }
+    html += '<div class="' + cls + '" onclick="selectAnswer(' + idx + ',' + oi + ')">' +
+      '<span class="letter">' + letters[oi] + '</span>' +
+      '<span>' + opt + '</span>' +
+      '</div>';
+  });
+  html += '</div>';
+  html += '<div class="q-explain ' + (isAnswered ? 'show' : '') + '">' + q.explain + '</div>';
+  el.innerHTML = html;
+}
+
+function renderAll() {
+  var container = document.getElementById('quizContainer');
+  container.innerHTML = '';
+  QUESTIONS.forEach(function(q, idx) {
+    if (filterCat !== 'all' && q.cat !== filterCat) return;
+    var div = document.createElement('div');
+    div.id = 'q-' + idx;
+    div.className = 'q-card';
+    container.appendChild(div);
+    renderQuestion(idx);
+  });
+  updateScore();
+}
+
+function resetAll() {
+  if (!confirm('Bạn có chắc muốn làm lại tất cả?')) return;
+  answered = {};
+  window._selected = {};
+  localStorage.removeItem('git-quiz-answered');
+  localStorage.removeItem('git-quiz-selected');
+  renderAll();
+}
+
+// Filter
+document.getElementById('filterBar').addEventListener('click', function(e) {
+  var btn = e.target.closest('.filter-btn');
+  if (!btn) return;
+  filterCat = btn.dataset.cat;
+  document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderAll();
+});
+
+// Shuffle options with seeded random so order is stable across reloads
+function seededRandom(seed) {
+  return function() {
+    seed = (seed * 16807 + 0) % 2147483647;
+    return (seed - 1) / 2147483646;
+  };
+}
+
+function shuffleOptions() {
+  var rng = seededRandom(42);
+  QUESTIONS.forEach(function(q) {
+    var indices = q.opts.map(function(_, i) { return i; });
+    for (var i = indices.length - 1; i > 0; i--) {
+      var j = Math.floor(rng() * (i + 1));
+      var tmp = indices[i]; indices[i] = indices[j]; indices[j] = tmp;
+    }
+    var newOpts = indices.map(function(i) { return q.opts[i]; });
+    var newAns = indices.indexOf(q.ans);
+    q.opts = newOpts;
+    q.ans = newAns;
+  });
+}
+
+// Init
+shuffleOptions();
+loadState();
+renderAll();
+</script>
+
+</body>
+</html>

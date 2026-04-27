@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CI/CD & GitHub Actions — Build & Deploy</title>
+    <link rel="stylesheet" href="build.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html">Build<span class="accent">&Deploy</span></a></div>
+            <div class="nav-links">
+                <a href="index.html">🗺️ Tổng quan</a>
+                <a href="git.html">📦 Git</a>
+                <a href="cicd.html" class="active">⚙️ CI/CD</a>
+                <a href="jenkins.html">🔴 Jenkins</a>
+                <a href="docker.html">🐳 Docker</a>
+                <a href="hosting.html">☁️ Hosting</a>
+                <a href="cloud.html">⛅ Cloud</a>
+                <a href="domain.html">🌐 Domain</a>
+                <a href="ssl.html">🔒 SSL</a>
+                <a href="monitoring.html">📊 Monitoring</a>
+                <a href="workflow.html">🔄 Workflow</a>
+            </div>
+            <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <header class="build-hero">
+        <div class="hero-content">
+            <div class="hero-badge">CHƯƠNG 3 · TỰ ĐỘNG HÓA</div>
+            <h1>CI/CD & <span class="gradient-text">GitHub Actions</span></h1>
+            <p class="hero-desc">Push code → tự động build, test, deploy. Dừng SSH vào server chạy tay.</p>
+        </div>
+    </header>
+
+    <!-- ===== SECTION 3: CI/CD ===== -->
+    <section class="section" id="cicd">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">⚙️</div>
+                <h2>3. CI/CD — Tự Động Hóa Mọi Thứ</h2>
+                <p>Push code → tự động build, test, deploy. Không cần SSH vào server chạy tay.</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>📖 CI vs CD — Hiểu Đúng Khái Niệm</h3>
+                <div class="cicd-explain">
+                    <div class="cicd-box ci-box">
+                        <h4>CI — Continuous Integration</h4>
+                        <p>"Mỗi khi push code → tự động build + chạy test"</p>
+                        <div class="cicd-steps">
+                            <div class="cicd-step">Push code / Tạo PR</div>
+                            <div class="cicd-step">Restore dependencies</div>
+                            <div class="cicd-step">Build project</div>
+                            <div class="cicd-step">Chạy unit tests</div>
+                            <div class="cicd-step">Chạy integration tests</div>
+                            <div class="cicd-step">Code quality check (lint, format)</div>
+                            <div class="cicd-step">✅ hoặc ❌ → báo kết quả</div>
+                        </div>
+                        <div class="cicd-goal">Mục đích: Phát hiện lỗi NGAY khi push — không phải khi deploy</div>
+                    </div>
+                    <div class="cicd-box cd-box">
+                        <h4>CD — Continuous Deployment / Delivery</h4>
+                        <p>"CI pass → tự động deploy lên staging/production"</p>
+                        <div class="cicd-steps">
+                            <div class="cicd-step">CI pass ✅</div>
+                            <div class="cicd-step">Build Docker image</div>
+                            <div class="cicd-step">Push image lên registry</div>
+                            <div class="cicd-step">Deploy lên staging</div>
+                            <div class="cicd-step">Smoke test trên staging</div>
+                            <div class="cicd-step">Approve (manual gate) hoặc auto</div>
+                            <div class="cicd-step">Deploy lên production 🚀</div>
+                        </div>
+                        <div class="cicd-goal">Mục đích: Code merge → production trong vài phút, không cần thao tác tay</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🛠️ Công Cụ CI/CD Phổ Biến</h3>
+                <div class="tools-grid">
+                    <div class="tool-card tool-rec">
+                        <div class="tool-badge">⭐ PHỔ BIẾN NHẤT</div>
+                        <div class="tool-logo">🐙</div>
+                        <h4>GitHub Actions</h4>
+                        <p>Tích hợp sẵn GitHub. Free cho public repo. File YAML đơn giản. Marketplace 15,000+ actions.</p>
+                        <div class="tool-pros">Miễn phí, dễ setup, cộng đồng lớn, tích hợp GitHub</div>
+                        <div class="tool-for">Phù hợp: Hầu hết dự án web, team mọi size</div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-logo">🦊</div>
+                        <h4>GitLab CI/CD</h4>
+                        <p>Tích hợp sẵn GitLab. Pipeline mạnh mẽ. Self-hosted runner. Free tier tốt.</p>
+                        <div class="tool-pros">All-in-one platform, self-hosted option, Auto DevOps</div>
+                        <div class="tool-for">Phù hợp: Team dùng GitLab, cần self-hosted</div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-logo">🔵</div>
+                        <h4>Azure DevOps</h4>
+                        <p>Pipeline mạnh cho .NET. Tích hợp Azure cloud. Boards, Repos, Artifacts trong 1.</p>
+                        <div class="tool-pros">Ecosystem .NET, Azure integration, enterprise features</div>
+                        <div class="tool-for">Phù hợp: Team .NET, deploy lên Azure</div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-logo">🔴</div>
+                        <h4>Jenkins</h4>
+                        <p>Open source, self-hosted. Plugin mọi thứ. Cần tự quản lý server.</p>
+                        <div class="tool-pros">Tùy biến tuyệt đối, 1800+ plugins, self-hosted</div>
+                        <div class="tool-for">Phù hợp: Enterprise, cần kiểm soát hoàn toàn</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>📝 GitHub Actions — Ví Dụ Thực Tế</h3>
+                <div class="cmd-grid">
+                    <div class="cmd-card">
+                        <div class="cmd-label">CI cho .NET Backend — .github/workflows/ci.yml</div>
+<pre class="code-block"><span class="c-key">name:</span> <span class="c-str">CI — Build & Test</span>
+
+<span class="c-key">on:</span>
+  <span class="c-key">push:</span>
+    <span class="c-key">branches:</span> [ main, develop ]
+  <span class="c-key">pull_request:</span>
+    <span class="c-key">branches:</span> [ main ]
+
+<span class="c-key">jobs:</span>
+  <span class="c-key">build:</span>
+    <span class="c-key">runs-on:</span> ubuntu-latest
+    <span class="c-key">steps:</span>
+      - <span class="c-key">uses:</span> actions/checkout@v4
+
+      - <span class="c-key">name:</span> Setup .NET
+        <span class="c-key">uses:</span> actions/setup-dotnet@v4
+        <span class="c-key">with:</span>
+          <span class="c-key">dotnet-version:</span> <span class="c-str">'8.0.x'</span>
+
+      - <span class="c-key">name:</span> Restore dependencies
+        <span class="c-key">run:</span> dotnet restore
+
+      - <span class="c-key">name:</span> Build
+        <span class="c-key">run:</span> dotnet build --no-restore --configuration Release
+
+      - <span class="c-key">name:</span> Test
+        <span class="c-key">run:</span> dotnet test --no-build --configuration Release --verbosity normal</pre>
+                    </div>
+
+                    <div class="cmd-card">
+                        <div class="cmd-label">CI cho Frontend React/Next.js</div>
+<pre class="code-block"><span class="c-key">name:</span> <span class="c-str">CI — Frontend</span>
+
+<span class="c-key">on:</span>
+  <span class="c-key">push:</span>
+    <span class="c-key">branches:</span> [ main ]
+  <span class="c-key">pull_request:</span>
+    <span class="c-key">branches:</span> [ main ]
+
+<span class="c-key">jobs:</span>
+  <span class="c-key">build:</span>
+    <span class="c-key">runs-on:</span> ubuntu-latest
+    <span class="c-key">steps:</span>
+      - <span class="c-key">uses:</span> actions/checkout@v4
+
+      - <span class="c-key">name:</span> Setup Node
+        <span class="c-key">uses:</span> actions/setup-node@v4
+        <span class="c-key">with:</span>
+          <span class="c-key">node-version:</span> <span class="c-str">'20'</span>
+          <span class="c-key">cache:</span> <span class="c-str">'npm'</span>
+
+      - <span class="c-key">run:</span> npm ci              <span class="c-cmt"># Install (deterministic)</span>
+      - <span class="c-key">run:</span> npm run lint         <span class="c-cmt"># Code quality</span>
+      - <span class="c-key">run:</span> npm run test -- --ci <span class="c-cmt"># Unit tests</span>
+      - <span class="c-key">run:</span> npm run build        <span class="c-cmt"># Production build</span></pre>
+                    </div>
+                </div>
+
+                <div class="tip-box">
+                    <strong>💡 Mẹo:</strong> Dùng <code>npm ci</code> thay <code>npm install</code> trong CI — nó install chính xác version trong <code>package-lock.json</code>, nhanh hơn và deterministic.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="closing-box">
+                <div class="closing-nav">
+                    <a href="index.html" class="closing-btn">🗺️ Tổng quan</a>
+                    <a href="git.html" class="closing-btn">📦 Git</a>
+                    <a href="jenkins.html" class="closing-btn">🔴 Jenkins</a>
+                    <a href="docker.html" class="closing-btn">🐳 Docker</a>
+                    <a href="hosting.html" class="closing-btn">☁️ Hosting</a>
+                    <a href="cloud.html" class="closing-btn">⛅ Cloud</a>
+                    <a href="domain.html" class="closing-btn">🌐 Domain</a>
+                    <a href="ssl.html" class="closing-btn">🔒 SSL</a>
+                    <a href="monitoring.html" class="closing-btn">📊 Monitoring</a>
+                    <a href="workflow.html" class="closing-btn">🔄 Workflow</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Build & Deploy — Triển khai website từ A→Z cho web developer</p>
+        </div>
+    </footer>
+
+    <script src="build.js"></script>
+</body>
+</html>

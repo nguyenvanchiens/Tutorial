@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend Languages 80/20 — Ngôn Ngữ Backend Thịnh Hành 2026</title>
+    <link rel="stylesheet" href="tutorial.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><a href="../BE/index.html">Backend<span class="accent">Lang</span></a></div>
+            <div class="nav-links">
+                <a href="#overview">Tổng quan</a>
+                <a href="#csharp">C#/.NET</a>
+                <a href="#golang">Go</a>
+                <a href="#rust">Rust</a>
+                <a href="#typescript">TypeScript</a>
+                <a href="#python">Python</a>
+                <a href="#java">Java/Kotlin</a>
+                <a href="#compare">So sánh</a>
+                <a href="#advice">Lời khuyên</a>
+                <a href="#learning-flow">Luồng học</a>
+            </div>
+            <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <header class="tut-hero">
+        <div class="hero-content">
+            <div class="hero-badge">BACKEND LANGUAGES 80/20 — NẮM CỐT LÕI, HIỂU BẢN CHẤT</div>
+            <h1>Backend <span class="gradient-text">Languages</span></h1>
+            <p class="hero-desc">Bạn đã biết C#/.NET — giờ mở rộng sang các ngôn ngữ backend thịnh hành nhất 2026.<br>Mỗi ngôn ngữ: cấu trúc 80/20, ví dụ thực tế, so sánh với C#, khi nào nên dùng.</p>
+            <div class="hero-stats">
+                <div class="stat"><span class="stat-number">6</span><span class="stat-label">Ngôn ngữ</span></div>
+                <div class="stat"><span class="stat-number">10</span><span class="stat-label">Chủ đề</span></div>
+                <div class="stat"><span class="stat-number">80/20</span><span class="stat-label">Cốt lõi</span></div>
+                <div class="stat"><span class="stat-number">vs C#</span><span class="stat-label">So sánh</span></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="toc-bar">
+        <div class="container">
+            <div class="toc-links">
+                <a href="#overview" class="toc-link">1. Tổng quan</a>
+                <a href="#csharp" class="toc-link">2. C#/.NET</a>
+                <a href="#golang" class="toc-link">3. Go</a>
+                <a href="#rust" class="toc-link">4. Rust</a>
+                <a href="#typescript" class="toc-link">5. TypeScript</a>
+                <a href="#python" class="toc-link">6. Python</a>
+                <a href="#java" class="toc-link">7. Java/Kotlin</a>
+                <a href="#compare" class="toc-link">8. So sánh</a>
+                <a href="#advice" class="toc-link">9. Lời khuyên</a>
+                <a href="#learning-flow" class="toc-link">10. Luồng học</a>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ===== SECTION 1: TỔNG QUAN ===== -->
+    <section class="section" id="overview">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🗺️</div>
+                <h2>1. Tổng Quan — Tại Sao Cần Biết Nhiều Ngôn Ngữ?</h2>
+                <p>Không phải để "jack of all trades" — mà để hiểu trade-offs và chọn đúng tool cho đúng bài toán</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>📊 Backend Landscape 2026 — Ai Đang Thống Trị?</h3>
+                <div class="landscape-grid">
+                    <div class="lang-overview-card" style="--lang-color: #00ADD8">
+                        <div class="lang-rank">#1 Rising</div>
+                        <h4>Go (Golang)</h4>
+                        <p>Google tạo. Microservices, cloud infrastructure, CLI tools. Docker, Kubernetes viết bằng Go.</p>
+                        <div class="lang-companies">Docker, Uber, Twitch, Cloudflare, CrowdStrike</div>
+                    </div>
+                    <div class="lang-overview-card" style="--lang-color: #DEA584">
+                        <div class="lang-rank">#2 Rising</div>
+                        <h4>Rust</h4>
+                        <p>Memory safe, cực nhanh. Systems programming, WebAssembly, cloud infra. "Most loved language" 8 năm liên tiếp.</p>
+                        <div class="lang-companies">Cloudflare, Discord, Figma, Dropbox, AWS</div>
+                    </div>
+                    <div class="lang-overview-card" style="--lang-color: #3178C6">
+                        <h4>TypeScript (Node.js)</h4>
+                        <p>Full-stack JS. Frontend + Backend cùng ngôn ngữ. Startup yêu thích. Ecosystem khổng lồ.</p>
+                        <div class="lang-companies">Netflix, PayPal, LinkedIn, Shopify</div>
+                    </div>
+                    <div class="lang-overview-card" style="--lang-color: #3776AB">
+                        <h4>Python (FastAPI)</h4>
+                        <p>AI/ML backend, rapid prototyping, scripting. FastAPI = modern Python web framework cực nhanh.</p>
+                        <div class="lang-companies">Instagram, Spotify, Dropbox, Netflix (ML)</div>
+                    </div>
+                    <div class="lang-overview-card" style="--lang-color: #F89820">
+                        <h4>Java / Kotlin (Spring Boot)</h4>
+                        <p>Enterprise king. Ổn định, ecosystem khổng lồ. Kotlin = "Java hiện đại" trên JVM.</p>
+                        <div class="lang-companies">Google, Amazon, Netflix, Banks, Enterprise</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🎯 Bạn Đã Biết C#/.NET — Lợi Thế Gì?</h3>
+                <div class="csharp-advantage">
+                    <div class="adv-item">✅ <strong>Go:</strong> Syntax đơn giản hơn C# nhiều — học nhanh trong 1-2 tuần</div>
+                    <div class="adv-item">✅ <strong>Rust:</strong> Khái niệm ownership khác biệt — nhưng generics, traits giống C# interfaces</div>
+                    <div class="adv-item">✅ <strong>TypeScript:</strong> Syntax gần C# (cùng cha Anders Hejlsberg). Generics, interfaces, async/await giống hệt</div>
+                    <div class="adv-item">✅ <strong>Python:</strong> Syntax khác nhưng OOP concepts giống. Dễ học nhất trong list</div>
+                    <div class="adv-item">✅ <strong>Java/Kotlin:</strong> C# lấy cảm hứng từ Java — syntax gần như anh em. Kotlin modern hơn</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== SECTION 2: C#/.NET ===== -->
+    <section class="section section-dark" id="csharp">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">💜</div>
+                <h2>2. C# / .NET — Ngôn Ngữ Chính Của Bạn</h2>
+                <p>Dù đã biết — vẫn cần biết ecosystem đầy đủ. Đây là "home base" để so sánh với mọi ngôn ngữ khác.</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>⚡ C# 80/20 — Những Thứ Bạn Đã Biết (Recap Nhanh)</h3>
+
+                <div class="lang-block">
+                    <div class="lang-label">Core Syntax — Nền tảng so sánh</div>
+<pre class="code-block"><span class="c-cmt">// Record (C# 9+) — immutable DTO</span>
+<span class="c-key">public record</span> <span class="c-fn">User</span>(
+    <span class="c-key">int</span> Id,
+    <span class="c-key">string</span> Name,
+    <span class="c-key">string</span> Email,
+    <span class="c-key">bool</span> IsActive = <span class="c-key">true</span>
+);
+
+<span class="c-cmt">// Interface + DI</span>
+<span class="c-key">public interface</span> <span class="c-fn">IUserRepository</span>
+{
+    Task&lt;User?&gt; <span class="c-fn">FindByIdAsync</span>(<span class="c-key">int</span> id);
+    Task&lt;User&gt; <span class="c-fn">CreateAsync</span>(User user);
+}
+
+<span class="c-cmt">// Minimal API (ASP.NET Core 8+)</span>
+<span class="c-key">var</span> app = WebApplication.<span class="c-fn">CreateBuilder</span>(args).<span class="c-fn">Build</span>();
+
+app.<span class="c-fn">MapGet</span>(<span class="c-str">"/api/users/{id}"</span>, <span class="c-key">async</span> (<span class="c-key">int</span> id, IUserRepository repo) =>
+{
+    <span class="c-key">var</span> user = <span class="c-key">await</span> repo.<span class="c-fn">FindByIdAsync</span>(id);
+    <span class="c-key">return</span> user <span class="c-key">is not null</span>
+        ? Results.<span class="c-fn">Ok</span>(user)
+        : Results.<span class="c-fn">NotFound</span>();
+});
+
+app.<span class="c-fn">MapPost</span>(<span class="c-str">"/api/users"</span>, <span class="c-key">async</span> (User user, IUserRepository repo) =>
+    Results.<span class="c-fn">Created</span>(<span class="c-str">$"/api/users/{user.Id}"</span>, <span class="c-key">await</span> repo.<span class="c-fn">CreateAsync</span>(user)));
+
+app.<span class="c-fn">Run</span>();</pre>
+                    <div class="lang-note">
+                        <strong>Đây là baseline:</strong> Mỗi ngôn ngữ phía dưới sẽ so sánh trực tiếp với C# code ở trên. Record = struct/data class. Interface = trait/protocol. DI = constructor injection. Minimal API = route handler.
+                    </div>
+                </div>
+
+                <div class="lang-block">
+                    <div class="lang-label">C# Modern Features — Cần biết để so sánh công bằng</div>
+<pre class="code-block"><span class="c-cmt">// Pattern matching (C# 11+)</span>
+<span class="c-key">var</span> result = user <span class="c-key">switch</span>
+{
+    { IsActive: <span class="c-key">true</span>, Role: <span class="c-str">"admin"</span> } => <span class="c-str">"Welcome, admin!"</span>,
+    { IsActive: <span class="c-key">true</span> }                  => <span class="c-str">"Welcome, user!"</span>,
+    _                                     => <span class="c-str">"Account inactive"</span>
+};
+
+<span class="c-cmt">// Primary constructor (C# 12)</span>
+<span class="c-key">public class</span> <span class="c-fn">UserService</span>(<span class="c-fn">IUserRepository</span> repo, <span class="c-fn">ILogger</span>&lt;UserService&gt; logger)
+{
+    <span class="c-key">public async</span> Task&lt;User&gt; <span class="c-fn">GetUserAsync</span>(<span class="c-key">int</span> id) =>
+        <span class="c-key">await</span> repo.<span class="c-fn">FindByIdAsync</span>(id)
+        ?? <span class="c-key">throw new</span> <span class="c-fn">NotFoundException</span>(<span class="c-str">$"User {id} not found"</span>);
+}
+
+<span class="c-cmt">// LINQ — sức mạnh query của C#</span>
+<span class="c-key">var</span> activeAdmins = users
+    .<span class="c-fn">Where</span>(u => u.IsActive && u.Role == <span class="c-str">"admin"</span>)
+    .<span class="c-fn">OrderBy</span>(u => u.Name)
+    .<span class="c-fn">Select</span>(u => <span class="c-key">new</span> { u.Name, u.Email })
+    .<span class="c-fn">ToList</span>();
+
+<span class="c-cmt">// Async streams (C# 8+)</span>
+<span class="c-key">await foreach</span> (<span class="c-key">var</span> item <span class="c-key">in</span> <span class="c-fn">GetItemsAsync</span>())
+{
+    Console.<span class="c-fn">WriteLine</span>(item);
+}</pre>
+                </div>
+
+                <div class="lang-summary">
+                    <h4>📋 C# Cheat Sheet — Baseline So Sánh</h4>
+                    <div class="cheat-grid">
+                        <div class="cheat-item"><code>var</code> Type inference</div>
+                        <div class="cheat-item"><code>class</code> Reference type</div>
+                        <div class="cheat-item"><code>record</code> Immutable DTO</div>
+                        <div class="cheat-item"><code>interface</code> Contract</div>
+                        <div class="cheat-item"><code>async/await</code> Async</div>
+                        <div class="cheat-item"><code>Task&lt;T&gt;</code> Future</div>
+                        <div class="cheat-item"><code>List&lt;T&gt;</code> Collection</div>
+                        <div class="cheat-item"><code>LINQ</code> Query</div>
+                        <div class="cheat-item"><code>try/catch</code> Error</div>
+                        <div class="cheat-item"><code>?</code> Nullable</div>
+                        <div class="cheat-item"><code>DI</code> Built-in</div>
+                        <div class="cheat-item"><code>dotnet</code> CLI</div>
+                    </div>
+                </div>
+
+                <div class="lib-ecosystem">
+                    <h4>📦 Thư Viện Phổ Biến — .NET Ecosystem</h4>
+                    <div class="lib-grid">
+                        <div class="lib-card" style="--lib-color: #512BD4">
+                            <div class="lib-category">Web Framework</div>
+                            <div class="lib-name">ASP.NET Core</div>
+                            <p>Built-in framework. Minimal APIs + Controllers. Middleware pipeline, DI, routing — tất cả built-in. <strong>Baseline so sánh.</strong></p>
+                            <code>dotnet new webapi</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #512BD4">
+                            <div class="lib-category">ORM</div>
+                            <div class="lib-name">Entity Framework Core</div>
+                            <p>ORM chính thức. Code-first migrations, LINQ queries, change tracking. <strong>So sánh: Prisma, GORM, SQLAlchemy, JPA.</strong></p>
+                            <code>dotnet add package Microsoft.EntityFrameworkCore</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #512BD4">
+                            <div class="lib-category">ORM (Lightweight)</div>
+                            <div class="lib-name">Dapper</div>
+                            <p>Micro-ORM. Viết SQL thuần, map kết quả vào object. Nhanh hơn EF Core. Giống sqlx (Go), SQLx (Rust).</p>
+                            <code>dotnet add package Dapper</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #512BD4">
+                            <div class="lib-category">Auth</div>
+                            <div class="lib-name">ASP.NET Identity</div>
+                            <p>User management, roles, JWT, OAuth2, 2FA — built-in. <strong>So sánh: Spring Security, Passport.js, Auth.js.</strong></p>
+                            <code>dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #512BD4">
+                            <div class="lib-category">Validation</div>
+                            <div class="lib-name">FluentValidation</div>
+                            <p>Fluent API cho validation rules. Tách validation logic ra khỏi model. <strong>So sánh: Zod, Pydantic, validator.</strong></p>
+                            <code>dotnet add package FluentValidation</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #512BD4">
+                            <div class="lib-category">HTTP Client</div>
+                            <div class="lib-name">HttpClient + Refit</div>
+                            <p><strong>HttpClient:</strong> built-in. <strong>Refit:</strong> interface-based REST client (giống Retrofit Java). Auto-generate HTTP calls.</p>
+                            <code>dotnet add package Refit</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #512BD4">
+                            <div class="lib-category">Background Jobs</div>
+                            <div class="lib-name">Hangfire</div>
+                            <p>Background jobs, scheduled tasks, dashboard. <strong>So sánh: Celery (Python), Bull (Node.js).</strong></p>
+                            <code>dotnet add package Hangfire</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #512BD4">
+                            <div class="lib-category">Logging</div>
+                            <div class="lib-name">Serilog</div>
+                            <p>Structured logging. Sinks cho mọi nơi (Console, File, Seq, Elasticsearch). <strong>So sánh: zerolog, tracing, winston.</strong></p>
+                            <code>dotnet add package Serilog.AspNetCore</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #512BD4">
+                            <div class="lib-category">Mapping</div>
+                            <div class="lib-name">Mapster / AutoMapper</div>
+                            <p>Object-to-object mapping (DTO ↔ Entity). <strong>Mapster:</strong> nhanh hơn, source generator. AutoMapper: cộng đồng lớn.</p>
+                            <code>dotnet add package Mapster</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #512BD4">
+                            <div class="lib-category">Testing</div>
+                            <div class="lib-name">xUnit + NSubstitute</div>
+                            <p><strong>xUnit:</strong> testing standard. <strong>NSubstitute:</strong> mocking (dễ hơn Moq). <strong>So sánh: pytest, Jest, JUnit, cargo test.</strong></p>
+                            <code>dotnet add package xunit NSubstitute</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== SECTION 3: GO ===== -->
+    <section class="section" id="golang">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🐹</div>
+                <h2>3. Go (Golang) — Đơn Giản, Nhanh, Concurrent</h2>
+                <p>Google tạo năm 2009. Triết lý: "Less is more". Không OOP truyền thống, không generics phức tạp, không exceptions.</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>⚡ Go 80/20 — Cốt Lõi Cần Nắm</h3>
+
+                <div class="lang-block">
+                    <div class="lang-label">Hello World + cấu trúc cơ bản</div>
+<pre class="code-block"><span class="c-key">package</span> main
+
+<span class="c-key">import</span> <span class="c-str">"fmt"</span>
+
+<span class="c-key">func</span> <span class="c-fn">main</span>() {
+    fmt.<span class="c-fn">Println</span>(<span class="c-str">"Hello, World!"</span>)
+}</pre>
+                    <div class="lang-note">
+                        <strong>vs C#:</strong> Không cần class, không cần namespace. File .go = package. <code>func main()</code> = entry point.
+                    </div>
+                </div>
+
+                <div class="lang-block">
+                    <div class="lang-label">Variables, Types, Structs</div>
+<pre class="code-block"><span class="c-cmt">// Khai báo biến</span>
+<span class="c-key">var</span> name <span class="c-key">string</span> = <span class="c-str">"Minh"</span>
+age := <span class="c-num">25</span>                    <span class="c-cmt">// Short declaration (tự suy type)</span>
+isActive := <span class="c-key">true</span>
+
+<span class="c-cmt">// Struct = class trong C# (nhưng không có inheritance)</span>
+<span class="c-key">type</span> User <span class="c-key">struct</span> {
+    ID       <span class="c-key">int</span>       <span class="c-str">`json:"id"`</span>
+    Name     <span class="c-key">string</span>    <span class="c-str">`json:"name"`</span>
+    Email    <span class="c-key">string</span>    <span class="c-str">`json:"email"`</span>
+    IsActive <span class="c-key">bool</span>      <span class="c-str">`json:"is_active"`</span>
+}
+
+<span class="c-cmt">// Method trên struct (giống method trong C# class)</span>
+<span class="c-key">func</span> (u User) <span class="c-fn">FullName</span>() <span class="c-key">string</span> {
+    <span class="c-key">return</span> u.Name
+}
+
+<span class="c-cmt">// Interface (giống C# interface — implicit implementation!)</span>
+<span class="c-key">type</span> Repository <span class="c-key">interface</span> {
+    <span class="c-fn">FindByID</span>(id <span class="c-key">int</span>) (*User, <span class="c-key">error</span>)
+    <span class="c-fn">Save</span>(user *User) <span class="c-key">error</span>
+}</pre>
+                    <div class="lang-note">
+                        <strong>vs C#:</strong> Go KHÔNG CÓ class, inheritance, constructor. Dùng struct + composition. Interface implicit — không cần <code>: IRepository</code>.
+                    </div>
+                </div>
+
+                <div class="lang-block">
+                    <div class="lang-label">Error Handling — Không có try/catch!</div>
+<pre class="code-block"><span class="c-cmt">// Go trả về error như giá trị thường — PHẢI check</span>
+<span class="c-key">func</span> <span class="c-fn">GetUser</span>(id <span class="c-key">int</span>) (*User, <span class="c-key">error</span>) {
+    user, err := db.<span class="c-fn">FindByID</span>(id)
+    <span class="c-key">if</span> err != <span class="c-key">nil</span> {
+        <span class="c-key">return</span> <span class="c-key">nil</span>, fmt.<span class="c-fn">Errorf</span>(<span class="c-str">"failed to get user %d: %w"</span>, id, err)
+    }
+    <span class="c-key">return</span> user, <span class="c-key">nil</span>
+}
+
+<span class="c-cmt">// Gọi function → PHẢI handle error</span>
+user, err := <span class="c-fn">GetUser</span>(<span class="c-num">42</span>)
+<span class="c-key">if</span> err != <span class="c-key">nil</span> {
+    log.<span class="c-fn">Fatal</span>(err)    <span class="c-cmt">// hoặc return err</span>
+}
+fmt.<span class="c-fn">Println</span>(user.Name)</pre>
+                    <div class="lang-note">
+                        <strong>vs C#:</strong> Không có <code>try/catch/throw</code>. Error là return value. Pattern <code>if err != nil</code> xuất hiện khắp nơi — ban đầu verbose nhưng code explicit hơn.
+                    </div>
+                </div>
+
+                <div class="lang-block">
+                    <div class="lang-label">Goroutines & Channels — Concurrent siêu dễ</div>
+<pre class="code-block"><span class="c-cmt">// Goroutine = lightweight thread (giống Task trong C# nhưng nhẹ hơn 1000x)</span>
+<span class="c-key">func</span> <span class="c-fn">main</span>() {
+    <span class="c-cmt">// Chạy 3 API calls đồng thời</span>
+    results := <span class="c-fn">make</span>(<span class="c-key">chan</span> <span class="c-key">string</span>, <span class="c-num">3</span>)
+
+    <span class="c-key">go</span> <span class="c-fn">fetchAPI</span>(<span class="c-str">"users"</span>, results)     <span class="c-cmt">// go = chạy goroutine</span>
+    <span class="c-key">go</span> <span class="c-fn">fetchAPI</span>(<span class="c-str">"products"</span>, results)
+    <span class="c-key">go</span> <span class="c-fn">fetchAPI</span>(<span class="c-str">"orders"</span>, results)
+
+    <span class="c-cmt">// Đợi 3 kết quả</span>
+    <span class="c-key">for</span> i := <span class="c-num">0</span>; i < <span class="c-num">3</span>; i++ {
+        fmt.<span class="c-fn">Println</span>(<-results)       <span class="c-cmt">// <- đọc từ channel</span>
+    }
+}
+
+<span class="c-key">func</span> <span class="c-fn">fetchAPI</span>(name <span class="c-key">string</span>, ch <span class="c-key">chan</span> <span class="c-key">string</span>) {
+    <span class="c-cmt">// ... fetch data ...</span>
+    ch <- fmt.<span class="c-fn">Sprintf</span>(<span class="c-str">"%s: done"</span>, name)  <span class="c-cmt">// gửi kết quả vào channel</span>
+}</pre>
+                    <div class="lang-note">
+                        <strong>vs C#:</strong> <code>go func()</code> = <code>Task.Run()</code>. Channel = giống <code>Channel&lt;T&gt;</code> trong C#. Nhưng goroutine nhẹ hơn nhiều — chạy hàng triệu goroutine bình thường.
+                    </div>
+                </div>
+
+                <div class="lang-block">
+                    <div class="lang-label">HTTP API với standard library (không cần framework!)</div>
+<pre class="code-block"><span class="c-key">package</span> main
+
+<span class="c-key">import</span> (
+    <span class="c-str">"encoding/json"</span>
+    <span class="c-str">"net/http"</span>
+)
+
+<span class="c-key">func</span> <span class="c-fn">main</span>() {
+    http.<span class="c-fn">HandleFunc</span>(<span class="c-str">"/api/users"</span>, handleUsers)
+    http.<span class="c-fn">ListenAndServe</span>(<span class="c-str">":8080"</span>, <span class="c-key">nil</span>)
+}
+
+<span class="c-key">func</span> <span class="c-fn">handleUsers</span>(w http.ResponseWriter, r *http.Request) {
+    users := []User{
+        {ID: <span class="c-num">1</span>, Name: <span class="c-str">"Minh"</span>, Email: <span class="c-str">"minh@email.com"</span>},
+    }
+    w.<span class="c-fn">Header</span>().<span class="c-fn">Set</span>(<span class="c-str">"Content-Type"</span>, <span class="c-str">"application/json"</span>)
+    json.<span class="c-fn">NewEncoder</span>(w).<span class="c-fn">Encode</span>(users)
+}</pre>
+                    <div class="lang-note">
+                        <strong>vs C#:</strong> Go standard library đủ mạnh cho API — không bắt buộc framework. Nếu cần router/middleware: dùng <strong>Chi</strong>, <strong>Gin</strong>, hoặc <strong>Fiber</strong>.
+                    </div>
+                </div>
+
+                <div class="lang-summary">
+                    <h4>📋 Go Cheat Sheet — Nắm Nhanh</h4>
+                    <div class="cheat-grid">
+                        <div class="cheat-item"><code>:=</code> Short declare</div>
+                        <div class="cheat-item"><code>func</code> Function</div>
+                        <div class="cheat-item"><code>struct</code> = Class</div>
+                        <div class="cheat-item"><code>interface</code> Implicit</div>
+                        <div class="cheat-item"><code>go f()</code> Goroutine</div>
+                        <div class="cheat-item"><code>chan T</code> Channel</div>
+                        <div class="cheat-item"><code>if err != nil</code> Error</div>
+                        <div class="cheat-item"><code>defer</code> = finally</div>
+                        <div class="cheat-item"><code>slice</code> = List&lt;T&gt;</div>
+                        <div class="cheat-item"><code>map[K]V</code> = Dict</div>
+                        <div class="cheat-item"><code>*T</code> Pointer</div>
+                        <div class="cheat-item"><code>nil</code> = null</div>
+                    </div>
+                </div>
+
+                <div class="lib-ecosystem">
+                    <h4>📦 Thư Viện Phổ Biến — Go Ecosystem</h4>
+                    <div class="lib-grid">
+                        <div class="lib-card" style="--lib-color: #00ADD8">
+                            <div class="lib-category">Web Framework</div>
+                            <div class="lib-name">Gin</div>
+                            <p>Framework HTTP phổ biến nhất Go. Nhanh, nhẹ, middleware dễ viết. Giống Express.js cho Go.</p>
+                            <code>go get github.com/gin-gonic/gin</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #00ADD8">
+                            <div class="lib-category">Web Framework</div>
+                            <div class="lib-name">Fiber</div>
+                            <p>Inspired by Express.js. Nhanh nhất Go. Syntax quen thuộc cho Node.js developers.</p>
+                            <code>go get github.com/gofiber/fiber/v2</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #00ADD8">
+                            <div class="lib-category">Router</div>
+                            <div class="lib-name">Chi</div>
+                            <p>Lightweight router, compatible với <code>net/http</code>. Tốt cho project cần giữ standard library style.</p>
+                            <code>go get github.com/go-chi/chi/v5</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #00ADD8">
+                            <div class="lib-category">ORM / Database</div>
+                            <div class="lib-name">GORM</div>
+                            <p>ORM phổ biến nhất Go. Auto migration, associations, hooks. Giống EF Core cho Go.</p>
+                            <code>go get gorm.io/gorm</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #00ADD8">
+                            <div class="lib-category">SQL Builder</div>
+                            <div class="lib-name">sqlx</div>
+                            <p>Mở rộng <code>database/sql</code> chuẩn. Scan struct, named queries. Không ORM — viết SQL thuần.</p>
+                            <code>go get github.com/jmoiron/sqlx</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #00ADD8">
+                            <div class="lib-category">Validation</div>
+                            <div class="lib-name">validator</div>
+                            <p>Validation bằng struct tags. <code>`validate:"required,email"`</code>. Giống Data Annotations C#.</p>
+                            <code>go get github.com/go-playground/validator/v10</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #00ADD8">
+                            <div class="lib-category">Auth / JWT</div>
+                            <div class="lib-name">golang-jwt</div>
+                            <p>Tạo và verify JWT tokens. Standard cho authentication trong Go APIs.</p>
+                            <code>go get github.com/golang-jwt/jwt/v5</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #00ADD8">
+                            <div class="lib-category">Logging</div>
+                            <div class="lib-name">zerolog / zap</div>
+                            <p><strong>zerolog:</strong> structured logging, zero allocation. <strong>zap:</strong> Uber tạo, blazing fast. Cả 2 đều production-grade.</p>
+                            <code>go get github.com/rs/zerolog</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #00ADD8">
+                            <div class="lib-category">Config</div>
+                            <div class="lib-name">Viper</div>
+                            <p>Đọc config từ file, env, flags. Giống <code>IConfiguration</code> trong ASP.NET. Hỗ trợ JSON, YAML, TOML.</p>
+                            <code>go get github.com/spf13/viper</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #00ADD8">
+                            <div class="lib-category">CLI Tool</div>
+                            <div class="lib-name">Cobra</div>
+                            <p>Build CLI apps chuyên nghiệp. Docker CLI, Kubernetes kubectl đều dùng Cobra.</p>
+                            <code>go get github.com/spf13/cobra</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== SECTION 3: RUST ===== -->
+    <section class="section section-dark" id="rust">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🦀</div>
+                <h2>4. Rust — An Toàn, Cực Nhanh, Zero-Cost Abstractions</h2>
+                <p>Memory safe mà KHÔNG cần garbage collector. Nhanh ngang C/C++. Khó học nhất nhưng đáng giá nhất.</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>⚡ Rust 80/20 — Cốt Lõi Cần Nắm</h3>
+
+                <div class="lang-block">
+                    <div class="lang-label">Variables, Types, Ownership</div>
+<pre class="code-block"><span class="c-cmt">// Biến immutable mặc định (ngược C#!)</span>
+<span class="c-key">let</span> name = <span class="c-str">"Minh"</span>;           <span class="c-cmt">// immutable</span>
+<span class="c-key">let mut</span> age = <span class="c-num">25</span>;            <span class="c-cmt">// mutable (phải khai báo mut)</span>
+
+<span class="c-cmt">// Struct</span>
+<span class="c-key">struct</span> <span class="c-fn">User</span> {
+    id: <span class="c-key">u32</span>,
+    name: <span class="c-key">String</span>,
+    email: <span class="c-key">String</span>,
+    is_active: <span class="c-key">bool</span>,
+}
+
+<span class="c-cmt">// Implement methods (giống partial class)</span>
+<span class="c-key">impl</span> <span class="c-fn">User</span> {
+    <span class="c-key">fn</span> <span class="c-fn">new</span>(name: <span class="c-key">String</span>, email: <span class="c-key">String</span>) -> <span class="c-fn">User</span> {
+        <span class="c-fn">User</span> { id: <span class="c-num">0</span>, name, email, is_active: <span class="c-key">true</span> }
+    }
+
+    <span class="c-key">fn</span> <span class="c-fn">display_name</span>(&<span class="c-key">self</span>) -> &<span class="c-key">str</span> {
+        &<span class="c-key">self</span>.name
+    }
+}
+
+<span class="c-cmt">// ⭐ OWNERSHIP — khái niệm quan trọng nhất của Rust</span>
+<span class="c-key">let</span> s1 = <span class="c-key">String</span>::from(<span class="c-str">"hello"</span>);
+<span class="c-key">let</span> s2 = s1;          <span class="c-cmt">// s1 MOVED sang s2 → s1 không dùng được nữa!</span>
+<span class="c-cmt">// println!("{}", s1); // ❌ Compile error: value moved</span>
+<span class="c-fn">println!</span>(<span class="c-str">"{}"</span>, s2);    <span class="c-cmt">// ✅ OK</span></pre>
+                    <div class="lang-note">
+                        <strong>Ownership = khác biệt lớn nhất vs mọi ngôn ngữ khác.</strong> Mỗi value có 1 owner. Khi owner ra khỏi scope → value tự giải phóng. Không cần GC, không memory leak, không null pointer.
+                    </div>
+                </div>
+
+                <div class="lang-block">
+                    <div class="lang-label">Error Handling — Result&lt;T, E&gt; và Option&lt;T&gt;</div>
+<pre class="code-block"><span class="c-cmt">// Rust không có null, không có exceptions</span>
+<span class="c-cmt">// Option&lt;T&gt; = có hoặc không có giá trị (thay null)</span>
+<span class="c-key">fn</span> <span class="c-fn">find_user</span>(id: <span class="c-key">u32</span>) -> <span class="c-fn">Option</span>&lt;User&gt; {
+    <span class="c-key">if</span> id == <span class="c-num">1</span> {
+        <span class="c-fn">Some</span>(<span class="c-fn">User</span>::new(<span class="c-str">"Minh"</span>.into(), <span class="c-str">"minh@email.com"</span>.into()))
+    } <span class="c-key">else</span> {
+        <span class="c-fn">None</span>
+    }
+}
+
+<span class="c-cmt">// Result&lt;T, E&gt; = thành công hoặc lỗi (thay try/catch)</span>
+<span class="c-key">fn</span> <span class="c-fn">get_user</span>(id: <span class="c-key">u32</span>) -> <span class="c-fn">Result</span>&lt;User, <span class="c-key">String</span>&gt; {
+    <span class="c-key">let</span> user = <span class="c-fn">find_user</span>(id)
+        .<span class="c-fn">ok_or</span>(<span class="c-fn">format!</span>(<span class="c-str">"User {} not found"</span>, id))?;  <span class="c-cmt">// ? = propagate error</span>
+    <span class="c-fn">Ok</span>(user)
+}
+
+<span class="c-cmt">// Pattern matching — cực mạnh</span>
+<span class="c-key">match</span> <span class="c-fn">get_user</span>(<span class="c-num">42</span>) {
+    <span class="c-fn">Ok</span>(user) => <span class="c-fn">println!</span>(<span class="c-str">"Found: {}"</span>, user.name),
+    <span class="c-fn">Err</span>(e)   => <span class="c-fn">println!</span>(<span class="c-str">"Error: {}"</span>, e),
+}</pre>
+                    <div class="lang-note">
+                        <strong>vs C#:</strong> <code>Option&lt;T&gt;</code> = <code>Nullable&lt;T&gt;</code> nhưng bắt buộc check. <code>Result&lt;T,E&gt;</code> = exception handling compile-time. <code>?</code> operator = <code>throw</code> tự động.
+                    </div>
+                </div>
+
+                <div class="lang-block">
+                    <div class="lang-label">Traits — Giống interface nhưng mạnh hơn</div>
+<pre class="code-block"><span class="c-cmt">// Trait = interface + default implementation</span>
+<span class="c-key">trait</span> <span class="c-fn">Repository</span> {
+    <span class="c-key">fn</span> <span class="c-fn">find_by_id</span>(&<span class="c-key">self</span>, id: <span class="c-key">u32</span>) -> <span class="c-fn">Option</span>&lt;User&gt;;
+    <span class="c-key">fn</span> <span class="c-fn">save</span>(&<span class="c-key">self</span>, user: &User) -> <span class="c-fn">Result</span>&lt;(), <span class="c-key">String</span>&gt;;
+
+    <span class="c-cmt">// Default method (giống default interface method C# 8)</span>
+    <span class="c-key">fn</span> <span class="c-fn">exists</span>(&<span class="c-key">self</span>, id: <span class="c-key">u32</span>) -> <span class="c-key">bool</span> {
+        <span class="c-key">self</span>.<span class="c-fn">find_by_id</span>(id).<span class="c-fn">is_some</span>()
+    }
+}
+
+<span class="c-cmt">// Implement trait cho struct</span>
+<span class="c-key">impl</span> <span class="c-fn">Repository</span> <span class="c-key">for</span> <span class="c-fn">PostgresRepo</span> {
+    <span class="c-key">fn</span> <span class="c-fn">find_by_id</span>(&<span class="c-key">self</span>, id: <span class="c-key">u32</span>) -> <span class="c-fn">Option</span>&lt;User&gt; {
+        <span class="c-cmt">// query database...</span>
+    }
+    <span class="c-key">fn</span> <span class="c-fn">save</span>(&<span class="c-key">self</span>, user: &User) -> <span class="c-fn">Result</span>&lt;(), <span class="c-key">String</span>&gt; {
+        <span class="c-cmt">// insert/update...</span>
+    }
+}</pre>
+                </div>
+
+                <div class="lang-block">
+                    <div class="lang-label">Web API với Actix-web</div>
+<pre class="code-block"><span class="c-key">use</span> actix_web::{web, App, HttpServer, HttpResponse};
+<span class="c-key">use</span> serde::{Serialize, Deserialize};
+
+<span class="c-key">#[derive(Serialize, Deserialize)]</span>
+<span class="c-key">struct</span> <span class="c-fn">User</span> { id: <span class="c-key">u32</span>, name: <span class="c-key">String</span> }
+
+<span class="c-key">async fn</span> <span class="c-fn">get_users</span>() -> HttpResponse {
+    <span class="c-key">let</span> users = <span class="c-key">vec!</span>[
+        <span class="c-fn">User</span> { id: <span class="c-num">1</span>, name: <span class="c-str">"Minh"</span>.<span class="c-fn">into</span>() },
+    ];
+    HttpResponse::Ok().<span class="c-fn">json</span>(users)
+}
+
+<span class="c-key">#[actix_web::main]</span>
+<span class="c-key">async fn</span> <span class="c-fn">main</span>() -> std::io::<span class="c-fn">Result</span>&lt;()&gt; {
+    HttpServer::<span class="c-fn">new</span>(|| {
+        App::<span class="c-fn">new</span>()
+            .<span class="c-fn">route</span>(<span class="c-str">"/api/users"</span>, web::<span class="c-fn">get</span>().<span class="c-fn">to</span>(get_users))
+    })
+    .<span class="c-fn">bind</span>(<span class="c-str">"0.0.0.0:8080"</span>)?
+    .<span class="c-fn">run</span>()
+    .<span class="c-key">await</span>
+}</pre>
+                    <div class="lang-note">
+                        <strong>Framework phổ biến:</strong> <strong>Actix-web</strong> (nhanh nhất), <strong>Axum</strong> (Tokio team, ergonomic nhất), <strong>Rocket</strong> (dễ dùng nhất).
+                    </div>
+                </div>
+
+                <div class="lang-summary">
+                    <h4>📋 Rust Cheat Sheet</h4>
+                    <div class="cheat-grid">
+                        <div class="cheat-item"><code>let / let mut</code> Biến</div>
+                        <div class="cheat-item"><code>fn</code> Function</div>
+                        <div class="cheat-item"><code>struct</code> + <code>impl</code> = Class</div>
+                        <div class="cheat-item"><code>trait</code> = Interface</div>
+                        <div class="cheat-item"><code>Option&lt;T&gt;</code> = Nullable</div>
+                        <div class="cheat-item"><code>Result&lt;T,E&gt;</code> = Error</div>
+                        <div class="cheat-item"><code>?</code> Propagate error</div>
+                        <div class="cheat-item"><code>match</code> Pattern match</div>
+                        <div class="cheat-item"><code>&T</code> Borrow (ref)</div>
+                        <div class="cheat-item"><code>Vec&lt;T&gt;</code> = List</div>
+                        <div class="cheat-item"><code>async/await</code> Async</div>
+                        <div class="cheat-item"><code>cargo</code> = dotnet CLI</div>
+                    </div>
+                </div>
+
+                <div class="lib-ecosystem">
+                    <h4>📦 Thư Viện Phổ Biến — Rust Crates</h4>
+                    <div class="lib-grid">
+                        <div class="lib-card" style="--lib-color: #DEA584">
+                            <div class="lib-category">Web Framework</div>
+                            <div class="lib-name">Axum</div>
+                            <p>Tokio team tạo. Ergonomic nhất, modular, tower middleware. Đang dần thay thế Actix-web làm #1.</p>
+                            <code>cargo add axum</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #DEA584">
+                            <div class="lib-category">Web Framework</div>
+                            <div class="lib-name">Actix-web</div>
+                            <p>Nhanh nhất (top benchmark). Actor model. Production-ready. Dùng nhiều trong fintech.</p>
+                            <code>cargo add actix-web</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #DEA584">
+                            <div class="lib-category">Async Runtime</div>
+                            <div class="lib-name">Tokio</div>
+                            <p>Async runtime chuẩn của Rust. Mọi async library đều dựa trên Tokio. <strong>Bắt buộc biết.</strong></p>
+                            <code>cargo add tokio --features full</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #DEA584">
+                            <div class="lib-category">Serialization</div>
+                            <div class="lib-name">Serde</div>
+                            <p>Serialize/deserialize JSON, YAML, TOML... Zero-cost. <code>#[derive(Serialize, Deserialize)]</code>. <strong>Dùng ở mọi project.</strong></p>
+                            <code>cargo add serde --features derive</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #DEA584">
+                            <div class="lib-category">ORM / Database</div>
+                            <div class="lib-name">SQLx</div>
+                            <p>Async SQL toolkit. Compile-time checked queries! Query sai → compiler báo lỗi. Không ORM overhead.</p>
+                            <code>cargo add sqlx --features postgres,runtime-tokio</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #DEA584">
+                            <div class="lib-category">ORM</div>
+                            <div class="lib-name">Diesel</div>
+                            <p>ORM type-safe. Schema migrations. Giống EF Core cho Rust. Sync-only (không async).</p>
+                            <code>cargo add diesel --features postgres</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #DEA584">
+                            <div class="lib-category">Error Handling</div>
+                            <div class="lib-name">anyhow + thiserror</div>
+                            <p><strong>anyhow:</strong> quick error handling cho apps. <strong>thiserror:</strong> custom error types cho libraries. Cặp đôi hoàn hảo.</p>
+                            <code>cargo add anyhow thiserror</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #DEA584">
+                            <div class="lib-category">Logging</div>
+                            <div class="lib-name">tracing</div>
+                            <p>Structured logging + distributed tracing. Tokio ecosystem. Production-standard cho Rust.</p>
+                            <code>cargo add tracing tracing-subscriber</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #DEA584">
+                            <div class="lib-category">HTTP Client</div>
+                            <div class="lib-name">reqwest</div>
+                            <p>HTTP client async. Giống <code>HttpClient</code> C#. TLS, cookies, JSON auto-deserialize.</p>
+                            <code>cargo add reqwest --features json</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #DEA584">
+                            <div class="lib-category">CLI Tool</div>
+                            <div class="lib-name">clap</div>
+                            <p>Build CLI apps bằng derive macros. Auto-generated help. Giống <code>System.CommandLine</code> C#.</p>
+                            <code>cargo add clap --features derive</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== SECTION 4: TYPESCRIPT ===== -->
+    <section class="section" id="typescript">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🟦</div>
+                <h2>5. TypeScript (Node.js) — Full-Stack JavaScript</h2>
+                <p>Anders Hejlsberg (tạo C#) cũng tạo TypeScript. Cùng cha nên syntax rất giống C#.</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>⚡ TypeScript 80/20 — Cốt Lõi Cần Nắm</h3>
+
+                <div class="lang-block">
+                    <div class="lang-label">Types, Interfaces, Classes</div>
+<pre class="code-block"><span class="c-cmt">// Interface — giống hệt C#</span>
+<span class="c-key">interface</span> <span class="c-fn">User</span> {
+    id: <span class="c-key">number</span>;
+    name: <span class="c-key">string</span>;
+    email: <span class="c-key">string</span>;
+    isActive: <span class="c-key">boolean</span>;
+    role?: <span class="c-key">string</span>;         <span class="c-cmt">// ? = optional (giống nullable)</span>
+}
+
+<span class="c-cmt">// Type alias — flexible hơn interface</span>
+<span class="c-key">type</span> <span class="c-fn">UserRole</span> = <span class="c-str">"admin"</span> | <span class="c-str">"user"</span> | <span class="c-str">"moderator"</span>;  <span class="c-cmt">// Union type</span>
+<span class="c-key">type</span> <span class="c-fn">ApiResponse</span>&lt;T&gt; = {
+    data: T;
+    message: <span class="c-key">string</span>;
+    success: <span class="c-key">boolean</span>;
+};
+
+<span class="c-cmt">// Generics — giống C#</span>
+<span class="c-key">function</span> <span class="c-fn">getFirst</span>&lt;T&gt;(items: T[]): T | <span class="c-key">undefined</span> {
+    <span class="c-key">return</span> items[<span class="c-num">0</span>];
+}
+
+<span class="c-cmt">// Async/Await — giống hệt C#</span>
+<span class="c-key">async function</span> <span class="c-fn">fetchUser</span>(id: <span class="c-key">number</span>): Promise&lt;User&gt; {
+    <span class="c-key">const</span> res = <span class="c-key">await</span> <span class="c-fn">fetch</span>(<span class="c-str">`/api/users/${id}`</span>);
+    <span class="c-key">return</span> res.<span class="c-fn">json</span>();
+}</pre>
+                    <div class="lang-note">
+                        <strong>vs C#:</strong> Interface syntax gần giống. Generics giống. <code>async/await</code> giống. Khác: <code>Promise&lt;T&gt;</code> = <code>Task&lt;T&gt;</code>. Union types (<code>string | number</code>) C# không có.
+                    </div>
+                </div>
+
+                <div class="lang-block">
+                    <div class="lang-label">Express.js API (phổ biến nhất)</div>
+<pre class="code-block"><span class="c-key">import</span> express <span class="c-key">from</span> <span class="c-str">'express'</span>;
+
+<span class="c-key">const</span> app = <span class="c-fn">express</span>();
+app.<span class="c-fn">use</span>(express.<span class="c-fn">json</span>());
+
+<span class="c-cmt">// GET /api/users</span>
+app.<span class="c-fn">get</span>(<span class="c-str">'/api/users'</span>, <span class="c-key">async</span> (req, res) => {
+    <span class="c-key">const</span> users = <span class="c-key">await</span> db.<span class="c-fn">query</span>(<span class="c-str">'SELECT * FROM users'</span>);
+    res.<span class="c-fn">json</span>(users);
+});
+
+<span class="c-cmt">// POST /api/users</span>
+app.<span class="c-fn">post</span>(<span class="c-str">'/api/users'</span>, <span class="c-key">async</span> (req, res) => {
+    <span class="c-key">const</span> { name, email } = req.body;
+    <span class="c-key">const</span> user = <span class="c-key">await</span> db.<span class="c-fn">query</span>(
+        <span class="c-str">'INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *'</span>,
+        [name, email]
+    );
+    res.<span class="c-fn">status</span>(<span class="c-num">201</span>).<span class="c-fn">json</span>(user);
+});
+
+app.<span class="c-fn">listen</span>(<span class="c-num">3000</span>, () => <span class="c-fn">console.log</span>(<span class="c-str">'Server running on :3000'</span>));</pre>
+                    <div class="lang-note">
+                        <strong>Framework phổ biến:</strong> <strong>Express</strong> (classic, đơn giản), <strong>Fastify</strong> (nhanh hơn Express), <strong>NestJS</strong> (giống ASP.NET — DI, decorators, modules), <strong>Hono</strong> (lightweight, edge-ready).
+                    </div>
+                </div>
+
+                <div class="lang-summary">
+                    <h4>📋 TypeScript Cheat Sheet</h4>
+                    <div class="cheat-grid">
+                        <div class="cheat-item"><code>const/let</code> Biến</div>
+                        <div class="cheat-item"><code>interface</code> Type shape</div>
+                        <div class="cheat-item"><code>type</code> Type alias</div>
+                        <div class="cheat-item"><code>=></code> Arrow func</div>
+                        <div class="cheat-item"><code>async/await</code> Async</div>
+                        <div class="cheat-item"><code>Promise&lt;T&gt;</code> = Task</div>
+                        <div class="cheat-item"><code>T[]</code> Array</div>
+                        <div class="cheat-item"><code>?.</code> Optional chain</div>
+                        <div class="cheat-item"><code>??</code> Null coalesce</div>
+                        <div class="cheat-item"><code>|</code> Union type</div>
+                        <div class="cheat-item"><code>npm/pnpm</code> Package mgr</div>
+                        <div class="cheat-item"><code>tsconfig.json</code> Config</div>
+                    </div>
+                </div>
+
+                <div class="lib-ecosystem">
+                    <h4>📦 Thư Viện Phổ Biến — Node.js / TypeScript</h4>
+                    <div class="lib-grid">
+                        <div class="lib-card" style="--lib-color: #3178C6">
+                            <div class="lib-category">Web Framework</div>
+                            <div class="lib-name">Express.js</div>
+                            <p>Framework lâu đời nhất, cộng đồng lớn nhất. Minimal, un-opinionated. Cần thêm middleware cho mọi thứ.</p>
+                            <code>npm i express @types/express</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #3178C6">
+                            <div class="lib-category">Web Framework</div>
+                            <div class="lib-name">NestJS</div>
+                            <p><strong>Giống ASP.NET nhất!</strong> DI, decorators, modules, guards. C# developer sẽ thấy rất quen. Enterprise-ready.</p>
+                            <code>npm i -g @nestjs/cli && nest new project</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #3178C6">
+                            <div class="lib-category">Web Framework</div>
+                            <div class="lib-name">Fastify</div>
+                            <p>Nhanh gấp 2x Express. Schema-based validation. Plugin system. Đang dần thay thế Express.</p>
+                            <code>npm i fastify</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #3178C6">
+                            <div class="lib-category">Full-stack</div>
+                            <div class="lib-name">Next.js</div>
+                            <p>React meta-framework. SSR, API routes, Server Components. 1 framework cho cả frontend + backend.</p>
+                            <code>npx create-next-app@latest</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #3178C6">
+                            <div class="lib-category">ORM</div>
+                            <div class="lib-name">Prisma</div>
+                            <p>Modern ORM. Schema-first, auto-generated client, migrations. Type-safe queries. <strong>ORM phổ biến nhất cho TS.</strong></p>
+                            <code>npm i prisma @prisma/client</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #3178C6">
+                            <div class="lib-category">ORM</div>
+                            <div class="lib-name">Drizzle</div>
+                            <p>Lightweight ORM, SQL-like syntax. Type-safe. Nhanh hơn Prisma. Đang tăng trưởng rất mạnh.</p>
+                            <code>npm i drizzle-orm</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #3178C6">
+                            <div class="lib-category">Validation</div>
+                            <div class="lib-name">Zod</div>
+                            <p>Schema validation + type inference. Khai báo schema 1 lần, dùng cho cả runtime validation và TypeScript types.</p>
+                            <code>npm i zod</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #3178C6">
+                            <div class="lib-category">Auth</div>
+                            <div class="lib-name">Passport.js / Auth.js</div>
+                            <p><strong>Passport:</strong> 500+ strategies (Google, GitHub, JWT...). <strong>Auth.js:</strong> modern, session-based, OAuth built-in.</p>
+                            <code>npm i passport passport-jwt</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #3178C6">
+                            <div class="lib-category">Testing</div>
+                            <div class="lib-name">Vitest / Jest</div>
+                            <p><strong>Vitest:</strong> nhanh, native ESM, compatible Jest API. <strong>Jest:</strong> Facebook tạo, cộng đồng lớn. Cả 2 đều production-grade.</p>
+                            <code>npm i -D vitest</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #3178C6">
+                            <div class="lib-category">API Client</div>
+                            <div class="lib-name">tRPC</div>
+                            <p>End-to-end type-safe APIs. Server define procedure, client gọi trực tiếp. Không cần REST/GraphQL.</p>
+                            <code>npm i @trpc/server @trpc/client</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== SECTION 5: PYTHON ===== -->
+    <section class="section section-dark" id="python">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🐍</div>
+                <h2>6. Python (FastAPI) — AI/ML Backend & Rapid Prototyping</h2>
+                <p>Ngôn ngữ #1 cho AI/ML. FastAPI biến Python thành API backend cực nhanh với auto docs.</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>⚡ Python 80/20 — Cốt Lõi Cần Nắm</h3>
+
+                <div class="lang-block">
+                    <div class="lang-label">Variables, Types, Classes</div>
+<pre class="code-block"><span class="c-cmt"># Python dùng indentation thay { } (quan trọng!)</span>
+name: <span class="c-key">str</span> = <span class="c-str">"Minh"</span>
+age: <span class="c-key">int</span> = <span class="c-num">25</span>
+is_active: <span class="c-key">bool</span> = <span class="c-key">True</span>
+scores: <span class="c-key">list</span>[<span class="c-key">int</span>] = [<span class="c-num">90</span>, <span class="c-num">85</span>, <span class="c-num">95</span>]
+
+<span class="c-cmt"># Dataclass = struct/record (C# record)</span>
+<span class="c-key">from</span> dataclasses <span class="c-key">import</span> dataclass
+
+<span class="c-key">@dataclass</span>
+<span class="c-key">class</span> <span class="c-fn">User</span>:
+    id: <span class="c-key">int</span>
+    name: <span class="c-key">str</span>
+    email: <span class="c-key">str</span>
+    is_active: <span class="c-key">bool</span> = <span class="c-key">True</span>  <span class="c-cmt"># default value</span>
+
+<span class="c-cmt"># Class với methods</span>
+<span class="c-key">class</span> <span class="c-fn">UserService</span>:
+    <span class="c-key">def</span> <span class="c-fn">__init__</span>(self, repo: UserRepository):
+        self.repo = repo  <span class="c-cmt"># DI qua constructor (giống C#)</span>
+
+    <span class="c-key">async def</span> <span class="c-fn">get_user</span>(self, id: <span class="c-key">int</span>) -> User | <span class="c-key">None</span>:
+        <span class="c-key">return await</span> self.repo.<span class="c-fn">find_by_id</span>(id)
+
+<span class="c-cmt"># List comprehension — rất Pythonic</span>
+active_names = [u.name <span class="c-key">for</span> u <span class="c-key">in</span> users <span class="c-key">if</span> u.is_active]
+<span class="c-cmt"># C#: users.Where(u => u.IsActive).Select(u => u.Name)</span></pre>
+                </div>
+
+                <div class="lang-block">
+                    <div class="lang-label">FastAPI — Modern Python API (auto docs!)</div>
+<pre class="code-block"><span class="c-key">from</span> fastapi <span class="c-key">import</span> FastAPI, HTTPException
+<span class="c-key">from</span> pydantic <span class="c-key">import</span> BaseModel
+
+app = <span class="c-fn">FastAPI</span>()
+
+<span class="c-cmt"># Pydantic model = DTO (auto validation!)</span>
+<span class="c-key">class</span> <span class="c-fn">UserCreate</span>(BaseModel):
+    name: <span class="c-key">str</span>
+    email: <span class="c-key">str</span>
+
+<span class="c-key">class</span> <span class="c-fn">UserResponse</span>(BaseModel):
+    id: <span class="c-key">int</span>
+    name: <span class="c-key">str</span>
+    email: <span class="c-key">str</span>
+    is_active: <span class="c-key">bool</span>
+
+<span class="c-key">@app.get</span>(<span class="c-str">"/api/users/{user_id}"</span>, response_model=UserResponse)
+<span class="c-key">async def</span> <span class="c-fn">get_user</span>(user_id: <span class="c-key">int</span>):
+    user = <span class="c-key">await</span> db.<span class="c-fn">find_user</span>(user_id)
+    <span class="c-key">if not</span> user:
+        <span class="c-key">raise</span> <span class="c-fn">HTTPException</span>(status_code=<span class="c-num">404</span>, detail=<span class="c-str">"User not found"</span>)
+    <span class="c-key">return</span> user
+
+<span class="c-key">@app.post</span>(<span class="c-str">"/api/users"</span>, response_model=UserResponse, status_code=<span class="c-num">201</span>)
+<span class="c-key">async def</span> <span class="c-fn">create_user</span>(user: UserCreate):
+    <span class="c-key">return await</span> db.<span class="c-fn">create_user</span>(user)
+
+<span class="c-cmt"># Chạy: uvicorn main:app --reload</span>
+<span class="c-cmt"># Auto docs: http://localhost:8000/docs (Swagger tự tạo!)</span></pre>
+                    <div class="lang-note">
+                        <strong>FastAPI killer feature:</strong> Auto-generate Swagger/OpenAPI docs từ type hints. Validation tự động từ Pydantic model. Performance gần Node.js nhờ async. <strong>Startup chọn Python chủ yếu vì AI/ML integration dễ.</strong>
+                    </div>
+                </div>
+
+                <div class="lang-summary">
+                    <h4>📋 Python Cheat Sheet</h4>
+                    <div class="cheat-grid">
+                        <div class="cheat-item"><code>def/async def</code> Func</div>
+                        <div class="cheat-item"><code>class</code> Class</div>
+                        <div class="cheat-item"><code>self</code> = this</div>
+                        <div class="cheat-item"><code>__init__</code> = ctor</div>
+                        <div class="cheat-item"><code>list[T]</code> = List</div>
+                        <div class="cheat-item"><code>dict[K,V]</code> = Dict</div>
+                        <div class="cheat-item"><code>None</code> = null</div>
+                        <div class="cheat-item"><code>raise</code> = throw</div>
+                        <div class="cheat-item"><code>try/except</code> = catch</div>
+                        <div class="cheat-item"><code>pip</code> = NuGet</div>
+                        <div class="cheat-item"><code>@decorator</code> = [Attr]</div>
+                        <div class="cheat-item">Indentation = { }</div>
+                    </div>
+                </div>
+
+                <div class="lib-ecosystem">
+                    <h4>📦 Thư Viện Phổ Biến — Python Ecosystem</h4>
+                    <div class="lib-grid">
+                        <div class="lib-card" style="--lib-color: #3776AB">
+                            <div class="lib-category">Web Framework</div>
+                            <div class="lib-name">FastAPI</div>
+                            <p>Modern, async, auto docs (Swagger). Pydantic validation. Performance gần Node.js. <strong>#1 cho API mới.</strong></p>
+                            <code>pip install fastapi uvicorn</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #3776AB">
+                            <div class="lib-category">Web Framework</div>
+                            <div class="lib-name">Django</div>
+                            <p>"Batteries included." ORM, admin panel, auth, migrations — tất cả built-in. Giống ASP.NET + EF Core + Identity.</p>
+                            <code>pip install django</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #3776AB">
+                            <div class="lib-category">Web Framework</div>
+                            <div class="lib-name">Flask</div>
+                            <p>Micro-framework. Minimal core, thêm extensions khi cần. Giống Express.js cho Python. Dễ học nhất.</p>
+                            <code>pip install flask</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #3776AB">
+                            <div class="lib-category">ORM</div>
+                            <div class="lib-name">SQLAlchemy</div>
+                            <p>ORM mạnh nhất Python. Core (SQL builder) + ORM (Active Record/Data Mapper). <strong>Production standard.</strong></p>
+                            <code>pip install sqlalchemy asyncpg</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #3776AB">
+                            <div class="lib-category">Validation</div>
+                            <div class="lib-name">Pydantic</div>
+                            <p>Data validation bằng type hints. FastAPI dùng Pydantic core. <code>BaseModel</code> = DTO auto-validated.</p>
+                            <code>pip install pydantic</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #3776AB">
+                            <div class="lib-category">Task Queue</div>
+                            <div class="lib-name">Celery</div>
+                            <p>Distributed task queue. Background jobs, scheduled tasks. Giống Hangfire C#. Dùng Redis/RabbitMQ.</p>
+                            <code>pip install celery[redis]</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #3776AB">
+                            <div class="lib-category">AI / ML</div>
+                            <div class="lib-name">LangChain / OpenAI SDK</div>
+                            <p>Build AI apps: RAG, agents, chains. Python là ngôn ngữ #1 cho AI integration. <strong>Killer feature của Python.</strong></p>
+                            <code>pip install langchain openai</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #3776AB">
+                            <div class="lib-category">Testing</div>
+                            <div class="lib-name">pytest</div>
+                            <p>Testing framework #1 Python. Fixtures, parametrize, plugins. Đơn giản mà mạnh. <code>assert</code> là đủ.</p>
+                            <code>pip install pytest pytest-asyncio</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #3776AB">
+                            <div class="lib-category">HTTP Client</div>
+                            <div class="lib-name">httpx</div>
+                            <p>Async HTTP client. Giống <code>HttpClient</code> C#. HTTP/2, async/sync, type hints.</p>
+                            <code>pip install httpx</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #3776AB">
+                            <div class="lib-category">Package Manager</div>
+                            <div class="lib-name">uv / Poetry</div>
+                            <p><strong>uv:</strong> Rust-powered, nhanh 10-100x pip. <strong>Poetry:</strong> dependency management + virtual env. Thay thế pip + venv.</p>
+                            <code>pip install uv && uv init</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== SECTION 6: JAVA/KOTLIN ===== -->
+    <section class="section" id="java">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">☕</div>
+                <h2>7. Java / Kotlin (Spring Boot) — Enterprise King</h2>
+                <p>C# được tạo ra lấy cảm hứng từ Java — nên syntax rất giống. Kotlin = "Java hiện đại" trên JVM.</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>⚡ Kotlin 80/20 — Java Hiện Đại</h3>
+                <p>Kotlin được Google chọn cho Android + backend. Syntax ngắn gọn hơn Java, null-safe, coroutines. Chạy trên JVM — dùng mọi Java library.</p>
+
+                <div class="lang-block">
+                    <div class="lang-label">Kotlin cơ bản — So sánh với C#</div>
+<pre class="code-block"><span class="c-cmt">// Data class = C# record</span>
+<span class="c-key">data class</span> <span class="c-fn">User</span>(
+    <span class="c-key">val</span> id: <span class="c-key">Int</span>,
+    <span class="c-key">val</span> name: <span class="c-key">String</span>,
+    <span class="c-key">val</span> email: <span class="c-key">String</span>,
+    <span class="c-key">val</span> isActive: <span class="c-key">Boolean</span> = <span class="c-key">true</span>   <span class="c-cmt">// default value</span>
+)
+
+<span class="c-cmt">// Null safety (giống C# nullable reference types)</span>
+<span class="c-key">var</span> name: <span class="c-key">String</span> = <span class="c-str">"Minh"</span>     <span class="c-cmt">// non-null</span>
+<span class="c-key">var</span> email: <span class="c-key">String</span>? = <span class="c-key">null</span>     <span class="c-cmt">// nullable</span>
+<span class="c-key">val</span> len = email?.<span class="c-fn">length</span> ?: <span class="c-num">0</span>  <span class="c-cmt">// ?. và ?: giống C#</span>
+
+<span class="c-cmt">// Extension functions (giống C# extension methods)</span>
+<span class="c-key">fun</span> <span class="c-key">String</span>.<span class="c-fn">toSlug</span>(): <span class="c-key">String</span> =
+    <span class="c-key">this</span>.<span class="c-fn">lowercase</span>().<span class="c-fn">replace</span>(<span class="c-str">" "</span>, <span class="c-str">"-"</span>)
+
+<span class="c-cmt">// Coroutines = async/await</span>
+<span class="c-key">suspend fun</span> <span class="c-fn">getUser</span>(id: <span class="c-key">Int</span>): User {
+    <span class="c-key">return</span> userRepository.<span class="c-fn">findById</span>(id)
+        ?: <span class="c-key">throw</span> <span class="c-fn">NotFoundException</span>(<span class="c-str">"User $id not found"</span>)
+}
+
+<span class="c-cmt">// When = switch expression (mạnh hơn C# switch)</span>
+<span class="c-key">val</span> greeting = <span class="c-key">when</span> (role) {
+    <span class="c-str">"admin"</span>     -> <span class="c-str">"Welcome, admin!"</span>
+    <span class="c-str">"moderator"</span> -> <span class="c-str">"Welcome, mod!"</span>
+    <span class="c-key">else</span>        -> <span class="c-str">"Hello, user!"</span>
+}</pre>
+                </div>
+
+                <div class="lang-block">
+                    <div class="lang-label">Spring Boot API (Kotlin) — Giống ASP.NET</div>
+<pre class="code-block"><span class="c-key">@RestController</span>
+<span class="c-key">@RequestMapping</span>(<span class="c-str">"/api/users"</span>)
+<span class="c-key">class</span> <span class="c-fn">UserController</span>(
+    <span class="c-key">private val</span> userService: UserService  <span class="c-cmt">// DI qua constructor</span>
+) {
+    <span class="c-key">@GetMapping</span>
+    <span class="c-key">fun</span> <span class="c-fn">getAll</span>(): List&lt;User&gt; = userService.<span class="c-fn">findAll</span>()
+
+    <span class="c-key">@GetMapping</span>(<span class="c-str">"/{id}"</span>)
+    <span class="c-key">fun</span> <span class="c-fn">getById</span>(<span class="c-key">@PathVariable</span> id: <span class="c-key">Long</span>): User =
+        userService.<span class="c-fn">findById</span>(id)
+            ?: <span class="c-key">throw</span> <span class="c-fn">ResponseStatusException</span>(HttpStatus.NOT_FOUND)
+
+    <span class="c-key">@PostMapping</span>
+    <span class="c-key">@ResponseStatus</span>(HttpStatus.CREATED)
+    <span class="c-key">fun</span> <span class="c-fn">create</span>(<span class="c-key">@RequestBody</span> user: CreateUserDto): User =
+        userService.<span class="c-fn">create</span>(user)
+}</pre>
+                    <div class="lang-note">
+                        <strong>vs ASP.NET:</strong> <code>@RestController</code> = <code>[ApiController]</code>. <code>@GetMapping</code> = <code>[HttpGet]</code>. <code>@RequestBody</code> = <code>[FromBody]</code>. Constructor DI giống hệt. Spring Boot = ASP.NET của thế giới Java.
+                    </div>
+                </div>
+
+                <div class="lang-summary">
+                    <h4>📋 Kotlin Cheat Sheet</h4>
+                    <div class="cheat-grid">
+                        <div class="cheat-item"><code>val</code> = readonly</div>
+                        <div class="cheat-item"><code>var</code> = mutable</div>
+                        <div class="cheat-item"><code>fun</code> Function</div>
+                        <div class="cheat-item"><code>data class</code> = record</div>
+                        <div class="cheat-item"><code>?</code> Nullable</div>
+                        <div class="cheat-item"><code>?.</code> Safe call</div>
+                        <div class="cheat-item"><code>?:</code> Elvis (??)</div>
+                        <div class="cheat-item"><code>when</code> = switch</div>
+                        <div class="cheat-item"><code>suspend</code> = async</div>
+                        <div class="cheat-item"><code>it</code> Lambda param</div>
+                        <div class="cheat-item"><code>companion object</code> = static</div>
+                        <div class="cheat-item"><code>gradle</code> = MSBuild</div>
+                    </div>
+                </div>
+
+                <div class="lib-ecosystem">
+                    <h4>📦 Thư Viện Phổ Biến — Java/Kotlin (JVM)</h4>
+                    <div class="lib-grid">
+                        <div class="lib-card" style="--lib-color: #7F52FF">
+                            <div class="lib-category">Web Framework</div>
+                            <div class="lib-name">Spring Boot</div>
+                            <p><strong>Giống ASP.NET nhất trong mọi framework.</strong> DI, middleware, security, data access — tất cả built-in. Enterprise king.</p>
+                            <code>spring init --dependencies=web,jpa,security</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #7F52FF">
+                            <div class="lib-category">Web Framework</div>
+                            <div class="lib-name">Ktor</div>
+                            <p>JetBrains tạo. Kotlin-native, lightweight, coroutines-first. Giống Minimal APIs trong ASP.NET.</p>
+                            <code>// start.ktor.io — generator online</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #7F52FF">
+                            <div class="lib-category">ORM</div>
+                            <div class="lib-name">Spring Data JPA</div>
+                            <p>Giống EF Core. Define interface → Spring auto-implement queries. <code>findByNameContaining()</code> → auto SQL.</p>
+                            <code>implementation("org.springframework.boot:spring-boot-starter-data-jpa")</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #7F52FF">
+                            <div class="lib-category">ORM (Kotlin)</div>
+                            <div class="lib-name">Exposed</div>
+                            <p>JetBrains ORM cho Kotlin. Type-safe SQL DSL. Lightweight hơn JPA. Kotlin-idiomatic.</p>
+                            <code>implementation("org.jetbrains.exposed:exposed-core:0.45.0")</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #7F52FF">
+                            <div class="lib-category">Security</div>
+                            <div class="lib-name">Spring Security</div>
+                            <p>Auth, authorization, OAuth2, JWT — tất cả built-in. Giống ASP.NET Identity + Authorization. Hơi phức tạp nhưng mạnh.</p>
+                            <code>implementation("org.springframework.boot:spring-boot-starter-security")</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #7F52FF">
+                            <div class="lib-category">Reactive</div>
+                            <div class="lib-name">Spring WebFlux</div>
+                            <p>Non-blocking, reactive web framework. Kotlin Coroutines support. Giống Minimal APIs + async streams.</p>
+                            <code>implementation("org.springframework.boot:spring-boot-starter-webflux")</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #7F52FF">
+                            <div class="lib-category">Serialization</div>
+                            <div class="lib-name">kotlinx.serialization</div>
+                            <p>Kotlin multiplatform serialization. Compile-time, no reflection. Nhanh hơn Jackson/Gson.</p>
+                            <code>implementation("org.jetbrains.kotlinx:kotlinx-serialization-json")</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #7F52FF">
+                            <div class="lib-category">Testing</div>
+                            <div class="lib-name">JUnit 5 + MockK</div>
+                            <p><strong>JUnit:</strong> testing standard (giống xUnit). <strong>MockK:</strong> mocking cho Kotlin (giống Moq C#). Coroutine-aware.</p>
+                            <code>testImplementation("io.mockk:mockk:1.13.8")</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #7F52FF">
+                            <div class="lib-category">HTTP Client</div>
+                            <div class="lib-name">Ktor Client / Retrofit</div>
+                            <p><strong>Ktor Client:</strong> Kotlin-native, coroutines. <strong>Retrofit:</strong> Square tạo, annotation-based. Cả 2 đều production-grade.</p>
+                            <code>implementation("io.ktor:ktor-client-core")</code>
+                        </div>
+                        <div class="lib-card" style="--lib-color: #7F52FF">
+                            <div class="lib-category">Build Tool</div>
+                            <div class="lib-name">Gradle (Kotlin DSL)</div>
+                            <p>Build tool chuẩn. <code>build.gradle.kts</code> viết bằng Kotlin. Dependencies, tasks, plugins. Giống MSBuild + NuGet.</p>
+                            <code>gradle init --type kotlin-application</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== SECTION 7: SO SÁNH ===== -->
+    <section class="section section-dark" id="compare">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">⚖️</div>
+                <h2>8. So Sánh Tổng Hợp — Chọn Ngôn Ngữ Nào?</h2>
+                <p>Không có ngôn ngữ "tốt nhất" — chỉ có ngôn ngữ "phù hợp nhất" cho bài toán cụ thể</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>📊 Bảng So Sánh Nhanh</h3>
+                <div class="compare-table">
+                    <div class="ct-header">
+                        <div class="ct-cell ct-head">Tiêu chí</div>
+                        <div class="ct-cell ct-head">C#/.NET</div>
+                        <div class="ct-cell ct-head">Go</div>
+                        <div class="ct-cell ct-head">Rust</div>
+                        <div class="ct-cell ct-head">TypeScript</div>
+                        <div class="ct-cell ct-head">Python</div>
+                        <div class="ct-cell ct-head">Kotlin</div>
+                    </div>
+                    <div class="ct-row">
+                        <div class="ct-cell ct-label">Độ khó học</div>
+                        <div class="ct-cell ct-med">Trung bình</div>
+                        <div class="ct-cell ct-easy">Dễ</div>
+                        <div class="ct-cell ct-hard">Khó</div>
+                        <div class="ct-cell ct-easy">Dễ</div>
+                        <div class="ct-cell ct-easy">Dễ nhất</div>
+                        <div class="ct-cell ct-med">Trung bình</div>
+                    </div>
+                    <div class="ct-row">
+                        <div class="ct-cell ct-label">Performance</div>
+                        <div class="ct-cell ct-good">Nhanh (AOT)</div>
+                        <div class="ct-cell ct-good">Rất nhanh</div>
+                        <div class="ct-cell ct-best">Nhanh nhất</div>
+                        <div class="ct-cell ct-med">Trung bình</div>
+                        <div class="ct-cell ct-bad">Chậm nhất</div>
+                        <div class="ct-cell ct-good">Nhanh</div>
+                    </div>
+                    <div class="ct-row">
+                        <div class="ct-cell ct-label">Concurrency</div>
+                        <div class="ct-cell ct-good">async/await, TPL</div>
+                        <div class="ct-cell ct-best">Goroutines ⭐</div>
+                        <div class="ct-cell ct-good">Tokio async</div>
+                        <div class="ct-cell ct-med">Event loop</div>
+                        <div class="ct-cell ct-bad">GIL hạn chế</div>
+                        <div class="ct-cell ct-good">Coroutines</div>
+                    </div>
+                    <div class="ct-row">
+                        <div class="ct-cell ct-label">Ecosystem</div>
+                        <div class="ct-cell ct-best">NuGet, rất mạnh</div>
+                        <div class="ct-cell ct-med">Đang phát triển</div>
+                        <div class="ct-cell ct-med">Đang phát triển</div>
+                        <div class="ct-cell ct-best">Khổng lồ (npm)</div>
+                        <div class="ct-cell ct-good">AI/ML tốt nhất</div>
+                        <div class="ct-cell ct-best">Java ecosystem</div>
+                    </div>
+                    <div class="ct-row">
+                        <div class="ct-cell ct-label">Tuyển dụng VN</div>
+                        <div class="ct-cell ct-good">Nhiều, ổn định</div>
+                        <div class="ct-cell ct-med">Ít, tăng nhanh</div>
+                        <div class="ct-cell ct-bad">Rất ít</div>
+                        <div class="ct-cell ct-good">Nhiều</div>
+                        <div class="ct-cell ct-good">Nhiều (AI)</div>
+                        <div class="ct-cell ct-med">Trung bình</div>
+                    </div>
+                    <div class="ct-row">
+                        <div class="ct-cell ct-label">Use case chính</div>
+                        <div class="ct-cell">Enterprise, API, Desktop, Game</div>
+                        <div class="ct-cell">Microservices, CLI, Cloud</div>
+                        <div class="ct-cell">Systems, Wasm, Performance-critical</div>
+                        <div class="ct-cell">Full-stack, Startup, API</div>
+                        <div class="ct-cell">AI/ML, Data, Scripting</div>
+                        <div class="ct-cell">Enterprise, Android, Server</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🎯 Chọn Ngôn Ngữ Theo Bài Toán</h3>
+                <div class="usecase-grid">
+                    <div class="usecase-card">
+                        <h4>🚀 Startup, MVP nhanh</h4>
+                        <div class="usecase-pick">TypeScript (Node.js) hoặc Python</div>
+                        <p>Tốc độ develop nhanh nhất. Cùng ngôn ngữ FE+BE (TS). AI features dễ integrate (Python).</p>
+                    </div>
+                    <div class="usecase-card">
+                        <h4>⚡ Microservices, High throughput</h4>
+                        <div class="usecase-pick">Go</div>
+                        <p>Concurrency siêu dễ. Build nhanh. Binary nhỏ. Docker image ~10MB. Kubernetes viết bằng Go.</p>
+                    </div>
+                    <div class="usecase-card">
+                        <h4>🔒 Performance-critical, Systems</h4>
+                        <div class="usecase-pick">Rust</div>
+                        <p>Memory safe + nhanh ngang C. WebAssembly. Database engines, game servers, blockchain.</p>
+                    </div>
+                    <div class="usecase-card">
+                        <h4>🏢 Enterprise, Banking, Large team</h4>
+                        <div class="usecase-pick">Java/Kotlin (Spring Boot) hoặc C#/.NET</div>
+                        <p>Ecosystem khổng lồ. Tooling tốt nhất. Developer pool lớn. Battle-tested decades.</p>
+                    </div>
+                    <div class="usecase-card">
+                        <h4>🤖 AI/ML Backend</h4>
+                        <div class="usecase-pick">Python (FastAPI)</div>
+                        <p>PyTorch, TensorFlow, HuggingFace đều Python. FastAPI cho API layer. Kết hợp Go/Rust cho performance layer.</p>
+                    </div>
+                    <div class="usecase-card">
+                        <h4>🌐 Full-stack Web</h4>
+                        <div class="usecase-pick">TypeScript (Next.js full-stack)</div>
+                        <p>1 ngôn ngữ, 1 framework, cả FE+BE. Server Components, API routes, SSR — tất cả trong Next.js.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== SECTION 8: LỜI KHUYÊN ===== -->
+    <section class="section" id="advice">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">💡</div>
+                <h2>9. Lời Khuyên — Học Ngôn Ngữ Mới Hiệu Quả</h2>
+                <p>Bạn đã biết C# — đừng học lại từ đầu. Tận dụng kiến thức đã có.</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>🎯 Chiến Lược Học — Cho Người Đã Biết 1 Ngôn Ngữ</h3>
+                <div class="advice-grid">
+                    <div class="advice-card">
+                        <div class="advice-num">01</div>
+                        <h4>Đừng đọc sách từ chapter 1</h4>
+                        <p>Bạn đã biết variables, loops, functions. <strong>Nhảy thẳng đến phần KHÁC BIỆT</strong>: Go → goroutines, error handling. Rust → ownership, borrowing. Python → list comprehension, decorators.</p>
+                    </div>
+                    <div class="advice-card">
+                        <div class="advice-num">02</div>
+                        <h4>Build 1 project nhỏ NGAY</h4>
+                        <p>Đọc tutorial 3 ngày < build TODO API trong 3 giờ. <strong>Project gợi ý:</strong> REST API CRUD + database + authentication. Cùng bài toán, ngôn ngữ khác → thấy khác biệt rõ nhất.</p>
+                    </div>
+                    <div class="advice-card">
+                        <div class="advice-num">03</div>
+                        <h4>So sánh với C# liên tục</h4>
+                        <p>"Cái này trong C# là gì?" → xây mental model nhanh hơn 10x. Interface Go = implicit. Error Go = return value. Ownership Rust = tự quản lý memory.</p>
+                    </div>
+                    <div class="advice-card">
+                        <div class="advice-num">04</div>
+                        <h4>Học idioms, không chỉ syntax</h4>
+                        <p>Viết Go theo style C# = Go tệ. Mỗi ngôn ngữ có "cách viết đúng". <strong>Go:</strong> error handling explicit. <strong>Rust:</strong> ownership + pattern matching. <strong>Python:</strong> list comprehension + generators.</p>
+                    </div>
+                    <div class="advice-card">
+                        <div class="advice-num">05</div>
+                        <h4>Thứ tự học gợi ý cho bạn</h4>
+                        <p><strong>TypeScript</strong> (gần C# nhất, 1-2 tuần) → <strong>Go</strong> (khác biệt vừa, 2-3 tuần) → <strong>Python</strong> (dễ, cần cho AI, 1 tuần) → <strong>Rust</strong> (khó, dành thời gian, 1-2 tháng).</p>
+                    </div>
+                    <div class="advice-card">
+                        <div class="advice-num">06</div>
+                        <h4>Không cần master — cần "đủ dùng"</h4>
+                        <p>80/20 = nắm 20% syntax + ecosystem + best practices = giải quyết 80% công việc. <strong>Chuyên sâu C#/.NET + biết đủ 2-3 ngôn ngữ khác</strong> = profile Team Lead mạnh.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>📚 Tài Nguyên Học — Chọn Lọc Tốt Nhất</h3>
+                <div class="resource-grid">
+                    <div class="resource-card">
+                        <h4>🐹 Go</h4>
+                        <div class="resource-list">
+                            <div class="resource-item"><strong>Go by Example</strong> — gobyexample.com — học qua ví dụ</div>
+                            <div class="resource-item"><strong>A Tour of Go</strong> — tour.golang.org — official interactive tutorial</div>
+                            <div class="resource-item"><strong>Let's Go</strong> (Alex Edwards) — sách build web app Go từ đầu</div>
+                        </div>
+                    </div>
+                    <div class="resource-card">
+                        <h4>🦀 Rust</h4>
+                        <div class="resource-list">
+                            <div class="resource-item"><strong>The Rust Book</strong> — doc.rust-lang.org/book — official, rất tốt</div>
+                            <div class="resource-item"><strong>Rustlings</strong> — exercises nhỏ, fix compiler errors</div>
+                            <div class="resource-item"><strong>Zero To Production In Rust</strong> — build production API</div>
+                        </div>
+                    </div>
+                    <div class="resource-card">
+                        <h4>🟦 TypeScript</h4>
+                        <div class="resource-list">
+                            <div class="resource-item"><strong>TypeScript Handbook</strong> — official docs, đọc nhanh vì biết C#</div>
+                            <div class="resource-item"><strong>Total TypeScript</strong> — Matt Pocock — advanced TS patterns</div>
+                            <div class="resource-item"><strong>NestJS docs</strong> — nếu thích ASP.NET style cho Node.js</div>
+                        </div>
+                    </div>
+                    <div class="resource-card">
+                        <h4>🐍 Python + ☕ Kotlin</h4>
+                        <div class="resource-list">
+                            <div class="resource-item"><strong>FastAPI docs</strong> — tutorial tốt nhất, interactive, đầy đủ</div>
+                            <div class="resource-item"><strong>Kotlin Koans</strong> — exercises tương tác trên play.kotlinlang.org</div>
+                            <div class="resource-item"><strong>Spring Boot + Kotlin guide</strong> — spring.io/guides</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== SECTION 9: LUỒNG HỌC NGÔN NGỮ MỚI ===== -->
+    <section class="section section-dark" id="learning-flow">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🧭</div>
+                <h2>10. Luồng Học Ngôn Ngữ Mới — Framework Áp Dụng Cho Mọi Ngôn Ngữ</h2>
+                <p>Dù là Go, Rust, Zig hay bất kỳ ngôn ngữ nào ra mắt năm 2030 — luồng tiếp cận này vẫn đúng.</p>
+            </div>
+
+            <!-- LEARNING FLOW PIPELINE -->
+            <div class="concept-card">
+                <h3>🔄 7 Bước Tiếp Cận Ngôn Ngữ Mới — The Universal Flow</h3>
+                <p style="color: var(--text-dim); margin-bottom: 24px;">Không cần thay đổi. Áp dụng bất kỳ ngôn ngữ nào, bất kỳ lúc nào. Mỗi bước ~1-3 ngày cho người đã biết 1 ngôn ngữ.</p>
+
+                <div class="flow-pipeline">
+                    <div class="flow-step" style="--step-color: #F59E0B">
+                        <div class="flow-num">1</div>
+                        <h4>WHY — Tại sao ngôn ngữ này tồn tại?</h4>
+                        <div class="flow-time">⏱ 2 giờ</div>
+                        <p>Mỗi ngôn ngữ được tạo ra để <strong>giải quyết 1 vấn đề cụ thể</strong> mà ngôn ngữ cũ chưa làm tốt. Hiểu "why" = hiểu mọi design decision sau này.</p>
+                        <div class="flow-actions">
+                            <span class="flow-action">Đọc trang "About" trên official site</span>
+                            <span class="flow-action">Tìm bài "Why [Language] was created"</span>
+                            <span class="flow-action">Xem creator nói về motivation</span>
+                        </div>
+                        <div class="flow-example">
+                            <strong>Ví dụ:</strong> Go = Google cần build microservices nhanh, compile nhanh, concurrency dễ → hiểu tại sao Go đơn giản, không có generics (lúc đầu), goroutines là core.<br>
+                            Rust = Mozilla cần browser engine an toàn + nhanh → hiểu tại sao ownership system tồn tại.
+                        </div>
+                    </div>
+
+                    <div class="flow-step" style="--step-color: #3B82F6">
+                        <div class="flow-num">2</div>
+                        <h4>SETUP — Cài đặt + Hello World + Build tool</h4>
+                        <div class="flow-time">⏱ 1-2 giờ</div>
+                        <p>Cài xong, chạy được Hello World = bạn đã vượt qua 50% rào cản tâm lý. <strong>Đừng đọc thêm — hãy chạy code trước.</strong></p>
+                        <div class="flow-actions">
+                            <span class="flow-action">Cài SDK/Runtime</span>
+                            <span class="flow-action">Setup IDE + extensions</span>
+                            <span class="flow-action">Hello World chạy được</span>
+                            <span class="flow-action">Hiểu build tool (cargo, go build, npm...)</span>
+                        </div>
+                        <div class="flow-example">
+                            <strong>Checklist:</strong> <code>go mod init</code> / <code>cargo new</code> / <code>npm init</code> → tạo project → build → run → thấy output. Done. Không cần hiểu gì thêm ở bước này.
+                        </div>
+                    </div>
+
+                    <div class="flow-step" style="--step-color: #10B981">
+                        <div class="flow-num">3</div>
+                        <h4>MAP — Syntax mapping từ ngôn ngữ cũ</h4>
+                        <div class="flow-time">⏱ 3-4 giờ</div>
+                        <p><strong>Đây là bước quan trọng nhất.</strong> Không học syntax mới — mà MAP syntax cũ sang syntax mới. Bạn đã biết concepts, chỉ cần biết "viết khác như nào".</p>
+                        <div class="flow-actions">
+                            <span class="flow-action">Variable: var/let/const → ?</span>
+                            <span class="flow-action">Function: cách khai báo → ?</span>
+                            <span class="flow-action">Class/Struct: → ?</span>
+                            <span class="flow-action">Interface: → ?</span>
+                            <span class="flow-action">Error handling: try/catch → ?</span>
+                            <span class="flow-action">Null handling: → ?</span>
+                            <span class="flow-action">Collection: List, Dict → ?</span>
+                            <span class="flow-action">Async: async/await → ?</span>
+                        </div>
+                        <div class="flow-example">
+                            <strong>Cách làm:</strong> Mở 2 tab — C# code bên trái, ngôn ngữ mới bên phải. Viết lại CÙNG 1 đoạn code. Ghi chú khác biệt. Sau 3-4 giờ bạn sẽ "à, hiểu rồi".
+                        </div>
+                    </div>
+
+                    <div class="flow-step" style="--step-color: #8B5CF6">
+                        <div class="flow-num">4</div>
+                        <h4>UNIQUE — Học cái ĐẶC BIỆT chỉ ngôn ngữ này có</h4>
+                        <div class="flow-time">⏱ 1-2 ngày</div>
+                        <p>Mỗi ngôn ngữ có 2-3 concepts KHÔNG tồn tại trong ngôn ngữ khác. <strong>Đây mới là thứ cần dành thời gian.</strong> Phần còn lại chỉ là syntax khác.</p>
+                        <div class="flow-actions">
+                            <span class="flow-action">Tìm "What makes [Lang] unique"</span>
+                            <span class="flow-action">Đọc sâu 2-3 concepts đặc biệt</span>
+                            <span class="flow-action">Viết code thử nghiệm</span>
+                        </div>
+                        <div class="flow-unique-grid">
+                            <div class="flow-unique-item" style="--u-color: #00ADD8">
+                                <strong>Go:</strong> Goroutines + Channels, implicit interfaces, multiple return values, <code>defer</code>
+                            </div>
+                            <div class="flow-unique-item" style="--u-color: #DEA584">
+                                <strong>Rust:</strong> Ownership + Borrowing, lifetime, pattern matching, <code>Result/Option</code> bắt buộc
+                            </div>
+                            <div class="flow-unique-item" style="--u-color: #3178C6">
+                                <strong>TypeScript:</strong> Union types, type narrowing, mapped types, conditional types
+                            </div>
+                            <div class="flow-unique-item" style="--u-color: #3776AB">
+                                <strong>Python:</strong> List comprehension, decorators, generators, GIL, dunder methods
+                            </div>
+                            <div class="flow-unique-item" style="--u-color: #7F52FF">
+                                <strong>Kotlin:</strong> Coroutines, sealed classes, extension functions, null safety built-in
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flow-step" style="--step-color: #EF4444">
+                        <div class="flow-num">5</div>
+                        <h4>BUILD — Xây CRUD API (cùng bài toán, ngôn ngữ mới)</h4>
+                        <div class="flow-time">⏱ 1-2 ngày</div>
+                        <p><strong>Luôn build cùng 1 project cho mọi ngôn ngữ.</strong> REST API CRUD + database + validation. Cùng bài toán → thấy khác biệt rõ nhất. Đây là lúc kiến thức "click".</p>
+                        <div class="flow-actions">
+                            <span class="flow-action">Tạo REST API (GET/POST/PUT/DELETE)</span>
+                            <span class="flow-action">Kết nối database (PostgreSQL)</span>
+                            <span class="flow-action">Validation + Error handling</span>
+                            <span class="flow-action">Middleware (logging, auth)</span>
+                            <span class="flow-action">Test cơ bản</span>
+                        </div>
+                        <div class="flow-example">
+                            <strong>Project gợi ý:</strong> <em>User Management API</em> — CRUD users + roles + JWT auth. Đơn giản nhưng đụng đủ: routing, DB, validation, middleware, error handling, auth. Sau khi build xong = bạn đã "biết" ngôn ngữ đó.
+                        </div>
+                    </div>
+
+                    <div class="flow-step" style="--step-color: #06B6D4">
+                        <div class="flow-num">6</div>
+                        <h4>ECOSYSTEM — Hiểu hệ sinh thái + tooling</h4>
+                        <div class="flow-time">⏱ 3-4 giờ</div>
+                        <p>Package manager, testing framework, linting, formatting, popular libraries — biết "ai là ai" trong ecosystem mới.</p>
+                        <div class="flow-actions">
+                            <span class="flow-action">Package manager (npm, pip, cargo...)</span>
+                            <span class="flow-action">Testing framework phổ biến</span>
+                            <span class="flow-action">Linting + formatting tool</span>
+                            <span class="flow-action">Top 10 popular libraries</span>
+                            <span class="flow-action">Framework chính (web, API)</span>
+                        </div>
+                        <div class="flow-ecosystem-map">
+                            <div class="eco-row">
+                                <div class="eco-label">Việc cần</div>
+                                <div class="eco-label">C# / .NET</div>
+                                <div class="eco-label">Tương đương?</div>
+                            </div>
+                            <div class="eco-row">
+                                <div class="eco-cell">Package Manager</div>
+                                <div class="eco-cell">NuGet</div>
+                                <div class="eco-cell">npm / pip / cargo / go mod</div>
+                            </div>
+                            <div class="eco-row">
+                                <div class="eco-cell">Web Framework</div>
+                                <div class="eco-cell">ASP.NET</div>
+                                <div class="eco-cell">Express / FastAPI / Actix / Spring</div>
+                            </div>
+                            <div class="eco-row">
+                                <div class="eco-cell">ORM</div>
+                                <div class="eco-cell">EF Core</div>
+                                <div class="eco-cell">Prisma / SQLAlchemy / Diesel / JPA</div>
+                            </div>
+                            <div class="eco-row">
+                                <div class="eco-cell">Testing</div>
+                                <div class="eco-cell">xUnit</div>
+                                <div class="eco-cell">Jest / pytest / cargo test / JUnit</div>
+                            </div>
+                            <div class="eco-row">
+                                <div class="eco-cell">Formatting</div>
+                                <div class="eco-cell">dotnet format</div>
+                                <div class="eco-cell">Prettier / Black / rustfmt / gofmt</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flow-step" style="--step-color: #F59E0B">
+                        <div class="flow-num">7</div>
+                        <h4>IDIOMS — Viết code "đúng cách" của ngôn ngữ đó</h4>
+                        <div class="flow-time">⏱ Ongoing (1-2 tuần đầu)</div>
+                        <p>Viết Go theo style C# = viết Go tệ. Mỗi ngôn ngữ có <strong>"the right way"</strong> — idioms, conventions, patterns riêng. Đây là bước biến bạn từ "biết syntax" → "viết code tốt".</p>
+                        <div class="flow-actions">
+                            <span class="flow-action">Đọc "Effective [Language]"</span>
+                            <span class="flow-action">Review code open-source nổi tiếng</span>
+                            <span class="flow-action">Chạy linter, fix warnings</span>
+                            <span class="flow-action">Refactor project ở bước 5</span>
+                        </div>
+                        <div class="flow-example">
+                            <strong>Go:</strong> Error handling explicit, không dùng exceptions. <strong>Rust:</strong> Dùng <code>Result</code>/<code>Option</code>, pattern matching everywhere. <strong>Python:</strong> "Pythonic" = list comprehension, generators, context managers. <strong>TypeScript:</strong> Strict types, discriminated unions, no <code>any</code>.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MINDSET -->
+            <div class="concept-card">
+                <h3>🧠 Mindset — Tư Duy Đúng Khi Học Ngôn Ngữ Mới</h3>
+                <div class="mindset-grid">
+                    <div class="mindset-card mindset-do">
+                        <h4>✅ NÊN</h4>
+                        <div class="mindset-list">
+                            <div class="mindset-item"><strong>So sánh, không phán xét</strong> — "Khác C# ở chỗ nào?" thay vì "Sao ngu vậy, C# có rồi mà"</div>
+                            <div class="mindset-item"><strong>Chấp nhận khó chịu ban đầu</strong> — 3 ngày đầu luôn bực bội. Đó là bình thường. Ngày thứ 4 sẽ "click"</div>
+                            <div class="mindset-item"><strong>Viết code xấu trước</strong> — Code chạy được > code đẹp. Refactor sau khi hiểu idioms</div>
+                            <div class="mindset-item"><strong>Đọc error messages kỹ</strong> — Compiler/runtime messages của mỗi ngôn ngữ khác nhau. Rust compiler = thầy giáo tốt nhất</div>
+                            <div class="mindset-item"><strong>Hỏi "Tại sao thiết kế thế?"</strong> — Mỗi quirk đều có lý do. Hiểu lý do = nhớ lâu hơn</div>
+                        </div>
+                    </div>
+                    <div class="mindset-card mindset-dont">
+                        <h4>❌ ĐỪNG</h4>
+                        <div class="mindset-list">
+                            <div class="mindset-item"><strong>Đừng học từ đầu như beginner</strong> — Bạn đã biết OOP, API, database. Skip chapters 1-5 của mọi cuốn sách</div>
+                            <div class="mindset-item"><strong>Đừng cố "master" trước khi build</strong> — Đọc docs 2 tuần = quên hết. Build sau 2 giờ = nhớ mãi</div>
+                            <div class="mindset-item"><strong>Đừng copy-paste code</strong> — Gõ tay từng dòng. Muscle memory giúp nhớ syntax nhanh gấp 5x</div>
+                            <div class="mindset-item"><strong>Đừng so sánh tốc độ với C#</strong> — Bạn viết C# 5 năm, Go 5 ngày. Chậm hơn là bình thường. 2 tuần sau sẽ nhanh lên</div>
+                            <div class="mindset-item"><strong>Đừng học nhiều ngôn ngữ cùng lúc</strong> — 1 ngôn ngữ/lần. 2-3 tuần mỗi cái. Xong cái này mới sang cái khác</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMMON TRAPS -->
+            <div class="concept-card">
+                <h3>⚠️ Bẫy Thường Gặp — Ai Cũng Dính</h3>
+                <div class="trap-grid">
+                    <div class="trap-card">
+                        <div class="trap-icon">📚</div>
+                        <h4>Tutorial Hell</h4>
+                        <p>Xem 10 video, đọc 5 tutorial, chưa viết dòng code nào. <strong>Fix:</strong> Sau 30 phút đọc → bắt buộc code. Không ngoại lệ.</p>
+                    </div>
+                    <div class="trap-card">
+                        <div class="trap-icon">🔄</div>
+                        <h4>Framework trước, Language sau</h4>
+                        <p>Nhảy thẳng vào NestJS/Spring Boot mà chưa hiểu TypeScript/Kotlin cơ bản. <strong>Fix:</strong> 2-3 ngày core language → mới vào framework.</p>
+                    </div>
+                    <div class="trap-card">
+                        <div class="trap-icon">🏗️</div>
+                        <h4>Over-engineering project đầu tiên</h4>
+                        <p>Muốn build "clean architecture" + CQRS + DDD ngay lần đầu. <strong>Fix:</strong> CRUD đơn giản. Tất cả trong 1 file cũng được. Refactor sau.</p>
+                    </div>
+                    <div class="trap-card">
+                        <div class="trap-icon">😤</div>
+                        <h4>Bỏ cuộc ở ngày thứ 3</h4>
+                        <p>"Ngôn ngữ này tệ quá, C# tốt hơn nhiều." Mọi ngôn ngữ đều khó chịu lúc đầu. <strong>Fix:</strong> Cam kết 7 ngày tối thiểu trước khi đánh giá.</p>
+                    </div>
+                    <div class="trap-card">
+                        <div class="trap-icon">🤖</div>
+                        <h4>Dùng AI viết hết code</h4>
+                        <p>ChatGPT/Copilot viết code giúp → không nhớ gì. <strong>Fix:</strong> Dùng AI để giải thích, KHÔNG để viết code khi đang học. Tự gõ tay.</p>
+                    </div>
+                    <div class="trap-card">
+                        <div class="trap-icon">🎯</div>
+                        <h4>Không có mục tiêu rõ ràng</h4>
+                        <p>"Tôi muốn học Go" vs "Tôi muốn build microservice xử lý 10k req/s bằng Go." <strong>Fix:</strong> Luôn có project cụ thể TRƯỚC khi bắt đầu học.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TIMELINE TEMPLATE -->
+            <div class="concept-card">
+                <h3>📅 Template 2 Tuần — Copy & Áp Dụng Cho Mọi Ngôn Ngữ</h3>
+                <p style="color: var(--text-dim); margin-bottom: 20px;">Dành cho developer đã biết ít nhất 1 ngôn ngữ backend. Mục tiêu: "đủ dùng" để build production-ready API.</p>
+
+                <div class="timeline-template">
+                    <div class="tl-week">
+                        <h4 class="tl-week-title">TUẦN 1 — Nền tảng</h4>
+                        <div class="tl-days">
+                            <div class="tl-day">
+                                <div class="tl-day-num">Ngày 1</div>
+                                <div class="tl-day-content">
+                                    <strong>WHY + SETUP</strong> — Đọc "why" (1h). Cài đặt SDK + IDE (1h). Hello World chạy được. Đọc syntax overview.
+                                </div>
+                            </div>
+                            <div class="tl-day">
+                                <div class="tl-day-num">Ngày 2</div>
+                                <div class="tl-day-content">
+                                    <strong>SYNTAX MAP</strong> — Variables, functions, structs/classes, interfaces. Viết lại 5-10 đoạn code C# sang ngôn ngữ mới.
+                                </div>
+                            </div>
+                            <div class="tl-day">
+                                <div class="tl-day-num">Ngày 3</div>
+                                <div class="tl-day-content">
+                                    <strong>SYNTAX MAP (tiếp)</strong> — Error handling, null safety, collections, generics, async/await. Hoàn thiện cheat sheet cá nhân.
+                                </div>
+                            </div>
+                            <div class="tl-day">
+                                <div class="tl-day-num">Ngày 4-5</div>
+                                <div class="tl-day-content">
+                                    <strong>UNIQUE FEATURES</strong> — Đọc sâu 2-3 concepts đặc biệt. Viết mini exercises. Đây là phần khó nhất — dành đủ thời gian.
+                                </div>
+                            </div>
+                            <div class="tl-day">
+                                <div class="tl-day-num">Ngày 6-7</div>
+                                <div class="tl-day-content">
+                                    <strong>BUILD (phần 1)</strong> — Khởi tạo project API. Setup routing + database connection. CRUD cơ bản chạy được.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tl-week">
+                        <h4 class="tl-week-title">TUẦN 2 — Thực chiến</h4>
+                        <div class="tl-days">
+                            <div class="tl-day">
+                                <div class="tl-day-num">Ngày 8-9</div>
+                                <div class="tl-day-content">
+                                    <strong>BUILD (phần 2)</strong> — Validation, error handling, middleware. Authentication (JWT). Viết tests cơ bản.
+                                </div>
+                            </div>
+                            <div class="tl-day">
+                                <div class="tl-day-num">Ngày 10-11</div>
+                                <div class="tl-day-content">
+                                    <strong>ECOSYSTEM</strong> — Popular libraries, testing framework, linter setup. Dockerize project. CI/CD đơn giản.
+                                </div>
+                            </div>
+                            <div class="tl-day">
+                                <div class="tl-day-num">Ngày 12-13</div>
+                                <div class="tl-day-content">
+                                    <strong>IDIOMS + REFACTOR</strong> — Đọc "Effective [Language]". Chạy linter, fix warnings. Refactor code theo idioms chuẩn.
+                                </div>
+                            </div>
+                            <div class="tl-day">
+                                <div class="tl-day-num">Ngày 14</div>
+                                <div class="tl-day-content">
+                                    <strong>REVIEW + DEPLOY</strong> — Review toàn bộ project. Deploy lên cloud. Viết README. Push lên GitHub. ✅ Done — bạn đã "biết" ngôn ngữ này.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tl-result">
+                    <strong>Kết quả sau 2 tuần:</strong> Bạn có 1 production-ready API project trên GitHub, hiểu core syntax + unique features + ecosystem + idioms. Chưa "master" — nhưng đủ để tự tin nhận ticket/task viết bằng ngôn ngữ đó. Phần còn lại sẽ học on-the-job.
+                </div>
+            </div>
+
+            <!-- GOLDEN RULES -->
+            <div class="concept-card">
+                <h3>💎 7 Quy Tắc Vàng — Ghi Nhớ Suốt Đời</h3>
+                <div class="golden-grid">
+                    <div class="golden-rule">
+                        <div class="golden-num">1</div>
+                        <p><strong>Code > Đọc.</strong> 1 giờ viết code = 5 giờ đọc tutorial. Luôn ưu tiên viết code.</p>
+                    </div>
+                    <div class="golden-rule">
+                        <div class="golden-num">2</div>
+                        <p><strong>So sánh > Học mới.</strong> Map từ ngôn ngữ cũ sang mới. Không bao giờ học "từ zero".</p>
+                    </div>
+                    <div class="golden-rule">
+                        <div class="golden-num">3</div>
+                        <p><strong>1 project > 10 exercises.</strong> Build 1 project thật > giải 100 bài LeetCode bằng ngôn ngữ mới.</p>
+                    </div>
+                    <div class="golden-rule">
+                        <div class="golden-num">4</div>
+                        <p><strong>Unique features first.</strong> Học cái ĐẶC BIỆT trước, cái giống nhau sẽ tự đến.</p>
+                    </div>
+                    <div class="golden-rule">
+                        <div class="golden-num">5</div>
+                        <p><strong>Gõ tay, đừng copy.</strong> Muscle memory giúp nhớ syntax nhanh gấp 5x. AI giải thích, bạn gõ.</p>
+                    </div>
+                    <div class="golden-rule">
+                        <div class="golden-num">6</div>
+                        <p><strong>7 ngày cam kết.</strong> Đừng đánh giá ngôn ngữ trước 7 ngày. Mọi thứ đều khó lúc đầu.</p>
+                    </div>
+                    <div class="golden-rule">
+                        <div class="golden-num">7</div>
+                        <p><strong>"Đủ dùng" > "Master".</strong> 80/20 cho mỗi ngôn ngữ. Chuyên sâu 1, biết đủ nhiều = profile mạnh nhất.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- CLOSING -->
+    <section class="section section-dark">
+        <div class="container">
+            <div class="closing-box">
+                <div class="closing-quote">
+                    "Biết 1 ngôn ngữ = biết cách code.<br>
+                    Biết nhiều ngôn ngữ = biết cách NGHĨ khác nhau về cùng 1 bài toán.<br>
+                    Đó là sự khác biệt giữa coder và software engineer."
+                </div>
+                <div class="closing-nav">
+                    <a href="../BE/index.html" class="closing-btn">📋 Roadmap .NET</a>
+                    <a href="../SQL/index.html" class="closing-btn">🗃️ SQL Mastery</a>
+                    <a href="../BUILD/index.html" class="closing-btn">🚀 Build & Deploy</a>
+                    <a href="../AI/index.html" class="closing-btn">🤖 AI Hub</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Backend Languages 80/20 — Nắm cốt lõi ngôn ngữ backend thịnh hành nhất 2026</p>
+            <p class="footer-note">Go · Rust · TypeScript · Python · Kotlin — So sánh với C# cho người đã biết .NET</p>
+        </div>
+    </footer>
+
+    <script src="tutorial.js"></script>
+</body>
+</html>
