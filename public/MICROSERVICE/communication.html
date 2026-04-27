@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Microservices · Giao Tiếp Giữa Các Service</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">Microservice<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="basics.html">Cơ Bản</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="communication.html" class="active">Giao Tiếp</a>
+      <a href="production.html">Production</a>
+      <a href="interview.html">Phỏng Vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">L1 → L2 · COMMUNICATION DEEP DIVE</div>
+  <h1>Giao tiếp <span class="gradient">giữa các service</span></h1>
+  <p class="hero-desc">REST vs gRPC vs Message Broker vs Event Streaming — chọn đúng kiểu giao tiếp quyết định 70% sự ổn định của hệ thống.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Sync vs Async — Khác biệt cốt lõi</h2>
+    <table class="cmp">
+      <thead><tr><th>Tiêu chí</th><th>Synchronous (REST/gRPC)</th><th>Asynchronous (Broker)</th></tr></thead>
+      <tbody>
+        <tr><td>Caller chờ response?</td><td>Có — block đến khi có kết quả</td><td>Không — fire &amp; forget</td></tr>
+        <tr><td>Coupling</td><td>Tight (caller biết callee tồn tại)</td><td>Loose (qua broker)</td></tr>
+        <tr><td>Callee chết</td><td>Caller fail / treo</td><td>Message ở queue, xử lý sau</td></tr>
+        <tr><td>Latency</td><td>Thấp (1 round trip)</td><td>Cao hơn (qua broker)</td></tr>
+        <tr><td>Use case</td><td>Query, validate, immediate response</td><td>Notification, integration, long task</td></tr>
+        <tr><td>Pattern</td><td>Request/Response</td><td>Pub/Sub, Queue, Event Streaming</td></tr>
+      </tbody>
+    </table>
+    <div class="tip"><strong>💡 Quy tắc vàng:</strong> Mặc định <strong>async</strong>. Chỉ dùng sync khi UI cần kết quả ngay lập tức (ví dụ: GET data, validate form).</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">REST — Khi nào dùng</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>✅ Dùng REST khi</h3>
+        <ul>
+          <li>Public API cho web/mobile/3rd party</li>
+          <li>Nghiệp vụ đơn giản: CRUD</li>
+          <li>Cần caching HTTP (CDN, ETag)</li>
+          <li>Tooling sẵn (Swagger, Postman)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>❌ Tránh REST khi</h3>
+        <ul>
+          <li>Service-to-service nội bộ tần suất cao → gRPC</li>
+          <li>Streaming (chat, realtime) → WebSocket / gRPC</li>
+          <li>Event-driven → Kafka / RabbitMQ</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="margin-top:1.5rem;color:var(--primary)">Best practices REST 2026</h3>
+    <pre class="code"><span class="c">// 1. Resource-based URL, không verb</span>
+<span class="t">POST</span> /orders                <span class="c">// ✅</span>
+<span class="t">POST</span> /createOrder           <span class="c">// ❌</span>
+
+<span class="c">// 2. Status code chuẩn</span>
+<span class="s">200</span> OK              <span class="c">// success</span>
+<span class="s">201</span> Created         <span class="c">// POST tạo mới</span>
+<span class="s">204</span> No Content      <span class="c">// DELETE thành công</span>
+<span class="s">400</span> Bad Request     <span class="c">// validation lỗi</span>
+<span class="s">401</span> Unauthorized    <span class="c">// chưa đăng nhập</span>
+<span class="s">403</span> Forbidden       <span class="c">// đăng nhập rồi nhưng không có quyền</span>
+<span class="s">404</span> Not Found       <span class="c">// resource không tồn tại</span>
+<span class="s">409</span> Conflict        <span class="c">// trùng, version mismatch</span>
+<span class="s">429</span> Too Many        <span class="c">// rate limit</span>
+<span class="s">500</span> Server Error    <span class="c">// bug server</span>
+<span class="s">503</span> Service Unavail.<span class="c">// downstream chết</span>
+
+<span class="c">// 3. Versioning</span>
+/v1/orders   /v2/orders   <span class="c">// hoặc header Accept-Version</span>
+
+<span class="c">// 4. Pagination chuẩn</span>
+<span class="t">GET</span> /orders?page=1&amp;size=20
+<span class="t">GET</span> /orders?cursor=eyJpZCI6MTIzfQ  <span class="c">// cursor-based, ổn định hơn</span>
+
+<span class="c">// 5. Idempotency-Key cho POST tài chính</span>
+<span class="t">POST</span> /payments
+<span class="t">Idempotency-Key</span>: <span class="s">"abc-123"</span>     <span class="c">// retry không tạo 2 thanh toán</span></pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">gRPC — Service-to-service nhanh</h2>
+    <p>HTTP/2 + Protobuf binary. Nhanh hơn REST 5-10×, schema mạnh, code-gen đa ngôn ngữ.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>✅ Lợi thế</h3>
+        <ul>
+          <li>Binary &amp; nén → bandwidth thấp</li>
+          <li>Strong typing qua <code>.proto</code></li>
+          <li>Streaming 4 chiều: unary, server stream, client stream, bidi</li>
+          <li>Code gen tự động cho 10+ ngôn ngữ</li>
+          <li>Built-in deadline, cancel, multiplexing</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>❌ Hạn chế</h3>
+        <ul>
+          <li>Browser không gọi trực tiếp (cần grpc-web/proxy)</li>
+          <li>Debug khó hơn REST (binary)</li>
+          <li>Tooling kém JSON</li>
+          <li>Versioning đòi quy ước nghiêm</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="margin-top:1.5rem;color:var(--primary)">Định nghĩa contract</h3>
+    <pre class="code"><span class="c">// payment.proto</span>
+<span class="k">syntax</span> = <span class="s">"proto3"</span>;
+
+<span class="k">service</span> <span class="t">PaymentService</span> {
+  <span class="k">rpc</span> <span class="n">Charge</span>(<span class="t">ChargeRequest</span>) <span class="k">returns</span> (<span class="t">ChargeResponse</span>);
+  <span class="k">rpc</span> <span class="n">StreamStatus</span>(<span class="t">StatusRequest</span>) <span class="k">returns</span> (<span class="k">stream</span> <span class="t">StatusEvent</span>);
+}
+
+<span class="k">message</span> <span class="t">ChargeRequest</span> {
+  <span class="k">string</span> order_id   = <span class="s">1</span>;
+  <span class="k">int64</span>  amount     = <span class="s">2</span>;
+  <span class="k">string</span> currency   = <span class="s">3</span>;
+  <span class="k">string</span> idempotency_key = <span class="s">4</span>;
+}</pre>
+    <p style="color:var(--muted)">→ Chạy <code>protoc</code> sinh stub cho C#, Go, Node, Python... Mọi service nói cùng "ngôn ngữ".</p>
+    <div class="info-box"><strong>📦 Khi nào dùng gRPC:</strong> service-to-service nội bộ, cần performance, đa ngôn ngữ, streaming.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Message Broker — Async Communication</h2>
+    <p class="section-sub">2 mô hình chính:</p>
+    <div class="grid grid-2">
+      <div class="dtype">
+        <h4>📬 Queue (Point-to-Point)</h4>
+        <p>1 message → 1 consumer xử lý. Phù hợp <strong>command/task</strong>: SendEmail, ProcessPayment.</p>
+        <p><strong>Tools:</strong> RabbitMQ, AWS SQS, Azure Service Bus.</p>
+      </div>
+      <div class="dtype">
+        <h4>📢 Pub/Sub (Topic / Event)</h4>
+        <p>1 event → N subscriber xử lý. Phù hợp <strong>event</strong>: OrderCreated → Inventory + Payment + Email cùng nhận.</p>
+        <p><strong>Tools:</strong> Kafka, RabbitMQ topic exchange, NATS, Google Pub/Sub.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">RabbitMQ vs Kafka — Khi nào dùng cái nào</h2>
+    <table class="cmp">
+      <thead><tr><th>Tiêu chí</th><th>RabbitMQ</th><th>Kafka</th></tr></thead>
+      <tbody>
+        <tr><td>Mô hình</td><td>Smart broker, dumb consumer</td><td>Dumb broker, smart consumer</td></tr>
+        <tr><td>Routing</td><td>Mạnh (exchange, routing key)</td><td>Đơn giản (topic + partition)</td></tr>
+        <tr><td>Throughput</td><td>~50k msg/s</td><td>~1M+ msg/s</td></tr>
+        <tr><td>Lưu trữ</td><td>Ngắn hạn (xử xong → xoá)</td><td>Dài hạn (giữ N ngày, replay được)</td></tr>
+        <tr><td>Order</td><td>Per queue</td><td>Per partition</td></tr>
+        <tr><td>Use case</td><td>Task queue, RPC, command</td><td>Event sourcing, log, streaming, analytics</td></tr>
+        <tr><td>Học ban đầu</td><td>Dễ — quen tay nhanh</td><td>Khó hơn — partition, offset, consumer group</td></tr>
+      </tbody>
+    </table>
+    <div class="info-box"><strong>📌 Quy tắc:</strong> Task ngắn, ít data, cần routing → RabbitMQ. Event-driven, data lớn, cần replay → Kafka.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">RabbitMQ — Ví dụ thực tế (.NET / MassTransit)</h2>
+    <h3 style="color:var(--primary);margin-bottom:.5rem">Producer</h3>
+    <pre class="code"><span class="c">// Order Service publish event</span>
+<span class="k">await</span> bus.<span class="n">Publish</span>(<span class="k">new</span> <span class="t">OrderCreated</span>(
+    <span class="t">OrderId</span>: order.<span class="p">Id</span>,
+    <span class="t">UserId</span>: order.<span class="p">UserId</span>,
+    <span class="t">Total</span>:  order.<span class="p">Total</span>
+));</pre>
+
+    <h3 style="color:var(--primary);margin:1rem 0 .5rem">Consumer</h3>
+    <pre class="code"><span class="c">// Inventory Service consume</span>
+<span class="k">public class</span> <span class="t">OrderCreatedConsumer</span> : <span class="t">IConsumer</span>&lt;<span class="t">OrderCreated</span>&gt; {
+    <span class="k">public async</span> <span class="t">Task</span> <span class="n">Consume</span>(<span class="t">ConsumeContext</span>&lt;<span class="t">OrderCreated</span>&gt; ctx) {
+        <span class="k">var</span> evt = ctx.<span class="p">Message</span>;
+        <span class="k">await</span> _inventory.<span class="n">ReserveAsync</span>(evt.<span class="p">OrderId</span>);
+        <span class="k">await</span> ctx.<span class="n">Publish</span>(<span class="k">new</span> <span class="t">StockReserved</span>(evt.<span class="p">OrderId</span>));
+    }
+}</pre>
+
+    <h3 style="color:var(--primary);margin:1rem 0 .5rem">Cấu hình</h3>
+    <pre class="code">builder.<span class="p">Services</span>.<span class="n">AddMassTransit</span>(x =&gt; {
+    x.<span class="n">AddConsumer</span>&lt;<span class="t">OrderCreatedConsumer</span>&gt;();
+    x.<span class="n">UsingRabbitMq</span>((ctx, cfg) =&gt; {
+        cfg.<span class="n">Host</span>(<span class="s">"rabbitmq"</span>);
+        cfg.<span class="n">ReceiveEndpoint</span>(<span class="s">"inventory-queue"</span>, e =&gt; {
+            e.<span class="n">ConfigureConsumer</span>&lt;<span class="t">OrderCreatedConsumer</span>&gt;(ctx);
+            e.<span class="n">UseMessageRetry</span>(r =&gt; r.<span class="n">Exponential</span>(<span class="s">5</span>, <span class="t">TimeSpan</span>.<span class="n">FromSeconds</span>(<span class="s">2</span>),
+                <span class="t">TimeSpan</span>.<span class="n">FromSeconds</span>(<span class="s">30</span>), <span class="t">TimeSpan</span>.<span class="n">FromSeconds</span>(<span class="s">5</span>)));
+            e.<span class="n">UseInMemoryOutbox</span>();   <span class="c">// idempotency</span>
+        });
+    });
+});</pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Kafka — Concept cốt lõi</h2>
+    <div class="grid grid-3">
+      <div class="card">
+        <h4>📋 Topic</h4>
+        <p>Tên kênh logic. Vd: <code>orders</code>, <code>payments</code>.</p>
+      </div>
+      <div class="card">
+        <h4>🔪 Partition</h4>
+        <p>Topic được chia thành N partition để scale. Mỗi partition có order riêng.</p>
+      </div>
+      <div class="card">
+        <h4>👥 Consumer Group</h4>
+        <p>N consumer cùng group → mỗi partition được 1 consumer xử lý → load balance tự động.</p>
+      </div>
+      <div class="card">
+        <h4>📍 Offset</h4>
+        <p>Vị trí đã đọc trong partition. Consumer commit offset → resume được khi restart.</p>
+      </div>
+      <div class="card">
+        <h4>🔁 Replication</h4>
+        <p>Mỗi partition có N replica trên N broker. Leader xử lý, followers đồng bộ.</p>
+      </div>
+      <div class="card">
+        <h4>♻️ Retention</h4>
+        <p>Giữ message N ngày / GB. Replay từ offset = time travel cho data.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:1.5rem;color:var(--primary)">Producer .NET</h3>
+    <pre class="code"><span class="k">using var</span> producer = <span class="k">new</span> <span class="t">ProducerBuilder</span>&lt;<span class="t">string</span>, <span class="t">string</span>&gt;(config).<span class="n">Build</span>();
+<span class="k">await</span> producer.<span class="n">ProduceAsync</span>(<span class="s">"orders"</span>, <span class="k">new</span> <span class="t">Message</span>&lt;<span class="t">string</span>, <span class="t">string</span>&gt; {
+    <span class="p">Key</span>   = order.<span class="p">UserId</span>,   <span class="c">// cùng key → cùng partition → giữ thứ tự</span>
+    <span class="p">Value</span> = <span class="t">JsonSerializer</span>.<span class="n">Serialize</span>(order)
+});</pre>
+
+    <div class="warn-box"><strong>⚠️ Partition key</strong> quyết định message đi vào partition nào. Chọn sai → 1 partition nóng, các partition khác idle. Nguyên tắc: key có cardinality cao và cân bằng (vd: userId).</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Event-Driven Architecture (EDA)</h2>
+    <p>Service không "gọi" nhau — mà <strong>phát event</strong>. Service khác lắng nghe event mình quan tâm.</p>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>🎯 3 loại event</h3>
+        <ul>
+          <li><strong>Domain event</strong> — đã xảy ra trong domain: <code>OrderPlaced</code></li>
+          <li><strong>Integration event</strong> — phát ra ngoài bounded context</li>
+          <li><strong>Notification event</strong> — chỉ thông báo, ít data</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>📐 Event schema chuẩn</h3>
+        <pre class="code">{
+  <span class="s">"id"</span>:        <span class="s">"uuid"</span>,
+  <span class="s">"type"</span>:      <span class="s">"OrderPlaced"</span>,
+  <span class="s">"version"</span>:   <span class="s">"v1"</span>,
+  <span class="s">"timestamp"</span>: <span class="s">"2026-04-27T10:00:00Z"</span>,
+  <span class="s">"source"</span>:    <span class="s">"order-service"</span>,
+  <span class="s">"data"</span>: { ... }
+}</pre>
+      </div>
+    </div>
+    <div class="info-box"><strong>📦 Chuẩn:</strong> CloudEvents (CNCF) — schema chuẩn cho event qua hệ thống.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Schema Registry &amp; Versioning</h2>
+    <p>Khi đổi schema event, làm sao consumer cũ không vỡ?</p>
+    <ul style="padding-left:1.5rem;color:var(--muted)">
+      <li><strong>Backward compatible</strong>: thêm field optional, không xoá field cũ</li>
+      <li><strong>Forward compatible</strong>: consumer mới đọc được event cũ</li>
+      <li>Dùng <strong>Schema Registry</strong> (Confluent, Apicurio) — broker từ chối publish nếu schema không tương thích</li>
+      <li>Version trong type name: <code>OrderCreated.v1</code>, <code>OrderCreated.v2</code></li>
+    </ul>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Bảng quyết định nhanh</h2>
+    <table class="cmp">
+      <thead><tr><th>Tình huống</th><th>Chọn</th></tr></thead>
+      <tbody>
+        <tr><td>Mobile/Web gọi API</td><td>REST + JSON</td></tr>
+        <tr><td>Service A gọi Service B nội bộ, latency-sensitive</td><td>gRPC</td></tr>
+        <tr><td>OrderCreated → 5 service xử lý</td><td>Pub/Sub (RabbitMQ topic / Kafka)</td></tr>
+        <tr><td>Task background (gửi email, generate PDF)</td><td>Queue (RabbitMQ)</td></tr>
+        <tr><td>Event log để analytics + replay</td><td>Kafka</td></tr>
+        <tr><td>Realtime chat / notification</td><td>WebSocket / SignalR</td></tr>
+        <tr><td>Streaming data (IoT, log)</td><td>Kafka, NATS</td></tr>
+        <tr><td>Workflow phức tạp nhiều bước</td><td>Saga orchestrator (Temporal, MassTransit)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Tiếp theo: <a href="production.html" style="color:var(--primary)">Vận hành Production →</a></p>
+</footer>
+
+</body>
+</html>

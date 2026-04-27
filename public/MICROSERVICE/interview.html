@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Microservices · 40+ Câu Phỏng Vấn</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">Microservice<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="basics.html">Cơ Bản</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="communication.html">Giao Tiếp</a>
+      <a href="production.html">Production</a>
+      <a href="interview.html" class="active">Phỏng Vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">PHỎNG VẤN · MID → SENIOR · 2026</div>
+  <h1>40+ <span class="gradient">Câu hỏi phỏng vấn</span> Microservices</h1>
+  <p class="hero-desc">Câu hỏi thật từ phỏng vấn Mid/Senior tại các công ty Việt Nam &amp; nước ngoài. Câu trả lời ngắn, tới luôn — không lý thuyết suông.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🎯 Khái niệm cốt lõi (8 câu)</h2>
+
+    <div class="qa">
+      <h4>Microservices và SOA khác nhau ở đâu?</h4>
+      <div class="answer">SOA: nhiều service, dùng <strong>ESB</strong> (Enterprise Service Bus) tập trung làm điều phối, share data + protocol nặng (SOAP). Microservices: dumb pipes (HTTP/MQ), smart endpoints — service tự lo logic, không phụ thuộc broker thông minh; mỗi service có DB riêng.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Khi nào KHÔNG nên dùng microservices?</h4>
+      <div class="answer">Team &lt; 10, MVP, chưa biết K8s/CI-CD, nghiệp vụ đơn giản, latency-sensitive, distributed transaction phức tạp khó tránh. Bắt đầu Modular Monolith — tách dần khi đau thật sự.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Bounded Context là gì? Cách tách service đúng?</h4>
+      <div class="answer">Bounded Context (DDD) là ranh giới ngữ nghĩa của domain. Tách theo <strong>business capability</strong> (Order, Payment, Inventory…) không tách theo layer kỹ thuật (UI/Service/DB). Nguyên tắc 2-pizza team: 1 service đủ nhỏ để 6-8 người sở hữu trọn.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Database per service — tại sao bắt buộc?</h4>
+      <div class="answer">Nếu 2 service cùng DB → mọi schema change phải đồng bộ deploy, vẫn là Monolith trá hình. DB riêng đảm bảo loose coupling, deploy độc lập, mỗi team chọn DB phù hợp (Postgres, Mongo, Redis...).</div>
+    </div>
+
+    <div class="qa">
+      <h4>Eventual consistency là gì? Khi nào chấp nhận được?</h4>
+      <div class="answer">Sau 1 transaction qua nhiều service, dữ liệu chỉ <strong>cuối cùng</strong> nhất quán (vài ms - vài giây). Chấp nhận được với 90% nghiệp vụ: gửi email, cập nhật inventory, recommendation. KHÔNG dùng cho: tài khoản ngân hàng số dư, đặt vé số lượng cứng.</div>
+    </div>
+
+    <div class="qa">
+      <h4>CAP theorem áp dụng vào microservices ra sao?</h4>
+      <div class="answer">Trong distributed system, khi network partition xảy ra phải chọn Consistency hoặc Availability. Microservices thường chọn <strong>AP</strong> + eventual consistency. CP chỉ dùng cho ledger, lock, leader election.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Modular Monolith vs Microservices?</h4>
+      <div class="answer">Modular Monolith: 1 process, nhiều module ranh giới rõ, không share data layer. Cùng lợi ích về cấu trúc nhưng không có overhead network/deploy/observability. 80% startup nên start ở đây, tách khi có lý do thật.</div>
+    </div>
+
+    <div class="qa">
+      <h4>"12-Factor App" có 12 yếu tố gì?</h4>
+      <div class="answer">Codebase, Dependencies, Config (env), Backing services, Build/Release/Run, Processes (stateless), Port binding, Concurrency, Disposability, Dev/prod parity, Logs (stream), Admin processes. Tham khảo: 12factor.net.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🔁 Communication &amp; Patterns (10 câu)</h2>
+
+    <div class="qa">
+      <h4>REST vs gRPC vs GraphQL — chọn cái nào khi nào?</h4>
+      <div class="answer">REST: public API, web/mobile, tooling tốt. gRPC: service-to-service nội bộ, hiệu năng cao, đa ngôn ngữ. GraphQL: BFF cho UI nhiều màn nhiều shape data khác nhau, giảm over/under-fetching.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Synchronous hay asynchronous nên dùng khi nào?</h4>
+      <div class="answer">Sync: UI cần kết quả ngay (validate, query). Async: workflow, notification, integration nhiều service. Mặc định async — coupling thấp hơn, fault isolation tốt hơn.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Saga Choreography vs Orchestration?</h4>
+      <div class="answer">Choreography: service tự nghe event, không có "đầu não". Hợp với flow ngắn (≤ 3 bước). Orchestration: 1 service chỉ huy gọi từng bước. Hợp với flow phức tạp, business logic rõ. Tools: Temporal, MassTransit, Camunda.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Distributed transaction xử lý thế nào?</h4>
+      <div class="answer">Không 2PC — chậm và mong manh. Dùng <strong>Saga</strong> + <strong>compensating transaction</strong>: chuỗi local transaction, mỗi bước có "undo" tương ứng. Kết hợp Outbox để publish event atomic với DB write.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Outbox pattern giải quyết vấn đề gì?</h4>
+      <div class="answer">Vấn đề dual-write: SaveDB + PublishEvent không atomic. Outbox: ghi event vào bảng outbox cùng transaction với business data → background worker đọc outbox → publish broker → mark sent. Đảm bảo at-least-once delivery.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Idempotency là gì? Cách triển khai?</h4>
+      <div class="answer">Cùng request gửi N lần chỉ tạo ra hiệu ứng 1 lần. Triển khai: <code>Idempotency-Key</code> header + bảng inbox lưu key đã xử lý. Bắt buộc cho POST tài chính, message consumer.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Circuit Breaker hoạt động ra sao?</h4>
+      <div class="answer">3 trạng thái: Closed (thường) → khi lỗi vượt ngưỡng (vd 5 lỗi/30s) → Open (fail fast, không gọi) → sau timeout → Half-Open (cho 1 request thử) → OK thì Closed, fail thì Open. Polly (.NET), resilience4j (Java).</div>
+    </div>
+
+    <div class="qa">
+      <h4>CQRS lúc nào nên áp dụng?</h4>
+      <div class="answer">Khi read và write có nhu cầu khác nhau lớn: ghi cần validate, đọc cần join 5 bảng / chịu traffic lớn. Tách: write model (normalized) + read model (denormalized, sync qua event). Đừng dùng nếu CRUD đơn giản — over-engineer.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Event Sourcing đáng dùng khi nào?</h4>
+      <div class="answer">Domain cần audit log (banking, ledger), undo/time-travel, phân tích hành vi. Tránh khi: schema thay đổi liên tục (event versioning đau), team chưa quen DDD. Tools: EventStoreDB, Marten, Axon.</div>
+    </div>
+
+    <div class="qa">
+      <h4>API Gateway có những trách nhiệm gì?</h4>
+      <div class="answer">Auth, rate-limit, request routing, response aggregation, protocol translation, caching, logging, tracing, circuit breaker chung. Tools: Ocelot, YARP, Kong, AWS API Gateway. Tránh nhồi business logic vào gateway.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">📨 Message Broker (6 câu)</h2>
+
+    <div class="qa">
+      <h4>RabbitMQ vs Kafka — khi nào chọn cái nào?</h4>
+      <div class="answer">RabbitMQ: smart broker, routing mạnh, queue ngắn hạn, throughput vừa, dễ học → task/command. Kafka: dumb broker + smart consumer, throughput cao, retention dài, replay được → event sourcing, log streaming, analytics.</div>
+    </div>
+
+    <div class="qa">
+      <h4>At-least-once / At-most-once / Exactly-once?</h4>
+      <div class="answer">At-least-once: tối thiểu 1 lần (có thể trùng) — phổ biến nhất. At-most-once: tối đa 1 lần (có thể mất). Exactly-once: chính xác 1 lần — hầu như không tồn tại thực sự, đạt được qua at-least-once + idempotent consumer.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Kafka partition key chọn như thế nào?</h4>
+      <div class="answer">Cùng key → cùng partition → giữ thứ tự. Chọn key có cardinality cao và phân bố đều: userId, orderId. Tránh key skew (vd: country=VN chiếm 90% → 1 partition nóng).</div>
+    </div>
+
+    <div class="qa">
+      <h4>Consumer group trong Kafka làm gì?</h4>
+      <div class="answer">N consumer cùng group → mỗi partition gán cho 1 consumer (load balance). 2 group khác nhau → cùng đọc full topic (broadcast). Mỗi group có offset riêng — replay được độc lập.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Dead Letter Queue (DLQ) dùng làm gì?</h4>
+      <div class="answer">Message xử lý fail N lần → đẩy vào DLQ riêng để không block queue chính. Có thể xem, debug, replay sau khi fix bug. Bắt buộc cho mọi consumer production.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Schema evolution khi đổi event schema?</h4>
+      <div class="answer">Backward compatible: thêm field optional, không xoá/đổi tên. Forward compatible: consumer mới đọc được event cũ. Dùng Schema Registry (Confluent, Apicurio) để enforce. Versioning trong type: <code>OrderCreated.v1</code>, <code>v2</code>.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🚀 Deploy &amp; DevOps (8 câu)</h2>
+
+    <div class="qa">
+      <h4>K8s Deployment khác Pod ra sao?</h4>
+      <div class="answer">Pod: đơn vị chạy 1 hoặc nhiều container, ephemeral. Deployment: quản lý nhiều replica của Pod, hỗ trợ rolling update, rollback. Người ta deploy <strong>Deployment</strong>, K8s tạo Pod thay bạn.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Liveness vs Readiness probe khác nhau?</h4>
+      <div class="answer">Liveness: app còn sống không — fail thì K8s kill &amp; restart. Readiness: sẵn sàng nhận traffic — fail thì K8s không route traffic vào (nhưng không restart). Service mới khởi động cần Readiness chờ DB connect.</div>
+    </div>
+
+    <div class="qa">
+      <h4>HPA scale theo cái gì?</h4>
+      <div class="answer">CPU/RAM mặc định. Custom metric: queue length, RPS, latency P95 — qua Prometheus Adapter. Cấu hình minReplicas ≥ 2 để không cold start.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Blue-Green vs Canary deployment?</h4>
+      <div class="answer">Blue-Green: 2 môi trường song song, switch traffic 100% qua Green khi sẵn sàng. Canary: 5% → 25% → 50% → 100% từ từ, rollback nếu metric xấu. Canary an toàn hơn nhưng phức tạp hơn — dùng Argo Rollouts/Flagger.</div>
+    </div>
+
+    <div class="qa">
+      <h4>GitOps là gì? Khác CI/CD truyền thống?</h4>
+      <div class="answer">Git là single source of truth cho infra/config. CI build artifact + push tag mới vào manifest repo → ArgoCD/Flux phát hiện diff → tự sync vào cluster. Mọi thay đổi auditable, rollback = git revert.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Service mesh có cần thiết?</h4>
+      <div class="answer">Khi &gt; 20 service. Lo cross-cutting concerns ở layer mạng: mTLS, retry, timeout, tracing, traffic split — không phải code lại trong từng service. Tools: Istio, Linkerd. Trade-off: thêm complexity + latency.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Helm vs Kustomize?</h4>
+      <div class="answer">Helm: package manager, dùng template engine, values.yaml cho từng env. Kustomize: overlay, không template — patch declarative. Kustomize built-in trong kubectl. Helm mạnh khi share chart công khai.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Mỗi service deploy độc lập — version compatibility xử lý sao?</h4>
+      <div class="answer">Backward compatible API: version v1, v2 cùng tồn tại 1 thời gian. Consumer-driven contract test (Pact). Schema evolution rule. Feature flag để release dần. Không bao giờ "big bang" deploy nhiều service cùng lúc.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🔭 Observability &amp; Debug (5 câu)</h2>
+
+    <div class="qa">
+      <h4>3 trụ cột observability?</h4>
+      <div class="answer">Logging (chuyện gì xảy ra), Metrics (hệ thống bình thường không), Tracing (request đi qua đâu, chậm ở đâu). OpenTelemetry là chuẩn 2026 cho cả 3.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Distributed tracing cần thiết cỡ nào?</h4>
+      <div class="answer">Khi &gt; 3 service. Mỗi request có trace-id propagate qua mọi service, mỗi đoạn xử lý là 1 span. Khi user complain "chậm", mở Jaeger thấy ngay span nào nuốt thời gian.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Log của microservice nên cấu trúc ra sao?</h4>
+      <div class="answer">JSON structured: timestamp, level, service, traceId, spanId, userId, message, exception. Không log password/token. Tập trung qua Loki/ELK. Serilog (.NET), zap (Go), pino (Node).</div>
+    </div>
+
+    <div class="qa">
+      <h4>RED metrics là gì?</h4>
+      <div class="answer">Rate (req/s), Errors (% lỗi), Duration (latency P50/P95/P99). Bộ 3 cho mọi service. Cùng cặp với USE (Utilization, Saturation, Errors) cho hạ tầng.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Khi 1 service chậm — debug thế nào?</h4>
+      <div class="answer">(1) Mở dashboard service đó: CPU/RAM/GC bình thường? (2) Tracing: span nào chậm? (3) Log: có exception/retry? (4) DB query: thiếu index? (5) Downstream call: gateway/service khác chậm? Quy trình: top-down từ user request.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🛠️ System Design Scenario (5 câu)</h2>
+
+    <div class="qa">
+      <h4>Thiết kế hệ thống đặt vé concert (1M user xem cùng lúc)?</h4>
+      <div class="answer">CDN cache trang, Redis cache stock, queue (Kafka) cho mọi request đặt vé, Inventory service xử lý theo thứ tự queue (FIFO per show), distributed lock Redis cho seat reservation, idempotency-key cho retry, payment async với Saga, notification qua event. Quan trọng: limit concurrent user vào checkout (virtual queue).</div>
+    </div>
+
+    <div class="qa">
+      <h4>Migration Monolith → Microservices — bắt đầu module nào?</h4>
+      <div class="answer">Module có (1) ranh giới rõ ràng nhất, (2) ít coupling với phần còn lại, (3) traffic riêng/nhu cầu scale khác nhau. Vd: Notification, Search, Recommendation. Dùng Strangler Fig: proxy route module mới sang service mới, các phần khác vẫn ở monolith.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Hệ thống thanh toán — đảm bảo không double charge ra sao?</h4>
+      <div class="answer">Idempotency-key bắt buộc trong header. Server lưu key + result trong Redis 24h. Request trùng key → trả về kết quả cũ. Bên payment gateway cũng có idempotency. Saga + Outbox cho consistency. Không bao giờ retry blind từ client.</div>
+    </div>
+
+    <div class="qa">
+      <h4>Service A cần data từ Service B — gọi sync hay copy data?</h4>
+      <div class="answer">Tuỳ tần suất &amp; data size. Gọi sync: data realtime, ít. Copy qua event: data không cần realtime, A nghe event B publish và lưu read model riêng (CQRS). Tránh "shared database" hoặc "service A query DB của B".</div>
+    </div>
+
+    <div class="qa">
+      <h4>1 service chết kéo theo cả hệ thống — phòng tránh?</h4>
+      <div class="answer">Circuit Breaker (Polly), Bulkhead (cô lập thread/connection pool), Timeout (mọi call ngoài), Retry với backoff + jitter, Fallback (degraded mode), Async (Kafka đệm), Health check + auto-restart. Quan trọng: thiết kế cho fault — service ngoài SẼ chết.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">💡 Câu hỏi "trick" hay gặp</h2>
+    <div class="qa">
+      <h4>"Nếu được làm lại từ đầu, bạn vẫn chọn microservices không?"</h4>
+      <div class="answer">Trả lời thật lòng — đây là câu test maturity. "Tuỳ team size + nghiệp vụ. Nếu &lt; 10 người, MVP — tôi sẽ chọn Modular Monolith. Microservices không phải <em>silver bullet</em>, nó là trade-off: tăng complexity DevOps để đổi lấy team autonomy &amp; scale độc lập."</div>
+    </div>
+
+    <div class="qa">
+      <h4>"Bạn từng debug 1 incident microservice phức tạp nhất là gì?"</h4>
+      <div class="answer">Kể 1 case THẬT: triệu chứng → cách bạn nhìn dashboard / tracing → giả thuyết → cách verify → root cause → fix tạm thời → fix lâu dài + postmortem. Kể quá trình tư duy, không chỉ kết quả.</div>
+    </div>
+
+    <div class="qa">
+      <h4>"Service A có nên gọi DB của Service B không?"</h4>
+      <div class="answer">KHÔNG. Đây là phản pattern. Hậu quả: schema lock, deploy phụ thuộc, không thể thay DB type. Đúng: gọi qua API/gRPC, hoặc subscribe event để build read model riêng.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">📚 Tài liệu nên đọc trước phỏng vấn</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>📖 Sách</h3>
+        <ul>
+          <li>Sam Newman — <em>Building Microservices</em> (2nd ed)</li>
+          <li>Chris Richardson — <em>Microservices Patterns</em></li>
+          <li>Martin Kleppmann — <em>Designing Data-Intensive Applications</em></li>
+          <li>Vaughn Vernon — <em>Implementing DDD</em></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>🌐 Web</h3>
+        <ul>
+          <li>microservices.io — patterns reference</li>
+          <li>martinfowler.com — Microservices, BFF, Strangler</li>
+          <li>kubernetes.io — official docs</li>
+          <li>cncf.io — Cloud Native Landscape</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tip" style="margin-top:1rem"><strong>💡 Tip phỏng vấn:</strong> Khi không biết câu trả lời, đừng đoán. Nói "Tôi chưa làm cụ thể, nhưng theo cách suy nghĩ thì..." — interviewer thích người biết giới hạn của mình hơn người ba hoa.</div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Microservice Mastery · Hết phần phỏng vấn · Quay về <a href="index.html" style="color:var(--primary)">Roadmap</a></p>
+</footer>
+
+</body>
+</html>

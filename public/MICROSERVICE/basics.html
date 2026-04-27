@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Microservices · Cơ Bản</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">Microservice<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="basics.html" class="active">Cơ Bản</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="communication.html">Giao Tiếp</a>
+      <a href="production.html">Production</a>
+      <a href="interview.html">Phỏng Vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">L0 → L1 · BÀI 1: NỀN TẢNG TƯ DUY</div>
+  <h1>Microservices · <span class="gradient">Cơ Bản</span></h1>
+  <p class="hero-desc">8 nguyên tắc cốt lõi, 5 bounded context, cách tách service đúng theo domain — tránh sai lầm "tách quá sớm" mà 80% startup mắc phải.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">8 Nguyên tắc cốt lõi</h2>
+    <div class="grid grid-2">
+      <div class="dtype">
+        <h4>1. Single Responsibility</h4>
+        <p>Mỗi service chỉ chịu trách nhiệm <strong>một business capability</strong>. Order Service chỉ lo order — không xử lý payment, không gửi email.</p>
+      </div>
+      <div class="dtype">
+        <h4>2. Database per Service</h4>
+        <p>Service không bao giờ truy cập DB của service khác. Muốn dữ liệu? Gọi API hoặc subscribe event.</p>
+      </div>
+      <div class="dtype">
+        <h4>3. Loose Coupling</h4>
+        <p>Service A đổi schema không làm service B sập. Hợp đồng rõ qua REST/gRPC + versioning.</p>
+      </div>
+      <div class="dtype">
+        <h4>4. High Cohesion</h4>
+        <p>Code liên quan thuộc cùng service. Đừng vẽ ra "Service Helper" lo nhiều thứ — đó là dấu hiệu chia sai.</p>
+      </div>
+      <div class="dtype">
+        <h4>5. Independently Deployable</h4>
+        <p>Deploy 1 service không cần build/redeploy service khác. Pipeline riêng, version riêng.</p>
+      </div>
+      <div class="dtype">
+        <h4>6. Decentralized Data</h4>
+        <p>Không có "Master DB". Eventual consistency &gt; ACID toàn cục.</p>
+      </div>
+      <div class="dtype">
+        <h4>7. Fail Fast, Fail Independently</h4>
+        <p>Service chết phải bị isolate (Circuit Breaker). Không kéo cả hệ thống xuống.</p>
+      </div>
+      <div class="dtype">
+        <h4>8. Built for Observability</h4>
+        <p>Mọi service log/metric/trace từ đầu — không phải "thêm sau". Không quan sát được = không debug được.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Bounded Context — Cách tách service đúng</h2>
+    <p class="section-sub">Bounded Context (DDD) là <strong>ranh giới ngữ nghĩa</strong>: cùng từ "Customer" trong sales nghĩa khác trong logistics. Mỗi bounded context là 1 ứng cử viên service.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>❌ Sai: Tách theo layer kỹ thuật</h3>
+        <pre class="code"><span class="c">// Phản pattern</span>
+<span class="t">UserAPI</span>      <span class="c">// chỉ HTTP layer</span>
+<span class="t">UserService</span>  <span class="c">// chỉ business</span>
+<span class="t">UserDB</span>       <span class="c">// chỉ data</span></pre>
+        <p>Tách như vậy chỉ là phân lớp trong Monolith — nhưng đặt qua network. Tệ nhất của 2 thế giới.</p>
+      </div>
+      <div class="card">
+        <h3>✅ Đúng: Tách theo business capability</h3>
+        <pre class="code"><span class="t">OrderService</span>      <span class="c">// API + logic + DB của Order</span>
+<span class="t">PaymentService</span>    <span class="c">// API + logic + DB của Payment</span>
+<span class="t">InventoryService</span>  <span class="c">// API + logic + DB của Stock</span>
+<span class="t">NotificationService</span></pre>
+        <p>Mỗi service đầy đủ stack — autonomous, deploy riêng, scale riêng.</p>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top:1rem">
+      <strong>📐 Quy tắc 2 pizza:</strong> Một service nên đủ nhỏ để 1 team 6-8 người (ăn hết 2 pizza) sở hữu trọn từ code → deploy → on-call. Lớn hơn → tách. Nhỏ hơn → gộp.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Ví dụ: E-commerce — Tách thành bounded context nào?</h2>
+    <table class="cmp">
+      <thead><tr><th>Bounded Context</th><th>Trách nhiệm</th><th>Sở hữu dữ liệu</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Catalog</strong></td><td>Quản lý sản phẩm, danh mục, search</td><td>Product, Category, Variant</td></tr>
+        <tr><td><strong>Cart</strong></td><td>Giỏ hàng tạm, voucher, ước tính tổng</td><td>Cart items, applied vouchers</td></tr>
+        <tr><td><strong>Order</strong></td><td>Tạo &amp; trạng thái đơn hàng</td><td>Order, OrderLine, OrderStatus</td></tr>
+        <tr><td><strong>Payment</strong></td><td>Tích hợp cổng thanh toán, refund</td><td>Payment, Transaction, Refund</td></tr>
+        <tr><td><strong>Inventory</strong></td><td>Tồn kho, reserve, release</td><td>Stock, Reservation, Warehouse</td></tr>
+        <tr><td><strong>Shipping</strong></td><td>Tính cước, đơn vận, tracking</td><td>Shipment, Tracking, Carrier</td></tr>
+        <tr><td><strong>Notification</strong></td><td>Email, SMS, push</td><td>Template, sent log</td></tr>
+        <tr><td><strong>User &amp; Identity</strong></td><td>Đăng ký, đăng nhập, JWT</td><td>User, Role, Session</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:1rem;color:var(--muted)">→ 8 service này có thể là 8 bounded context. Hoặc tuỳ team size, gộp lại còn 4-5 (vd: Order + Cart, Catalog + Inventory).</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Vòng đời 1 request — Customer đặt hàng</h2>
+    <ol class="steps">
+      <li><strong>Mobile App → API Gateway</strong> — POST /checkout. Gateway xác thực JWT, rate-limit, route đến Order Service.</li>
+      <li><strong>Order Service</strong> tạo Order với status <code>PENDING</code>, lưu DB.</li>
+      <li>Order Service <strong>publish event</strong> <code>OrderCreated</code> lên RabbitMQ/Kafka.</li>
+      <li><strong>Inventory Service</strong> consume event, reserve stock, publish <code>StockReserved</code> hoặc <code>StockOutOfStock</code>.</li>
+      <li><strong>Payment Service</strong> consume <code>OrderCreated</code>, gọi cổng thanh toán, publish <code>PaymentSucceeded</code> / <code>PaymentFailed</code>.</li>
+      <li>Order Service consume các event này → cập nhật status <code>CONFIRMED</code> hoặc <code>CANCELLED</code> (Saga).</li>
+      <li><strong>Notification Service</strong> consume <code>OrderConfirmed</code> → gửi email/SMS cho user.</li>
+      <li><strong>Shipping Service</strong> consume <code>OrderConfirmed</code> → tạo shipment, gửi cho đối tác vận chuyển.</li>
+    </ol>
+    <div class="tip" style="margin-top:1rem">
+      <strong>💡 Insight:</strong> 1 user click "Đặt hàng" → 5 service chạy. Nếu làm Monolith, đó chỉ là 1 transaction. Microservices = nhanh hơn, phân tải tốt hơn, nhưng phải cẩn thận với <strong>Saga</strong>, <strong>Idempotency</strong>, <strong>Tracing</strong> — sẽ học ở các trang sau.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Các thành phần phải có (Building Blocks)</h2>
+    <div class="grid grid-3">
+      <div class="card">
+        <h4>🚪 API Gateway</h4>
+        <p>Cửa ngõ duy nhất từ ngoài vào. Auth, rate-limit, aggregate, transform.</p>
+        <p style="margin-top:.4rem"><strong>Tools:</strong> Ocelot, YARP, Kong, Nginx, AWS API Gateway, Azure API Management.</p>
+      </div>
+      <div class="card">
+        <h4>🔍 Service Discovery</h4>
+        <p>Service tìm nhau bằng <strong>tên</strong>, không phải IP cứng. K8s tự lo qua DNS.</p>
+        <p style="margin-top:.4rem"><strong>Tools:</strong> Consul, Eureka, K8s Service.</p>
+      </div>
+      <div class="card">
+        <h4>⚙️ Config Server</h4>
+        <p>Config tập trung, đổi không cần redeploy. Hot reload.</p>
+        <p style="margin-top:.4rem"><strong>Tools:</strong> Spring Cloud Config, K8s ConfigMap, AWS AppConfig.</p>
+      </div>
+      <div class="card">
+        <h4>🔐 Secret Manager</h4>
+        <p>API key, DB password — KHÔNG bỏ vào git/env file.</p>
+        <p style="margin-top:.4rem"><strong>Tools:</strong> HashiCorp Vault, AWS Secrets Manager, Azure Key Vault.</p>
+      </div>
+      <div class="card">
+        <h4>📨 Message Broker</h4>
+        <p>Async giữa các service. Decouple producer/consumer.</p>
+        <p style="margin-top:.4rem"><strong>Tools:</strong> RabbitMQ, Kafka, NATS, Azure Service Bus.</p>
+      </div>
+      <div class="card">
+        <h4>🔭 Observability Stack</h4>
+        <p>Log + Metric + Trace tập trung. OpenTelemetry là chuẩn 2026.</p>
+        <p style="margin-top:.4rem"><strong>Tools:</strong> Prometheus, Grafana, Jaeger, Loki, Datadog.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Hello World Microservice (.NET 8)</h2>
+    <p class="section-sub">Một Order Service tối thiểu: REST API + DB + publish event lên RabbitMQ.</p>
+    <pre class="code"><span class="c">// Program.cs</span>
+<span class="k">var</span> builder = <span class="t">WebApplication</span>.<span class="n">CreateBuilder</span>(args);
+
+<span class="c">// 1. EF Core với DB riêng cho Order</span>
+builder.<span class="p">Services</span>.<span class="n">AddDbContext</span>&lt;<span class="t">OrderDbContext</span>&gt;(opt =&gt;
+    opt.<span class="n">UseNpgsql</span>(builder.<span class="p">Configuration</span>.<span class="n">GetConnectionString</span>(<span class="s">"OrderDb"</span>)));
+
+<span class="c">// 2. MassTransit + RabbitMQ</span>
+builder.<span class="p">Services</span>.<span class="n">AddMassTransit</span>(x =&gt; {
+    x.<span class="n">UsingRabbitMq</span>((ctx, cfg) =&gt; {
+        cfg.<span class="n">Host</span>(<span class="s">"rabbitmq"</span>, <span class="s">"/"</span>, h =&gt; {
+            h.<span class="n">Username</span>(<span class="s">"guest"</span>); h.<span class="n">Password</span>(<span class="s">"guest"</span>);
+        });
+    });
+});
+
+<span class="k">var</span> app = builder.<span class="n">Build</span>();
+
+<span class="c">// 3. POST /orders</span>
+app.<span class="n">MapPost</span>(<span class="s">"/orders"</span>, <span class="k">async</span> (<span class="t">CreateOrderDto</span> dto, <span class="t">OrderDbContext</span> db, <span class="t">IPublishEndpoint</span> bus) =&gt; {
+    <span class="k">var</span> order = <span class="k">new</span> <span class="t">Order</span>(dto.<span class="p">UserId</span>, dto.<span class="p">Items</span>);
+    db.<span class="p">Orders</span>.<span class="n">Add</span>(order);
+    <span class="k">await</span> db.<span class="n">SaveChangesAsync</span>();
+
+    <span class="c">// publish event để Inventory + Payment xử lý</span>
+    <span class="k">await</span> bus.<span class="n">Publish</span>(<span class="k">new</span> <span class="t">OrderCreated</span>(order.<span class="p">Id</span>, order.<span class="p">Total</span>));
+
+    <span class="k">return</span> <span class="t">Results</span>.<span class="n">Ok</span>(order);
+});
+
+app.<span class="n">Run</span>();</pre>
+
+    <p style="margin-top:1rem;color:var(--muted)">→ Service này tự lo DB riêng, publish event, không gọi trực tiếp Inventory hay Payment. Đó là nguyên tắc <strong>loose coupling</strong>.</p>
+
+    <div class="warn-box">
+      <strong>⚠️ Vấn đề ở code trên:</strong> SaveChanges + Publish không atomic. Nếu DB save xong nhưng RabbitMQ down → mất event → Inventory không reserve. Giải pháp: <strong>Outbox Pattern</strong> (xem trang Patterns).
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Checklist trước khi viết service đầu tiên</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>✅ Nắm chắc</h3>
+        <ul>
+          <li>HTTP status codes, REST best practices</li>
+          <li>JSON serialization &amp; versioning (v1, v2)</li>
+          <li>Async/await, Task, goroutine — tuỳ ngôn ngữ</li>
+          <li>SQL transaction, isolation level</li>
+          <li>Docker: build, run, multi-stage, compose</li>
+          <li>Linux permissions, port, network</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>📚 Đã đọc</h3>
+        <ul>
+          <li>Sam Newman — <em>Building Microservices</em></li>
+          <li>Chris Richardson — <em>Microservices Patterns</em></li>
+          <li>Martin Fowler — bài <em>Microservices</em> trên blog</em></li>
+          <li>microservices.io — pattern reference</li>
+          <li>The 12-Factor App</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Tiếp theo: <a href="patterns.html" style="color:var(--primary)">Patterns thực chiến →</a></p>
+</footer>
+
+</body>
+</html>

@@ -25,6 +25,14 @@ const SECTIONS = [
     { id: 'redis-production', label: 'Production',  src: '/REDIS/production.html' },
     { id: 'redis-interview',  label: 'Phỏng Vấn',   src: '/REDIS/interview.html' },
   ]},
+  { id: 'microservice', icon: '🕸', label: 'Microservices', children: [
+    { id: 'micro-roadmap',       label: 'Roadmap',       src: '/MICROSERVICE/index.html' },
+    { id: 'micro-basics',        label: 'Cơ Bản',        src: '/MICROSERVICE/basics.html' },
+    { id: 'micro-patterns',      label: 'Patterns',      src: '/MICROSERVICE/patterns.html' },
+    { id: 'micro-communication', label: 'Giao Tiếp',     src: '/MICROSERVICE/communication.html' },
+    { id: 'micro-production',    label: 'Production',    src: '/MICROSERVICE/production.html' },
+    { id: 'micro-interview',     label: 'Phỏng Vấn',     src: '/MICROSERVICE/interview.html' },
+  ]},
   { id: 'build', icon: '\uD83D\uDE80', label: 'Build & Deploy', children: [
     { id: 'build-overview',   label: 'Tổng Quan',        src: '/BUILD/index.html' },
     { id: 'build-git',        label: 'Git & Workflow',   src: '/BUILD/git.html' },

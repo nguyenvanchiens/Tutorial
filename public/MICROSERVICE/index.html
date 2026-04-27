@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Microservices Mastery — Từ Monolith đến Distributed System</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">Microservice<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html" class="active">Roadmap</a>
+      <a href="basics.html">Cơ Bản</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="communication.html">Giao Tiếp</a>
+      <a href="production.html">Production</a>
+      <a href="interview.html">Phỏng Vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">DISTRIBUTED SYSTEMS · CLOUD-NATIVE · 2026</div>
+  <h1>Làm chủ <span class="gradient">Microservices</span> từ A → Z</h1>
+  <p class="hero-desc">Kiến trúc nhỏ — hệ thống lớn. Từ Monolith đến hệ phân tán hàng triệu user. Saga, CQRS, Event Sourcing, Service Mesh, Kubernetes — tất cả trong 1 lộ trình thực chiến với .NET, Go &amp; Node.js.</p>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-number">5</span><span class="stat-label">Cấp độ</span></div>
+    <div class="stat"><span class="stat-number">15+</span><span class="stat-label">Patterns</span></div>
+    <div class="stat"><span class="stat-number">6</span><span class="stat-label">Trang chi tiết</span></div>
+    <div class="stat"><span class="stat-number">40+</span><span class="stat-label">Câu phỏng vấn</span></div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Microservices là gì?</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>💡 Định nghĩa 30 giây</h3>
+        <p><strong>Microservices</strong> là kiến trúc chia ứng dụng thành nhiều dịch vụ nhỏ, độc lập, mỗi service:</p>
+        <ul>
+          <li>Có <strong>database riêng</strong> (database-per-service)</li>
+          <li>Triển khai <strong>độc lập</strong> (deploy không cần build cả hệ thống)</li>
+          <li>Giao tiếp qua <strong>network</strong> (REST, gRPC, message broker)</li>
+          <li>Sở hữu một <strong>business capability</strong> (Order, Payment, User…)</li>
+          <li>Có thể viết bằng <strong>ngôn ngữ khác nhau</strong> (polyglot)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>⚡ Tại sao cần Microservices?</h3>
+        <ul>
+          <li><strong>Scale độc lập</strong> — service nào nóng thì scale riêng</li>
+          <li><strong>Team độc lập</strong> — mỗi team sở hữu service của mình</li>
+          <li><strong>Deploy nhanh</strong> — đẩy 1 service không ảnh hưởng cả hệ thống</li>
+          <li><strong>Fault isolation</strong> — 1 service chết, các service khác vẫn sống</li>
+          <li><strong>Tech diversity</strong> — chọn stack phù hợp từng nghiệp vụ</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Monolith vs Microservices</h2>
+    <table class="cmp">
+      <thead><tr><th>Tiêu chí</th><th>Monolith</th><th>Microservices</th></tr></thead>
+      <tbody>
+        <tr><td>Codebase</td><td>1 repo, 1 process</td><td>N repo (hoặc monorepo), N process</td></tr>
+        <tr><td>Database</td><td>1 DB chung</td><td>Mỗi service 1 DB riêng</td></tr>
+        <tr><td>Deploy</td><td>Build &amp; deploy toàn bộ</td><td>Deploy riêng từng service</td></tr>
+        <tr><td>Scale</td><td>Scale cả app (vertical/horizontal)</td><td>Scale từng service</td></tr>
+        <tr><td>Giao tiếp</td><td>Gọi trong cùng process (in-memory)</td><td>Network call (REST/gRPC/MQ)</td></tr>
+        <tr><td>Transaction</td><td>ACID đơn giản</td><td>Distributed transaction (Saga)</td></tr>
+        <tr><td>Debug</td><td>1 stack trace</td><td>Distributed tracing (Jaeger, Zipkin)</td></tr>
+        <tr><td>DevOps</td><td>1 pipeline</td><td>N pipeline + K8s + service mesh</td></tr>
+        <tr><td>Team size</td><td>≤ 10 người</td><td>≥ 30 người, nhiều team</td></tr>
+        <tr><td>Phù hợp</td><td>MVP, startup nhỏ, nghiệp vụ đơn giản</td><td>Hệ thống lớn, nhiều domain, traffic cao</td></tr>
+      </tbody>
+    </table>
+    <div class="warn-box">
+      <strong>⚠️ Cảnh báo:</strong> Đừng làm Microservices chỉ vì "trendy". Nếu team &lt; 10 người, traffic thấp, MVP — Monolith (hoặc Modular Monolith) sẽ thắng. Microservices tăng độ phức tạp <strong>10×</strong> ở DevOps, debug, và data consistency.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Kiến trúc tổng thể (Reference Architecture)</h2>
+    <div class="arch-diagram">
+      <div class="arch-row"><div class="arch-box">📱 Mobile App</div><div class="arch-box">🌐 Web App</div><div class="arch-box">🔗 3rd Party</div></div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-row"><div class="arch-box gw">API Gateway / BFF</div></div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-row">
+        <div class="arch-box svc">User Service</div>
+        <div class="arch-box svc">Order Service</div>
+        <div class="arch-box svc">Payment Service</div>
+        <div class="arch-box svc">Inventory Service</div>
+        <div class="arch-box svc">Notification Service</div>
+      </div>
+      <div class="arch-arrow">↓ (sync REST/gRPC)   ↕ (async events)</div>
+      <div class="arch-row">
+        <div class="arch-box db">User DB</div>
+        <div class="arch-box db">Order DB</div>
+        <div class="arch-box db">Payment DB</div>
+        <div class="arch-box db">Inventory DB</div>
+        <div class="arch-box mq">RabbitMQ / Kafka</div>
+      </div>
+    </div>
+    <p class="section-sub" style="margin-top:1rem">→ <strong>API Gateway</strong> nhận request từ client, route tới service phù hợp, xử lý auth/rate-limit/aggregate. <strong>Message broker</strong> (Kafka/RabbitMQ) lo giao tiếp bất đồng bộ giữa các service. Mỗi service có DB riêng — không ai được truy cập DB của service khác.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Lộ trình 5 Cấp độ</h2>
+    <div class="grid grid-3">
+      <div class="card level-card">
+        <span class="level-badge" style="background:linear-gradient(135deg,#667eea,#764ba2)">L0</span>
+        <h4>Foundations</h4>
+        <p style="color:var(--muted);font-size:.85rem">Nền tảng phải có trước khi đụng micro</p>
+        <ul>
+          <li>HTTP, REST, JSON</li>
+          <li>SQL + 1 ORM</li>
+          <li>Docker basics (run, build)</li>
+          <li>1 ngôn ngữ backend solid (.NET / Go / Node)</li>
+          <li>Git, Linux command line</li>
+        </ul>
+      </div>
+      <div class="card level-card">
+        <span class="level-badge" style="background:linear-gradient(135deg,#4facfe,#00f2fe)">L1</span>
+        <h4>Distributed Basics</h4>
+        <p style="color:var(--muted);font-size:.85rem">Hiểu thế giới mạng &amp; bất đồng bộ</p>
+        <ul>
+          <li>Synchronous vs Asynchronous</li>
+          <li>RabbitMQ / Kafka cơ bản</li>
+          <li>gRPC, Protobuf</li>
+          <li>API Gateway (Ocelot, YARP, Nginx)</li>
+          <li>Service Discovery (Consul, K8s DNS)</li>
+        </ul>
+      </div>
+      <div class="card level-card">
+        <span class="level-badge" style="background:linear-gradient(135deg,#43e97b,#38f9d7)">L2</span>
+        <h4>Patterns &amp; Resilience</h4>
+        <p style="color:var(--muted);font-size:.85rem">Pattern bắt buộc cho hệ thống production</p>
+        <ul>
+          <li>Saga (Choreography &amp; Orchestration)</li>
+          <li>CQRS &amp; Event Sourcing</li>
+          <li>Circuit Breaker, Retry, Timeout</li>
+          <li>Outbox Pattern</li>
+          <li>Idempotency, exactly-once</li>
+        </ul>
+      </div>
+      <div class="card level-card">
+        <span class="level-badge" style="background:linear-gradient(135deg,#fa709a,#fee140)">L3</span>
+        <h4>DevOps &amp; Observability</h4>
+        <p style="color:var(--muted);font-size:.85rem">Run &amp; debug được trên production</p>
+        <ul>
+          <li>Kubernetes (Pod, Deployment, Service, Ingress)</li>
+          <li>Helm, Kustomize</li>
+          <li>Centralized logging (ELK, Loki)</li>
+          <li>Tracing (Jaeger, OpenTelemetry)</li>
+          <li>Metrics (Prometheus, Grafana)</li>
+        </ul>
+      </div>
+      <div class="card level-card">
+        <span class="level-badge" style="background:linear-gradient(135deg,#f093fb,#f5576c)">L4</span>
+        <h4>Senior / Architect</h4>
+        <p style="color:var(--muted);font-size:.85rem">Thiết kế hệ thống ở quy mô công ty</p>
+        <ul>
+          <li>DDD, Bounded Context</li>
+          <li>Service Mesh (Istio, Linkerd)</li>
+          <li>Multi-region, disaster recovery</li>
+          <li>Cost optimization</li>
+          <li>Migration từ Monolith — Strangler Fig</li>
+        </ul>
+      </div>
+      <div class="card level-card">
+        <span class="level-badge" style="background:linear-gradient(135deg,#ffecd2,#fcb69f)">L5</span>
+        <h4>Tech Lead / Principal</h4>
+        <p style="color:var(--muted);font-size:.85rem">Định hình platform cho cả tổ chức</p>
+        <ul>
+          <li>Platform engineering, Internal Developer Platform</li>
+          <li>Multi-tenant SaaS</li>
+          <li>Event-driven architecture toàn org</li>
+          <li>Mentor team, kiến trúc 5+ năm</li>
+          <li>Build/Buy/Outsource decisions</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Khi nào nên / KHÔNG nên dùng</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3 style="color:var(--success)">✅ Nên dùng khi</h3>
+        <ul>
+          <li>Team &gt; 30 người, nhiều domain rõ rệt</li>
+          <li>Traffic cao, một số module cần scale riêng</li>
+          <li>Codebase monolith đã &gt; 500k LOC, deploy chậm, build lâu</li>
+          <li>Cần tech-stack khác nhau cho từng domain (ML / Realtime / CRUD)</li>
+          <li>Yêu cầu uptime cao, fault isolation</li>
+          <li>SaaS multi-tenant phức tạp</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--danger)">❌ KHÔNG nên dùng khi</h3>
+        <ul>
+          <li>Team &lt; 10 người</li>
+          <li>MVP / startup giai đoạn tìm product-market fit</li>
+          <li>Nghiệp vụ đơn giản, nhiều CRUD</li>
+          <li>Chưa có DevOps engineer / chưa biết K8s</li>
+          <li>Latency-sensitive (mỗi network hop tốn 1-10ms)</li>
+          <li>Distributed transaction phức tạp khó tránh</li>
+        </ul>
+        <div class="tip" style="margin-top:.75rem"><strong>💡 Gợi ý:</strong> Bắt đầu với <strong>Modular Monolith</strong> (1 process, nhiều module có ranh giới rõ) — khi cần thì tách dần thành microservice.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Stack thực chiến 2026</h2>
+    <div class="grid grid-3">
+      <div class="card">
+        <h3>🔧 Backend</h3>
+        <ul>
+          <li><strong>.NET 8/9</strong> — ASP.NET Core, MassTransit, Polly</li>
+          <li><strong>Go</strong> — service nặng performance, gRPC</li>
+          <li><strong>Node.js</strong> — BFF, realtime</li>
+          <li><strong>Python</strong> — ML / data service</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>📨 Communication</h3>
+        <ul>
+          <li><strong>gRPC + Protobuf</strong> — service nội bộ</li>
+          <li><strong>REST + JSON</strong> — public API, BFF</li>
+          <li><strong>RabbitMQ</strong> — task queue, command</li>
+          <li><strong>Kafka</strong> — event streaming, log</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>🗄️ Data</h3>
+        <ul>
+          <li><strong>PostgreSQL</strong> — OLTP chủ lực</li>
+          <li><strong>MongoDB</strong> — document, catalog</li>
+          <li><strong>Redis</strong> — cache, session, lock</li>
+          <li><strong>Elasticsearch</strong> — search, log</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>🚀 Deploy &amp; Runtime</h3>
+        <ul>
+          <li><strong>Docker</strong> — image hoá service</li>
+          <li><strong>Kubernetes</strong> — orchestration</li>
+          <li><strong>Helm / Kustomize</strong> — packaging</li>
+          <li><strong>Istio / Linkerd</strong> — service mesh</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>🔭 Observability</h3>
+        <ul>
+          <li><strong>OpenTelemetry</strong> — chuẩn tracing/log/metric</li>
+          <li><strong>Jaeger / Tempo</strong> — distributed tracing</li>
+          <li><strong>Prometheus + Grafana</strong> — metric</li>
+          <li><strong>Loki / ELK</strong> — log tập trung</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>⚙️ CI/CD &amp; Cloud</h3>
+        <ul>
+          <li><strong>GitHub Actions / GitLab CI</strong></li>
+          <li><strong>ArgoCD</strong> — GitOps</li>
+          <li><strong>AWS EKS / Azure AKS / GCP GKE</strong></li>
+          <li><strong>Terraform / Pulumi</strong> — IaC</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">7 Sai lầm phổ biến</h2>
+    <ol class="steps">
+      <li><strong>Tách service quá sớm hoặc quá nhỏ</strong> — có khi 50 service mà chưa có 50 người. Hậu quả: deploy &amp; debug địa ngục. Hãy bắt đầu từ Modular Monolith.</li>
+      <li><strong>Share database giữa các service</strong> — đây là phản pattern. Nếu 2 service đụng vào cùng 1 bảng, đó vẫn là Monolith, chỉ là tách process.</li>
+      <li><strong>Distributed transaction kiểu 2PC</strong> — chậm và mong manh. Dùng <strong>Saga</strong> + <strong>Outbox</strong> thay thế.</li>
+      <li><strong>Quên Idempotency</strong> — message broker có thể deliver 2 lần. Mọi handler phải idempotent.</li>
+      <li><strong>Không có distributed tracing</strong> — khi lỗi sẽ không biết request đi qua đâu, dừng ở đâu.</li>
+      <li><strong>Sync chains quá dài</strong> — A→B→C→D→E. Một service chết là cả chuỗi sập. Dùng async event để giảm coupling.</li>
+      <li><strong>Bỏ qua bảo mật service-to-service</strong> — internal network không có nghĩa là an toàn. mTLS, JWT, network policy là bắt buộc.</li>
+    </ol>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Microservice Mastery · Phần của Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

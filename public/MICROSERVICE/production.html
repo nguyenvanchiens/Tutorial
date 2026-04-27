@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Microservices · Production &amp; Vận Hành</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">Microservice<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="basics.html">Cơ Bản</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="communication.html">Giao Tiếp</a>
+      <a href="production.html" class="active">Production</a>
+      <a href="interview.html">Phỏng Vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">L3 · DEPLOY · OBSERVABILITY · SCALE</div>
+  <h1>Microservices ở <span class="gradient">Production</span></h1>
+  <p class="hero-desc">Docker, Kubernetes, observability, security, performance — tất cả những gì cần để chạy 50+ service ổn định.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">1. Containerize — Dockerfile chuẩn</h2>
+    <p>Mỗi service một image. Multi-stage build → image nhỏ, build nhanh.</p>
+    <pre class="code"><span class="c"># --- Build stage ---</span>
+<span class="k">FROM</span> mcr.microsoft.com/dotnet/sdk:<span class="s">9.0</span> <span class="k">AS</span> build
+<span class="k">WORKDIR</span> /src
+<span class="k">COPY</span> *.csproj ./
+<span class="k">RUN</span> dotnet restore
+<span class="k">COPY</span> . .
+<span class="k">RUN</span> dotnet publish -c Release -o /app /p:PublishTrimmed=true
+
+<span class="c"># --- Runtime stage (nhỏ hơn 5×) ---</span>
+<span class="k">FROM</span> mcr.microsoft.com/dotnet/aspnet:<span class="s">9.0</span>-alpine
+<span class="k">WORKDIR</span> /app
+<span class="k">COPY</span> --from=build /app .
+<span class="k">USER</span> $APP_UID            <span class="c"># non-root, security</span>
+<span class="k">EXPOSE</span> <span class="s">8080</span>
+<span class="k">ENTRYPOINT</span> [<span class="s">"dotnet"</span>, <span class="s">"OrderService.dll"</span>]</pre>
+    <div class="tip"><strong>💡 Best practices:</strong> non-root user, .dockerignore, multi-stage, alpine/distroless, healthcheck, image scan (Trivy/Snyk).</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">2. Docker Compose — Local dev nhanh</h2>
+    <pre class="code"><span class="c"># docker-compose.yml</span>
+<span class="k">services</span>:
+  rabbitmq:
+    image: rabbitmq:<span class="s">3.13</span>-management
+    ports: [<span class="s">"5672:5672"</span>, <span class="s">"15672:15672"</span>]
+
+  postgres:
+    image: postgres:<span class="s">16</span>-alpine
+    environment:
+      POSTGRES_PASSWORD: dev
+    volumes: [pgdata:/var/lib/postgresql/data]
+
+  order-service:
+    build: ./services/order
+    depends_on: [postgres, rabbitmq]
+    environment:
+      ConnectionStrings__OrderDb: <span class="s">"Host=postgres;Database=order;Username=postgres;Password=dev"</span>
+    ports: [<span class="s">"5001:8080"</span>]
+
+  inventory-service:
+    build: ./services/inventory
+    depends_on: [rabbitmq]
+    ports: [<span class="s">"5002:8080"</span>]
+
+<span class="k">volumes</span>: { pgdata: {} }</pre>
+    <p style="color:var(--muted)">→ <code>docker compose up</code> → cả hệ chạy local trong 30 giây.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">3. Kubernetes — Production runtime</h2>
+    <div class="grid grid-3">
+      <div class="card">
+        <h4>📦 Pod</h4>
+        <p>Đơn vị chạy nhỏ nhất. 1 hoặc nhiều container chia sẻ network/storage.</p>
+      </div>
+      <div class="card">
+        <h4>🚀 Deployment</h4>
+        <p>Quản lý replica của Pod. Rolling update, rollback.</p>
+      </div>
+      <div class="card">
+        <h4>🌐 Service</h4>
+        <p>Tên DNS ổn định cho 1 nhóm Pod. Load balance nội bộ.</p>
+      </div>
+      <div class="card">
+        <h4>🚪 Ingress</h4>
+        <p>Cổng vào từ ngoài cluster, route theo host/path.</p>
+      </div>
+      <div class="card">
+        <h4>⚙️ ConfigMap / Secret</h4>
+        <p>Config &amp; secret tách khỏi image, mount vào pod.</p>
+      </div>
+      <div class="card">
+        <h4>📊 HPA</h4>
+        <p>Auto-scale theo CPU/RAM/custom metric.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:1.5rem;color:var(--primary)">Deployment manifest tối thiểu</h3>
+    <pre class="code"><span class="k">apiVersion</span>: apps/v1
+<span class="k">kind</span>: Deployment
+<span class="k">metadata</span>: { name: order-service }
+<span class="k">spec</span>:
+  replicas: <span class="s">3</span>
+  selector: { matchLabels: { app: order } }
+  template:
+    metadata: { labels: { app: order } }
+    spec:
+      containers:
+      - name: app
+        image: registry/order-service:<span class="s">v1.2.3</span>
+        ports: [{ containerPort: <span class="s">8080</span> }]
+        resources:
+          requests: { cpu: <span class="s">100m</span>, memory: <span class="s">128Mi</span> }
+          limits:   { cpu: <span class="s">500m</span>, memory: <span class="s">512Mi</span> }
+        livenessProbe:
+          httpGet: { path: /health/live, port: <span class="s">8080</span> }
+          initialDelaySeconds: <span class="s">10</span>
+        readinessProbe:
+          httpGet: { path: /health/ready, port: <span class="s">8080</span> }
+        env:
+        - name: ConnectionStrings__OrderDb
+          valueFrom: { secretKeyRef: { name: order-secrets, key: db } }
+---
+<span class="k">apiVersion</span>: v1
+<span class="k">kind</span>: Service
+<span class="k">metadata</span>: { name: order-service }
+<span class="k">spec</span>:
+  selector: { app: order }
+  ports: [{ port: <span class="s">80</span>, targetPort: <span class="s">8080</span> }]</pre>
+    <div class="info-box"><strong>📦 Đóng gói:</strong> Helm chart hoặc Kustomize. GitOps qua ArgoCD/Flux để mọi thay đổi auditable qua git.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">4. Health Check — 3 loại</h2>
+    <table class="cmp">
+      <thead><tr><th>Loại</th><th>Endpoint</th><th>Mục đích</th></tr></thead>
+      <tbody>
+        <tr><td>Liveness</td><td>/health/live</td><td>App còn sống không? Fail → K8s kill &amp; restart</td></tr>
+        <tr><td>Readiness</td><td>/health/ready</td><td>Sẵn sàng nhận traffic? Fail → K8s không route traffic vào</td></tr>
+        <tr><td>Startup</td><td>/health/start</td><td>App đang khởi động (dùng cho app khởi động chậm)</td></tr>
+      </tbody>
+    </table>
+    <pre class="code"><span class="c">// .NET</span>
+builder.<span class="p">Services</span>.<span class="n">AddHealthChecks</span>()
+    .<span class="n">AddNpgSql</span>(connStr, name: <span class="s">"db"</span>, tags: [<span class="s">"ready"</span>])
+    .<span class="n">AddRabbitMQ</span>(rabbitUri, name: <span class="s">"mq"</span>, tags: [<span class="s">"ready"</span>]);
+
+app.<span class="n">MapHealthChecks</span>(<span class="s">"/health/live"</span>);
+app.<span class="n">MapHealthChecks</span>(<span class="s">"/health/ready"</span>, <span class="k">new</span>() { <span class="t">Predicate</span> = c =&gt; c.<span class="p">Tags</span>.<span class="n">Contains</span>(<span class="s">"ready"</span>) });</pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">5. Observability — 3 trụ cột</h2>
+    <div class="grid grid-3">
+      <div class="dtype">
+        <h4>📝 Logging</h4>
+        <p><strong>Mục tiêu:</strong> trả lời "chuyện gì xảy ra".</p>
+        <ul>
+          <li>Cấu trúc JSON, không text thô</li>
+          <li>Bao gồm <code>traceId</code>, <code>userId</code>, <code>service</code></li>
+          <li>Tập trung qua Loki / ELK</li>
+          <li>Tools: Serilog (.NET), zap (Go), pino (Node)</li>
+        </ul>
+      </div>
+      <div class="dtype">
+        <h4>📊 Metrics</h4>
+        <p><strong>Mục tiêu:</strong> "hệ thống có bình thường không".</p>
+        <ul>
+          <li>RED: Rate, Errors, Duration</li>
+          <li>USE: Utilization, Saturation, Errors (cho hạ tầng)</li>
+          <li>Prometheus scrape, Grafana visualize</li>
+          <li>Alert khi: P95 &gt; 500ms, error rate &gt; 1%</li>
+        </ul>
+      </div>
+      <div class="dtype">
+        <h4>🔍 Tracing</h4>
+        <p><strong>Mục tiêu:</strong> "request đi qua đâu, chậm ở đâu".</p>
+        <ul>
+          <li>Mỗi request có <code>trace-id</code> propagate qua mọi service</li>
+          <li>Span = mỗi đoạn xử lý</li>
+          <li>OpenTelemetry → Jaeger / Tempo</li>
+          <li>Bắt buộc khi &gt; 5 service</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="margin-top:1.5rem;color:var(--primary)">OpenTelemetry .NET — setup 1 lần dùng cả 3</h3>
+    <pre class="code">builder.<span class="p">Services</span>.<span class="n">AddOpenTelemetry</span>()
+  .<span class="n">WithTracing</span>(t =&gt; t
+    .<span class="n">AddAspNetCoreInstrumentation</span>()
+    .<span class="n">AddHttpClientInstrumentation</span>()
+    .<span class="n">AddNpgsql</span>()
+    .<span class="n">AddOtlpExporter</span>())
+  .<span class="n">WithMetrics</span>(m =&gt; m
+    .<span class="n">AddAspNetCoreInstrumentation</span>()
+    .<span class="n">AddPrometheusExporter</span>())
+  .<span class="n">WithLogging</span>(l =&gt; l.<span class="n">AddOtlpExporter</span>());</pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">6. Distributed Tracing — Cứu mạng khi debug</h2>
+    <p>Request đi qua: Gateway → Order → Payment → Inventory → DB. Mỗi đoạn 1 span. Khi chậm, mở Jaeger thấy ngay span nào nuốt 80% thời gian.</p>
+    <pre class="code">trace-id: abc-123 (tổng <span class="s">800ms</span>)
+├─ <span class="t">[Gateway]</span>           <span class="s">5ms</span>
+├─ <span class="t">[OrderService.POST]</span> <span class="s">650ms</span>   <span class="c">// ⚠️ chậm ở đây</span>
+│   ├─ <span class="t">[Postgres SELECT]</span> <span class="s">600ms</span>  <span class="c">// 👈 thiếu index!</span>
+│   └─ <span class="t">[RabbitMQ publish]</span> <span class="s">5ms</span>
+├─ <span class="t">[InventoryService]</span>  <span class="s">80ms</span>
+└─ <span class="t">[PaymentService]</span>    <span class="s">60ms</span></pre>
+    <div class="tip"><strong>💡 Insight:</strong> Không có tracing thì khi user complain "chậm", bạn phải đoán. Có tracing — chỉ ra được service &amp; query thủ phạm trong 30 giây.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">7. CI/CD pipeline cho Microservices</h2>
+    <ol class="steps">
+      <li><strong>PR mở</strong> → chạy lint, unit test, integration test (Testcontainers).</li>
+      <li><strong>Merge</strong> → build Docker image, tag <code>service:&lt;sha&gt;</code>, push registry, scan vulnerability.</li>
+      <li><strong>Deploy DEV</strong> tự động → smoke test.</li>
+      <li><strong>Deploy STAGING</strong> qua ArgoCD (GitOps) — đổi tag trong manifest repo → ArgoCD sync.</li>
+      <li><strong>Deploy PROD</strong>: canary 5% → 25% → 50% → 100%, rollback tự động nếu error rate tăng.</li>
+    </ol>
+    <div class="info-box"><strong>📦 Tools:</strong> GitHub Actions, GitLab CI, Jenkins, ArgoCD, Flux, Spinnaker, Argo Rollouts (canary/blue-green).</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">8. Security — bắt buộc ở production</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>🔐 Service-to-service</h4>
+        <ul>
+          <li><strong>mTLS</strong> — mọi call nội bộ encrypt + xác thực 2 chiều (Istio/Linkerd làm sẵn)</li>
+          <li><strong>JWT</strong> propagate qua header, mỗi service verify</li>
+          <li><strong>Network Policy</strong> — chỉ service nào được nói chuyện với service nào</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>🔑 Secret &amp; Auth</h4>
+        <ul>
+          <li>Vault / AWS Secrets Manager — không nhồi vào image</li>
+          <li>OAuth2 / OIDC — Keycloak, Auth0, Azure AD</li>
+          <li>Short-lived token (15 phút) + refresh token</li>
+          <li>API key có scope, rotation định kỳ</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>🛡️ Image &amp; Cluster</h4>
+        <ul>
+          <li>Container scan: Trivy, Snyk</li>
+          <li>SBOM (Software Bill of Materials)</li>
+          <li>Pod Security Standards: non-root, read-only fs</li>
+          <li>RBAC trong K8s — least privilege</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>🚨 Edge</h4>
+        <ul>
+          <li>WAF ở Gateway (Cloudflare, AWS WAF)</li>
+          <li>Rate limit theo user/IP</li>
+          <li>DDoS protection</li>
+          <li>OWASP Top 10 review định kỳ</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">9. Performance &amp; Scale</h2>
+    <table class="cmp">
+      <thead><tr><th>Vấn đề</th><th>Giải pháp</th></tr></thead>
+      <tbody>
+        <tr><td>1 service nóng (CPU/RAM cao)</td><td>HPA: scale theo CPU, RAM, custom metric (queue depth)</td></tr>
+        <tr><td>DB chậm vì truy vấn lặp</td><td>Cache Redis (cache-aside, write-through)</td></tr>
+        <tr><td>API call nội bộ chậm</td><td>Đổi REST → gRPC, hoặc batch call</td></tr>
+        <tr><td>Read load lớn</td><td>CQRS — read model riêng, denormalized</td></tr>
+        <tr><td>Báo cáo / analytics chiếm DB</td><td>Tách OLAP: Kafka → ClickHouse / BigQuery</td></tr>
+        <tr><td>Cold start khi scale</td><td>Min replicas ≥ 2, prewarm pool, lighter image</td></tr>
+        <tr><td>Network hop nhiều</td><td>Service mesh — connection pool, retry budget</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">10. Disaster Recovery &amp; Reliability</h2>
+    <div class="grid grid-3">
+      <div class="card">
+        <h4>🎯 SLO &amp; SLI</h4>
+        <p>Đặt mục tiêu rõ: 99.9% uptime, P95 latency &lt; 300ms. Đo qua metric, có error budget.</p>
+      </div>
+      <div class="card">
+        <h4>💾 Backup</h4>
+        <p>DB backup hằng ngày, test restore hằng tháng. Không test = không có backup.</p>
+      </div>
+      <div class="card">
+        <h4>🌍 Multi-AZ / Multi-Region</h4>
+        <p>K8s cluster trải qua nhiều AZ. Sạch sẽ cho HA. Multi-region khi đã giàu kinh nghiệm.</p>
+      </div>
+      <div class="card">
+        <h4>🧪 Chaos Engineering</h4>
+        <p>Chủ động kill pod (Chaos Mesh, Litmus) → kiểm chứng resilience. Netflix Chaos Monkey là kinh điển.</p>
+      </div>
+      <div class="card">
+        <h4>📜 Runbook</h4>
+        <p>Mỗi alert có document: "khi alert này nổ thì làm gì". Tránh on-call ngơ ngác lúc 3h sáng.</p>
+      </div>
+      <div class="card">
+        <h4>📋 Postmortem</h4>
+        <p>Sau incident: blameless postmortem. Tập trung tìm process &amp; system fix, không trách cá nhân.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Production Readiness Checklist</h2>
+    <div class="card">
+      <h3>Trước khi đẩy 1 service lên production</h3>
+      <ul style="columns:2;gap:2rem">
+        <li>✅ Dockerfile multi-stage, image &lt; 200MB</li>
+        <li>✅ Health checks (live/ready)</li>
+        <li>✅ Resource requests/limits</li>
+        <li>✅ HPA cấu hình</li>
+        <li>✅ Logs JSON structured, kèm traceId</li>
+        <li>✅ Metrics endpoint /metrics</li>
+        <li>✅ OpenTelemetry trace export</li>
+        <li>✅ Secret từ Vault, không trong code</li>
+        <li>✅ DB migration tự động (idempotent)</li>
+        <li>✅ Graceful shutdown (SIGTERM)</li>
+        <li>✅ Retry + Circuit Breaker cho call ngoài</li>
+        <li>✅ Idempotency cho POST quan trọng</li>
+        <li>✅ Outbox cho event publish</li>
+        <li>✅ Network policy &amp; mTLS</li>
+        <li>✅ Có alert + runbook</li>
+        <li>✅ Có dashboard Grafana</li>
+        <li>✅ Có integration test trong CI</li>
+        <li>✅ Tài liệu README, openapi.yaml</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Tiếp theo: <a href="interview.html" style="color:var(--primary)">Phỏng vấn Microservice →</a></p>
+</footer>
+
+</body>
+</html>
