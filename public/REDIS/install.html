@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cài đặt Redis &amp; redis-cli — Linux, macOS, Docker, WSL</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">Redis<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="install.html" class="active">Cài đặt</a>
+      <a href="basics.html">Cơ Bản</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="lua.html">Lua</a>
+      <a href="production.html">Production</a>
+      <a href="internals.html">Internals</a>
+      <a href="interview.html">Phỏng Vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">L0-L1 · CƠ BẢN</div>
+  <h1>Cài đặt <span class="gradient">Redis &amp; redis-cli</span></h1>
+  <p class="hero-desc">Cài Redis trên Linux, macOS, Docker, WSL. Hiểu redis.conf, làm chủ redis-cli, RESP protocol và kết nối từ .NET / Node.js. Cập nhật cho Redis 7.4 / 8.0 (2026).</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">1. Redis là gì &amp; phiên bản nào?</h2>
+    <p class="section-sub">Redis là in-memory data store. Tính tới 2026, hệ sinh thái đã tách đôi sau đợt đổi license năm 2024 — bạn nên biết để chọn đúng bản.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>📦 Redis (Redis Inc.)</h3>
+        <p>Bản gốc. Từ Redis 7.4 dùng license kép <strong>RSALv2 / SSPLv1</strong> (không còn BSD thuần). Redis 8.0 (2025) thêm lại tùy chọn <strong>AGPLv3</strong>. Có RediSearch, JSON, TimeSeries tích hợp.</p>
+        <pre class="code"><span class="c"># Kiểm tra version sau khi cài</span>
+redis-server --version
+<span class="ret">Redis server v=8.0.x</span></pre>
+      </div>
+      <div class="card">
+        <h3>🍴 Valkey (Linux Foundation)</h3>
+        <p>Fork BSD mã nguồn mở ra đời tháng 3/2024 do AWS, Google, Oracle hậu thuẫn sau khi Redis đổi license. API tương thích Redis 7.2. Nhiều cloud (ElastiCache, Memorystore) đã chuyển sang Valkey mặc định.</p>
+        <div class="tip" style="margin-top:.5rem"><strong>2026:</strong> drop-in cho hầu hết use case. Client (StackExchange.Redis, ioredis) dùng y nguyên. Chi tiết khác biệt xem trang <a href="internals.html" style="color:var(--primary)">Internals</a>.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">2. Cài trên Linux</h2>
+    <p class="section-sub">2 hướng: package manager (nhanh, có thể cũ) hoặc build from source (mới nhất, kiểm soát flag).</p>
+
+    <h3 style="color:var(--primary);margin-bottom:.5rem">Ubuntu / Debian — repo chính thức của Redis</h3>
+    <pre class="code"><span class="c"># Thêm GPG key + repo chính thức (mới hơn apt mặc định)</span>
+sudo apt-get install -y lsb-release curl gpg
+curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
+echo <span class="s">"deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main"</span> \
+  | sudo tee /etc/apt/sources.list.d/redis.list
+
+sudo apt-get update
+sudo apt-get install -y redis        <span class="c"># cài redis-server + redis-cli</span>
+
+<span class="c"># Chạy như systemd service</span>
+sudo systemctl enable --now redis-server
+sudo systemctl status redis-server</pre>
+
+    <h3 style="color:var(--primary);margin:1.5rem 0 .5rem">RHEL / Rocky / Fedora</h3>
+    <pre class="code">sudo dnf install -y redis
+sudo systemctl enable --now redis</pre>
+
+    <h3 style="color:var(--primary);margin:1.5rem 0 .5rem">Build from source — kiểm soát hoàn toàn</h3>
+    <pre class="code"><span class="c"># Cần build tools</span>
+sudo apt-get install -y build-essential tcl pkg-config
+
+<span class="c"># Tải bản ổn định, build có TLS</span>
+wget https://download.redis.io/redis-stable.tar.gz
+tar xzf redis-stable.tar.gz
+cd redis-stable
+make BUILD_TLS=yes              <span class="c"># bật TLS support</span>
+make test                       <span class="c"># chạy test suite (tùy chọn)</span>
+sudo make install               <span class="c"># cài vào /usr/local/bin</span>
+
+<span class="c"># Verify</span>
+redis-server --version
+which redis-cli</pre>
+
+    <div class="info-box"><strong>Vì sao build from source?</strong> Bản apt/dnf của distro thường trễ vài version. Nếu cần feature mới (Functions, RESP3 client tracking, mới nhất từ Redis 8) thì build hoặc dùng repo chính thức ở trên.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">3. Cài trên macOS &amp; WSL</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>🍎 macOS — Homebrew</h3>
+        <pre class="code">brew install redis
+
+<span class="c"># Chạy nền như service (tự start lúc boot)</span>
+brew services start redis
+
+<span class="c"># Hoặc chạy foreground để xem log</span>
+redis-server /opt/homebrew/etc/redis.conf
+
+<span class="c"># Dừng service</span>
+brew services stop redis</pre>
+        <p style="margin-top:.5rem">File config ở <code>/opt/homebrew/etc/redis.conf</code> (Apple Silicon) hoặc <code>/usr/local/etc/redis.conf</code> (Intel).</p>
+      </div>
+      <div class="card">
+        <h3>🪟 Windows — dùng WSL2</h3>
+        <p>Redis <strong>không hỗ trợ Windows native</strong>. Cách đúng năm 2026 là chạy trong WSL2 (Ubuntu).</p>
+        <pre class="code"><span class="c"># PowerShell (admin), một lần</span>
+wsl --install -d Ubuntu
+
+<span class="c"># Trong shell Ubuntu của WSL, làm theo mục Linux</span>
+sudo apt-get update
+sudo apt-get install -y redis
+sudo service redis-server start
+
+<span class="c"># Test từ Windows: localhost:6379 đã forward</span>
+redis-cli ping</pre>
+        <div class="warn-box" style="margin-top:.5rem"><strong>Lưu ý:</strong> Microsoft từng có port <code>Memurai</code>/MSOpenTech nhưng đã lỗi thời. Đừng dùng cho dev mới — Docker hoặc WSL2 là lựa chọn chuẩn.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">4. Docker — nhanh nhất cho dev</h2>
+    <p class="section-sub">Không cài gì lên máy, container hoá. Lý tưởng cho local dev và CI.</p>
+
+    <pre class="code"><span class="c"># Chạy nhanh, port mặc định</span>
+docker run --name redis -p <span class="s">6379</span>:<span class="s">6379</span> -d redis:<span class="s">8-alpine</span>
+
+<span class="c"># Vào redis-cli bên trong container</span>
+docker exec -it redis redis-cli
+
+<span class="c"># Có persistence + custom config + password</span>
+docker run --name redis -d \
+  -p <span class="s">6379</span>:<span class="s">6379</span> \
+  -v redis-data:/data \
+  -v $(pwd)/redis.conf:/usr/local/etc/redis/redis.conf \
+  redis:<span class="s">8-alpine</span> \
+  redis-server /usr/local/etc/redis/redis.conf --requirepass <span class="s">mypassword</span></pre>
+
+    <h3 style="color:var(--primary);margin:1.5rem 0 .5rem">docker-compose.yml</h3>
+    <pre class="code"><span class="p">services</span>:
+  <span class="p">redis</span>:
+    <span class="p">image</span>: redis:8-alpine
+    <span class="p">ports</span>: [<span class="s">"6379:6379"</span>]
+    <span class="p">command</span>: redis-server --appendonly yes --requirepass <span class="s">devpass</span>
+    <span class="p">volumes</span>: [<span class="s">redis-data:/data</span>]
+    <span class="p">healthcheck</span>:
+      <span class="p">test</span>: [<span class="s">"CMD"</span>, <span class="s">"redis-cli"</span>, <span class="s">"ping"</span>]
+      <span class="p">interval</span>: 5s
+<span class="p">volumes</span>:
+  <span class="p">redis-data</span>:</pre>
+    <div class="tip"><strong>Image tip:</strong> <code>redis:8-alpine</code> nhỏ (~15MB). Cần module RediSearch/JSON thì dùng <code>redis/redis-stack</code> (có GUI Redis Insight ở cổng 8001). Muốn fork mã nguồn mở thì <code>valkey/valkey</code>.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">5. redis.conf — Các tham số phải biết</h2>
+    <p class="section-sub">File config chính. Dưới đây là các directive bạn sẽ chạm tới ngay từ ngày đầu.</p>
+
+    <pre class="code"><span class="c"># ===== Network =====</span>
+bind <span class="s">127.0.0.1</span> -::1     <span class="c"># chỉ nghe localhost (an toàn mặc định)</span>
+                          <span class="c"># prod: bind IP private, KHÔNG bao giờ 0.0.0.0 lộ internet</span>
+port <span class="s">6379</span>               <span class="c"># cổng; đặt 0 để tắt plaintext (chỉ TLS)</span>
+protected-mode yes        <span class="c"># chặn connect ngoài khi chưa auth</span>
+timeout <span class="s">0</span>                 <span class="c"># giây idle trước khi đóng client (0 = không)</span>
+
+<span class="c"># ===== Security =====</span>
+requirepass <span class="s">your-strong-password</span>   <span class="c"># mật khẩu (dùng AUTH để đăng nhập)</span>
+
+<span class="c"># ===== Memory =====</span>
+maxmemory <span class="s">2gb</span>             <span class="c"># trần RAM; tới ngưỡng thì eviction</span>
+maxmemory-policy <span class="s">allkeys-lru</span>   <span class="c"># xoá key ít dùng nhất khi đầy (cache)</span>
+                              <span class="c"># noeviction nếu Redis là DB không được mất</span>
+
+<span class="c"># ===== Persistence =====</span>
+appendonly yes            <span class="c"># bật AOF — mất tối đa ~1s khi crash</span>
+appendfsync everysec      <span class="c"># fsync mỗi giây (cân bằng tốc độ/an toàn)</span>
+save <span class="s">3600</span> <span class="s">1</span>             <span class="c"># RDB snapshot: ≥1 thay đổi trong 1h</span>
+save <span class="s">300</span> <span class="s">100</span>           <span class="c"># hoặc ≥100 thay đổi trong 5 phút</span>
+dir /var/lib/redis        <span class="c"># thư mục lưu dump.rdb / appendonly</span>
+
+<span class="c"># ===== Logging =====</span>
+logfile /var/log/redis/redis.log
+loglevel notice           <span class="c"># debug / verbose / notice / warning</span></pre>
+
+    <table class="cmp">
+      <tr><th>Directive</th><th>Mặc định</th><th>Khi nào chỉnh</th></tr>
+      <tr><td><code>bind</code></td><td>127.0.0.1</td><td>Để app server khác máy connect → bind IP private</td></tr>
+      <tr><td><code>port</code></td><td>6379</td><td>Tránh xung đột / multi-instance trên 1 máy</td></tr>
+      <tr><td><code>maxmemory</code></td><td>0 (không giới hạn)</td><td><strong>Luôn set</strong> trên prod kẻo OOM kill</td></tr>
+      <tr><td><code>appendonly</code></td><td>no</td><td>Bật khi không được mất data lúc crash</td></tr>
+      <tr><td><code>requirepass</code></td><td>(trống)</td><td>Luôn bật trừ khi localhost-only dev</td></tr>
+    </table>
+
+    <pre class="code"><span class="c"># Đổi config runtime không cần restart</span>
+redis-cli <span class="cmd">CONFIG SET</span> maxmemory <span class="s">3gb</span>
+redis-cli <span class="cmd">CONFIG GET</span> maxmemory-policy
+redis-cli <span class="cmd">CONFIG REWRITE</span>        <span class="c"># ghi config hiện tại trở lại file</span></pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">6. redis-cli — Công cụ bạn sống chung mỗi ngày</h2>
+    <p class="section-sub">CLI đi kèm Redis. Đây là những thao tác bạn sẽ dùng liên tục.</p>
+
+    <div class="cli">
+<span class="prompt">$</span> <span class="cmd">redis-cli</span>                       <span class="comment"># connect localhost:6379</span>
+<span class="prompt">$</span> <span class="cmd">redis-cli</span> -h <span class="s">10.0.0.5</span> -p <span class="s">6380</span>     <span class="comment"># host/port khác</span>
+<span class="prompt">$</span> <span class="cmd">redis-cli</span> -a <span class="s">mypassword</span>           <span class="comment"># auth (hoặc dùng AUTH sau khi vào)</span>
+<span class="prompt">$</span> <span class="cmd">redis-cli</span> -u <span class="s">redis://user:pass@host:6379/0</span>   <span class="comment"># connection URI</span>
+<span class="prompt">&gt;</span> <span class="cmd">PING</span>
+<span class="ret">PONG</span>
+<span class="prompt">&gt;</span> <span class="cmd">SELECT</span> <span class="s">1</span>                      <span class="comment"># chuyển sang DB số 1 (mặc định 0..15)</span>
+<span class="ret">OK</span>
+<span class="prompt">&gt;</span> <span class="cmd">SET</span> hello <span class="s">"world"</span>
+<span class="ret">OK</span>
+<span class="prompt">&gt;</span> <span class="cmd">GET</span> hello
+<span class="ret">"world"</span>
+<span class="prompt">&gt;</span> <span class="cmd">DBSIZE</span>                         <span class="comment"># số key trong DB hiện tại</span>
+<span class="ret">(integer) 1</span>
+<span class="prompt">&gt;</span> <span class="cmd">INFO</span> server                    <span class="comment"># thông tin server</span>
+<span class="prompt">&gt;</span> <span class="cmd">CLIENT</span> LIST                    <span class="comment"># client đang kết nối</span>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>🔎 --scan — duyệt key an toàn</h4>
+        <pre class="code"><span class="c"># Liệt kê key theo pattern, KHÔNG block (dùng SCAN bên trong)</span>
+redis-cli --scan --pattern <span class="s">'user:*'</span>
+
+<span class="c"># Đếm tổng key match</span>
+redis-cli --scan --pattern <span class="s">'cache:*'</span> | wc -l
+
+<span class="c"># Xoá hàng loạt an toàn</span>
+redis-cli --scan --pattern <span class="s">'session:*'</span> | xargs redis-cli DEL</pre>
+        <div class="danger-box" style="margin-top:.5rem"><strong>Không dùng <code>KEYS *</code></strong> — chặn server single-thread. <code>--scan</code> chia batch nên an toàn prod.</div>
+      </div>
+      <div class="card">
+        <h4>🔭 MONITOR — xem lệnh realtime</h4>
+        <pre class="code"><span class="prompt">&gt;</span> <span class="cmd">MONITOR</span>
+<span class="ret">OK</span>
+<span class="ret">1718....123 [0 127.0.0.1:54021] "GET" "hello"</span>
+<span class="ret">1718....456 [0 127.0.0.1:54021] "SET" "x" "1"</span></pre>
+        <p style="margin-top:.5rem">In mọi command đang chạy. Cực hữu ích để debug "app gọi cái gì?". <strong>Chỉ bật ngắn</strong> vì làm chậm server.</p>
+        <pre class="code" style="margin-top:.5rem"><span class="c"># Thống kê độ trễ ngay tại terminal</span>
+redis-cli --latency
+redis-cli --stat            <span class="c"># ops/s, mem, clients mỗi giây</span>
+redis-cli --bigkeys         <span class="c"># tìm key tốn RAM nhất</span></pre>
+      </div>
+    </div>
+
+    <pre class="code"><span class="c"># Chạy lệnh một phát rồi thoát (script hoá)</span>
+redis-cli SET counter <span class="s">0</span>
+redis-cli INCR counter
+redis-cli -n <span class="s">2</span> GET counter      <span class="c"># -n chọn DB index trực tiếp</span>
+
+<span class="c"># Đưa file lệnh hàng loạt (pipe mode, cực nhanh)</span>
+cat commands.txt | redis-cli --pipe</pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">7. RESP — Giao thức Redis nói chuyện</h2>
+    <p class="section-sub">RESP (REdis Serialization Protocol) là protocol text trên TCP. Hiểu nó giúp bạn debug bằng telnet và biết client làm gì dưới mui xe.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Các kiểu RESP (RESP2)</h3>
+        <table class="cmp" style="margin:0">
+          <tr><th>Byte đầu</th><th>Kiểu</th><th>Ví dụ</th></tr>
+          <tr><td><code>+</code></td><td>Simple String</td><td><code>+OK\r\n</code></td></tr>
+          <tr><td><code>-</code></td><td>Error</td><td><code>-ERR ...\r\n</code></td></tr>
+          <tr><td><code>:</code></td><td>Integer</td><td><code>:1000\r\n</code></td></tr>
+          <tr><td><code>$</code></td><td>Bulk String</td><td><code>$5\r\nhello\r\n</code></td></tr>
+          <tr><td><code>*</code></td><td>Array</td><td><code>*2\r\n...\r\n</code></td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>RESP3 (Redis 6+)</h3>
+        <p>Phiên bản mới thêm kiểu: <code>_</code> (null), <code>#</code> (boolean), <code>,</code> (double), <code>%</code> (map), <code>~</code> (set), <code>&gt;</code> (push). Map giúp <code>HGETALL</code> trả object thay vì mảng phẳng, và bật được <strong>client-side caching</strong>.</p>
+        <pre class="code"><span class="prompt">&gt;</span> <span class="cmd">HELLO</span> <span class="s">3</span>          <span class="c"># nâng cấp connection lên RESP3</span></pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--primary);margin:1.5rem 0 .5rem">Tự gửi RESP bằng tay</h3>
+    <pre class="code"><span class="c"># Lệnh SET foo bar dưới dạng RESP raw:</span>
+<span class="c"># *3  = mảng 3 phần tử (SET, foo, bar)</span>
+<span class="s">*3\r\n$3\r\nSET\r\n$3\r\nfoo\r\n$3\r\nbar\r\n</span>
+
+<span class="c"># Thử trực tiếp qua nc — sẽ thấy server trả +OK</span>
+printf <span class="s">'*3\r\n$3\r\nSET\r\n$3\r\nfoo\r\n$3\r\nbar\r\n'</span> | nc localhost <span class="s">6379</span>
+<span class="ret">+OK</span></pre>
+
+    <div class="info-box"><strong>Vì sao đáng học:</strong> Khi viết client, mock test, hoặc debug "tại sao client X gửi sai", đọc được RESP cho bạn nhìn xuyên tầng abstraction. Cả Redis lẫn Valkey đều dùng RESP — protocol không đổi sau fork.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">8. Kết nối từ code</h2>
+
+    <h3 style="color:var(--primary);margin-bottom:.5rem">C# / .NET — StackExchange.Redis</h3>
+    <pre class="code"><span class="c">// dotnet add package StackExchange.Redis</span>
+<span class="k">using</span> StackExchange.Redis;
+
+<span class="c">// Connection string đầy đủ: host, password, TLS, abortConnect</span>
+<span class="k">var</span> config = ConfigurationOptions.Parse(
+    <span class="s">"localhost:6379,password=mypassword,abortConnect=false,ssl=false"</span>);
+config.ConnectRetry = <span class="s">3</span>;
+
+<span class="c">// Multiplexer là SINGLETON — tạo 1 lần, dùng chung toàn app</span>
+<span class="k">var</span> mux = <span class="k">await</span> ConnectionMultiplexer.ConnectAsync(config);
+<span class="k">var</span> db = mux.GetDatabase(<span class="s">0</span>);     <span class="c">// chọn DB index</span>
+
+<span class="k">await</span> db.StringSetAsync(<span class="s">"hello"</span>, <span class="s">"world"</span>, TimeSpan.FromMinutes(<span class="s">10</span>));
+<span class="k">var</span> v = <span class="k">await</span> db.StringGetAsync(<span class="s">"hello"</span>);
+<span class="k">var</span> pong = <span class="k">await</span> db.PingAsync();
+
+<span class="c">// ASP.NET Core DI</span>
+builder.Services.AddSingleton&lt;IConnectionMultiplexer&gt;(
+    _ =&gt; ConnectionMultiplexer.Connect(config));</pre>
+
+    <h3 style="color:var(--primary);margin:1.5rem 0 .5rem">Node.js — ioredis</h3>
+    <pre class="code"><span class="c">// npm install ioredis</span>
+<span class="k">import</span> Redis <span class="k">from</span> <span class="s">'ioredis'</span>;
+
+<span class="c">// Cách 1: connection URL</span>
+<span class="k">const</span> redis = <span class="k">new</span> Redis(<span class="s">'redis://:mypassword@localhost:6379/0'</span>);
+
+<span class="c">// Cách 2: object — rõ ràng hơn, có retry strategy</span>
+<span class="k">const</span> redis2 = <span class="k">new</span> Redis({
+  host: <span class="s">'localhost'</span>,
+  port: <span class="s">6379</span>,
+  password: <span class="s">'mypassword'</span>,
+  db: <span class="s">0</span>,
+  retryStrategy: (times) =&gt; Math.min(times * <span class="s">50</span>, <span class="s">2000</span>),
+});
+
+<span class="k">await</span> redis.set(<span class="s">'hello'</span>, <span class="s">'world'</span>, <span class="s">'EX'</span>, <span class="s">600</span>);
+<span class="k">const</span> v = <span class="k">await</span> redis.get(<span class="s">'hello'</span>);
+
+redis.on(<span class="s">'error'</span>, (e) =&gt; console.error(<span class="s">'Redis error'</span>, e));
+redis.on(<span class="s">'connect'</span>, () =&gt; console.log(<span class="s">'Connected'</span>));</pre>
+
+    <div class="tip"><strong>Quy tắc vàng:</strong> 1 connection multiplexer dùng chung toàn app (singleton). Đừng tạo connection mới mỗi request. Cả StackExchange.Redis lẫn ioredis đều multiplex command qua 1 socket — hiệu quả hơn connection pool kiểu SQL.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">💡 Checklist sau khi cài</h2>
+    <ol class="steps">
+      <li><strong>Verify:</strong> <code>redis-cli ping</code> trả <code>PONG</code>.</li>
+      <li><strong>Bảo mật ngay:</strong> set <code>requirepass</code>, <code>bind</code> private IP, <code>protected-mode yes</code> — đừng để Redis trần ra internet.</li>
+      <li><strong>Set <code>maxmemory</code></strong> + <code>maxmemory-policy</code> để tránh OOM kill.</li>
+      <li><strong>Bật persistence</strong> (<code>appendonly yes</code>) nếu data quan trọng.</li>
+      <li><strong>Thử <code>--scan</code>, <code>--stat</code>, <code>--bigkeys</code></strong> để quen tooling.</li>
+      <li><strong>Kết nối từ app</strong> bằng singleton multiplexer, test một SET/GET.</li>
+    </ol>
+
+    <div class="tip" style="margin-top:1rem"><strong>Sẵn sàng dùng thật?</strong> <a href="basics.html" style="color:var(--primary)">→ Trang Cơ Bản</a> — 9 data types, TTL, transaction, pipelining.</div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Redis Mastery · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

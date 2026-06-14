@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux & CLI cơ bản — Nền tảng Deploy</title>
+    <link rel="stylesheet" href="build.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .cmd-table { width:100%; border-collapse: collapse; color: var(--text); font-size: .88rem; }
+        .cmd-table th { padding:.7rem; text-align:left; border-bottom:1px solid var(--border-light); background: rgba(245,158,11,.08); color: var(--text-bright); }
+        .cmd-table td { padding:.6rem .7rem; border-bottom:1px solid var(--border); vertical-align: top; }
+        .cmd-table td:first-child { white-space: nowrap; }
+        .cmd-table code { color: var(--primary); background: transparent; padding:0; }
+        .perm-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap:10px; margin-top:12px; }
+        .perm-cell { padding:14px; background: var(--bg-code); border:1px solid var(--border); border-radius: var(--radius-sm); text-align:center; }
+        .perm-cell .perm-bit { font-family: var(--mono); font-size:1.4rem; font-weight:700; color: var(--primary); }
+        .perm-cell .perm-name { font-size:.8rem; color: var(--text-dim); margin-top:4px; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html">Build<span class="accent">&Deploy</span></a></div>
+            <div class="nav-links">
+                <a href="index.html">🗺️ Tổng quan</a>
+                <a href="linux-cli.html" class="active">🐧 Linux & CLI</a>
+                <a href="networking.html">🌐 Networking</a>
+                <a href="secrets.html">🔑 Secrets</a>
+                <a href="git.html">📦 Git</a>
+                <a href="cicd.html">⚙️ CI/CD</a>
+                <a href="jenkins.html">🔴 Jenkins</a>
+                <a href="docker.html">🐳 Docker</a>
+                <a href="hosting.html">☁️ Hosting</a>
+                <a href="cloud.html">⛅ Cloud</a>
+                <a href="domain.html">🌐 Domain</a>
+                <a href="ssl.html">🔒 SSL</a>
+                <a href="monitoring.html">📊 Monitoring</a>
+                <a href="workflow.html">🔄 Workflow</a>
+            </div>
+            <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <header class="build-hero">
+        <div class="hero-content">
+            <div class="hero-badge">CHƯƠNG 1 · NỀN TẢNG</div>
+            <h1>Linux & <span class="gradient-text">CLI cơ bản</span></h1>
+            <p class="hero-desc">99% server production chạy Linux và bạn điều khiển chúng qua terminal — không có chuột.<br>Nắm vững những lệnh dưới đây là đủ để deploy app lên VPS, debug sự cố và sống sót khi SSH vào server lúc 2 giờ sáng.</p>
+        </div>
+    </header>
+
+    <!-- ===== SECTION 1: FILESYSTEM ===== -->
+    <section class="section section-dark" id="filesystem">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🐧</div>
+                <h2>1. Filesystem & Đường Dẫn</h2>
+                <p>Linux không có "ổ C, ổ D". Mọi thứ treo trên một cây thư mục duy nhất bắt đầu từ <code>/</code> (root).</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>🌳 Cây Thư Mục — Những Chỗ Bạn Hay Gặp</h3>
+                <div class="cmd-card" style="overflow-x:auto;">
+                    <table class="cmd-table">
+                        <thead><tr><th>Đường dẫn</th><th>Là gì</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>/</code></td><td>Root — gốc của toàn bộ hệ thống</td></tr>
+                            <tr><td><code>/home/user</code></td><td>Thư mục cá nhân của user (viết tắt <code>~</code>)</td></tr>
+                            <tr><td><code>/etc</code></td><td>File cấu hình hệ thống (nginx, ssh, systemd...)</td></tr>
+                            <tr><td><code>/var/log</code></td><td>Log của hệ thống và app — nơi đầu tiên debug khi sập</td></tr>
+                            <tr><td><code>/var/www</code></td><td>Thư mục chứa website (theo quy ước phổ biến)</td></tr>
+                            <tr><td><code>/usr/bin</code>, <code>/usr/local/bin</code></td><td>Nơi chứa các chương trình thực thi</td></tr>
+                            <tr><td><code>/tmp</code></td><td>File tạm — bị xoá khi reboot</td></tr>
+                            <tr><td><code>/opt</code></td><td>Phần mềm bên thứ ba cài thủ công</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="tip-box">
+                    <strong>💡 Đường dẫn tuyệt đối vs tương đối:</strong> Bắt đầu bằng <code>/</code> là <strong>tuyệt đối</strong> (luôn cố định, vd <code>/etc/nginx</code>). Không có <code>/</code> đầu là <strong>tương đối</strong> (tính từ thư mục hiện tại). <code>.</code> = thư mục hiện tại, <code>..</code> = thư mục cha, <code>~</code> = home của bạn.
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🧭 Di Chuyển — Bạn Đang Ở Đâu, Đi Đâu</h3>
+                <div class="cmd-card">
+                    <div class="cmd-label">Navigation cơ bản</div>
+<pre class="code-block"><span class="c-cmd">pwd</span>                      <span class="c-cmt"># Print Working Directory — đang đứng ở đâu?</span>
+<span class="c-cmd">ls</span>                       <span class="c-cmt"># Liệt kê file/thư mục</span>
+<span class="c-cmd">ls -lah</span>                  <span class="c-cmt"># -l chi tiết, -a kể cả file ẩn, -h dung lượng dễ đọc</span>
+<span class="c-cmd">cd /var/www</span>              <span class="c-cmt"># Chuyển vào thư mục tuyệt đối</span>
+<span class="c-cmd">cd app</span>                   <span class="c-cmt"># Vào thư mục con (tương đối)</span>
+<span class="c-cmd">cd ..</span>                    <span class="c-cmt"># Lùi ra thư mục cha</span>
+<span class="c-cmd">cd ~</span>                     <span class="c-cmt"># Về home</span>
+<span class="c-cmd">cd -</span>                     <span class="c-cmt"># Quay lại thư mục vừa đứng trước đó</span></pre>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>📁 Thao Tác File & Thư Mục</h3>
+                <div class="cmd-card">
+                    <div class="cmd-label">Tạo, copy, di chuyển, xoá</div>
+<pre class="code-block"><span class="c-cmd">mkdir releases</span>           <span class="c-cmt"># Tạo thư mục</span>
+<span class="c-cmd">mkdir -p app/logs/2026</span>   <span class="c-cmt"># -p tạo cả cây thư mục lồng nhau</span>
+<span class="c-cmd">touch app.log</span>            <span class="c-cmt"># Tạo file rỗng / cập nhật timestamp</span>
+<span class="c-cmd">cp config.json config.bak</span>   <span class="c-cmt"># Copy file</span>
+<span class="c-cmd">cp -r src/ backup/</span>       <span class="c-cmt"># -r copy cả thư mục (recursive)</span>
+<span class="c-cmd">mv old.txt new.txt</span>       <span class="c-cmt"># Đổi tên HOẶC di chuyển</span>
+<span class="c-cmd">rm temp.log</span>              <span class="c-cmt"># Xoá file</span>
+<span class="c-cmd">rm -rf node_modules</span>      <span class="c-cmt"># -r đệ quy, -f không hỏi — XÓA THẲNG TAY</span></pre>
+                </div>
+                <div class="warning-box">
+                    <strong>⚠️ <code>rm -rf</code> không có thùng rác.</strong> Không có "Ctrl+Z". <code>rm -rf /</code> hoặc <code>rm -rf $VAR/</code> khi <code>$VAR</code> rỗng = xoá sạch server. Luôn <code>pwd</code> và <code>ls</code> kiểm tra trước khi xoá. Trên prod, cân nhắc <code>mv</code> vào thư mục tạm thay vì <code>rm</code> ngay.
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>👀 Xem Nội Dung File</h3>
+                <div class="cmd-card">
+                    <div class="cmd-label">Đọc file & theo dõi log</div>
+<pre class="code-block"><span class="c-cmd">cat config.json</span>         <span class="c-cmt"># In toàn bộ file ra màn hình</span>
+<span class="c-cmd">less app.log</span>             <span class="c-cmt"># Xem phân trang (q để thoát, / để tìm)</span>
+<span class="c-cmd">head -n 20 app.log</span>       <span class="c-cmt"># 20 dòng đầu</span>
+<span class="c-cmd">tail -n 50 app.log</span>       <span class="c-cmt"># 50 dòng cuối</span>
+<span class="c-cmd">tail -f app.log</span>          <span class="c-cmt"># THEO DÕI log live — quan trọng nhất khi debug deploy</span>
+<span class="c-cmd">grep -i "error" app.log</span>  <span class="c-cmt"># Lọc dòng chứa "error" (không phân biệt hoa thường)</span>
+<span class="c-cmd">grep -rn "TODO" src/</span>     <span class="c-cmt"># Tìm đệ quy trong thư mục, kèm số dòng</span></pre>
+                </div>
+                <div class="tip-box">
+                    <strong>💡 <code>tail -f</code> là người bạn thân nhất khi deploy.</strong> Mở một terminal chạy <code>tail -f /var/log/nginx/error.log</code>, terminal khác restart app — bạn thấy lỗi ngay khi nó xảy ra.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SECTION 2: PERMISSIONS ===== -->
+    <section class="section" id="permissions">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🔐</div>
+                <h2>2. Quyền (Permissions) & User</h2>
+                <p>Lý do số 1 khiến app "không chạy được trên server": sai permission. Hiểu rwx là hết bệnh.</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>🔢 Đọc Hiểu <code>rwx</code> và Số Octal</h3>
+                <p>Chạy <code>ls -l</code> sẽ thấy dòng kiểu <code>-rwxr-xr--</code>. Mỗi nhóm 3 ký tự dành cho: <strong>Owner</strong> (chủ) · <strong>Group</strong> (nhóm) · <strong>Others</strong> (còn lại).</p>
+                <div class="perm-grid">
+                    <div class="perm-cell"><div class="perm-bit">r = 4</div><div class="perm-name">read (đọc)</div></div>
+                    <div class="perm-cell"><div class="perm-bit">w = 2</div><div class="perm-name">write (ghi)</div></div>
+                    <div class="perm-cell"><div class="perm-bit">x = 1</div><div class="perm-name">execute (chạy)</div></div>
+                </div>
+                <div class="cmd-card" style="margin-top:16px;">
+                    <div class="cmd-label">chmod & chown</div>
+<pre class="code-block"><span class="c-cmt"># Cộng các số lại: rwx=7, rw-=6, r-x=5, r--=4</span>
+<span class="c-cmd">chmod 755 deploy.sh</span>      <span class="c-cmt"># owner rwx(7), group r-x(5), others r-x(5)</span>
+<span class="c-cmd">chmod 644 config.json</span>   <span class="c-cmt"># owner rw-(6), group r--(4), others r--(4)</span>
+<span class="c-cmd">chmod +x deploy.sh</span>       <span class="c-cmt"># Thêm quyền execute (cách viết ký hiệu)</span>
+<span class="c-cmd">chmod 600 ~/.ssh/id_ed25519</span>  <span class="c-cmt"># SSH key BẮT BUỘC chỉ owner đọc/ghi</span>
+
+<span class="c-cmt"># chown = đổi chủ sở hữu (owner:group)</span>
+<span class="c-cmd">chown www-data:www-data /var/www/app</span>
+<span class="c-cmd">chown -R deploy:deploy /opt/myapp</span>   <span class="c-cmt"># -R áp dụng đệ quy</span></pre>
+                </div>
+                <div class="warning-box">
+                    <strong>⚠️ Đừng bao giờ <code>chmod 777</code> để "cho nhanh".</strong> 777 = ai cũng đọc/ghi/chạy được — lỗ hổng bảo mật kinh điển. SSH private key sai quyền (không phải 600) sẽ bị từ chối kèm lỗi <code>UNPROTECTED PRIVATE KEY FILE</code>.
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>👤 User, Root & <code>sudo</code></h3>
+                <p>Trên server, <strong>root</strong> là vua — làm được mọi thứ kể cả tự huỷ. Best practice: tạo user thường rồi dùng <code>sudo</code> khi cần quyền cao, thay vì login root trực tiếp.</p>
+                <div class="cmd-card">
+                    <div class="cmd-label">Quản lý user & sudo</div>
+<pre class="code-block"><span class="c-cmd">whoami</span>                   <span class="c-cmt"># Đang là user nào?</span>
+<span class="c-cmd">sudo apt update</span>          <span class="c-cmt"># Chạy lệnh với quyền root</span>
+<span class="c-cmd">sudo adduser deploy</span>      <span class="c-cmt"># Tạo user mới tên deploy</span>
+<span class="c-cmd">sudo usermod -aG sudo deploy</span>   <span class="c-cmt"># Cho deploy quyền dùng sudo</span>
+<span class="c-cmd">su - deploy</span>              <span class="c-cmt"># Chuyển sang user deploy</span>
+<span class="c-cmd">id deploy</span>                <span class="c-cmt"># Xem user thuộc group nào</span></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SECTION 3: PACKAGES & PROCESSES ===== -->
+    <section class="section section-dark" id="packages">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">📦</div>
+                <h2>3. Cài Phần Mềm & Quản Lý Tiến Trình</h2>
+                <p>Cài runtime, theo dõi tiến trình ngốn RAM, và "tắt" cái app đang treo cổng.</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>📥 Package Manager — apt vs yum/dnf</h3>
+                <div class="compare-grid">
+                    <div class="compare-card">
+                        <h4>🟠 apt (Debian / Ubuntu)</h4>
+                        <div class="compare-list">
+                            <div class="compare-item"><code>sudo apt update</code> — cập nhật danh sách package</div>
+                            <div class="compare-item"><code>sudo apt upgrade</code> — nâng cấp các package đã cài</div>
+                            <div class="compare-item"><code>sudo apt install nginx</code> — cài phần mềm</div>
+                            <div class="compare-item"><code>sudo apt remove nginx</code> — gỡ phần mềm</div>
+                            <div class="compare-item"><code>apt search node</code> — tìm package</div>
+                        </div>
+                    </div>
+                    <div class="compare-card">
+                        <h4>🔴 yum / dnf (RHEL / CentOS / Fedora / Amazon Linux)</h4>
+                        <div class="compare-list">
+                            <div class="compare-item"><code>sudo dnf check-update</code> — kiểm tra cập nhật</div>
+                            <div class="compare-item"><code>sudo dnf upgrade</code> — nâng cấp</div>
+                            <div class="compare-item"><code>sudo dnf install nginx</code> — cài</div>
+                            <div class="compare-item"><code>sudo dnf remove nginx</code> — gỡ</div>
+                            <div class="compare-item"><code>dnf search node</code> — tìm</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tip-box">
+                    <strong>💡</strong> Ubuntu là distro phổ biến nhất cho VPS nên bạn sẽ gặp <code>apt</code> nhiều nhất. <code>dnf</code> là bản kế nhiệm hiện đại của <code>yum</code> (lệnh gần như y hệt).
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>⚙️ Tiến Trình (Processes)</h3>
+                <div class="cmd-card">
+                    <div class="cmd-label">Xem & kill process</div>
+<pre class="code-block"><span class="c-cmd">ps aux</span>                   <span class="c-cmt"># Liệt kê TẤT CẢ tiến trình</span>
+<span class="c-cmd">ps aux | grep dotnet</span>     <span class="c-cmt"># Lọc tiến trình của app .NET</span>
+<span class="c-cmd">top</span>                      <span class="c-cmt"># Bảng tiến trình live (CPU/RAM), q để thoát</span>
+<span class="c-cmd">htop</span>                     <span class="c-cmt"># top phiên bản đẹp hơn (cần cài: apt install htop)</span>
+<span class="c-cmd">kill 12345</span>              <span class="c-cmt"># Gửi tín hiệu dừng nhẹ nhàng (SIGTERM) cho PID 12345</span>
+<span class="c-cmd">kill -9 12345</span>           <span class="c-cmt"># Ép tắt cứng (SIGKILL) — dùng khi treo cứng</span>
+<span class="c-cmd">lsof -i :8080</span>           <span class="c-cmt"># Tiến trình nào đang chiếm cổng 8080?</span></pre>
+                </div>
+                <div class="warning-box">
+                    <strong>⚠️ "Address already in use".</strong> Lỗi cực phổ biến khi deploy: cổng đã bị app cũ chiếm. Dùng <code>lsof -i :8080</code> tìm PID rồi <code>kill</code>. Ưu tiên <code>kill</code> thường (cho app dọn dẹp) trước, chỉ <code>kill -9</code> khi nó không chịu chết.
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🔄 systemd & Quản Lý Service</h3>
+                <p>Trên Linux hiện đại, app của bạn nên chạy như một <strong>service systemd</strong> để tự khởi động lại khi crash và tự bật khi reboot server.</p>
+                <div class="cmd-card">
+                    <div class="cmd-label">systemctl — điều khiển service</div>
+<pre class="code-block"><span class="c-cmd">sudo systemctl status nginx</span>     <span class="c-cmt"># Xem service đang chạy/lỗi gì</span>
+<span class="c-cmd">sudo systemctl start myapp</span>       <span class="c-cmt"># Khởi động</span>
+<span class="c-cmd">sudo systemctl stop myapp</span>        <span class="c-cmt"># Dừng</span>
+<span class="c-cmd">sudo systemctl restart myapp</span>     <span class="c-cmt"># Khởi động lại (sau khi deploy phiên bản mới)</span>
+<span class="c-cmd">sudo systemctl enable myapp</span>      <span class="c-cmt"># Bật tự chạy khi reboot</span>
+<span class="c-cmd">journalctl -u myapp -f</span>           <span class="c-cmt"># Xem log của service (live)</span></pre>
+                </div>
+                <div class="cmd-card" style="margin-top:16px;">
+                    <div class="cmd-label">/etc/systemd/system/myapp.service — định nghĩa service cho .NET app</div>
+<pre class="code-block"><span class="c-key">[Unit]</span>
+<span class="c-key">Description</span>=My .NET API
+<span class="c-key">After</span>=network.target
+
+<span class="c-key">[Service]</span>
+<span class="c-key">WorkingDirectory</span>=/var/www/myapp
+<span class="c-key">ExecStart</span>=/usr/bin/dotnet /var/www/myapp/MyApp.dll
+<span class="c-key">Restart</span>=always
+<span class="c-key">User</span>=www-data
+<span class="c-key">Environment</span>=ASPNETCORE_ENVIRONMENT=Production
+
+<span class="c-key">[Install]</span>
+<span class="c-key">WantedBy</span>=multi-user.target</pre>
+                </div>
+                <div class="tip-box">
+                    <strong>💡 Sau khi sửa file <code>.service</code>:</strong> chạy <code>sudo systemctl daemon-reload</code> rồi <code>sudo systemctl restart myapp</code> để áp dụng.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SECTION 4: SSH ===== -->
+    <section class="section" id="ssh">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🔑</div>
+                <h2>4. SSH — Kết Nối & Chuyển File</h2>
+                <p>SSH là cách bạn điều khiển server từ xa một cách an toàn. Không có SSH = không deploy được lên VPS.</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>🗝️ Tạo Key & Đăng Nhập (không cần mật khẩu)</h3>
+                <div class="cmd-card">
+                    <div class="cmd-label">Quy trình SSH key chuẩn 2026</div>
+<pre class="code-block"><span class="c-cmt"># 1. Tạo cặp key trên MÁY BẠN (ed25519 nhanh & an toàn hơn RSA)</span>
+<span class="c-cmd">ssh-keygen -t ed25519 -C "deploy@laptop"</span>
+
+<span class="c-cmt"># 2. Copy public key lên server (tự thêm vào ~/.ssh/authorized_keys)</span>
+<span class="c-cmd">ssh-copy-id deploy@203.0.113.10</span>
+
+<span class="c-cmt"># 3. Đăng nhập — giờ không cần gõ mật khẩu nữa</span>
+<span class="c-cmd">ssh deploy@203.0.113.10</span>
+
+<span class="c-cmt"># Đăng nhập qua port tuỳ chỉnh & chỉ định key cụ thể</span>
+<span class="c-cmd">ssh -p 2222 -i ~/.ssh/id_ed25519 deploy@myserver.com</span></pre>
+                </div>
+                <div class="warning-box">
+                    <strong>⚠️ Private key (<code>id_ed25519</code>) KHÔNG bao giờ rời máy bạn.</strong> Chỉ copy file <code>.pub</code> (public) lên server. Đặt quyền <code>chmod 600</code> cho private key, <code>chmod 700</code> cho thư mục <code>~/.ssh</code>.
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>📤 Chuyển File: <code>scp</code> vs <code>rsync</code></h3>
+                <div class="cmd-card">
+                    <div class="cmd-label">Upload code/artifact lên server</div>
+<pre class="code-block"><span class="c-cmt"># scp — copy đơn giản qua SSH</span>
+<span class="c-cmd">scp app.zip deploy@server:/var/www/</span>          <span class="c-cmt"># Đẩy file lên</span>
+<span class="c-cmd">scp -r dist/ deploy@server:/var/www/app/</span>     <span class="c-cmt"># Đẩy cả thư mục</span>
+<span class="c-cmd">scp deploy@server:/var/log/app.log ./</span>        <span class="c-cmt"># Kéo file về</span>
+
+<span class="c-cmt"># rsync — thông minh hơn: chỉ truyền phần KHÁC BIỆT, hỗ trợ resume</span>
+<span class="c-cmd">rsync -avz --delete dist/ deploy@server:/var/www/app/</span>
+<span class="c-cmt">#  -a giữ nguyên quyền/timestamp  -v hiện chi tiết</span>
+<span class="c-cmt">#  -z nén khi truyền  --delete xoá file thừa ở đích cho khớp source</span></pre>
+                </div>
+                <div class="tip-box">
+                    <strong>💡 Deploy thật nên dùng <code>rsync</code>.</strong> Lần đầu nó copy hết, các lần sau chỉ truyền file thay đổi → nhanh hơn nhiều và an toàn nếu mất mạng giữa chừng.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SECTION 5: BASH ===== -->
+    <section class="section section-dark" id="bash">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">📜</div>
+                <h2>5. Biến Môi Trường, Pipe & Bash Script</h2>
+                <p>Ghép các lệnh nhỏ thành một quy trình deploy tự động — đây là sức mạnh thật của CLI.</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>🌱 Biến Môi Trường (Environment Variables)</h3>
+                <div class="cmd-card">
+                    <div class="cmd-label">Đọc, đặt, xuất biến</div>
+<pre class="code-block"><span class="c-cmd">echo $HOME</span>               <span class="c-cmt"># In giá trị một biến</span>
+<span class="c-cmd">env</span>                      <span class="c-cmt"># Liệt kê tất cả biến môi trường</span>
+<span class="c-cmd">export API_KEY="abc123"</span>   <span class="c-cmt"># Đặt biến cho session hiện tại</span>
+<span class="c-cmd">printenv DATABASE_URL</span>     <span class="c-cmt"># In một biến cụ thể</span>
+
+<span class="c-cmt"># Để biến tồn tại vĩnh viễn → thêm vào ~/.bashrc rồi: source ~/.bashrc</span></pre>
+                </div>
+                <div class="tip-box">
+                    <strong>💡</strong> App đọc cấu hình qua biến môi trường (vd <code>ASPNETCORE_ENVIRONMENT</code>, <code>DATABASE_URL</code>) — đây là nền tảng của 12-factor app. Chi tiết ở trang <a href="secrets.html">🔑 Secrets</a>.
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🔗 Pipe <code>|</code> và Redirection <code>&gt; &gt;&gt;</code></h3>
+                <div class="cmd-card">
+                    <div class="cmd-label">Nối lệnh & điều hướng output</div>
+<pre class="code-block"><span class="c-cmt"># Pipe: đưa output lệnh này làm input lệnh kia</span>
+<span class="c-cmd">ps aux | grep nginx | wc -l</span>     <span class="c-cmt"># Đếm số tiến trình nginx</span>
+<span class="c-cmd">cat access.log | grep 500 | head</span>   <span class="c-cmt"># Lọc lỗi 500, lấy vài dòng đầu</span>
+
+<span class="c-cmt"># Redirection: ghi output ra file</span>
+<span class="c-cmd">dotnet MyApp.dll &gt; app.log 2&gt;&amp;1</span>   <span class="c-cmt"># &gt; ghi đè, 2&gt;&amp;1 gộp cả lỗi vào</span>
+<span class="c-cmd">echo "deployed $(date)" &gt;&gt; deploy.log</span>   <span class="c-cmt"># &gt;&gt; ghi nối thêm vào cuối</span></pre>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🤖 Bash Script Deploy Cơ Bản</h3>
+                <div class="cmd-card">
+                    <div class="cmd-label">deploy.sh — script triển khai mẫu</div>
+<pre class="code-block"><span class="c-cmt">#!/bin/bash</span>
+<span class="c-key">set</span> -euo pipefail          <span class="c-cmt"># Dừng ngay khi có lỗi — RẤT QUAN TRỌNG</span>
+
+APP_DIR=<span class="c-str">"/var/www/myapp"</span>
+BRANCH=<span class="c-str">"main"</span>
+
+<span class="c-cmd">echo</span> <span class="c-str">"==&gt; Kéo code mới"</span>
+<span class="c-cmd">cd</span> <span class="c-str">"$APP_DIR"</span>
+<span class="c-cmd">git</span> pull origin <span class="c-str">"$BRANCH"</span>
+
+<span class="c-cmd">echo</span> <span class="c-str">"==&gt; Build"</span>
+<span class="c-cmd">dotnet</span> publish -c Release -o ./publish
+
+<span class="c-cmd">echo</span> <span class="c-str">"==&gt; Restart service"</span>
+<span class="c-cmd">sudo</span> systemctl restart myapp
+
+<span class="c-cmd">echo</span> <span class="c-str">"✅ Deploy xong lúc $(date)"</span></pre>
+                </div>
+                <div class="warning-box">
+                    <strong>⚠️ Luôn mở script bằng <code>set -euo pipefail</code>.</strong> <code>-e</code> dừng khi lệnh lỗi, <code>-u</code> báo lỗi khi dùng biến chưa khai báo, <code>-o pipefail</code> bắt lỗi giữa pipe. Không có dòng này, script sẽ "chạy tiếp dù đã hỏng" và deploy ra bản lỗi.
+                </div>
+                <div class="tip-box">
+                    <strong>💡 Chạy script:</strong> <code>chmod +x deploy.sh</code> rồi <code>./deploy.sh</code>. Dùng <code>bash -x deploy.sh</code> để debug từng dòng.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="closing-box">
+                <div class="closing-nav">
+                    <a href="index.html" class="closing-btn">🗺️ Tổng quan</a>
+                    <a href="networking.html" class="closing-btn">🌐 Networking →</a>
+                    <a href="secrets.html" class="closing-btn">🔑 Secrets</a>
+                    <a href="git.html" class="closing-btn">📦 Git</a>
+                    <a href="docker.html" class="closing-btn">🐳 Docker</a>
+                    <a href="hosting.html" class="closing-btn">☁️ Hosting</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Build & Deploy — Triển khai website từ A→Z cho web developer</p>
+            <p class="footer-note">Linux & CLI — nền tảng để deploy lên bất kỳ VPS/server nào</p>
+        </div>
+    </footer>
+
+    <script src="build.js"></script>
+</body>
+</html>

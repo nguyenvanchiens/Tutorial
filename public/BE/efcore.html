@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EF Core nền tảng — ORM cho .NET 8/9 từ A-Z</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --ut-primary: #512bd4;
+        --ut-primary-2: #8a2be2;
+        --ut-accent: #43e97b;
+        --ut-warn: #f39c12;
+        --ut-danger: #f5576c;
+        --ut-card: #1a1d2e;
+        --ut-card-2: #232640;
+        --ut-border: #2d3148;
+        --ut-text: #e2e8f0;
+        --ut-muted: #94a3b8;
+    }
+
+    .ut-hero {
+        text-align: center;
+        padding: 4rem 1.5rem 3rem;
+        background: radial-gradient(ellipse at top, rgba(81,43,212,.18), transparent 60%);
+    }
+    .ut-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 1rem; }
+    .ut-hero h1 .gradient {
+        background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .ut-hero .hero-badge {
+        display: inline-block;
+        background: rgba(81,43,212,.15);
+        color: var(--ut-primary-2);
+        padding: .4rem 1rem;
+        border-radius: 20px;
+        font-size: .78rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        margin-bottom: 1.25rem;
+    }
+    .ut-hero p { color: var(--ut-muted); max-width: 820px; margin: 0 auto; }
+
+    .ut-section { padding: 2.5rem 0; }
+    .ut-title {
+        font-size: 1.7rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        padding-left: 1rem;
+        color: var(--ut-text);
+    }
+    .ut-title::before {
+        content: '';
+        position: absolute;
+        left: 0; top: 6px; bottom: 6px;
+        width: 4px;
+        background: linear-gradient(180deg, var(--ut-primary), var(--ut-primary-2));
+        border-radius: 3px;
+    }
+    .ut-sub { color: var(--ut-muted); margin-bottom: 1.25rem; }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+
+    .ut-grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .ut-grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    .ut-grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+
+    .ut-card {
+        background: var(--ut-card);
+        border: 1px solid var(--ut-border);
+        border-radius: 12px;
+        padding: 1.4rem;
+    }
+    .ut-card h3 { color: var(--ut-primary-2); margin-bottom: .6rem; font-size: 1.1rem; }
+    .ut-card h4 { color: var(--ut-accent); margin-bottom: .45rem; font-size: .98rem; }
+    .ut-card p, .ut-card li { color: var(--ut-muted); font-size: .95rem; }
+    .ut-card ul { padding-left: 1.2rem; }
+    .ut-card ul li { margin-bottom: .3rem; }
+
+    pre.cb {
+        background: #0b1020;
+        border: 1px solid var(--ut-border);
+        border-left: 3px solid var(--ut-primary);
+        border-radius: 8px;
+        padding: 1rem 1.15rem;
+        overflow-x: auto;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+        font-size: .88rem;
+        line-height: 1.6;
+        margin: .75rem 0;
+        color: #d6deeb;
+    }
+    pre.cb .k { color: #c792ea; }
+    pre.cb .s { color: #ecc48d; }
+    pre.cb .c { color: #637777; font-style: italic; }
+    pre.cb .n { color: #82aaff; }
+    pre.cb .t { color: #ffcb8b; }
+    pre.cb .a { color: #7fdbca; }
+    code {
+        background: #2d3148;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: .88em;
+        color: #f8d06b;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+    }
+
+    .callout {
+        border-radius: 10px;
+        padding: .95rem 1.15rem;
+        margin: 1rem 0;
+        border: 1px solid;
+    }
+    .callout.tip { background: rgba(67,233,123,.07); border-color: var(--ut-accent); }
+    .callout.tip strong { color: var(--ut-accent); }
+    .callout.warn { background: rgba(243,156,18,.07); border-color: var(--ut-warn); }
+    .callout.warn strong { color: var(--ut-warn); }
+    .callout.danger { background: rgba(245,87,108,.07); border-color: var(--ut-danger); }
+    .callout.danger strong { color: var(--ut-danger); }
+    .callout.info { background: rgba(81,43,212,.08); border-color: var(--ut-primary-2); }
+    .callout.info strong { color: var(--ut-primary-2); }
+
+    table.cmp { width: 100%; border-collapse: collapse; background: var(--ut-card); border-radius: 10px; overflow: hidden; margin: 1rem 0; font-size: .92rem; }
+    table.cmp th, table.cmp td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--ut-border); }
+    table.cmp th { background: var(--ut-card-2); color: var(--ut-primary-2); font-weight: 600; }
+    table.cmp td { color: var(--ut-muted); }
+    table.cmp tr:last-child td { border-bottom: none; }
+
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; position: relative; padding-left: 2.8rem; margin-bottom: 1rem; }
+    .steps li::before {
+        content: counter(step);
+        position: absolute; left: 0; top: 0;
+        width: 2rem; height: 2rem;
+        background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2));
+        color: #fff;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700;
+    }
+
+    .do-dont { border-left: 3px solid; padding: 1rem 1.15rem; border-radius: 8px; margin-bottom: 1rem; }
+    .do-dont.do { border-color: var(--ut-accent); background: rgba(67,233,123,.04); }
+    .do-dont.dont { border-color: var(--ut-danger); background: rgba(245,87,108,.04); }
+    .do-dont h4 { margin-bottom: .5rem; }
+    .do-dont.do h4 { color: var(--ut-accent); }
+    .do-dont.dont h4 { color: var(--ut-danger); }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo"><a href="index.html" style="color:inherit;-webkit-text-fill-color:inherit;">.NET<span class="accent">Mastery</span></a></div>
+        <div class="nav-links">
+            <a href="index.html">Roadmap</a>
+            <a href="csharp-basics.html">C# Basics</a>
+            <a href="oop.html">OOP</a>
+            <a href="linq.html">LINQ</a>
+            <a href="sql-basics.html">SQL</a>
+            <a href="webapi-first.html">Web API</a>
+            <a href="efcore.html" class="nav-active">EF Core</a>
+            <a href="di.html">DI</a>
+        </div>
+        <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+</nav>
+
+<header class="ut-hero">
+    <div class="hero-badge">CƠ BẢN · FOUNDATION</div>
+    <h1>Làm chủ <span class="gradient">EF Core</span> nền tảng</h1>
+    <p>Entity Framework Core là ORM chính thức của .NET. Bài học đi từ khái niệm ORM, cấu hình <code>DbContext</code>, mapping entity, migrations, quan hệ (1-1, 1-n, n-n), loading dữ liệu liên quan, query LINQ → SQL, change tracking, cho tới vấn đề kinh điển N+1. Cập nhật EF Core 8/9 trên .NET 8/9 (2026).</p>
+</header>
+
+<div class="container">
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">1. EF Core là gì? Khái niệm ORM</h2>
+    <p class="ut-sub">EF Core (Entity Framework Core) là một <strong>ORM</strong> (Object-Relational Mapper) — lớp trung gian ánh xạ giữa <em>class C#</em> và <em>bảng trong database</em>. Bạn làm việc với object, EF Core dịch ra SQL.</p>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h4>🧠 ORM giải quyết gì?</h4>
+            <ul>
+                <li>Không phải viết SQL chuỗi tay → giảm lỗi typo, SQL injection</li>
+                <li>Class C# ↔ bảng, property ↔ cột tự động</li>
+                <li>Query bằng LINQ, EF Core dịch sang SQL của provider</li>
+                <li>Theo dõi thay đổi (change tracking) và sinh INSERT/UPDATE/DELETE</li>
+                <li>Quản lý schema qua migrations</li>
+            </ul>
+        </div>
+        <div class="ut-card">
+            <h4>⚙️ Mô hình hoạt động</h4>
+            <ul>
+                <li><strong>Entity</strong> — class POCO ánh xạ tới 1 bảng</li>
+                <li><strong>DbContext</strong> — đại diện 1 phiên làm việc với DB</li>
+                <li><strong>DbSet&lt;T&gt;</strong> — đại diện 1 bảng / tập entity</li>
+                <li><strong>Provider</strong> — thư viện dịch LINQ sang SQL cụ thể</li>
+                <li><strong>Migration</strong> — bản ghi tiến hoá schema</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3 style="margin-top:1.5rem; color:var(--ut-primary-2)">🔌 Database Providers phổ biến</h3>
+    <p class="ut-sub">EF Core không gắn chặt một DB nào. Cài provider tương ứng để chạy với SQL Server, PostgreSQL, SQLite...</p>
+    <table class="cmp">
+        <tr><th>Provider (NuGet)</th><th>Database</th><th>Method cấu hình</th><th>Ghi chú</th></tr>
+        <tr><td><code>Microsoft.EntityFrameworkCore.SqlServer</code></td><td>SQL Server / Azure SQL</td><td><code>.UseSqlServer(...)</code></td><td>Phổ biến trong doanh nghiệp .NET</td></tr>
+        <tr><td><code>Npgsql.EntityFrameworkCore.PostgreSQL</code></td><td>PostgreSQL</td><td><code>.UseNpgsql(...)</code></td><td>Open-source, mạnh, được ưa chuộng 2026</td></tr>
+        <tr><td><code>Microsoft.EntityFrameworkCore.Sqlite</code></td><td>SQLite</td><td><code>.UseSqlite(...)</code></td><td>File nhẹ, tốt cho dev/test/mobile</td></tr>
+        <tr><td><code>Microsoft.EntityFrameworkCore.InMemory</code></td><td>(RAM)</td><td><code>.UseInMemoryDatabase(...)</code></td><td>Chỉ test logic — không phải SQL thật</td></tr>
+        <tr><td><code>Pomelo.EntityFrameworkCore.MySql</code></td><td>MySQL / MariaDB</td><td><code>.UseMySql(...)</code></td><td>Cộng đồng duy trì</td></tr>
+    </table>
+
+    <pre class="cb"><span class="c"># Cài provider — chọn 1 theo DB của bạn</span>
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer
+dotnet add package Npgsql.EntityFrameworkCore.PostgreSQL
+dotnet add package Microsoft.EntityFrameworkCore.Sqlite
+
+<span class="c"># Công cụ dòng lệnh ef (toàn cục) cho migrations</span>
+dotnet tool install --global dotnet-ef
+dotnet add package Microsoft.EntityFrameworkCore.Design  <span class="c"># cần để scaffold/migration</span></pre>
+
+    <div class="callout info">
+        <strong>EF Core ≠ EF6:</strong> EF Core là bản viết lại hoàn toàn, cross-platform (Windows/Linux/macOS), nhẹ và nhanh hơn. Phiên bản đi cùng .NET: EF Core 8 ↔ .NET 8 (LTS), EF Core 9 ↔ .NET 9. Luôn match major version của EF Core với target framework.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">2. DbContext — trái tim của EF Core</h2>
+    <p class="ut-sub"><code>DbContext</code> đại diện cho một phiên làm việc với database: nó chứa các <code>DbSet&lt;T&gt;</code> (bảng), cấu hình model, và quản lý change tracking + lưu thay đổi.</p>
+
+    <pre class="cb"><span class="c">// AppDbContext.cs</span>
+<span class="k">using</span> Microsoft.EntityFrameworkCore;
+
+<span class="k">public class</span> <span class="t">AppDbContext</span> : <span class="t">DbContext</span>
+{
+    <span class="k">public</span> <span class="n">AppDbContext</span>(<span class="t">DbContextOptions</span>&lt;<span class="t">AppDbContext</span>&gt; options)
+        : <span class="k">base</span>(options) { }
+
+    <span class="c">// Mỗi DbSet đại diện 1 bảng</span>
+    <span class="k">public</span> DbSet&lt;<span class="t">Blog</span>&gt; Blogs =&gt; Set&lt;<span class="t">Blog</span>&gt;();
+    <span class="k">public</span> DbSet&lt;<span class="t">Post</span>&gt; Posts =&gt; Set&lt;<span class="t">Post</span>&gt;();
+    <span class="k">public</span> DbSet&lt;<span class="t">Author</span>&gt; Authors =&gt; Set&lt;<span class="t">Author</span>&gt;();
+
+    <span class="c">// Cấu hình model bằng Fluent API</span>
+    <span class="k">protected override void</span> <span class="n">OnModelCreating</span>(<span class="t">ModelBuilder</span> modelBuilder)
+    {
+        modelBuilder.Entity&lt;<span class="t">Blog</span>&gt;(b =&gt;
+        {
+            b.HasKey(x =&gt; x.Id);
+            b.Property(x =&gt; x.Title).HasMaxLength(<span class="s">200</span>).IsRequired();
+            b.HasIndex(x =&gt; x.Url).IsUnique();
+        });
+
+        <span class="c">// Áp dụng tất cả config trong assembly (khuyên dùng khi model lớn)</span>
+        modelBuilder.ApplyConfigurationsFromAssembly(<span class="k">typeof</span>(<span class="t">AppDbContext</span>).Assembly);
+    }
+}</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Đăng ký DbContext qua DI + connection string</h3>
+    <p class="ut-sub">Trong ASP.NET Core, đăng ký <code>DbContext</code> trong container DI bằng <code>AddDbContext</code>. Connection string đặt ở <code>appsettings.json</code>.</p>
+
+    <pre class="cb"><span class="c">// appsettings.json</span>
+{
+  <span class="s">"ConnectionStrings"</span>: {
+    <span class="s">"Default"</span>: <span class="s">"Host=localhost;Database=blogdb;Username=app;Password=secret"</span>
+  }
+}</pre>
+
+    <pre class="cb"><span class="c">// Program.cs (.NET 8/9 minimal hosting)</span>
+<span class="k">var</span> builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext&lt;<span class="t">AppDbContext</span>&gt;(options =&gt;
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString(<span class="s">"Default"</span>)));
+
+<span class="c">// EF Core 8+: có thể dùng AddDbContextPool để tái sử dụng instance (perf)</span>
+builder.Services.AddDbContextPool&lt;<span class="t">AppDbContext</span>&gt;(o =&gt;
+    o.UseNpgsql(builder.Configuration.GetConnectionString(<span class="s">"Default"</span>)));
+
+<span class="k">var</span> app = builder.Build();</pre>
+
+    <div class="callout warn">
+        <strong>⚠️ Lifetime của DbContext:</strong> <code>AddDbContext</code> đăng ký lifetime <strong>Scoped</strong> (1 instance / 1 request HTTP). KHÔNG bao giờ dùng <code>DbContext</code> như Singleton hay chia sẻ giữa nhiều thread — nó <em>không</em> thread-safe. Mỗi đơn vị công việc nên có context riêng và sống ngắn.
+    </div>
+
+    <pre class="cb"><span class="c">// Inject DbContext vào service / controller</span>
+<span class="k">public class</span> <span class="t">BlogService</span>
+{
+    <span class="k">private readonly</span> <span class="t">AppDbContext</span> _db;
+    <span class="k">public</span> <span class="n">BlogService</span>(<span class="t">AppDbContext</span> db) =&gt; _db = db;
+
+    <span class="k">public</span> Task&lt;List&lt;<span class="t">Blog</span>&gt;&gt; <span class="n">GetAllAsync</span>() =&gt;
+        _db.Blogs.ToListAsync();
+}</pre>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">3. Entities — Conventions, Annotations &amp; Fluent API</h2>
+    <p class="ut-sub">Entity là class POCO (Plain Old CLR Object). EF Core ánh xạ chúng theo 3 lớp ưu tiên: <strong>convention</strong> (quy ước mặc định) → <strong>data annotations</strong> (attribute) → <strong>Fluent API</strong> (mạnh nhất, ghi đè tất cả).</p>
+
+    <h3 style="color:var(--ut-primary-2)">🪄 Conventions — EF Core tự suy ra</h3>
+    <div class="ut-card">
+        <ul>
+            <li>Property tên <code>Id</code> hoặc <code>&lt;Tên&gt;Id</code> → khoá chính (primary key)</li>
+            <li>Property kiểu reference tới entity khác + <code>&lt;Tên&gt;Id</code> → khoá ngoại (foreign key)</li>
+            <li>Tên class → tên bảng (số nhiều qua DbSet); tên property → tên cột</li>
+            <li>Kiểu C# → kiểu cột tương ứng (<code>int</code>→int, <code>string</code>→nvarchar, <code>DateTime</code>→timestamp...)</li>
+            <li><code>string?</code> → cột nullable; <code>string</code> (non-nullable) → cột NOT NULL (nếu bật nullable reference types)</li>
+        </ul>
+    </div>
+
+    <pre class="cb"><span class="c">// Entity dựa hoàn toàn vào convention</span>
+<span class="k">public class</span> <span class="t">Blog</span>
+{
+    <span class="k">public int</span> Id { <span class="k">get</span>; <span class="k">set</span>; }            <span class="c">// PK theo convention</span>
+    <span class="k">public</span> <span class="k">string</span> Title { <span class="k">get</span>; <span class="k">set</span>; } = <span class="s">""</span>;  <span class="c">// NOT NULL</span>
+    <span class="k">public</span> <span class="k">string</span>? Url { <span class="k">get</span>; <span class="k">set</span>; }         <span class="c">// nullable</span>
+    <span class="k">public</span> DateTime CreatedAt { <span class="k">get</span>; <span class="k">set</span>; }
+
+    <span class="c">// Navigation property — quan hệ 1-n</span>
+    <span class="k">public</span> List&lt;<span class="t">Post</span>&gt; Posts { <span class="k">get</span>; <span class="k">set</span>; } = [];
+}</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Data Annotations vs Fluent API</h3>
+    <p class="ut-sub">Cùng một cấu hình, hai cách viết. Annotations ngắn gọn cho rule đơn giản; Fluent API mạnh hơn, tách config ra khỏi entity.</p>
+
+    <table class="cmp">
+        <tr><th>Mục đích</th><th>Data Annotation</th><th>Fluent API</th></tr>
+        <tr><td>Khoá chính</td><td><code>[Key]</code></td><td><code>.HasKey(x =&gt; x.Id)</code></td></tr>
+        <tr><td>Bắt buộc (NOT NULL)</td><td><code>[Required]</code></td><td><code>.Property(x =&gt; x.Title).IsRequired()</code></td></tr>
+        <tr><td>Độ dài tối đa</td><td><code>[MaxLength(200)]</code></td><td><code>.Property(x =&gt; x.Title).HasMaxLength(200)</code></td></tr>
+        <tr><td>Tên cột</td><td><code>[Column("title")]</code></td><td><code>.Property(x =&gt; x.Title).HasColumnName("title")</code></td></tr>
+        <tr><td>Tên bảng</td><td><code>[Table("blogs")]</code></td><td><code>.ToTable("blogs")</code></td></tr>
+        <tr><td>Bỏ qua property</td><td><code>[NotMapped]</code></td><td><code>.Ignore(x =&gt; x.FullName)</code></td></tr>
+        <tr><td>Index / Unique</td><td><code>[Index(nameof(Url), IsUnique=true)]</code></td><td><code>.HasIndex(x =&gt; x.Url).IsUnique()</code></td></tr>
+        <tr><td>Quan hệ phức tạp</td><td>❌ không đủ sức</td><td>✅ <code>.HasOne().WithMany()...</code></td></tr>
+        <tr><td>Giá trị mặc định</td><td>❌</td><td>✅ <code>.HasDefaultValueSql("now()")</code></td></tr>
+    </table>
+
+    <pre class="cb"><span class="c">// Cách A — Data Annotations (gắn trực tiếp trên entity)</span>
+<span class="k">using</span> System.ComponentModel.DataAnnotations;
+<span class="k">using</span> System.ComponentModel.DataAnnotations.Schema;
+
+[<span class="a">Table</span>(<span class="s">"posts"</span>)]
+<span class="k">public class</span> <span class="t">Post</span>
+{
+    [<span class="a">Key</span>]
+    <span class="k">public int</span> Id { <span class="k">get</span>; <span class="k">set</span>; }
+
+    [<span class="a">Required</span>, <span class="a">MaxLength</span>(<span class="s">300</span>)]
+    <span class="k">public</span> <span class="k">string</span> Title { <span class="k">get</span>; <span class="k">set</span>; } = <span class="s">""</span>;
+
+    [<span class="a">Column</span>(<span class="s">"body"</span>, TypeName = <span class="s">"text"</span>)]
+    <span class="k">public</span> <span class="k">string</span>? Content { <span class="k">get</span>; <span class="k">set</span>; }
+
+    [<span class="a">NotMapped</span>]
+    <span class="k">public int</span> WordCount =&gt; Content?.Split(<span class="s">' '</span>).Length ?? <span class="s">0</span>;
+}</pre>
+
+    <pre class="cb"><span class="c">// Cách B — Fluent API trong IEntityTypeConfiguration (khuyên cho dự án lớn)</span>
+<span class="k">public class</span> <span class="t">PostConfig</span> : <span class="t">IEntityTypeConfiguration</span>&lt;<span class="t">Post</span>&gt;
+{
+    <span class="k">public void</span> <span class="n">Configure</span>(<span class="t">EntityTypeBuilder</span>&lt;<span class="t">Post</span>&gt; b)
+    {
+        b.ToTable(<span class="s">"posts"</span>);
+        b.HasKey(x =&gt; x.Id);
+        b.Property(x =&gt; x.Title).HasMaxLength(<span class="s">300</span>).IsRequired();
+        b.Property(x =&gt; x.Content).HasColumnName(<span class="s">"body"</span>).HasColumnType(<span class="s">"text"</span>);
+        b.Ignore(x =&gt; x.WordCount);
+        b.HasIndex(x =&gt; x.Title);
+    }
+}
+<span class="c">// Được nạp tự động bởi ApplyConfigurationsFromAssembly(...) trong OnModelCreating</span></pre>
+
+    <div class="callout tip">
+        <strong>💡 Khoá chính (Primary Key):</strong> Convention nhận diện <code>Id</code> / <code>&lt;Type&gt;Id</code>. Muốn khoá kép (composite) thì BẮT BUỘC dùng Fluent API: <code>b.HasKey(x =&gt; new { x.OrderId, x.ProductId })</code>. EF Core mặc định sinh khoá <code>int</code> identity (auto-increment); muốn GUID dùng <code>b.Property(x =&gt; x.Id).HasDefaultValueSql("gen_random_uuid()")</code>.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">4. Migrations — quản lý tiến hoá schema</h2>
+    <p class="ut-sub">Migration là cơ chế version-control cho database schema. Mỗi lần model thay đổi, bạn tạo một migration ghi lại diff, rồi áp lên database.</p>
+
+    <ol class="steps">
+        <li><strong>Tạo migration đầu tiên</strong> — EF Core so sánh model hiện tại với migration trước đó (lần đầu là rỗng) và sinh code.
+            <pre class="cb"><span class="c"># Tên migration nên mô tả ý nghĩa thay đổi</span>
+dotnet ef migrations add InitialCreate
+
+<span class="c"># Nếu DbContext nằm ở project khác project khởi động:</span>
+dotnet ef migrations add InitialCreate \
+    --project src/MyApp.Infrastructure \
+    --startup-project src/MyApp.Api</pre>
+        </li>
+        <li><strong>Áp migration lên database</strong> — tạo bảng / sửa cột thật sự.
+            <pre class="cb">dotnet ef database update            <span class="c"># áp tới migration mới nhất</span>
+dotnet ef database update InitialCreate  <span class="c"># áp tới 1 migration cụ thể</span></pre>
+        </li>
+        <li><strong>Thêm thay đổi tiếp theo</strong> — sửa entity (vd thêm cột <code>Slug</code>), rồi tạo migration mới.
+            <pre class="cb"><span class="c"># Sau khi sửa entity Post thêm property Slug</span>
+dotnet ef migrations add AddPostSlug
+dotnet ef database update</pre>
+        </li>
+        <li><strong>Hoàn tác (revert)</strong> — quay về một migration trước đó, EF chạy phần <code>Down()</code>.
+            <pre class="cb"><span class="c"># Quay DB về trạng thái sau InitialCreate (undo AddPostSlug)</span>
+dotnet ef database update InitialCreate
+
+<span class="c"># Gỡ migration cuối CHƯA áp (xoá file)</span>
+dotnet ef migrations remove
+
+<span class="c"># Sinh script SQL để DBA review / chạy trên prod</span>
+dotnet ef migrations script --idempotent -o migrate.sql</pre>
+        </li>
+    </ol>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Một file migration chứa gì?</h3>
+    <pre class="cb"><span class="c">// Migrations/20260615_AddPostSlug.cs</span>
+<span class="k">public partial class</span> <span class="t">AddPostSlug</span> : <span class="t">Migration</span>
+{
+    <span class="c">// Up: áp dụng thay đổi (forward)</span>
+    <span class="k">protected override void</span> <span class="n">Up</span>(<span class="t">MigrationBuilder</span> migrationBuilder)
+    {
+        migrationBuilder.AddColumn&lt;<span class="k">string</span>&gt;(
+            name: <span class="s">"Slug"</span>,
+            table: <span class="s">"posts"</span>,
+            type: <span class="s">"character varying(150)"</span>,
+            maxLength: <span class="s">150</span>,
+            nullable: <span class="k">true</span>);
+    }
+
+    <span class="c">// Down: hoàn tác (rollback)</span>
+    <span class="k">protected override void</span> <span class="n">Down</span>(<span class="t">MigrationBuilder</span> migrationBuilder)
+    {
+        migrationBuilder.DropColumn(name: <span class="s">"Slug"</span>, table: <span class="s">"posts"</span>);
+    }
+}</pre>
+
+    <table class="cmp">
+        <tr><th>Thành phần</th><th>Vai trò</th></tr>
+        <tr><td><code>Up()</code></td><td>Lệnh áp dụng thay đổi tiến lên (CREATE/ALTER/ADD)</td></tr>
+        <tr><td><code>Down()</code></td><td>Lệnh hoàn tác — chạy khi rollback</td></tr>
+        <tr><td><code>*.Designer.cs</code></td><td>Snapshot model tại thời điểm migration (EF dùng để diff)</td></tr>
+        <tr><td><code>ModelSnapshot.cs</code></td><td>Snapshot model HIỆN TẠI (toàn bộ). Đừng sửa tay!</td></tr>
+        <tr><td>Bảng <code>__EFMigrationsHistory</code></td><td>EF tạo trong DB để ghi migration nào đã áp</td></tr>
+    </table>
+
+    <div class="callout warn">
+        <strong>⚠️ Đừng sửa migration đã chạy trên prod.</strong> Migration là bất biến sau khi đã apply. Cần đổi thì tạo migration MỚI. Trên production nên dùng <code>migrations script --idempotent</code> (an toàn chạy lại nhiều lần) hoặc CI/CD apply tự động — tránh gọi <code>EnsureCreated()</code> (nó bỏ qua hệ thống migration hoàn toàn).
+    </div>
+
+    <div class="callout info">
+        <strong>EnsureCreated vs Migrate:</strong> <code>Database.EnsureCreated()</code> tạo schema một phát từ model, KHÔNG dùng migration — chỉ hợp cho test/prototype. <code>Database.Migrate()</code> áp các migration còn thiếu — dùng cho app thật.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">5. Relationships — quan hệ giữa các bảng</h2>
+    <p class="ut-sub">EF Core dựng quan hệ qua <strong>navigation property</strong> + <strong>foreign key</strong>. Có 3 dạng chính: 1-1, 1-n, n-n.</p>
+
+    <h3 style="color:var(--ut-primary-2)">📐 One-to-Many (1-n) — phổ biến nhất</h3>
+    <p class="ut-sub">Schema: <code>Blog</code> (1) ⟶ nhiều <code>Post</code>. Bảng <code>posts</code> có cột FK <code>BlogId</code> trỏ về <code>blogs.Id</code>.</p>
+    <pre class="cb"><span class="k">public class</span> <span class="t">Blog</span>
+{
+    <span class="k">public int</span> Id { <span class="k">get</span>; <span class="k">set</span>; }
+    <span class="k">public</span> <span class="k">string</span> Title { <span class="k">get</span>; <span class="k">set</span>; } = <span class="s">""</span>;
+    <span class="k">public</span> List&lt;<span class="t">Post</span>&gt; Posts { <span class="k">get</span>; <span class="k">set</span>; } = [];   <span class="c">// nav: nhiều con</span>
+}
+
+<span class="k">public class</span> <span class="t">Post</span>
+{
+    <span class="k">public int</span> Id { <span class="k">get</span>; <span class="k">set</span>; }
+    <span class="k">public</span> <span class="k">string</span> Title { <span class="k">get</span>; <span class="k">set</span>; } = <span class="s">""</span>;
+    <span class="k">public int</span> BlogId { <span class="k">get</span>; <span class="k">set</span>; }        <span class="c">// FK theo convention</span>
+    <span class="k">public</span> <span class="t">Blog</span> Blog { <span class="k">get</span>; <span class="k">set</span>; } = <span class="k">null</span>!;  <span class="c">// nav: cha</span>
+}</pre>
+    <pre class="cb"><span class="c">// Fluent API (tường minh, ghi đè convention)</span>
+modelBuilder.Entity&lt;<span class="t">Post</span>&gt;()
+    .HasOne(p =&gt; p.Blog)
+    .WithMany(b =&gt; b.Posts)
+    .HasForeignKey(p =&gt; p.BlogId)
+    .OnDelete(DeleteBehavior.Cascade);   <span class="c">// xoá blog → xoá post con</span></pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">📐 One-to-One (1-1)</h3>
+    <p class="ut-sub">Schema: mỗi <code>Author</code> có đúng 1 <code>AuthorProfile</code>. Bảng <code>author_profiles</code> giữ FK <code>AuthorId</code> đồng thời là khoá chính của nó.</p>
+    <pre class="cb"><span class="k">public class</span> <span class="t">Author</span>
+{
+    <span class="k">public int</span> Id { <span class="k">get</span>; <span class="k">set</span>; }
+    <span class="k">public</span> <span class="k">string</span> Name { <span class="k">get</span>; <span class="k">set</span>; } = <span class="s">""</span>;
+    <span class="k">public</span> <span class="t">AuthorProfile</span>? Profile { <span class="k">get</span>; <span class="k">set</span>; }
+}
+
+<span class="k">public class</span> <span class="t">AuthorProfile</span>
+{
+    <span class="k">public int</span> Id { <span class="k">get</span>; <span class="k">set</span>; }
+    <span class="k">public</span> <span class="k">string</span> Bio { <span class="k">get</span>; <span class="k">set</span>; } = <span class="s">""</span>;
+    <span class="k">public int</span> AuthorId { <span class="k">get</span>; <span class="k">set</span>; }      <span class="c">// FK</span>
+    <span class="k">public</span> <span class="t">Author</span> Author { <span class="k">get</span>; <span class="k">set</span>; } = <span class="k">null</span>!;
+}</pre>
+    <pre class="cb">modelBuilder.Entity&lt;<span class="t">Author</span>&gt;()
+    .HasOne(a =&gt; a.Profile)
+    .WithOne(p =&gt; p.Author)
+    .HasForeignKey&lt;<span class="t">AuthorProfile</span>&gt;(p =&gt; p.AuthorId);  <span class="c">// chỉ rõ bên giữ FK</span></pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">📐 Many-to-Many (n-n) — skip navigation (EF Core 5+)</h3>
+    <p class="ut-sub">Schema: 1 <code>Post</code> có nhiều <code>Tag</code>, 1 <code>Tag</code> gắn nhiều <code>Post</code>. Từ EF Core 5, bạn KHÔNG cần khai báo entity join — EF tự tạo bảng nối <code>PostTag</code> ngầm.</p>
+    <pre class="cb"><span class="k">public class</span> <span class="t">Post</span>
+{
+    <span class="k">public int</span> Id { <span class="k">get</span>; <span class="k">set</span>; }
+    <span class="k">public</span> List&lt;<span class="t">Tag</span>&gt; Tags { <span class="k">get</span>; <span class="k">set</span>; } = [];   <span class="c">// skip navigation</span>
+}
+
+<span class="k">public class</span> <span class="t">Tag</span>
+{
+    <span class="k">public int</span> Id { <span class="k">get</span>; <span class="k">set</span>; }
+    <span class="k">public</span> <span class="k">string</span> Name { <span class="k">get</span>; <span class="k">set</span>; } = <span class="s">""</span>;
+    <span class="k">public</span> List&lt;<span class="t">Post</span>&gt; Posts { <span class="k">get</span>; <span class="k">set</span>; } = [];
+}</pre>
+    <pre class="cb"><span class="c">// Convention tự xử lý. Muốn tuỳ biến bảng nối:</span>
+modelBuilder.Entity&lt;<span class="t">Post</span>&gt;()
+    .HasMany(p =&gt; p.Tags)
+    .WithMany(t =&gt; t.Posts)
+    .UsingEntity&lt;<span class="t">PostTag</span>&gt;(
+        j =&gt; j.HasOne&lt;<span class="t">Tag</span>&gt;().WithMany().HasForeignKey(<span class="s">"TagId"</span>),
+        j =&gt; j.HasOne&lt;<span class="t">Post</span>&gt;().WithMany().HasForeignKey(<span class="s">"PostId"</span>),
+        j =&gt;
+        {
+            j.ToTable(<span class="s">"post_tags"</span>);
+            j.Property&lt;DateTime&gt;(<span class="s">"AddedAt"</span>).HasDefaultValueSql(<span class="s">"now()"</span>);
+        });</pre>
+
+    <table class="cmp">
+        <tr><th>Quan hệ</th><th>Nav phía 1</th><th>Nav phía 2</th><th>FK nằm ở</th></tr>
+        <tr><td>1-1</td><td>1 reference</td><td>1 reference</td><td>1 bảng (bên phụ thuộc)</td></tr>
+        <tr><td>1-n</td><td>collection</td><td>1 reference</td><td>bảng "nhiều"</td></tr>
+        <tr><td>n-n</td><td>collection</td><td>collection</td><td>bảng nối (ngầm hoặc tường minh)</td></tr>
+    </table>
+
+    <div class="callout tip">
+        <strong>💡 OnDelete behavior:</strong> <code>Cascade</code> (xoá cha → xoá con), <code>Restrict</code> (chặn xoá nếu còn con), <code>SetNull</code> (set FK = null). Chọn đúng để tránh xoá nhầm dữ liệu hoặc lỗi ràng buộc khoá ngoại.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">6. Loading Related Data — nạp dữ liệu liên quan</h2>
+    <p class="ut-sub">Khi query <code>Blog</code>, navigation <code>Posts</code> KHÔNG tự động được nạp. EF Core có 3 chiến lược nạp dữ liệu liên quan.</p>
+
+    <h3 style="color:var(--ut-primary-2)">① Eager Loading — Include / ThenInclude</h3>
+    <p class="ut-sub">Nạp dữ liệu liên quan ngay trong query gốc bằng JOIN. Rõ ràng, dễ kiểm soát.</p>
+    <pre class="cb"><span class="k">var</span> blogs = <span class="k">await</span> _db.Blogs
+    .Include(b =&gt; b.Posts)                  <span class="c">// nạp các Post</span>
+        .ThenInclude(p =&gt; p.Comments)       <span class="c">// rồi nạp Comment của mỗi Post</span>
+    .Include(b =&gt; b.Owner)                  <span class="c">// nạp thêm 1 nhánh khác</span>
+    .ToListAsync();
+
+<span class="c">// Filtered Include (EF Core 5+): lọc/sắp xếp collection được nạp</span>
+<span class="k">var</span> blog = <span class="k">await</span> _db.Blogs
+    .Include(b =&gt; b.Posts.Where(p =&gt; p.IsPublished)
+                        .OrderByDescending(p =&gt; p.CreatedAt))
+    .FirstOrDefaultAsync(b =&gt; b.Id == <span class="s">1</span>);</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">② Explicit Loading — .Entry().Collection().Load()</h3>
+    <p class="ut-sub">Nạp dữ liệu liên quan SAU, khi đã có entity, bằng lệnh tường minh. Hữu ích khi không phải lúc nào cũng cần dữ liệu con.</p>
+    <pre class="cb"><span class="k">var</span> blog = <span class="k">await</span> _db.Blogs.FirstAsync(b =&gt; b.Id == <span class="s">1</span>);
+
+<span class="c">// Nạp collection sau</span>
+<span class="k">await</span> _db.Entry(blog)
+    .Collection(b =&gt; b.Posts)
+    .LoadAsync();
+
+<span class="c">// Nạp 1 reference sau</span>
+<span class="k">await</span> _db.Entry(blog)
+    .Reference(b =&gt; b.Owner)
+    .LoadAsync();
+
+<span class="c">// Có thể truy vấn thêm trên collection thay vì load hết</span>
+<span class="k">var</span> publishedCount = <span class="k">await</span> _db.Entry(blog)
+    .Collection(b =&gt; b.Posts)
+    .Query()
+    .CountAsync(p =&gt; p.IsPublished);</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">③ Lazy Loading — proxies + virtual</h3>
+    <p class="ut-sub">Tự động nạp khi truy cập navigation lần đầu. Tiện nhưng RẤT dễ gây N+1 (xem mục 9). Phải cài package proxies + đánh dấu navigation là <code>virtual</code>.</p>
+    <pre class="cb"><span class="c"># Cài package</span>
+dotnet add package Microsoft.EntityFrameworkCore.Proxies</pre>
+    <pre class="cb"><span class="c">// Bật proxies khi cấu hình</span>
+builder.Services.AddDbContext&lt;<span class="t">AppDbContext</span>&gt;(o =&gt; o
+    .UseLazyLoadingProxies()
+    .UseNpgsql(connectionString));
+
+<span class="c">// Navigation PHẢI là virtual để EF tạo proxy override</span>
+<span class="k">public class</span> <span class="t">Blog</span>
+{
+    <span class="k">public int</span> Id { <span class="k">get</span>; <span class="k">set</span>; }
+    <span class="k">public virtual</span> List&lt;<span class="t">Post</span>&gt; Posts { <span class="k">get</span>; <span class="k">set</span>; } = [];
+}
+
+<span class="c">// Truy cập blog.Posts lần đầu → EF tự bắn thêm 1 query</span>
+<span class="k">foreach</span> (<span class="k">var</span> p <span class="k">in</span> blog.Posts) { ... }  <span class="c">// query ngầm xảy ra ở đây!</span></pre>
+
+    <table class="cmp">
+        <tr><th>Chiến lược</th><th>Khi nạp</th><th>Số query</th><th>Dùng khi</th></tr>
+        <tr><td>Eager (<code>Include</code>)</td><td>Cùng query gốc (JOIN)</td><td>1 (hoặc vài với SplitQuery)</td><td>Biết chắc cần dữ liệu con</td></tr>
+        <tr><td>Explicit (<code>.Load()</code>)</td><td>Gọi tay sau đó</td><td>1 thêm / lần Load</td><td>Đôi khi mới cần dữ liệu con</td></tr>
+        <tr><td>Lazy (proxies)</td><td>Tự động khi truy cập nav</td><td>1 thêm / mỗi lần chạm (⚠️ N+1)</td><td>Prototype — tránh ở prod</td></tr>
+    </table>
+
+    <div class="callout danger">
+        <strong>🚫 Cẩn thận Lazy Loading:</strong> tiện lợi nhưng âm thầm sinh hàng loạt query trong vòng lặp. Phần lớn team production TẮT lazy loading và dùng Eager (<code>Include</code>) hoặc projection để kiểm soát số query.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">7. Querying — LINQ dịch sang SQL</h2>
+    <p class="ut-sub">Bạn viết LINQ trên <code>DbSet</code>; EF Core dịch sang SQL của provider và thực thi trên server (không kéo cả bảng về RAM). Query chỉ chạy khi được "materialize" (<code>ToListAsync</code>, <code>FirstOrDefaultAsync</code>, ...).</p>
+
+    <pre class="cb"><span class="c">// Where + OrderBy + paging → dịch thành WHERE / ORDER BY / LIMIT OFFSET</span>
+<span class="k">var</span> posts = <span class="k">await</span> _db.Posts
+    .Where(p =&gt; p.IsPublished &amp;&amp; p.BlogId == <span class="s">1</span>)
+    .OrderByDescending(p =&gt; p.CreatedAt)
+    .Skip(<span class="s">20</span>).Take(<span class="s">10</span>)
+    .ToListAsync();
+
+<span class="c">// FirstOrDefault — lấy 1 hoặc null</span>
+<span class="k">var</span> post = <span class="k">await</span> _db.Posts
+    .FirstOrDefaultAsync(p =&gt; p.Id == <span class="s">42</span>);
+
+<span class="c">// SingleOrDefault — kỳ vọng 0 hoặc 1, ném lỗi nếu &gt;1</span>
+<span class="k">var</span> bySlug = <span class="k">await</span> _db.Posts.SingleOrDefaultAsync(p =&gt; p.Slug == <span class="s">"hello"</span>);
+
+<span class="c">// Aggregate dịch thẳng xuống SQL — không kéo dữ liệu về</span>
+<span class="k">int</span> count = <span class="k">await</span> _db.Posts.CountAsync(p =&gt; p.IsPublished);
+<span class="k">bool</span> any  = <span class="k">await</span> _db.Posts.AnyAsync(p =&gt; p.BlogId == <span class="s">1</span>);</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Projection — chỉ lấy cột cần (Select)</h3>
+    <p class="ut-sub">Dùng <code>Select</code> tạo DTO → SQL chỉ SELECT các cột cần, không nạp toàn entity, không cần tracking. Rất hiệu quả cho màn hình đọc.</p>
+    <pre class="cb"><span class="k">var</span> summaries = <span class="k">await</span> _db.Posts
+    .Where(p =&gt; p.IsPublished)
+    .Select(p =&gt; <span class="k">new</span> <span class="t">PostSummaryDto</span>
+    {
+        Id = p.Id,
+        Title = p.Title,
+        BlogTitle = p.Blog.Title,          <span class="c">// JOIN tự động, không cần Include</span>
+        CommentCount = p.Comments.Count()   <span class="c">// dịch thành sub-query COUNT</span>
+    })
+    .ToListAsync();</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">AsNoTracking — query chỉ đọc</h3>
+    <pre class="cb"><span class="c">// Read-only → tắt change tracking → nhanh hơn, ít RAM hơn</span>
+<span class="k">var</span> posts = <span class="k">await</span> _db.Posts
+    .AsNoTracking()
+    .Where(p =&gt; p.IsPublished)
+    .ToListAsync();
+
+<span class="c">// Bật mặc định no-tracking cho cả context (nếu phần lớn là đọc)</span>
+_db.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;</pre>
+
+    <div class="callout tip">
+        <strong>💡 <code>AsNoTracking()</code> cho mọi query chỉ đọc.</strong> Khi không cần update entity, no-tracking bỏ qua việc tạo snapshot theo dõi → giảm bộ nhớ và CPU đáng kể trên list lớn. Còn với <code>Select</code> ra DTO thì EF không tracking sẵn rồi.
+    </div>
+
+    <div class="callout warn">
+        <strong>⚠️ Client vs Server evaluation:</strong> EF Core cố dịch toàn bộ LINQ xuống SQL. Nếu dùng method C# mà SQL không hiểu (vd hàm tự viết) trong <code>Where</code>, EF Core 3+ sẽ NÉM lỗi thay vì âm thầm kéo dữ liệu về lọc ở client. Hãy đẩy logic lọc xuống dạng SQL-dịch-được, hoặc <code>.AsEnumerable()</code> tường minh trước khi xử lý ở client.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">8. Change Tracking &amp; SaveChanges</h2>
+    <p class="ut-sub">Khi query entity (có tracking), EF Core giữ một <em>snapshot</em>. Khi bạn sửa property, EF so sánh với snapshot để biết cần UPDATE cột nào. <code>SaveChanges</code> gom tất cả thay đổi thành lệnh SQL trong 1 transaction.</p>
+
+    <table class="cmp">
+        <tr><th>EntityState</th><th>Ý nghĩa</th><th>SaveChanges sinh</th></tr>
+        <tr><td><code>Added</code></td><td>Mới <code>Add()</code>, chưa có trong DB</td><td>INSERT</td></tr>
+        <tr><td><code>Modified</code></td><td>Đang tracked và có property đổi</td><td>UPDATE (chỉ cột đổi)</td></tr>
+        <tr><td><code>Deleted</code></td><td>Đã gọi <code>Remove()</code></td><td>DELETE</td></tr>
+        <tr><td><code>Unchanged</code></td><td>Tracked nhưng không đổi gì</td><td>(không sinh lệnh)</td></tr>
+        <tr><td><code>Detached</code></td><td>Không được context theo dõi</td><td>(không sinh lệnh)</td></tr>
+    </table>
+
+    <pre class="cb"><span class="c">// INSERT</span>
+<span class="k">var</span> blog = <span class="k">new</span> <span class="t">Blog</span> { Title = <span class="s">"EF Core"</span> };
+_db.Blogs.Add(blog);                 <span class="c">// state = Added</span>
+
+<span class="c">// UPDATE — chỉ cần sửa property trên entity đã tracked</span>
+<span class="k">var</span> post = <span class="k">await</span> _db.Posts.FirstAsync(p =&gt; p.Id == <span class="s">1</span>);
+post.Title = <span class="s">"Tiêu đề mới"</span>;       <span class="c">// state tự thành Modified</span>
+
+<span class="c">// DELETE</span>
+<span class="k">var</span> old = <span class="k">await</span> _db.Posts.FindAsync(<span class="s">99</span>);
+_db.Posts.Remove(old);               <span class="c">// state = Deleted</span>
+
+<span class="c">// Tất cả gom trong 1 transaction</span>
+<span class="k">await</span> _db.SaveChangesAsync();
+
+<span class="c">// Kiểm tra state tường minh</span>
+<span class="k">var</span> state = _db.Entry(post).State;  <span class="c">// EntityState.Modified</span></pre>
+
+    <div class="callout info">
+        <strong>SaveChanges là atomic:</strong> EF Core gói toàn bộ INSERT/UPDATE/DELETE của một lần <code>SaveChanges</code> vào MỘT transaction. Nếu một lệnh fail → rollback tất cả. EF Core còn batch nhiều lệnh thành ít round-trip để tối ưu hiệu năng.
+    </div>
+
+    <div class="callout warn">
+        <strong>⚠️ Khi tracking gây hại perf:</strong> query trả về hàng chục nghìn entity chỉ để hiển thị (đọc) mà vẫn tracking → tốn RAM tạo snapshot + chậm. Dùng <code>AsNoTracking()</code> hoặc projection. Ngoài ra giữ <code>DbContext</code> sống quá lâu khiến change tracker phình to → memory leak; hãy giữ context sống ngắn (scoped per request).
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">9. Vấn đề N+1 — bug hiệu năng kinh điển</h2>
+    <p class="ut-sub">N+1 xảy ra khi bạn chạy 1 query lấy danh sách, rồi trong vòng lặp lại bắn THÊM 1 query cho mỗi phần tử để nạp dữ liệu con. 1 + N query thay vì 1.</p>
+
+    <div class="do-dont dont">
+        <h4>❌ SAI — lazy/explicit load trong vòng lặp</h4>
+        <p>Lấy 100 blog (1 query) rồi với mỗi blog lại truy cập <code>blog.Posts</code> (lazy) → 100 query con. Tổng <strong>101 query</strong>, kéo theo nghẽn DB.</p>
+        <pre class="cb"><span class="k">var</span> blogs = <span class="k">await</span> _db.Blogs.ToListAsync();   <span class="c">// 1 query lấy 100 blog</span>
+
+<span class="k">foreach</span> (<span class="k">var</span> blog <span class="k">in</span> blogs)
+{
+    <span class="c">// MỖI lần chạm blog.Posts (lazy) bắn 1 query → +100 query!</span>
+    Console.WriteLine($<span class="s">"{blog.Title}: {blog.Posts.Count} bài"</span>);
+}
+<span class="c">// Tổng cộng: 1 + 100 = 101 query (N+1)</span></pre>
+    </div>
+
+    <div class="do-dont do">
+        <h4>✅ ĐÚNG — Eager Include hoặc projection (1 query)</h4>
+        <p>Gộp dữ liệu con vào query gốc bằng <code>Include</code>, hoặc tốt hơn là <code>Select</code> ra đúng dữ liệu cần (DTO + COUNT dịch thẳng sang SQL).</p>
+        <pre class="cb"><span class="c">// Cách 1: Eager loading — 1 query có JOIN</span>
+<span class="k">var</span> blogs = <span class="k">await</span> _db.Blogs
+    .Include(b =&gt; b.Posts)
+    .ToListAsync();
+
+<span class="c">// Cách 2 (tốt nhất cho màn hình đọc): projection — chỉ lấy số đếm</span>
+<span class="k">var</span> data = <span class="k">await</span> _db.Blogs
+    .Select(b =&gt; <span class="k">new</span> { b.Title, PostCount = b.Posts.Count() })
+    .ToListAsync();   <span class="c">// 1 query, COUNT chạy trên SQL server</span></pre>
+    </div>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">AsSplitQuery — tránh "cartesian explosion"</h3>
+    <p class="ut-sub">Khi <code>Include</code> nhiều collection cùng lúc, JOIN sinh tích Descartes → dữ liệu trùng lặp phình to. <code>AsSplitQuery</code> tách thành nhiều query nhỏ thay vì 1 JOIN khổng lồ.</p>
+    <pre class="cb"><span class="k">var</span> blogs = <span class="k">await</span> _db.Blogs
+    .Include(b =&gt; b.Posts)
+    .Include(b =&gt; b.Contributors)
+    .AsSplitQuery()        <span class="c">// nhiều query nhỏ thay vì 1 JOIN bùng nổ</span>
+    .AsNoTracking()        <span class="c">// đọc thuần → bỏ tracking</span>
+    .ToListAsync();</pre>
+
+    <div class="callout tip">
+        <strong>💡 Phát hiện N+1:</strong> bật logging EF Core (<code>.LogTo(Console.WriteLine, LogLevel.Information)</code>) hoặc <code>.EnableSensitiveDataLogging()</code> ở môi trường dev để thấy SQL thực tế. Nếu một màn hình bắn hàng chục query giống nhau → gần như chắc chắn là N+1. Fix bằng <code>Include</code> / projection; với nhiều collection thêm <code>AsSplitQuery</code>; query đọc luôn kèm <code>AsNoTracking</code>.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">10. Một số tính năng đáng dùng (EF Core 8/9)</h2>
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h4>⚡ Bulk update / delete (EF Core 7+)</h4>
+            <p>Update/Delete hàng loạt thẳng trên SQL, không cần load entity về tracking.</p>
+            <pre class="cb"><span class="c">// 1 lệnh UPDATE, không kéo entity về</span>
+<span class="k">await</span> _db.Posts
+    .Where(p =&gt; p.CreatedAt &lt; cutoff)
+    .ExecuteUpdateAsync(s =&gt; s
+        .SetProperty(p =&gt; p.IsArchived, <span class="k">true</span>));
+
+<span class="k">await</span> _db.Posts
+    .Where(p =&gt; p.IsSpam)
+    .ExecuteDeleteAsync();</pre>
+        </div>
+        <div class="ut-card">
+            <h4>🧱 Complex types &amp; raw SQL</h4>
+            <p>EF Core 8 thêm <code>ComplexProperty</code>; raw SQL khi LINQ không đủ.</p>
+            <pre class="cb"><span class="c">// Raw SQL an toàn (tham số hoá)</span>
+<span class="k">var</span> posts = <span class="k">await</span> _db.Posts
+    .FromSql($<span class="s">"SELECT * FROM posts WHERE title = {term}"</span>)
+    .ToListAsync();
+
+<span class="c">// SQL không trả entity</span>
+<span class="k">await</span> _db.Database.ExecuteSqlAsync(
+    $<span class="s">"REFRESH MATERIALIZED VIEW post_stats"</span>);</pre>
+        </div>
+    </div>
+
+    <div class="callout info">
+        <strong>Transaction tường minh:</strong> mặc định mỗi <code>SaveChanges</code> đã là 1 transaction. Cần gói nhiều <code>SaveChanges</code> hoặc nhiều thao tác lại với nhau → dùng <code>await using var tx = await _db.Database.BeginTransactionAsync();</code> rồi <code>await tx.CommitAsync();</code>.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">🎯 Checklist EF Core nền tảng</h2>
+    <div class="ut-card">
+        <ul>
+            <li>✅ Cài đúng provider (SqlServer / Npgsql / Sqlite) khớp database</li>
+            <li>✅ <code>DbContext</code> đăng ký Scoped qua <code>AddDbContext</code>, connection string ở <code>appsettings.json</code></li>
+            <li>✅ KHÔNG chia sẻ <code>DbContext</code> giữa thread; giữ context sống ngắn</li>
+            <li>✅ Entity có khoá chính rõ ràng (convention hoặc <code>HasKey</code>)</li>
+            <li>✅ Cấu hình phức tạp dùng Fluent API trong <code>IEntityTypeConfiguration</code></li>
+            <li>✅ Quản lý schema bằng migrations (<code>migrations add</code> + <code>database update</code>), không sửa migration đã apply</li>
+            <li>✅ Prod dùng <code>migrations script --idempotent</code> hoặc <code>Database.Migrate()</code>, không <code>EnsureCreated()</code></li>
+            <li>✅ Định nghĩa quan hệ 1-1 / 1-n / n-n + chọn đúng <code>OnDelete</code></li>
+            <li>✅ Nạp dữ liệu liên quan có chủ đích — ưu tiên <code>Include</code> / projection, tránh Lazy ở prod</li>
+            <li>✅ Query chỉ đọc luôn thêm <code>AsNoTracking()</code></li>
+            <li>✅ Dùng <code>Select</code> ra DTO để lấy đúng cột cần thay vì cả entity</li>
+            <li>✅ Tránh N+1 — không lazy/explicit load trong vòng lặp; thêm <code>AsSplitQuery</code> khi Include nhiều collection</li>
+            <li>✅ Bật EF Core logging ở dev để soi SQL thực tế và phát hiện query thừa</li>
+        </ul>
+    </div>
+</section>
+
+</div>
+
+<footer style="text-align:center;padding:3rem 1.5rem;color:var(--ut-muted);border-top:1px solid var(--ut-border);margin-top:3rem;font-size:.9rem;">
+    <p>EF Core nền tảng · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

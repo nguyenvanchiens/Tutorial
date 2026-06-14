@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Microservices · DDD Tactical</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">Microservice<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="modular-monolith.html">Modular Monolith</a>
+      <a href="basics.html">Cơ Bản</a>
+      <a href="ddd-tactical.html" class="active">DDD</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="communication.html">Giao Tiếp</a>
+      <a href="testing.html">Testing</a>
+      <a href="production.html">Production</a>
+      <a href="architect.html">Architect</a>
+      <a href="interview.html">Phỏng Vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">L1-L2 · CƠ BẢN→NÂNG CAO</div>
+  <h1>DDD cho <span class="gradient">Microservices</span></h1>
+  <p class="hero-desc">Domain-Driven Design là la bàn để vẽ ranh giới service đúng. Bounded context → service boundary, aggregate → đơn vị nhất quán, domain event → giao tiếp. Học tactical patterns với code C# thực chiến.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Bounded Context = Service Boundary</h2>
+    <p class="section-sub">Bounded Context là <strong>ranh giới ngôn ngữ</strong>: cùng một từ mang nghĩa khác nhau ở các context khác nhau. Đây là ứng cử viên tự nhiên nhất cho ranh giới service — không phải bảng dữ liệu, không phải layer kỹ thuật.</p>
+    <div class="grid grid-2">
+      <div class="dtype">
+        <h4>"Product" trong Catalog</h4>
+        <p>Có tên, mô tả, hình ảnh, danh mục, thuộc tính SEO, đánh giá. Quan tâm: trình bày &amp; tìm kiếm.</p>
+      </div>
+      <div class="dtype">
+        <h4>"Product" trong Inventory</h4>
+        <p>Chỉ có SKU, số lượng tồn, vị trí kho, ngưỡng reorder. Không quan tâm mô tả hay hình ảnh.</p>
+      </div>
+    </div>
+    <div class="info-box"><strong>📐 Bài học:</strong> Cùng "Product" nhưng 2 model hoàn toàn khác → 2 bounded context → 2 service. Cố gò chung 1 "God Product entity" là sai lầm kinh điển dẫn tới coupling.</div>
+    <table class="cmp">
+      <thead><tr><th>Bounded Context</th><th>Ubiquitous Language</th><th>Aggregate chính</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Sales</strong></td><td>Order, Customer, Quote, Discount</td><td>Order</td></tr>
+        <tr><td><strong>Billing</strong></td><td>Invoice, Payment, Refund, Ledger</td><td>Invoice</td></tr>
+        <tr><td><strong>Inventory</strong></td><td>Stock, Reservation, Warehouse, SKU</td><td>StockItem</td></tr>
+        <tr><td><strong>Shipping</strong></td><td>Shipment, Carrier, Tracking, Route</td><td>Shipment</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Building blocks — Tactical DDD</h2>
+    <div class="grid grid-3">
+      <div class="card">
+        <h4>🧩 Entity</h4>
+        <p>Có <strong>identity</strong> (Id) bền vững qua thời gian. Hai entity bằng nhau khi cùng Id, dù thuộc tính khác. Vd: Order, Customer.</p>
+      </div>
+      <div class="card">
+        <h4>💎 Value Object</h4>
+        <p>Không có identity, định nghĩa bởi <strong>giá trị</strong>. Bất biến (immutable). Vd: Money, Address, DateRange. Hai cái bằng nhau khi mọi field bằng nhau.</p>
+      </div>
+      <div class="card">
+        <h4>📦 Aggregate</h4>
+        <p>Cụm entity + value object được xem là <strong>một đơn vị</strong> cho thay đổi dữ liệu. Có 1 root duy nhất là cổng vào.</p>
+      </div>
+      <div class="card">
+        <h4>👑 Aggregate Root</h4>
+        <p>Entity duy nhất bên ngoài được phép tham chiếu. Bảo vệ invariant của cả aggregate. Là ranh giới transaction.</p>
+      </div>
+      <div class="card">
+        <h4>⚡ Domain Event</h4>
+        <p>Sự kiện nghiệp vụ đã xảy ra trong quá khứ: <code>OrderPlaced</code>, <code>PaymentReceived</code>. Cách aggregate "báo" cho phần còn lại.</p>
+      </div>
+      <div class="card">
+        <h4>🏭 Repository</h4>
+        <p>Trừu tượng lưu trữ <strong>theo aggregate root</strong> (1 repo / 1 aggregate). Load và save toàn bộ aggregate như một khối.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Value Object trong C#</h2>
+    <p class="section-sub"><code>record</code> của C# là công cụ tuyệt vời cho value object: bất biến + so sánh theo giá trị sẵn có.</p>
+    <pre class="code"><span class="c">// Money — value object bất biến, tự bảo vệ invariant</span>
+<span class="k">public readonly record struct</span> <span class="t">Money</span>
+{
+    <span class="k">public</span> <span class="t">decimal</span> Amount { <span class="k">get</span>; }
+    <span class="k">public</span> <span class="t">string</span> Currency { <span class="k">get</span>; }
+
+    <span class="k">public</span> <span class="t">Money</span>(<span class="t">decimal</span> amount, <span class="t">string</span> currency)
+    {
+        <span class="k">if</span> (amount &lt; <span class="s">0</span>) <span class="k">throw new</span> <span class="t">ArgumentException</span>(<span class="s">"Số tiền không âm"</span>);
+        <span class="k">if</span> (<span class="t">string</span>.<span class="n">IsNullOrWhiteSpace</span>(currency)) <span class="k">throw new</span> <span class="t">ArgumentException</span>(<span class="s">"Thiếu currency"</span>);
+        Amount = amount; Currency = currency;
+    }
+
+    <span class="k">public static</span> <span class="t">Money</span> <span class="k">operator</span> +(<span class="t">Money</span> a, <span class="t">Money</span> b)
+    {
+        <span class="k">if</span> (a.<span class="p">Currency</span> != b.<span class="p">Currency</span>)
+            <span class="k">throw new</span> <span class="t">InvalidOperationException</span>(<span class="s">"Khác loại tiền tệ"</span>);
+        <span class="k">return new</span> <span class="t">Money</span>(a.<span class="p">Amount</span> + b.<span class="p">Amount</span>, a.<span class="p">Currency</span>);
+    }
+}</pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Aggregate &amp; Aggregate Root — ví dụ Order đầy đủ</h2>
+    <p class="section-sub">Order là aggregate root; OrderLine là entity bên trong, chỉ truy cập qua Order. Mọi invariant (tổng tiền, trạng thái hợp lệ) được bảo vệ trong root.</p>
+    <pre class="code"><span class="k">public sealed class</span> <span class="t">Order</span> : <span class="t">AggregateRoot</span>  <span class="c">// AggregateRoot giữ list domain event</span>
+{
+    <span class="k">private readonly</span> <span class="t">List</span>&lt;<span class="t">OrderLine</span>&gt; _lines = <span class="k">new</span>();
+
+    <span class="k">public</span> <span class="t">Guid</span> Id { <span class="k">get</span>; <span class="k">private set</span>; }
+    <span class="k">public</span> <span class="t">Guid</span> CustomerId { <span class="k">get</span>; <span class="k">private set</span>; }
+    <span class="k">public</span> <span class="t">OrderStatus</span> Status { <span class="k">get</span>; <span class="k">private set</span>; }
+    <span class="k">public</span> <span class="t">IReadOnlyList</span>&lt;<span class="t">OrderLine</span>&gt; Lines =&gt; _lines.<span class="n">AsReadOnly</span>();
+    <span class="k">public</span> <span class="t">Money</span> Total =&gt; _lines.<span class="n">Aggregate</span>(
+        <span class="k">new</span> <span class="t">Money</span>(<span class="s">0</span>, <span class="s">"VND"</span>), (sum, l) =&gt; sum + l.<span class="p">LineTotal</span>);
+
+    <span class="k">private</span> <span class="t">Order</span>() { }  <span class="c">// cho EF Core</span>
+
+    <span class="c">// Factory: cách DUY NHẤT tạo Order hợp lệ</span>
+    <span class="k">public static</span> <span class="t">Order</span> <span class="n">Place</span>(<span class="t">Guid</span> customerId, <span class="t">IEnumerable</span>&lt;<span class="t">OrderLine</span>&gt; lines)
+    {
+        <span class="k">var</span> order = <span class="k">new</span> <span class="t">Order</span>
+        {
+            Id = <span class="t">Guid</span>.<span class="n">CreateVersion7</span>(),
+            CustomerId = customerId,
+            Status = <span class="t">OrderStatus</span>.<span class="p">Pending</span>
+        };
+        order._lines.<span class="n">AddRange</span>(lines);
+        <span class="k">if</span> (order._lines.<span class="p">Count</span> == <span class="s">0</span>)
+            <span class="k">throw new</span> <span class="t">DomainException</span>(<span class="s">"Đơn hàng phải có ít nhất 1 dòng"</span>);
+
+        <span class="c">// raise domain event — chưa publish, chỉ ghi vào aggregate</span>
+        order.<span class="n">Raise</span>(<span class="k">new</span> <span class="t">OrderPlaced</span>(order.<span class="p">Id</span>, order.<span class="p">CustomerId</span>, order.<span class="p">Total</span>));
+        <span class="k">return</span> order;
+    }
+
+    <span class="k">public void</span> <span class="n">Confirm</span>()
+    {
+        <span class="k">if</span> (Status != <span class="t">OrderStatus</span>.<span class="p">Pending</span>)
+            <span class="k">throw new</span> <span class="t">DomainException</span>(<span class="s">"Chỉ xác nhận đơn đang Pending"</span>);
+        Status = <span class="t">OrderStatus</span>.<span class="p">Confirmed</span>;
+        <span class="n">Raise</span>(<span class="k">new</span> <span class="t">OrderConfirmed</span>(Id));
+    }
+}</pre>
+    <div class="tip"><strong>💡 Quy tắc aggregate:</strong> (1) Mỗi transaction chỉ thay đổi <em>một</em> aggregate. (2) Tham chiếu aggregate khác bằng <strong>Id</strong>, không bằng object. (3) Aggregate root là ranh giới nhất quán mạnh — mọi thứ ngoài nó là eventual consistency.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Domain Event — phát &amp; xử lý</h2>
+    <pre class="code"><span class="c">// Domain event — record bất biến, "đã xảy ra"</span>
+<span class="k">public record</span> <span class="t">OrderPlaced</span>(<span class="t">Guid</span> OrderId, <span class="t">Guid</span> CustomerId, <span class="t">Money</span> Total) : <span class="t">IDomainEvent</span>;
+
+<span class="c">// Sau khi SaveChanges thành công, dispatch event đã raise</span>
+<span class="k">public class</span> <span class="t">OrderDbContext</span> : <span class="t">DbContext</span>
+{
+    <span class="k">private readonly</span> <span class="t">IDomainEventDispatcher</span> _dispatcher;
+
+    <span class="k">public override async</span> <span class="t">Task</span>&lt;<span class="t">int</span>&gt; <span class="n">SaveChangesAsync</span>(<span class="t">CancellationToken</span> ct = <span class="k">default</span>)
+    {
+        <span class="k">var</span> events = <span class="t">ChangeTracker</span>.<span class="n">Entries</span>&lt;<span class="t">AggregateRoot</span>&gt;()
+            .<span class="n">SelectMany</span>(e =&gt; e.<span class="p">Entity</span>.<span class="p">DomainEvents</span>)
+            .<span class="n">ToList</span>();
+
+        <span class="k">var</span> result = <span class="k">await base</span>.<span class="n">SaveChangesAsync</span>(ct);  <span class="c">// commit trước</span>
+        <span class="k">await</span> _dispatcher.<span class="n">DispatchAsync</span>(events, ct);    <span class="c">// rồi mới phát</span>
+        <span class="k">return</span> result;
+    }
+}</pre>
+    <div class="warn-box"><strong>⚠️ Domain event ≠ Integration event.</strong> Domain event ở <em>trong</em> bounded context (in-process). Khi cần báo cho service khác, map sang <strong>integration event</strong> và đẩy qua Outbox → broker. Đừng để domain event nội bộ rò rỉ ra ngoài context.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Context Mapping — quan hệ giữa các context</h2>
+    <p class="section-sub">Khi vẽ xong các bounded context, bạn phải định nghĩa <strong>chúng quan hệ với nhau thế nào</strong>. Đây là context map — bản đồ chính trị + kỹ thuật của hệ thống.</p>
+    <table class="cmp">
+      <thead><tr><th>Quan hệ</th><th>Ý nghĩa</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Partnership</strong></td><td>2 team phối hợp chặt, thành/bại cùng nhau, đồng bộ release</td></tr>
+        <tr><td><strong>Customer / Supplier</strong></td><td>Downstream phụ thuộc upstream; upstream cân nhắc nhu cầu downstream</td></tr>
+        <tr><td><strong>Conformist</strong></td><td>Downstream buộc theo model của upstream (vd dùng API bên thứ 3), không thương lượng</td></tr>
+        <tr><td><strong>Anti-Corruption Layer (ACL)</strong></td><td>Downstream dựng lớp dịch để KHÔNG bị model upstream làm bẩn domain của mình</td></tr>
+        <tr><td><strong>Open Host Service + Published Language</strong></td><td>Upstream phơi API/event chuẩn hoá, công khai cho nhiều consumer</td></tr>
+        <tr><td><strong>Shared Kernel</strong></td><td>2 context chia sẻ 1 phần model nhỏ — dùng dè dặt, tạo coupling</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Anti-Corruption Layer (ACL) — code thực chiến</h2>
+    <p class="section-sub">Bài toán: Shipping service phải gọi 1 carrier API legacy với model xấu, đầy mã viết tắt khó hiểu. ACL dịch model bẩn của họ sang domain sạch của ta.</p>
+    <pre class="code"><span class="c">// Model bẩn từ carrier bên ngoài (không kiểm soát được)</span>
+<span class="k">public class</span> <span class="t">CarrierTrackResp</span>
+{
+    <span class="k">public</span> <span class="t">string</span> sts { <span class="k">get</span>; <span class="k">set</span>; }    <span class="c">// "D"=delivered, "T"=transit, "X"=fail</span>
+    <span class="k">public</span> <span class="t">string</span> loc_cd { <span class="k">get</span>; <span class="k">set</span>; }
+    <span class="k">public</span> <span class="t">long</span> ts_epoch { <span class="k">get</span>; <span class="k">set</span>; }
+}
+
+<span class="c">// ACL: cô lập sự "bẩn" tại đây, domain bên trong luôn sạch</span>
+<span class="k">public sealed class</span> <span class="t">CarrierAntiCorruptionLayer</span>(<span class="t">ILegacyCarrierClient</span> client)
+{
+    <span class="k">public async</span> <span class="t">Task</span>&lt;<span class="t">ShipmentStatus</span>&gt; <span class="n">GetStatusAsync</span>(<span class="t">TrackingNumber</span> tn)
+    {
+        <span class="t">CarrierTrackResp</span> raw = <span class="k">await</span> client.<span class="n">TrackAsync</span>(tn.<span class="p">Value</span>);
+
+        <span class="c">// dịch sang ngôn ngữ domain của ta — đây là toàn bộ điểm của ACL</span>
+        <span class="k">var</span> status = raw.<span class="p">sts</span> <span class="k">switch</span>
+        {
+            <span class="s">"D"</span> =&gt; <span class="t">DeliveryState</span>.<span class="p">Delivered</span>,
+            <span class="s">"T"</span> =&gt; <span class="t">DeliveryState</span>.<span class="p">InTransit</span>,
+            <span class="s">"X"</span> =&gt; <span class="t">DeliveryState</span>.<span class="p">Failed</span>,
+            _   =&gt; <span class="t">DeliveryState</span>.<span class="p">Unknown</span>
+        };
+        <span class="k">return new</span> <span class="t">ShipmentStatus</span>(status,
+            <span class="t">Location</span>.<span class="n">FromCode</span>(raw.<span class="p">loc_cd</span>),
+            <span class="t">DateTimeOffset</span>.<span class="n">FromUnixTimeSeconds</span>(raw.<span class="p">ts_epoch</span>));
+    }
+}</pre>
+    <div class="info-box"><strong>📦 Lợi ích:</strong> Nếu carrier đổi format (vd <code>sts</code> → <code>status_code</code>), bạn chỉ sửa <em>một nơi</em> — ACL. Domain Shipping không hề biết carrier tồn tại.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Checklist — Áp dụng DDD đúng</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>✅ Strategic (vẽ ranh giới)</h3>
+        <ul>
+          <li>Đã xác định các bounded context bằng ngôn ngữ nghiệp vụ, không phải bảng DB</li>
+          <li>Có context map ghi rõ quan hệ (ACL, Conformist, OHS...)</li>
+          <li>Dùng EventStorming với domain expert để khám phá context</li>
+          <li>Mỗi service = 1 bounded context (hoặc 1 context = nhiều service nếu cần)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>✅ Tactical (code)</h3>
+        <ul>
+          <li>Aggregate nhỏ, root bảo vệ invariant, tham chiếu chéo bằng Id</li>
+          <li>Value object bất biến cho khái niệm không có identity</li>
+          <li>1 transaction = 1 aggregate</li>
+          <li>Domain event dispatch sau commit; map sang integration event khi ra ngoài</li>
+          <li>ACL bọc mọi tích hợp bên ngoài/legacy</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Tiếp theo: <a href="patterns.html" style="color:var(--primary)">Patterns thực chiến →</a></p>
+</footer>
+
+</body>
+</html>

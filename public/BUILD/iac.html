@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infrastructure as Code — Hạ Tầng Bằng Code</title>
+    <link rel="stylesheet" href="build.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html">Build<span class="accent">&Deploy</span></a></div>
+            <div class="nav-links">
+                <a href="index.html">🗺️ Tổng quan</a>
+                <a href="git.html">📦 Git</a>
+                <a href="cicd.html">⚙️ CI/CD</a>
+                <a href="jenkins.html">🔴 Jenkins</a>
+                <a href="docker.html">🐳 Docker</a>
+                <a href="kubernetes.html">☸️ Kubernetes</a>
+                <a href="iac.html" class="active">🏗️ IaC</a>
+                <a href="sre.html">🚨 SRE</a>
+                <a href="devsecops.html">🛡️ DevSecOps</a>
+                <a href="hosting.html">☁️ Hosting</a>
+                <a href="cloud.html">⛅ Cloud</a>
+                <a href="monitoring.html">📊 Monitoring</a>
+                <a href="workflow.html">🔄 Workflow</a>
+            </div>
+            <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <header class="build-hero">
+        <div class="hero-content">
+            <div class="hero-badge">CHƯƠNG 12 · INFRASTRUCTURE AS CODE</div>
+            <h1>Infrastructure as <span class="gradient-text">Code</span></h1>
+            <p class="hero-desc">Đừng click chuột tạo server. Khai báo hạ tầng bằng code — versioned trong Git, review qua PR, tái tạo trong vài phút. "Pets vs Cattle" — server là gia súc, không phải thú cưng.</p>
+            <div class="hero-stats">
+                <div class="stat"><span class="stat-number">Terraform</span><span class="stat-label">Chuẩn de-facto</span></div>
+                <div class="stat"><span class="stat-number">Bicep/Pulumi</span><span class="stat-label">Lựa chọn khác</span></div>
+                <div class="stat"><span class="stat-number">GitOps</span><span class="stat-label">Git = nguồn sự thật</span></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== SECTION 1: WHY IaC ===== -->
+    <section class="section section-dark" id="why">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🤔</div>
+                <h2>12.1 — Tại Sao Cần IaC?</h2>
+                <p>Tạo server bằng click chuột = không tái tạo được, không ai biết ai đổi gì, drift lan tràn</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>🖱️ ClickOps vs IaC</h3>
+                <div class="analogy-grid">
+                    <div class="analogy-box">
+                        <h4>❌ ClickOps — Click vào portal</h4>
+                        <p>Tạo VM bằng tay trên Azure Portal. 6 tháng sau ai nhớ config gì? Server chết → dựng lại mất 2 ngày mò mẫm. Staging khác production vì "ai đó sửa tay". Không audit, không rollback, không review.</p>
+                    </div>
+                    <div class="analogy-box good">
+                        <h4>✅ IaC — Hạ tầng bằng code</h4>
+                        <p>Toàn bộ hạ tầng trong file <code>.tf</code> commit Git. Server chết → <code>terraform apply</code> dựng lại y hệt trong 5 phút. Staging = production vì cùng code (khác variables). Mọi thay đổi qua PR, có review + audit.</p>
+                    </div>
+                </div>
+                <div class="tip-box">
+                    <strong>💡 "Pets vs Cattle":</strong> Server kiểu pet — đặt tên, vuốt ve, chết là khóc, chữa bằng tay. Server kiểu cattle — đánh số, chết là thay con mới từ code. IaC biến hạ tầng từ pet thành cattle. Đây là tư duy cốt lõi của Platform Engineering 2026.
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>📐 Declarative vs Imperative</h3>
+                <div class="cicd-explain">
+                    <div class="cicd-box cd-box">
+                        <h4>Declarative — Khai báo "muốn gì"</h4>
+                        <p>Terraform, Bicep, K8s YAML, CloudFormation</p>
+                        <div class="cicd-step">Bạn mô tả <strong>trạng thái cuối</strong>: "tôi muốn 1 VM + 1 network"</div>
+                        <div class="cicd-step">Tool tự tính cần làm gì để đạt được</div>
+                        <div class="cicd-step">Chạy lại nhiều lần → kết quả như nhau (idempotent)</div>
+                        <div class="cicd-goal">✅ Chuẩn IaC hiện đại</div>
+                    </div>
+                    <div class="cicd-box ci-box">
+                        <h4>Imperative — Ra lệnh "làm gì"</h4>
+                        <p>Bash script, Azure CLI thuần, Ansible (phần lớn)</p>
+                        <div class="cicd-step">Bạn viết <strong>từng bước</strong>: "tạo VM, rồi tạo network, rồi gắn..."</div>
+                        <div class="cicd-step">Bạn tự lo logic "đã tồn tại chưa?"</div>
+                        <div class="cicd-step">Chạy 2 lần → có thể tạo trùng / lỗi</div>
+                        <div class="cicd-goal">⚠️ Hợp cho config/automation hơn provisioning</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SECTION 2: TERRAFORM BASICS ===== -->
+    <section class="section" id="terraform">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🌍</div>
+                <h2>12.2 — Terraform — Nền Tảng</h2>
+                <p>Terraform (HashiCorp) là chuẩn de-facto: đa cloud, ngôn ngữ HCL, state-based. Lưu ý license đổi sang BSL 2023 → bản fork OpenTofu (MPL) cũng phổ biến 2026</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>🧩 4 Khái Niệm Cốt Lõi</h3>
+                <div class="docker-concepts">
+                    <div class="docker-concept"><strong>Provider</strong> — plugin nói chuyện với cloud (azurerm, aws, google). Khai báo provider nào, version nào.</div>
+                    <div class="docker-concept"><strong>Resource</strong> — một thứ hạ tầng (VM, network, DB). Đơn vị xây dựng chính của Terraform.</div>
+                    <div class="docker-concept"><strong>State</strong> — file <code>terraform.tfstate</code> ghi nhớ "đã tạo gì". Terraform so state với code để biết phải thay đổi gì.</div>
+                    <div class="docker-concept"><strong>Variables / Outputs</strong> — tham số hóa input (variable) và xuất giá trị ra (output: IP, connection string).</div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🔁 Vòng Đời — Workflow Chuẩn</h3>
+                <div class="pipeline-flow">
+                    <div class="pipeline-step">
+                        <div class="pipe-icon">✍️</div>
+                        <div class="pipe-label">write</div>
+                        <div class="pipe-desc">Viết file .tf</div>
+                    </div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-step">
+                        <div class="pipe-icon">🔌</div>
+                        <div class="pipe-label">init</div>
+                        <div class="pipe-desc">Tải provider</div>
+                    </div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-step">
+                        <div class="pipe-icon">👀</div>
+                        <div class="pipe-label">plan</div>
+                        <div class="pipe-desc">Xem sẽ đổi gì</div>
+                    </div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-step">
+                        <div class="pipe-icon">🚀</div>
+                        <div class="pipe-label">apply</div>
+                        <div class="pipe-desc">Thực thi</div>
+                    </div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-step">
+                        <div class="pipe-icon">💥</div>
+                        <div class="pipe-label">destroy</div>
+                        <div class="pipe-desc">Xóa hạ tầng</div>
+                    </div>
+                </div>
+                <div class="warning-box">
+                    <strong>⚠️ LUÔN đọc <code>terraform plan</code> trước khi <code>apply</code>.</strong> Plan cho biết chính xác resource nào sẽ tạo (+), đổi (~), hay xóa (-). Một thay đổi nhỏ vào tên resource có thể khiến Terraform <strong>destroy + recreate</strong> cả database production. Số "X to destroy" lớn bất thường = DỪNG NGAY.
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>📄 Ví Dụ Thực Tế — Provision VM + Network trên Azure</h3>
+                <pre class="code-block"><span class="c-cmt"># main.tf — Provider</span>
+<span class="c-key">terraform</span> {
+  <span class="c-key">required_providers</span> {
+    azurerm = { source = <span class="c-str">"hashicorp/azurerm"</span>, version = <span class="c-str">"~> 4.0"</span> }
+  }
+  <span class="c-key">backend</span> <span class="c-str">"azurerm"</span> {}    <span class="c-cmt"># remote state, cấu hình khi init</span>
+}
+<span class="c-key">provider</span> <span class="c-str">"azurerm"</span> { features {} }
+
+<span class="c-cmt"># variables.tf</span>
+<span class="c-key">variable</span> <span class="c-str">"location"</span>     { default = <span class="c-str">"southeastasia"</span> }
+<span class="c-key">variable</span> <span class="c-str">"vm_size"</span>      { default = <span class="c-str">"Standard_B2s"</span> }
+<span class="c-key">variable</span> <span class="c-str">"admin_password"</span> { type = string, sensitive = <span class="c-key">true</span> }  <span class="c-cmt"># không log ra</span>
+
+<span class="c-cmt"># Resource — Resource Group + Network</span>
+<span class="c-key">resource</span> <span class="c-str">"azurerm_resource_group"</span> <span class="c-str">"rg"</span> {
+  name     = <span class="c-str">"rg-webapp-prod"</span>
+  location = var.location
+}
+<span class="c-key">resource</span> <span class="c-str">"azurerm_virtual_network"</span> <span class="c-str">"vnet"</span> {
+  name                = <span class="c-str">"vnet-prod"</span>
+  address_space       = [<span class="c-str">"10.0.0.0/16"</span>]
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+}
+<span class="c-key">resource</span> <span class="c-str">"azurerm_subnet"</span> <span class="c-str">"subnet"</span> {
+  name                 = <span class="c-str">"subnet-web"</span>
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = [<span class="c-str">"10.0.1.0/24"</span>]
+}
+
+<span class="c-cmt"># Resource — Linux VM</span>
+<span class="c-key">resource</span> <span class="c-str">"azurerm_linux_virtual_machine"</span> <span class="c-str">"web"</span> {
+  name                = <span class="c-str">"vm-web-01"</span>
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  size                = var.vm_size
+  admin_username      = <span class="c-str">"azureuser"</span>
+  admin_password      = var.admin_password
+  network_interface_ids = [azurerm_network_interface.nic.id]
+  os_disk { caching = <span class="c-str">"ReadWrite"</span>, storage_account_type = <span class="c-str">"Premium_LRS"</span> }
+  source_image_reference {
+    publisher = <span class="c-str">"Canonical"</span>, offer = <span class="c-str">"ubuntu-24_04-lts"</span>
+    sku       = <span class="c-str">"server"</span>,    version = <span class="c-str">"latest"</span>
+  }
+}
+
+<span class="c-cmt"># outputs.tf — xuất giá trị ra ngoài</span>
+<span class="c-key">output</span> <span class="c-str">"vm_private_ip"</span> { value = azurerm_network_interface.nic.private_ip_address }</pre>
+                <div class="cmd-grid">
+                    <div class="cmd-card">
+                        <div class="cmd-label">Chạy</div>
+                        <pre class="code-block"><span class="c-cmd">terraform</span> init
+<span class="c-cmd">terraform</span> plan -out=tfplan
+<span class="c-cmd">terraform</span> apply tfplan
+<span class="c-cmd">terraform</span> output vm_private_ip</pre>
+                    </div>
+                    <div class="cmd-card">
+                        <div class="cmd-label">Truyền secret an toàn</div>
+                        <pre class="code-block"><span class="c-cmt"># KHÔNG hardcode password trong .tf</span>
+<span class="c-cmd">export</span> TF_VAR_admin_password=$SECRET
+<span class="c-cmt"># hoặc đọc từ Key Vault qua data source</span></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>📦 Modules — Tái Sử Dụng & Chuẩn Hóa</h3>
+                <p>Module = nhóm resource đóng gói tái dùng. Ví dụ module "network" dùng cho mọi môi trường, chỉ đổi variables.</p>
+                <pre class="code-block"><span class="c-cmt"># Gọi module thay vì copy-paste resource</span>
+<span class="c-key">module</span> <span class="c-str">"network"</span> {
+  source   = <span class="c-str">"./modules/network"</span>     <span class="c-cmt"># local, hoặc registry, hoặc git</span>
+  vnet_cidr = <span class="c-str">"10.0.0.0/16"</span>
+  env       = <span class="c-str">"prod"</span>
+}
+<span class="c-cmt"># Tách môi trường bằng workspace hoặc thư mục riêng + tfvars</span>
+<span class="c-cmt">#   terraform apply -var-file="prod.tfvars"</span></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SECTION 3: ALTERNATIVES ===== -->
+    <section class="section section-dark" id="alternatives">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🔀</div>
+                <h2>12.3 — Bicep & Pulumi — Lựa Chọn Khác</h2>
+                <p>Terraform không phải lựa chọn duy nhất. Tùy hệ sinh thái và sở thích ngôn ngữ</p>
+            </div>
+
+            <div class="concept-card">
+                <div class="tools-grid">
+                    <div class="tool-card tool-rec">
+                        <span class="tool-badge">ĐA CLOUD</span>
+                        <div class="tool-logo">🌍</div>
+                        <h4>Terraform / OpenTofu</h4>
+                        <p>Ngôn ngữ HCL khai báo. Đa cloud, hệ sinh thái module khổng lồ. OpenTofu là fork open-source (MPL) sau khi Terraform đổi sang BSL.</p>
+                        <div class="tool-pros">✓ Phổ biến nhất, nhiều provider</div>
+                        <div class="tool-for">Đa cloud, team lớn, chuẩn ngành</div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-logo">💪</div>
+                        <h4>Bicep (Azure)</h4>
+                        <p>DSL của Microsoft, biên dịch ra ARM template. Cú pháp sạch hơn ARM nhiều. Chỉ cho Azure, state do Azure tự quản (không cần file state riêng).</p>
+                        <div class="tool-pros">✓ Native Azure, không lo state file</div>
+                        <div class="tool-for">Team thuần Azure / .NET</div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-logo">⚡</div>
+                        <h4>Pulumi</h4>
+                        <p>Viết hạ tầng bằng <strong>ngôn ngữ thật</strong>: C#, TypeScript, Python, Go. Có loop, condition, hàm — không học DSL mới. Đa cloud.</p>
+                        <div class="tool-pros">✓ Dùng C#/TS, IDE + test thật</div>
+                        <div class="tool-for">Dev thích code hơn DSL, logic phức tạp</div>
+                    </div>
+                </div>
+                <div class="tip-box">
+                    <strong>💡 Chọn sao?</strong> Thuần Azure → <strong>Bicep</strong>. Đa cloud hoặc chuẩn ngành → <strong>Terraform/OpenTofu</strong>. Team dev mạnh muốn dùng C#/TypeScript với vòng lặp/test → <strong>Pulumi</strong>. Đừng trộn nhiều tool trong cùng một dự án.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SECTION 4: GITOPS ===== -->
+    <section class="section" id="gitops">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🔄</div>
+                <h2>12.4 — GitOps — Git Là Nguồn Sự Thật</h2>
+                <p>Đưa IaC lên một tầm cao: Git repo = trạng thái mong muốn, một agent tự đồng bộ cluster theo Git</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>📖 GitOps là gì?</h3>
+                <p>Thay vì <code>kubectl apply</code> / <code>terraform apply</code> thủ công từ laptop, một <strong>operator chạy trong cluster</strong> (Argo CD / Flux) liên tục so Git với cluster và tự kéo về cho khớp.</p>
+                <div class="workflow-timeline">
+                    <div class="wf-step">
+                        <div class="wf-num">1</div>
+                        <div class="wf-content">
+                            <h4>Commit thay đổi manifest vào Git</h4>
+                            <p>Sửa số replicas / image tag → mở PR → review → merge vào main.</p>
+                        </div>
+                    </div>
+                    <div class="wf-step">
+                        <div class="wf-num">2</div>
+                        <div class="wf-content">
+                            <h4>Operator phát hiện thay đổi</h4>
+                            <p>Argo CD / Flux poll repo (hoặc qua webhook), thấy Git ≠ cluster.</p>
+                        </div>
+                    </div>
+                    <div class="wf-step">
+                        <div class="wf-num">3</div>
+                        <div class="wf-content">
+                            <h4>Tự động sync về cluster</h4>
+                            <p>Operator apply thay đổi. Không ai cần quyền <code>kubectl</code> vào prod nữa.</p>
+                        </div>
+                    </div>
+                    <div class="wf-step">
+                        <div class="wf-num">4</div>
+                        <div class="wf-content">
+                            <h4>Self-heal & rollback = git revert</h4>
+                            <p>Ai sửa tay cluster → operator kéo về đúng Git. Rollback = <code>git revert</code>.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="tip-box">
+                    <strong>💡 Lợi ích lớn nhất:</strong> Mọi thay đổi production đi qua Git → audit hoàn chỉnh (ai, khi nào, vì sao), review qua PR, rollback bằng revert. Không ai cần credential prod trên máy cá nhân. Argo CD và Flux là 2 tool GitOps phổ biến nhất 2026.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SECTION 5: STATE & DRIFT ===== -->
+    <section class="section section-dark" id="state">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">💾</div>
+                <h2>12.5 — State & Drift — Best Practices</h2>
+                <p>State file là trái tim của Terraform. Quản sai = mất hạ tầng hoặc lộ secret</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>🌊 Drift là gì?</h3>
+                <p><strong>Drift</strong> = hạ tầng thực tế lệch khỏi code, do ai đó sửa tay trên portal. Code nói "1 VM", thực tế ai đó thêm VM thứ 2 qua portal → state không biết → lần apply tiếp theo gây kết quả bất ngờ.</p>
+                <pre class="code-block"><span class="c-cmd">terraform</span> plan          <span class="c-cmt"># phát hiện drift (resource bị sửa ngoài code)</span>
+<span class="c-cmd">terraform</span> apply         <span class="c-cmt"># kéo thực tế về khớp code (xóa thay đổi tay)</span>
+<span class="c-cmd">terraform</span> import ...    <span class="c-cmt"># nhập resource tạo tay vào state để quản lý</span></pre>
+            </div>
+
+            <div class="concept-card">
+                <h3>✅ Checklist Quản Lý State</h3>
+                <div class="checklist-grid">
+                    <div class="check-item check-critical">
+                        <span class="check-icon">🔴</span>
+                        <div><strong>Remote state, KHÔNG local</strong><p>Lưu state ở Azure Blob / S3 + DynamoDB, không để <code>.tfstate</code> trên laptop. Mất laptop = mất state = không quản được hạ tầng.</p></div>
+                    </div>
+                    <div class="check-item check-critical">
+                        <span class="check-icon">🔴</span>
+                        <div><strong>State locking</strong><p>Bật lock (S3+DynamoDB / Azure Blob lease) để 2 người không apply cùng lúc → corrupt state.</p></div>
+                    </div>
+                    <div class="check-item check-danger">
+                        <span class="check-icon">🟡</span>
+                        <div><strong>Đừng commit state vào Git</strong><p>State chứa secret dạng plaintext (password, key). <code>.gitignore</code> phải có <code>*.tfstate*</code>.</p></div>
+                    </div>
+                    <div class="check-item check-danger">
+                        <span class="check-icon">🟡</span>
+                        <div><strong>Đừng sửa tay (no ClickOps)</strong><p>Mọi thay đổi qua code + PR. Sửa tay tạo drift. Đặt policy chặn quyền write thủ công trên prod.</p></div>
+                    </div>
+                    <div class="check-item check-info">
+                        <span class="check-icon">🔵</span>
+                        <div><strong>plan trong CI, apply có gate</strong><p>PR chạy <code>terraform plan</code> tự động, comment kết quả vào PR. Apply chỉ sau khi merge + approve gate.</p></div>
+                    </div>
+                    <div class="check-item check-info">
+                        <span class="check-icon">🔵</span>
+                        <div><strong>Pin version provider</strong><p><code>version = "~> 4.0"</code> để build tái lập. Provider tự nâng major có thể phá apply.</p></div>
+                    </div>
+                </div>
+                <div class="warning-box">
+                    <strong>⚠️ State = secret store ngầm:</strong> File tfstate lưu mọi thuộc tính resource ở plaintext, kể cả password DB và key. Bất kỳ ai đọc được state = đọc được hết secret. Mã hóa backend, hạn chế quyền truy cập state nghiêm ngặt như với production database.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="closing-box">
+                <div class="closing-nav">
+                    <a href="index.html" class="closing-btn">🗺️ Tổng quan</a>
+                    <a href="kubernetes.html" class="closing-btn">☸️ Kubernetes</a>
+                    <a href="cloud.html" class="closing-btn">⛅ Cloud</a>
+                    <a href="sre.html" class="closing-btn">🚨 SRE</a>
+                    <a href="devsecops.html" class="closing-btn">🛡️ DevSecOps</a>
+                    <a href="workflow.html" class="closing-btn">🔄 Workflow</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Build & Deploy — Triển khai website từ A→Z cho web developer</p>
+            <p class="footer-note">Infrastructure as Code — Terraform, Bicep, Pulumi, GitOps, state & drift management</p>
+        </div>
+    </footer>
+
+    <script src="build.js"></script>
+</body>
+</html>

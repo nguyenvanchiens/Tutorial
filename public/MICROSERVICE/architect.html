@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Microservices · Architect Level</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">Microservice<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="modular-monolith.html">Modular Monolith</a>
+      <a href="basics.html">Cơ Bản</a>
+      <a href="ddd-tactical.html">DDD</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="communication.html">Giao Tiếp</a>
+      <a href="testing.html">Testing</a>
+      <a href="production.html">Production</a>
+      <a href="architect.html" class="active">Architect</a>
+      <a href="interview.html">Phỏng Vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">L4-L5 · MASTER</div>
+  <h1>Architect-level <span class="gradient">Microservices</span></h1>
+  <p class="hero-desc">Tầng dành cho người thiết kế nền tảng cho hàng trăm service, hàng triệu user, nhiều region. Multi-region, multi-tenancy, service mesh, backpressure, platform engineering, capacity planning — và quan trọng nhất: khi nào microservices là sai lầm.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Multi-region &amp; Geo-distribution</h2>
+    <p class="section-sub">Phục vụ user toàn cầu với độ trễ thấp và sống sót khi cả một region sập. Đây là bài toán đánh đổi giữa <strong>latency, consistency và cost</strong>.</p>
+    <table class="cmp">
+      <thead><tr><th>Mô hình</th><th>Mô tả</th><th>Đánh đổi</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Active-Passive</strong></td><td>1 region chính, region khác standby; failover khi sự cố</td><td>Đơn giản, RTO/RPO cao hơn; lãng phí capacity dự phòng</td></tr>
+        <tr><td><strong>Active-Active</strong></td><td>Mọi region nhận traffic; route theo địa lý (GeoDNS/Anycast)</td><td>Latency thấp, kháng lỗi; phải giải xung đột ghi dữ liệu</td></tr>
+        <tr><td><strong>Cell-based</strong></td><td>Hệ chia thành "cell" độc lập, mỗi cell phục vụ tập user</td><td>Blast radius nhỏ, scale tuyến tính; phức tạp routing &amp; vận hành</td></tr>
+      </tbody>
+    </table>
+    <div class="grid grid-2" style="margin-top:1rem">
+      <div class="card">
+        <h3>Dữ liệu xuyên region</h3>
+        <ul>
+          <li><strong>Data residency:</strong> GDPR/luật VN buộc data user ở lại region của họ</li>
+          <li><strong>Conflict resolution:</strong> CRDT, last-write-wins, hoặc partition theo region để tránh ghi đồng thời</li>
+          <li><strong>DB toàn cầu:</strong> CockroachDB, Spanner, DynamoDB Global Tables, Cosmos DB multi-region</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Đo độ sẵn sàng</h3>
+        <ul>
+          <li><strong>RTO</strong> (Recovery Time Objective): bao lâu để khôi phục</li>
+          <li><strong>RPO</strong> (Recovery Point Objective): chấp nhận mất bao nhiêu dữ liệu</li>
+          <li>Diễn tập <strong>region failover</strong> định kỳ (game day), không chỉ trên giấy</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Chiến lược Multi-tenancy</h2>
+    <p class="section-sub">SaaS phục vụ nhiều khách hàng (tenant) trên cùng hạ tầng. Chọn mức cô lập là quyết định kiến trúc nền tảng, ảnh hưởng cost, bảo mật và blast radius.</p>
+    <table class="cmp">
+      <thead><tr><th>Mô hình</th><th>Cô lập</th><th>Chi phí / Phù hợp</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Shared DB, shared schema</strong> (TenantId cột)</td><td>Thấp — chỉ bằng query filter</td><td>Rẻ nhất, dày đặc; rủi ro rò rỉ chéo tenant nếu quên filter</td></tr>
+        <tr><td><strong>Shared DB, schema/tenant</strong></td><td>Trung bình</td><td>Cân bằng; giới hạn số tenant theo khả năng DB</td></tr>
+        <tr><td><strong>DB/tenant</strong></td><td>Cao</td><td>Cô lập tốt, backup/restore riêng; vận hành nhiều DB</td></tr>
+        <tr><td><strong>Stack/tenant (silo)</strong></td><td>Cao nhất</td><td>Cho khách enterprise, compliance; đắt, ít dày đặc</td></tr>
+      </tbody>
+    </table>
+    <pre class="code"><span class="c">// EF Core global query filter — cô lập tenant mức shared schema</span>
+<span class="k">protected override void</span> <span class="n">OnModelCreating</span>(<span class="t">ModelBuilder</span> mb)
+{
+    mb.<span class="t">Entity</span>&lt;<span class="t">Order</span>&gt;()
+      .<span class="n">HasQueryFilter</span>(o =&gt; o.<span class="p">TenantId</span> == _tenantContext.<span class="p">CurrentTenantId</span>);
+    <span class="c">// MỌI query tự thêm WHERE TenantId = @current — chống rò rỉ chéo</span>
+}</pre>
+    <div class="warn-box"><strong>⚠️ Noisy neighbor:</strong> Ở shared model, 1 tenant "ồn ào" có thể ngốn hết tài nguyên của tenant khác. Cần rate-limit &amp; quota theo tenant (xem backpressure bên dưới).</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Service Mesh — Istio / Linkerd (hands-on)</h2>
+    <p class="section-sub">Service mesh đẩy các cross-cutting concern (mTLS, retry, traffic shaping, telemetry) xuống <strong>tầng hạ tầng</strong> qua sidecar proxy — code service không cần biết. 2026: Istio có ambient mode (không sidecar) ngày càng phổ biến.</p>
+    <div class="grid grid-3">
+      <div class="dtype">
+        <h4>🔐 mTLS tự động</h4>
+        <p>Mọi traffic service-to-service được mã hoá &amp; xác thực hai chiều, zero-trust, không sửa code.</p>
+      </div>
+      <div class="dtype">
+        <h4>🚦 Traffic management</h4>
+        <p>Canary, blue-green, traffic splitting theo %, fault injection — khai báo bằng YAML.</p>
+      </div>
+      <div class="dtype">
+        <h4>📊 Telemetry đồng nhất</h4>
+        <p>Golden metrics (latency, traffic, error, saturation) cho mọi service mà không cần instrument tay.</p>
+      </div>
+    </div>
+    <pre class="code"><span class="c"># Istio: canary 90/10 + retry + timeout — khai báo, không code</span>
+<span class="k">apiVersion:</span> networking.istio.io/v1
+<span class="k">kind:</span> <span class="t">VirtualService</span>
+<span class="k">metadata:</span> { name: orders }
+<span class="k">spec:</span>
+  hosts: [ orders ]
+  http:
+  - route:
+    - destination: { host: orders, subset: v1 }
+      weight: <span class="s">90</span>
+    - destination: { host: orders, subset: v2 }   <span class="c"># canary 10%</span>
+      weight: <span class="s">10</span>
+    retries: { attempts: <span class="s">3</span>, perTryTimeout: <span class="s">2s</span>, retryOn: <span class="s">5xx,reset</span> }
+    timeout: <span class="s">10s</span></pre>
+    <div class="info-box"><strong>📦 Istio vs Linkerd:</strong> Linkerd nhẹ, đơn giản, Rust-based proxy, dễ vận hành — hợp đa số. Istio mạnh &amp; nhiều tính năng (multi-cluster, ambient mesh) nhưng phức tạp hơn. <strong>Đừng dùng mesh khi &lt;15-20 service</strong> — overhead vận hành không xứng.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Backpressure &amp; Load Shedding</h2>
+    <p class="section-sub">Khi tải vượt sức, hệ thống phải <strong>chủ động từ chối</strong> một phần để phần còn lại sống — thay vì cố nhận hết rồi sập toàn bộ (cascading failure).</p>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Backpressure (đẩy ngược áp lực)</h3>
+        <p>Consumer chậm → báo ngược cho producer chậm lại. Trong .NET dùng <code>System.Threading.Channels</code> bounded, Kafka consumer lag, hoặc gRPC flow control.</p>
+        <pre class="code"><span class="c">// Bounded channel — producer bị chặn khi đầy</span>
+<span class="k">var</span> ch = <span class="t">Channel</span>.<span class="n">CreateBounded</span>&lt;<span class="t">Job</span>&gt;(
+    <span class="k">new</span> <span class="t">BoundedChannelOptions</span>(<span class="s">1000</span>)
+    {
+        FullMode = <span class="t">BoundedChannelFullMode</span>.<span class="p">Wait</span>
+    });
+<span class="c">// queue không phình vô hạn → không OOM</span></pre>
+      </div>
+      <div class="card">
+        <h3>Load shedding (vứt bớt tải)</h3>
+        <p>Khi quá tải, từ chối nhanh request ít quan trọng (HTTP 429/503) để bảo vệ request critical. Ưu tiên theo tier.</p>
+        <pre class="code"><span class="c">// .NET 9 Rate Limiting middleware</span>
+builder.<span class="p">Services</span>.<span class="n">AddRateLimiter</span>(o =&gt;
+{
+    o.<span class="n">AddConcurrencyLimiter</span>(<span class="s">"checkout"</span>, l =&gt;
+    {
+        l.<span class="p">PermitLimit</span> = <span class="s">500</span>;
+        l.<span class="p">QueueLimit</span> = <span class="s">0</span>;  <span class="c">// đầy → 503 ngay, fail fast</span>
+    });
+    o.<span class="p">RejectionStatusCode</span> = <span class="s">503</span>;
+});</pre>
+      </div>
+    </div>
+    <div class="tip"><strong>💡 Nguyên tắc:</strong> "Fail fast" tốt hơn "fail slow". Một 503 trả trong 5ms tốt hơn vô hạn request treo 30s rồi timeout đồng loạt. Kết hợp với <strong>adaptive concurrency</strong> (vd thuật toán giống Netflix concurrency-limits) để tự điều chỉnh ngưỡng theo latency thực.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Platform Engineering &amp; Internal Developer Platform (IDP)</h2>
+    <p class="section-sub">Ở quy mô hàng trăm service, bạn không thể bắt mỗi team tự lo K8s, CI/CD, observability. Platform team xây <strong>"golden path"</strong> để dev tự phục vụ (self-service) — đây là xu hướng chủ đạo 2024-2026.</p>
+    <div class="grid grid-3">
+      <div class="card">
+        <h4>🛤️ Golden Path</h4>
+        <p>Template + scaffolding cho service mới: repo, pipeline, dashboard, alert đã sẵn. <code>create service</code> → chạy được trong vài phút.</p>
+      </div>
+      <div class="card">
+        <h4>🧰 Self-service IDP</h4>
+        <p>Dev khai báo "tôi cần 1 service + Postgres + topic" → platform tự provision. Tools: <strong>Backstage</strong>, Port, Humanitec.</p>
+      </div>
+      <div class="card">
+        <h4>📜 Platform as Product</h4>
+        <p>Coi developer là khách hàng. Đo bằng DORA metrics, thời gian onboard, developer satisfaction.</p>
+      </div>
+    </div>
+    <div class="info-box"><strong>📦 IaC + GitOps:</strong> Hạ tầng khai báo bằng Terraform/Pulumi; deploy qua GitOps (ArgoCD/Flux) — git là nguồn sự thật duy nhất. Platform team sở hữu các module này, team sản phẩm chỉ "đặt hàng" qua PR.</div>
+    <table class="cmp">
+      <thead><tr><th>DORA metric</th><th>Đo gì</th></tr></thead>
+      <tbody>
+        <tr><td>Deployment Frequency</td><td>Deploy bao nhiêu lần/ngày — elite: nhiều lần/ngày</td></tr>
+        <tr><td>Lead Time for Changes</td><td>Commit → production mất bao lâu — elite: &lt;1 giờ</td></tr>
+        <tr><td>Change Failure Rate</td><td>% deploy gây sự cố — elite: &lt;15%</td></tr>
+        <tr><td>MTTR</td><td>Khôi phục sau sự cố mất bao lâu — elite: &lt;1 giờ</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Cost &amp; Capacity Planning</h2>
+    <p class="section-sub">Microservices ở cloud dễ "đốt tiền" âm thầm: mỗi service idle vẫn ăn CPU/RAM, traffic chéo region tốn phí egress, over-provision vì sợ.</p>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Tối ưu chi phí</h3>
+        <ul>
+          <li><strong>Right-sizing:</strong> đặt request/limit K8s sát thực tế dựa trên metric, không đoán</li>
+          <li><strong>Autoscaling:</strong> HPA theo CPU/RPS, KEDA theo queue length; scale-to-zero cho service ít dùng</li>
+          <li><strong>Spot/preemptible</strong> cho workload chịu được gián đoạn</li>
+          <li><strong>Egress cost:</strong> giữ traffic trong cùng AZ/region; data transfer chéo region rất đắt</li>
+          <li><strong>FinOps:</strong> gán cost theo team/service (tagging), hiển thị showback/chargeback</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Capacity planning</h3>
+        <ul>
+          <li>Load test để biết 1 pod chịu được bao nhiêu RPS (k6, NBomber)</li>
+          <li>Tính headroom cho spike (vd Black Friday = 10x): xác định trước scaling limit</li>
+          <li>Quota &amp; limit để 1 service không ngốn cả cluster</li>
+          <li>Theo dõi <strong>saturation</strong> (USE method) — phát hiện cạn tài nguyên trước khi sập</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Khi nào microservices THẤT BẠI</h2>
+    <p class="section-sub">Phần quan trọng nhất của một architect: biết khi nào <strong>không</strong> dùng. Phần lớn "thảm hoạ microservices" đến từ áp dụng sai bối cảnh.</p>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>🚩 Dấu hiệu tách sai</h3>
+        <ul>
+          <li><strong>Distributed monolith:</strong> service phải deploy cùng nhau, đổi 1 phải đổi tất cả — tệ hơn monolith</li>
+          <li><strong>Chatty services:</strong> 1 request user → hàng chục network hop nội bộ → latency &amp; lỗi lan</li>
+          <li>Tách trước khi hiểu domain → ranh giới sai, refactor cực đắt</li>
+          <li>Team nhỏ hơn số service → mỗi người ôm nhiều repo, kiệt sức on-call</li>
+          <li>Shared database giữa các service → coupling ngầm, mất hết lợi ích</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>✅ Khi nên giữ monolith</h3>
+        <ul>
+          <li>Startup giai đoạn đầu, domain còn biến động mạnh</li>
+          <li>Team nhỏ (&lt; 15-20 dev), 1-2 team</li>
+          <li>Tải không lớn, không có nhu cầu scale từng phần độc lập</li>
+          <li>Chưa có nền tảng CI/CD, observability, on-call trưởng thành</li>
+          <li>→ Dùng <a href="modular-monolith.html" style="color:var(--primary)">Modular Monolith</a>, tách dần khi có lý do rõ ràng</li>
+        </ul>
+      </div>
+    </div>
+    <div class="danger-box"><strong>🔥 Sự thật của architect:</strong> Microservices là giải pháp cho bài toán <em>quy mô tổ chức &amp; scale độc lập</em>, đánh đổi bằng độ phức tạp vận hành khổng lồ. Nếu bạn không có bài toán đó, bạn chỉ đang mua phức tạp mà không nhận lại lợi ích. "Big enough to need it, mature enough to run it."</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Checklist — Tư duy Architect-level</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>✅ Thiết kế nền tảng</h3>
+        <ul>
+          <li>Chọn mô hình multi-region khớp RTO/RPO &amp; ngân sách</li>
+          <li>Chiến lược multi-tenancy rõ ràng + chống rò rỉ chéo tenant</li>
+          <li>Service mesh chỉ khi đủ số service để xứng overhead</li>
+          <li>Backpressure + load shedding có chủ đích, fail fast</li>
+          <li>IDP/golden path cho dev self-service, đo bằng DORA</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>✅ Kỷ luật &amp; chi phí</h3>
+        <ul>
+          <li>FinOps: cost gán theo service/team, tối ưu egress &amp; right-size</li>
+          <li>Capacity plan có load test &amp; headroom cho spike</li>
+          <li>Game day diễn tập failover định kỳ</li>
+          <li>Luôn hỏi "bài toán này có cần micro không?" trước khi tách</li>
+          <li>Sẵn sàng gộp service lại nếu tách sai (không cố chấp)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Quay lại: <a href="index.html" style="color:var(--primary)">Roadmap tổng quan →</a></p>
+</footer>
+
+</body>
+</html>

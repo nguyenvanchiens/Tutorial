@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevSecOps & Supply-Chain Security — Bảo Mật Trong Pipeline</title>
+    <link rel="stylesheet" href="build.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html">Build<span class="accent">&Deploy</span></a></div>
+            <div class="nav-links">
+                <a href="index.html">🗺️ Tổng quan</a>
+                <a href="git.html">📦 Git</a>
+                <a href="cicd.html">⚙️ CI/CD</a>
+                <a href="jenkins.html">🔴 Jenkins</a>
+                <a href="docker.html">🐳 Docker</a>
+                <a href="kubernetes.html">☸️ Kubernetes</a>
+                <a href="iac.html">🏗️ IaC</a>
+                <a href="sre.html">🚨 SRE</a>
+                <a href="devsecops.html" class="active">🛡️ DevSecOps</a>
+                <a href="hosting.html">☁️ Hosting</a>
+                <a href="cloud.html">⛅ Cloud</a>
+                <a href="monitoring.html">📊 Monitoring</a>
+                <a href="workflow.html">🔄 Workflow</a>
+            </div>
+            <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <header class="build-hero">
+        <div class="hero-content">
+            <div class="hero-badge">CHƯƠNG 14 · DEVSECOPS & SUPPLY CHAIN</div>
+            <h1>Dev<span class="gradient-text">Sec</span>Ops</h1>
+            <p class="hero-desc">Bảo mật không phải bước cuối — nó nằm trong từng commit. Shift-left, quét secret, SAST/DAST, scan dependency & image, SBOM, OIDC thay vì key tĩnh, ký artifact. Bảo vệ cả supply chain.</p>
+            <div class="hero-stats">
+                <div class="stat"><span class="stat-number">Shift-Left</span><span class="stat-label">Bảo mật sớm</span></div>
+                <div class="stat"><span class="stat-number">SAST/DAST</span><span class="stat-label">Quét code</span></div>
+                <div class="stat"><span class="stat-number">OIDC</span><span class="stat-label">Không key tĩnh</span></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== SECTION 1: SHIFT-LEFT ===== -->
+    <section class="section section-dark" id="shiftleft">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">⬅️</div>
+                <h2>14.1 — Shift-Left — Bảo Mật Càng Sớm Càng Rẻ</h2>
+                <p>Tìm lỗ hổng lúc viết code = sửa vài phút. Tìm lúc production = sự cố + tốn gấp 100 lần</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>🌊 Bảo mật dịch trái về phía developer</h3>
+                <div class="analogy-grid">
+                    <div class="analogy-box">
+                        <h4>❌ Mô hình cũ — Security gác cổng</h4>
+                        <p>Code xong → đội security pentest ngay trước release → tìm ra 50 lỗ hổng → release trễ 2 tuần, hoặc release bừa rồi vá sau. Security là kẻ "nói không", dev ghét.</p>
+                    </div>
+                    <div class="analogy-box good">
+                        <h4>✅ DevSecOps — Shift Left</h4>
+                        <p>Security tự động hóa, chạy trong IDE + mỗi PR + mỗi build. Dev thấy lỗ hổng ngay khi commit, fix tại chỗ. Security là công cụ tích hợp, không phải cổng chặn cuối.</p>
+                    </div>
+                </div>
+                <div class="tip-box">
+                    <strong>💡 Nguyên tắc:</strong> Mỗi giai đoạn càng về sau, chi phí sửa lỗ hổng càng tăng theo cấp số nhân. Tích hợp bảo mật vào pipeline để nó tự động & liên tục — không phải sự kiện một lần trước release. Đây là tinh thần cốt lõi của DevSecOps.
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🔐 Các Tầng Quét Trong Pipeline</h3>
+                <div class="pipeline-flow">
+                    <div class="pipeline-step"><div class="pipe-icon">⌨️</div><div class="pipe-label">IDE / commit</div><div class="pipe-desc">pre-commit, secret scan</div></div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-step"><div class="pipe-icon">🔍</div><div class="pipe-label">PR / CI</div><div class="pipe-desc">SAST, dep scan</div></div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-step"><div class="pipe-icon">📦</div><div class="pipe-label">Build</div><div class="pipe-desc">image scan, SBOM, sign</div></div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-step"><div class="pipe-icon">🚀</div><div class="pipe-label">Deploy</div><div class="pipe-desc">verify sig, policy</div></div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-step"><div class="pipe-icon">🌐</div><div class="pipe-label">Runtime</div><div class="pipe-desc">DAST, monitor</div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SECTION 2: SECRET SCANNING ===== -->
+    <section class="section" id="secrets">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🔑</div>
+                <h2>14.2 — Secret Scanning</h2>
+                <p>Lỗ hổng phổ biến nhất: API key / password vô tình commit lên Git</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>🛑 Chặn Secret Trước Khi Quá Muộn</h3>
+                <div class="cmd-grid">
+                    <div class="cmd-card">
+                        <div class="cmd-label">pre-commit hook — chặn ngay tại máy dev</div>
+                        <pre class="code-block"><span class="c-cmt"># .pre-commit-config.yaml</span>
+<span class="c-key">repos:</span>
+  - <span class="c-key">repo:</span> https://github.com/gitleaks/gitleaks
+    <span class="c-key">rev:</span> v8.18.0
+    <span class="c-key">hooks:</span>
+      - <span class="c-key">id:</span> gitleaks   <span class="c-cmt"># quét secret trước khi commit</span></pre>
+                    </div>
+                    <div class="cmd-card">
+                        <div class="cmd-label">CI step — chặn ở pipeline</div>
+                        <pre class="code-block"><span class="c-cmt"># GitHub Actions</span>
+- <span class="c-key">name:</span> Secret scan
+  <span class="c-key">uses:</span> gitleaks/gitleaks-action@v2
+  <span class="c-cmt"># + bật GitHub Secret Scanning &</span>
+  <span class="c-cmt">#   Push Protection trên repo</span></pre>
+                    </div>
+                </div>
+                <div class="warning-box">
+                    <strong>⚠️ Lỡ commit secret rồi thì sao?</strong> Xóa khỏi code KHÔNG đủ — nó vẫn nằm trong git history. Phải coi secret đó đã <strong>lộ vĩnh viễn</strong>: <strong>(1) ROTATE ngay</strong> (đổi key/password mới, vô hiệu cái cũ), rồi (2) cân nhắc xóa khỏi history (git filter-repo). Rotate quan trọng hơn xóa — kẻ tấn công có thể đã copy.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SECTION 3: SAST/DAST/DEPS ===== -->
+    <section class="section section-dark" id="scanning">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🔬</div>
+                <h2>14.3 — SAST, DAST & Dependency Scanning</h2>
+                <p>Quét chính code của bạn, quét app đang chạy, và quét thư viện bên thứ ba</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>🆚 SAST vs DAST</h3>
+                <div class="cicd-explain">
+                    <div class="cicd-box ci-box">
+                        <h4>SAST — Static (Hộp trắng)</h4>
+                        <p>Quét source code TĨNH, không cần chạy app</p>
+                        <div class="cicd-step">Tìm: SQL injection, hardcoded secret, code pattern nguy hiểm</div>
+                        <div class="cicd-step">Chạy ở: PR / CI, sớm</div>
+                        <div class="cicd-step">Tool: CodeQL (GitHub), SonarQube, Semgrep</div>
+                        <div class="cicd-goal">Nhanh, sớm — nhưng nhiều false positive</div>
+                    </div>
+                    <div class="cicd-box cd-box">
+                        <h4>DAST — Dynamic (Hộp đen)</h4>
+                        <p>Tấn công app ĐANG CHẠY (staging) từ bên ngoài</p>
+                        <div class="cicd-step">Tìm: lỗ hổng runtime, auth, config sai, XSS thực</div>
+                        <div class="cicd-step">Chạy ở: sau deploy lên staging</div>
+                        <div class="cicd-step">Tool: OWASP ZAP, Burp Suite</div>
+                        <div class="cicd-goal">Thực tế hơn — nhưng chậm & cần app chạy</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>📚 Dependency Scanning (SCA)</h3>
+                <p>Phần lớn code app hiện đại là thư viện bên thứ ba. Một lỗ hổng trong NuGet/npm package = lỗ hổng của bạn (nhớ Log4Shell, xz backdoor).</p>
+                <div class="tools-grid">
+                    <div class="tool-card tool-rec">
+                        <span class="tool-badge">DỄ NHẤT</span>
+                        <div class="tool-logo">🤖</div>
+                        <h4>Dependabot (GitHub)</h4>
+                        <p>Tự quét dependency, mở PR nâng version vá lỗ hổng. Bật 1 click. Có cả security alerts + version updates.</p>
+                        <div class="tool-pros">✓ Miễn phí, native GitHub, auto PR</div>
+                        <div class="tool-for">Mọi repo trên GitHub</div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-logo">🦉</div>
+                        <h4>OWASP Dependency-Check</h4>
+                        <p>Quét dependency đối chiếu CSDL CVE (NVD). Chạy được offline / CI bất kỳ. Hỗ trợ .NET, Java, npm...</p>
+                        <div class="tool-pros">✓ Open-source, CI-agnostic</div>
+                        <div class="tool-for">Pipeline tự host / không dùng GitHub</div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-logo">🐶</div>
+                        <h4>Snyk / Trivy fs</h4>
+                        <p>Snyk: SCA + fix suggestion mạnh. Trivy cũng quét được dependency lẫn IaC misconfig, không chỉ image.</p>
+                        <div class="tool-pros">✓ Đa năng, gợi ý fix tốt</div>
+                        <div class="tool-for">Team muốn 1 tool quét nhiều thứ</div>
+                    </div>
+                </div>
+                <div class="cmd-grid" style="margin-top:16px;">
+                    <div class="cmd-card">
+                        <div class="cmd-label">.NET — kiểm tra package lỗ hổng</div>
+                        <pre class="code-block"><span class="c-cmd">dotnet</span> list package --vulnerable --include-transitive
+<span class="c-cmt"># liệt kê cả dependency gián tiếp có CVE</span></pre>
+                    </div>
+                    <div class="cmd-card">
+                        <div class="cmd-label">npm — audit</div>
+                        <pre class="code-block"><span class="c-cmd">npm</span> audit
+<span class="c-cmd">npm</span> audit fix   <span class="c-cmt"># tự vá nếu không breaking</span></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SECTION 4: IMAGE SCAN + SBOM ===== -->
+    <section class="section" id="image">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🐳</div>
+                <h2>14.4 — Image Scanning & SBOM</h2>
+                <p>Container image kế thừa mọi lỗ hổng của base image. Quét nó và biết chính xác bên trong có gì</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>🔎 Trivy — Quét Image trong CI</h3>
+                <pre class="code-block"><span class="c-cmt"># Quét image local, fail build nếu có lỗ hổng nghiêm trọng</span>
+<span class="c-cmd">trivy</span> image --severity HIGH,CRITICAL --exit-code 1 myapp:1.4.2
+
+<span class="c-cmt"># GitHub Actions step</span>
+- <span class="c-key">name:</span> Scan image
+  <span class="c-key">uses:</span> aquasecurity/trivy-action@master
+  <span class="c-key">with:</span>
+    image-ref: myapp:${{ github.sha }}
+    severity: <span class="c-str">"HIGH,CRITICAL"</span>
+    exit-code: <span class="c-str">"1"</span>          <span class="c-cmt"># chặn deploy nếu dính lỗ hổng nặng</span></pre>
+                <div class="tip-box">
+                    <strong>💡 Giảm bề mặt tấn công image:</strong> Dùng base image tối giản — <strong>distroless</strong> hoặc <strong>Alpine/chiseled (.NET)</strong> thay vì image full OS. Ít package = ít CVE = image nhỏ. Chạy container bằng user non-root. Pin digest (<code>@sha256:...</code>) thay vì tag để bất biến.
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>📜 SBOM — Software Bill of Materials</h3>
+                <p>SBOM = "danh sách thành phần" của phần mềm: mọi package, version, license bên trong. Khi CVE mới công bố (kiểu Log4Shell), bạn tra SBOM trong vài giây để biết "mình có dính không" thay vì hoảng loạn rà tay.</p>
+                <pre class="code-block"><span class="c-cmt"># Sinh SBOM theo chuẩn (SPDX / CycloneDX)</span>
+<span class="c-cmd">syft</span> myapp:1.4.2 -o spdx-json > sbom.json
+<span class="c-cmt"># .NET: dotnet CLI cũng sinh được SBOM (CycloneDX)</span>
+<span class="c-cmd">dotnet</span> CycloneDX MyApp.csproj -o ./sbom
+
+<span class="c-cmt"># Sau đó quét SBOM với DB lỗ hổng</span>
+<span class="c-cmd">grype</span> sbom:./sbom.json</pre>
+                <div class="warning-box">
+                    <strong>⚠️ SBOM đang trở thành bắt buộc.</strong> Nhiều quy định/khách hàng (đặc biệt khu vực công, EU Cyber Resilience Act) yêu cầu SBOM đi kèm sản phẩm. Sinh SBOM tự động trong build và lưu kèm artifact — đừng để nước đến chân mới làm.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SECTION 5: IAM/OIDC + SIGNING ===== -->
+    <section class="section section-dark" id="iam">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🪪</div>
+                <h2>14.5 — Least-Privilege, OIDC & Ký Artifact</h2>
+                <p>Bỏ key tĩnh dài hạn. Cho ít quyền nhất. Ký mọi thứ để chứng minh nguồn gốc</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>🔓 OIDC-to-Cloud — Hết Thời Key Tĩnh trong CI</h3>
+                <div class="analogy-grid">
+                    <div class="analogy-box">
+                        <h4>❌ Long-lived secret</h4>
+                        <p>Lưu <code>AWS_ACCESS_KEY</code> / service principal secret trong GitHub Secrets. Key sống mãi → lộ là toang, phải rotate thủ công, dễ quên. Một secret rò = toàn quyền cloud.</p>
+                    </div>
+                    <div class="analogy-box good">
+                        <h4>✅ OIDC federation</h4>
+                        <p>CI (GitHub Actions) đổi token OIDC ngắn hạn lấy credential cloud tạm thời (vài phút). Không có secret tĩnh để lộ. Cloud tin "đúng repo/branch này" qua federation.</p>
+                    </div>
+                </div>
+                <pre class="code-block"><span class="c-cmt"># GitHub Actions → Azure qua OIDC, KHÔNG cần client secret</span>
+<span class="c-key">permissions:</span>
+  id-token: write        <span class="c-cmt"># cho phép xin OIDC token</span>
+  contents: read
+<span class="c-key">steps:</span>
+  - <span class="c-key">uses:</span> azure/login@v2
+    <span class="c-key">with:</span>
+      client-id: ${{ secrets.AZURE_CLIENT_ID }}      <span class="c-cmt"># id, không phải secret</span>
+      tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+      subscription-id: ${{ secrets.AZURE_SUB_ID }}
+      <span class="c-cmt"># không có client-secret — dùng workload identity federation</span></pre>
+                <div class="tip-box">
+                    <strong>💡 Least-privilege:</strong> Identity của pipeline/app chỉ được cấp đúng quyền cần thiết, đúng resource, đúng môi trường. Không gán "Contributor/Owner" cho tiện. Tách identity theo môi trường — credential deploy staging KHÔNG được chạm production.
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>✍️ Artifact Signing & Provenance</h3>
+                <p>Ký image/artifact để khi deploy, cluster kiểm chứng "thứ này đúng do pipeline của ta build, chưa bị tráo". Chống tấn công supply-chain kiểu chèn image độc vào registry.</p>
+                <pre class="code-block"><span class="c-cmt"># Cosign (Sigstore) — ký image keyless bằng OIDC identity</span>
+<span class="c-cmd">cosign</span> sign myregistry.io/myapp:1.4.2
+
+<span class="c-cmt"># Verify trước/khi deploy (gắn vào admission controller K8s)</span>
+<span class="c-cmd">cosign</span> verify myregistry.io/myapp:1.4.2 \
+  --certificate-identity=... --certificate-oidc-issuer=...</pre>
+                <div class="tip-box">
+                    <strong>💡 SLSA & provenance:</strong> Hướng tới attestation theo khung <strong>SLSA</strong> — chứng minh chuỗi "code nào → build ở đâu → ra artifact nào". Kết hợp với policy ở K8s (Kyverno/Gatekeeper) để <strong>chỉ cho phép chạy image đã ký + đã quét sạch</strong>. Đây là tuyến phòng thủ supply-chain mạnh nhất 2026.
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>✅ Checklist DevSecOps Pipeline</h3>
+                <div class="checklist-grid">
+                    <div class="check-item check-critical"><span class="check-icon">🔴</span><div><strong>Secret scanning + push protection</strong><p>Chặn secret ngay từ commit/PR. Rotate ngay nếu lỡ lộ.</p></div></div>
+                    <div class="check-item check-critical"><span class="check-icon">🔴</span><div><strong>OIDC thay key tĩnh</strong><p>Không lưu credential cloud dài hạn trong CI secrets.</p></div></div>
+                    <div class="check-item check-danger"><span class="check-icon">🟡</span><div><strong>SAST + dependency scan ở mỗi PR</strong><p>CodeQL/Semgrep + Dependabot. Fail build nếu CRITICAL.</p></div></div>
+                    <div class="check-item check-danger"><span class="check-icon">🟡</span><div><strong>Image scan + base image tối giản</strong><p>Trivy + distroless/chiseled + non-root user.</p></div></div>
+                    <div class="check-item check-info"><span class="check-icon">🔵</span><div><strong>SBOM mỗi build</strong><p>Sinh & lưu SBOM (SPDX/CycloneDX) kèm artifact.</p></div></div>
+                    <div class="check-item check-info"><span class="check-icon">🔵</span><div><strong>Ký artifact + verify khi deploy</strong><p>Cosign sign/verify, policy chỉ chạy image đã ký.</p></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="closing-box">
+                <div class="closing-nav">
+                    <a href="index.html" class="closing-btn">🗺️ Tổng quan</a>
+                    <a href="cicd.html" class="closing-btn">⚙️ CI/CD</a>
+                    <a href="docker.html" class="closing-btn">🐳 Docker</a>
+                    <a href="kubernetes.html" class="closing-btn">☸️ Kubernetes</a>
+                    <a href="ssl.html" class="closing-btn">🔒 SSL</a>
+                    <a href="sre.html" class="closing-btn">🚨 SRE</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Build & Deploy — Triển khai website từ A→Z cho web developer</p>
+            <p class="footer-note">DevSecOps — shift-left, secret/SAST/DAST/dependency/image scan, SBOM, OIDC, artifact signing</p>
+        </div>
+    </footer>
+
+    <script src="build.js"></script>
+</body>
+</html>

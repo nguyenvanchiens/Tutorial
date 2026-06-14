@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL &amp; Database nền tảng — A-Z cho Backend Developer</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --ut-primary: #512bd4;
+        --ut-primary-2: #8a2be2;
+        --ut-accent: #43e97b;
+        --ut-warn: #f39c12;
+        --ut-danger: #f5576c;
+        --ut-card: #1a1d2e;
+        --ut-card-2: #232640;
+        --ut-border: #2d3148;
+        --ut-text: #e2e8f0;
+        --ut-muted: #94a3b8;
+    }
+
+    .ut-hero {
+        text-align: center;
+        padding: 4rem 1.5rem 3rem;
+        background: radial-gradient(ellipse at top, rgba(81,43,212,.18), transparent 60%);
+    }
+    .ut-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 1rem; }
+    .ut-hero h1 .gradient {
+        background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .ut-hero .hero-badge {
+        display: inline-block;
+        background: rgba(81,43,212,.15);
+        color: var(--ut-primary-2);
+        padding: .4rem 1rem;
+        border-radius: 20px;
+        font-size: .78rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        margin-bottom: 1.25rem;
+    }
+    .ut-hero p { color: var(--ut-muted); max-width: 820px; margin: 0 auto; }
+
+    .ut-section { padding: 2.5rem 0; }
+    .ut-title {
+        font-size: 1.7rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        padding-left: 1rem;
+        color: var(--ut-text);
+    }
+    .ut-title::before {
+        content: '';
+        position: absolute;
+        left: 0; top: 6px; bottom: 6px;
+        width: 4px;
+        background: linear-gradient(180deg, var(--ut-primary), var(--ut-primary-2));
+        border-radius: 3px;
+    }
+    .ut-sub { color: var(--ut-muted); margin-bottom: 1.25rem; }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+
+    .ut-grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .ut-grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    .ut-grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+
+    .ut-card {
+        background: var(--ut-card);
+        border: 1px solid var(--ut-border);
+        border-radius: 12px;
+        padding: 1.4rem;
+    }
+    .ut-card h3 { color: var(--ut-primary-2); margin-bottom: .6rem; font-size: 1.1rem; }
+    .ut-card h4 { color: var(--ut-accent); margin-bottom: .45rem; font-size: .98rem; }
+    .ut-card p, .ut-card li { color: var(--ut-muted); font-size: .95rem; }
+    .ut-card ul { padding-left: 1.2rem; }
+    .ut-card ul li { margin-bottom: .3rem; }
+
+    pre.cb {
+        background: #0b1020;
+        border: 1px solid var(--ut-border);
+        border-left: 3px solid var(--ut-primary);
+        border-radius: 8px;
+        padding: 1rem 1.15rem;
+        overflow-x: auto;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+        font-size: .88rem;
+        line-height: 1.6;
+        margin: .75rem 0;
+        color: #d6deeb;
+    }
+    pre.cb .k { color: #c792ea; }
+    pre.cb .s { color: #ecc48d; }
+    pre.cb .c { color: #637777; font-style: italic; }
+    pre.cb .n { color: #82aaff; }
+    pre.cb .t { color: #ffcb8b; }
+    pre.cb .a { color: #7fdbca; }
+    code {
+        background: #2d3148;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: .88em;
+        color: #f8d06b;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+    }
+
+    .callout {
+        border-radius: 10px;
+        padding: .95rem 1.15rem;
+        margin: 1rem 0;
+        border: 1px solid;
+    }
+    .callout.tip { background: rgba(67,233,123,.07); border-color: var(--ut-accent); }
+    .callout.tip strong { color: var(--ut-accent); }
+    .callout.warn { background: rgba(243,156,18,.07); border-color: var(--ut-warn); }
+    .callout.warn strong { color: var(--ut-warn); }
+    .callout.danger { background: rgba(245,87,108,.07); border-color: var(--ut-danger); }
+    .callout.danger strong { color: var(--ut-danger); }
+    .callout.info { background: rgba(81,43,212,.08); border-color: var(--ut-primary-2); }
+    .callout.info strong { color: var(--ut-primary-2); }
+
+    table.cmp { width: 100%; border-collapse: collapse; background: var(--ut-card); border-radius: 10px; overflow: hidden; margin: 1rem 0; font-size: .92rem; }
+    table.cmp th, table.cmp td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--ut-border); }
+    table.cmp th { background: var(--ut-card-2); color: var(--ut-primary-2); font-weight: 600; }
+    table.cmp td { color: var(--ut-muted); }
+    table.cmp tr:last-child td { border-bottom: none; }
+
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; position: relative; padding-left: 2.8rem; margin-bottom: 1rem; }
+    .steps li::before {
+        content: counter(step);
+        position: absolute; left: 0; top: 0;
+        width: 2rem; height: 2rem;
+        background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2));
+        color: #fff;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700;
+    }
+
+    .do-dont { border-left: 3px solid; padding: 1rem 1.15rem; border-radius: 8px; margin-bottom: 1rem; }
+    .do-dont.do { border-color: var(--ut-accent); background: rgba(67,233,123,.04); }
+    .do-dont.dont { border-color: var(--ut-danger); background: rgba(245,87,108,.04); }
+    .do-dont h4 { margin-bottom: .5rem; }
+    .do-dont.do h4 { color: var(--ut-accent); }
+    .do-dont.dont h4 { color: var(--ut-danger); }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo"><a href="index.html" style="color:inherit;-webkit-text-fill-color:inherit;">.NET<span class="accent">Mastery</span></a></div>
+        <div class="nav-links">
+            <a href="index.html">Roadmap</a>
+            <a href="csharp-basics.html">C# Basics</a>
+            <a href="oop.html">OOP</a>
+            <a href="linq.html">LINQ</a>
+            <a href="sql-basics.html" class="nav-active">SQL</a>
+            <a href="webapi-first.html">Web API</a>
+            <a href="efcore.html">EF Core</a>
+            <a href="di.html">DI</a>
+        </div>
+        <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+</nav>
+
+<header class="ut-hero">
+    <div class="hero-badge">CƠ BẢN · FOUNDATION</div>
+    <h1>SQL &amp; <span class="gradient">Database</span> nền tảng</h1>
+    <p>Toàn bộ kiến thức SQL nền tảng cho backend developer: SELECT &amp; lọc dữ liệu, các loại JOIN, GROUP BY &amp; hàm tổng hợp, khóa &amp; ràng buộc, index, chuẩn hóa (normalization), transaction &amp; ACID, và bảo mật chống SQL Injection. Ví dụ chuẩn ANSI SQL, ghi chú khác biệt SQL Server / PostgreSQL / MySQL.</p>
+</header>
+
+<div class="container">
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">1. Database quan hệ &amp; bảng mẫu</h2>
+    <p class="ut-sub">Database quan hệ (RDBMS) lưu dữ liệu trong các <strong>bảng</strong> (table) gồm <strong>cột</strong> (column) và <strong>hàng</strong> (row). Các bảng liên kết với nhau qua khóa. Toàn bộ lesson dùng schema bán hàng đơn giản dưới đây.</p>
+
+    <div class="ut-grid ut-grid-3">
+        <div class="ut-card">
+            <h4>🗂️ Bảng (Table)</h4>
+            <p>Tập hợp dữ liệu cùng loại — như một "sheet" Excel. Ví dụ: <code>Customers</code>, <code>Orders</code>, <code>Products</code>.</p>
+        </div>
+        <div class="ut-card">
+            <h4>📊 Cột (Column)</h4>
+            <p>Thuộc tính có kiểu dữ liệu cố định: <code>INT</code>, <code>VARCHAR</code>, <code>DECIMAL</code>, <code>DATE</code>... Mỗi cột có tên duy nhất trong bảng.</p>
+        </div>
+        <div class="ut-card">
+            <h4>📑 Hàng (Row)</h4>
+            <p>Một bản ghi cụ thể — một khách hàng, một đơn hàng. Còn gọi là <em>record</em> hoặc <em>tuple</em>.</p>
+        </div>
+    </div>
+
+    <h3 style="margin-top:1.5rem; color:var(--ut-primary-2)">📐 Schema mẫu dùng xuyên suốt</h3>
+    <pre class="cb"><span class="c">-- Bảng khách hàng</span>
+<span class="t">Customers</span> ( Id, Name, City, CreatedAt )
+
+<span class="c">-- Bảng đơn hàng — mỗi đơn thuộc về 1 khách hàng</span>
+<span class="t">Orders</span> ( Id, CustomerId, Total, Status, OrderDate )
+
+<span class="c">-- Bảng sản phẩm</span>
+<span class="t">Products</span> ( Id, Name, CategoryId, Price, Stock )
+
+<span class="c">-- Bảng chi tiết đơn — nối Orders &lt;-&gt; Products (quan hệ nhiều-nhiều)</span>
+<span class="t">OrderItems</span> ( OrderId, ProductId, Quantity, UnitPrice )</pre>
+
+    <div class="callout info">
+        <strong>SQL là ngôn ngữ khai báo (declarative):</strong> bạn mô tả <em>cái gì</em> muốn lấy, không mô tả <em>làm thế nào</em>. Bộ tối ưu (query optimizer) của database tự quyết định cách thực thi nhanh nhất.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">2. SELECT — Truy vấn &amp; chiếu cột</h2>
+    <p class="ut-sub">Lệnh <code>SELECT</code> là trái tim của SQL. Nó đọc dữ liệu từ bảng và trả về một tập kết quả (result set).</p>
+
+    <pre class="cb"><span class="c">-- Lấy tất cả cột (tránh dùng * trong production)</span>
+<span class="k">SELECT</span> * <span class="k">FROM</span> <span class="t">Customers</span>;
+
+<span class="c">-- Chiếu (projection): chỉ lấy cột cần thiết</span>
+<span class="k">SELECT</span> Id, Name, City <span class="k">FROM</span> <span class="t">Customers</span>;
+
+<span class="c">-- Alias cột (AS) và alias bảng — đặt tên ngắn gọn, dễ đọc</span>
+<span class="k">SELECT</span> c.Name <span class="k">AS</span> CustomerName,
+       c.City <span class="k">AS</span> Location
+<span class="k">FROM</span> <span class="t">Customers</span> c;
+
+<span class="c">-- Cột tính toán (computed column)</span>
+<span class="k">SELECT</span> Name,
+       Price,
+       Price * <span class="s">1.1</span> <span class="k">AS</span> PriceWithTax
+<span class="k">FROM</span> <span class="t">Products</span>;</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">DISTINCT — loại bỏ trùng lặp</h3>
+    <pre class="cb"><span class="c">-- Danh sách thành phố duy nhất khách hàng đang ở</span>
+<span class="k">SELECT DISTINCT</span> City <span class="k">FROM</span> <span class="t">Customers</span>;
+
+<span class="c">-- DISTINCT áp dụng cho TỔ HỢP cột, không phải từng cột riêng</span>
+<span class="k">SELECT DISTINCT</span> City, Status <span class="k">FROM</span> <span class="t">Customers</span> c
+<span class="k">JOIN</span> <span class="t">Orders</span> o <span class="k">ON</span> o.CustomerId = c.Id;</pre>
+
+    <div class="callout warn">
+        <strong>⚠️ Tránh <code>SELECT *</code> trong code production:</strong> lấy thừa cột → tốn băng thông, phá vỡ covering index, và code dễ vỡ khi schema thay đổi. Luôn liệt kê cột cụ thể.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">3. WHERE — Lọc dữ liệu</h2>
+    <p class="ut-sub">Mệnh đề <code>WHERE</code> lọc các hàng theo điều kiện. Chỉ những hàng thỏa điều kiện mới đi vào kết quả.</p>
+
+    <h3 style="color:var(--ut-primary-2)">Toán tử so sánh &amp; logic</h3>
+    <pre class="cb"><span class="c">-- So sánh cơ bản: = &lt;&gt; &lt; &gt; &lt;= &gt;=</span>
+<span class="k">SELECT</span> * <span class="k">FROM</span> <span class="t">Orders</span> <span class="k">WHERE</span> Total &gt;= <span class="s">1000</span>;
+
+<span class="c">-- Kết hợp AND / OR / NOT — chú ý độ ưu tiên, dùng ngoặc cho rõ</span>
+<span class="k">SELECT</span> * <span class="k">FROM</span> <span class="t">Orders</span>
+<span class="k">WHERE</span> Status = <span class="s">'Paid'</span>
+  <span class="k">AND</span> (Total &gt; <span class="s">500</span> <span class="k">OR</span> CustomerId = <span class="s">7</span>);</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">LIKE — khớp mẫu chuỗi</h3>
+    <pre class="cb"><span class="c">-- % = nhiều ký tự bất kỳ ; _ = đúng 1 ký tự</span>
+<span class="k">SELECT</span> * <span class="k">FROM</span> <span class="t">Customers</span> <span class="k">WHERE</span> Name <span class="k">LIKE</span> <span class="s">'Nguyen%'</span>;   <span class="c">-- bắt đầu bằng Nguyen</span>
+<span class="k">SELECT</span> * <span class="k">FROM</span> <span class="t">Customers</span> <span class="k">WHERE</span> Name <span class="k">LIKE</span> <span class="s">'%an%'</span>;       <span class="c">-- chứa "an"</span>
+<span class="k">SELECT</span> * <span class="k">FROM</span> <span class="t">Customers</span> <span class="k">WHERE</span> City <span class="k">LIKE</span> <span class="s">'Ha _oi'</span>;     <span class="c">-- Ha + 1 ký tự + oi</span></pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">IN, BETWEEN, IS NULL</h3>
+    <pre class="cb"><span class="c">-- IN: thuộc một danh sách giá trị (gọn hơn nhiều OR)</span>
+<span class="k">SELECT</span> * <span class="k">FROM</span> <span class="t">Orders</span> <span class="k">WHERE</span> Status <span class="k">IN</span> (<span class="s">'Paid'</span>, <span class="s">'Shipped'</span>, <span class="s">'Done'</span>);
+
+<span class="c">-- BETWEEN: trong khoảng (bao gồm 2 đầu mút)</span>
+<span class="k">SELECT</span> * <span class="k">FROM</span> <span class="t">Orders</span> <span class="k">WHERE</span> Total <span class="k">BETWEEN</span> <span class="s">100</span> <span class="k">AND</span> <span class="s">500</span>;
+<span class="k">SELECT</span> * <span class="k">FROM</span> <span class="t">Orders</span>
+<span class="k">WHERE</span> OrderDate <span class="k">BETWEEN</span> <span class="s">'2026-01-01'</span> <span class="k">AND</span> <span class="s">'2026-06-30'</span>;
+
+<span class="c">-- IS NULL / IS NOT NULL — KHÔNG dùng = NULL (luôn trả về UNKNOWN!)</span>
+<span class="k">SELECT</span> * <span class="k">FROM</span> <span class="t">Customers</span> <span class="k">WHERE</span> City <span class="k">IS NULL</span>;
+<span class="k">SELECT</span> * <span class="k">FROM</span> <span class="t">Customers</span> <span class="k">WHERE</span> City <span class="k">IS NOT NULL</span>;</pre>
+
+    <div class="callout danger">
+        <strong>🚫 NULL không bằng bất cứ thứ gì — kể cả chính nó.</strong> <code>NULL = NULL</code> trả về <em>UNKNOWN</em>, không phải TRUE. Vì vậy <code>WHERE City = NULL</code> không bao giờ khớp hàng nào. Luôn dùng <code>IS NULL</code> / <code>IS NOT NULL</code>.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">4. ORDER BY &amp; phân trang (LIMIT / TOP / OFFSET-FETCH)</h2>
+    <p class="ut-sub"><code>ORDER BY</code> sắp xếp kết quả. Phân trang giúp lấy từng "trang" dữ liệu — cú pháp khác nhau giữa các hệ DB.</p>
+
+    <pre class="cb"><span class="c">-- Sắp xếp tăng dần (ASC, mặc định) / giảm dần (DESC)</span>
+<span class="k">SELECT</span> Name, Total <span class="k">FROM</span> <span class="t">Orders</span>
+<span class="k">ORDER BY</span> Total <span class="k">DESC</span>, OrderDate <span class="k">ASC</span>;   <span class="c">-- sắp nhiều cột</span></pre>
+
+    <table class="cmp">
+        <tr><th>Hệ DB</th><th>Lấy N hàng đầu</th><th>Phân trang (bỏ qua + lấy)</th></tr>
+        <tr><td>SQL Server</td><td><code>SELECT TOP 10 ...</code></td><td><code>OFFSET 20 ROWS FETCH NEXT 10 ROWS ONLY</code></td></tr>
+        <tr><td>PostgreSQL / MySQL / SQLite</td><td><code>... LIMIT 10</code></td><td><code>LIMIT 10 OFFSET 20</code></td></tr>
+        <tr><td>Oracle (12c+)</td><td><code>FETCH FIRST 10 ROWS ONLY</code></td><td><code>OFFSET 20 ROWS FETCH NEXT 10 ROWS ONLY</code></td></tr>
+    </table>
+
+    <pre class="cb"><span class="c">-- ANSI chuẩn (SQL Server 2012+, Postgres, Oracle): OFFSET-FETCH</span>
+<span class="c">-- Trang 3, mỗi trang 10 dòng -&gt; bỏ qua (3-1)*10 = 20 dòng</span>
+<span class="k">SELECT</span> Id, Total <span class="k">FROM</span> <span class="t">Orders</span>
+<span class="k">ORDER BY</span> OrderDate <span class="k">DESC</span>
+<span class="k">OFFSET</span> <span class="s">20</span> <span class="k">ROWS FETCH NEXT</span> <span class="s">10</span> <span class="k">ROWS ONLY</span>;
+
+<span class="c">-- MySQL / PostgreSQL: LIMIT ... OFFSET</span>
+<span class="k">SELECT</span> Id, Total <span class="k">FROM</span> <span class="t">Orders</span>
+<span class="k">ORDER BY</span> OrderDate <span class="k">DESC</span>
+<span class="k">LIMIT</span> <span class="s">10</span> <span class="k">OFFSET</span> <span class="s">20</span>;</pre>
+
+    <div class="callout warn">
+        <strong>⚠️ Phân trang luôn cần <code>ORDER BY</code>:</strong> không có ORDER BY thì thứ tự hàng không xác định → trang 2 có thể lặp/bỏ sót dữ liệu của trang 1. Với dataset lớn, cân nhắc <em>keyset pagination</em> (WHERE Id &gt; lastId) thay vì OFFSET lớn vì OFFSET phải quét bỏ qua nhiều hàng.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">5. JOIN — Kết hợp nhiều bảng</h2>
+    <p class="ut-sub"><code>JOIN</code> ghép các hàng từ nhiều bảng dựa trên điều kiện liên kết (thường là khóa). Đây là kỹ năng quan trọng bậc nhất khi truy vấn dữ liệu quan hệ.</p>
+
+    <table class="cmp">
+        <tr><th>Loại JOIN</th><th>Trả về</th><th>Khi nào dùng</th></tr>
+        <tr><td><strong>INNER JOIN</strong></td><td>Chỉ các hàng khớp ở CẢ hai bảng</td><td>Lấy đơn hàng có khách hàng tồn tại</td></tr>
+        <tr><td><strong>LEFT JOIN</strong></td><td>Tất cả hàng bảng trái + khớp bên phải (NULL nếu không khớp)</td><td>Tất cả khách, kể cả người chưa mua</td></tr>
+        <tr><td><strong>RIGHT JOIN</strong></td><td>Tất cả hàng bảng phải + khớp bên trái</td><td>Hiếm dùng — thường viết lại thành LEFT</td></tr>
+        <tr><td><strong>FULL OUTER JOIN</strong></td><td>Tất cả hàng cả hai bảng, NULL chỗ không khớp</td><td>Đối chiếu 2 tập, tìm chênh lệch</td></tr>
+        <tr><td><strong>CROSS JOIN</strong></td><td>Tích Descartes — mọi cặp tổ hợp</td><td>Sinh ma trận, lịch, kết hợp size×color</td></tr>
+        <tr><td><strong>SELF JOIN</strong></td><td>Bảng tự nối với chính nó</td><td>Quan hệ phân cấp: nhân viên ↔ quản lý</td></tr>
+    </table>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">INNER JOIN — giao của hai bảng</h3>
+    <pre class="cb"><span class="c">-- Đơn hàng kèm tên khách. Chỉ đơn có CustomerId khớp Customers.Id</span>
+<span class="k">SELECT</span> o.Id, o.Total, c.Name
+<span class="k">FROM</span> <span class="t">Orders</span> o
+<span class="k">INNER JOIN</span> <span class="t">Customers</span> c <span class="k">ON</span> o.CustomerId = c.Id;</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">LEFT JOIN — giữ hết bảng trái</h3>
+    <pre class="cb"><span class="c">-- Tất cả khách hàng, kèm đơn hàng nếu có. Khách chưa mua -&gt; cột đơn = NULL</span>
+<span class="k">SELECT</span> c.Name, o.Id <span class="k">AS</span> OrderId, o.Total
+<span class="k">FROM</span> <span class="t">Customers</span> c
+<span class="k">LEFT JOIN</span> <span class="t">Orders</span> o <span class="k">ON</span> o.CustomerId = c.Id;
+
+<span class="c">-- Mẹo: tìm khách CHƯA từng mua hàng</span>
+<span class="k">SELECT</span> c.Name
+<span class="k">FROM</span> <span class="t">Customers</span> c
+<span class="k">LEFT JOIN</span> <span class="t">Orders</span> o <span class="k">ON</span> o.CustomerId = c.Id
+<span class="k">WHERE</span> o.Id <span class="k">IS NULL</span>;</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">RIGHT JOIN — giữ hết bảng phải</h3>
+    <pre class="cb"><span class="c">-- Tương đương LEFT JOIN nhưng đảo vai trò. Hiếm dùng trong thực tế.</span>
+<span class="k">SELECT</span> c.Name, o.Total
+<span class="k">FROM</span> <span class="t">Orders</span> o
+<span class="k">RIGHT JOIN</span> <span class="t">Customers</span> c <span class="k">ON</span> o.CustomerId = c.Id;</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">FULL OUTER JOIN — giữ hết cả hai</h3>
+    <pre class="cb"><span class="c">-- Cả khách không đơn LẪN đơn mồ côi (CustomerId không khớp khách nào)</span>
+<span class="k">SELECT</span> c.Name, o.Id <span class="k">AS</span> OrderId
+<span class="k">FROM</span> <span class="t">Customers</span> c
+<span class="k">FULL OUTER JOIN</span> <span class="t">Orders</span> o <span class="k">ON</span> o.CustomerId = c.Id;
+<span class="c">-- Lưu ý: MySQL không hỗ trợ FULL OUTER JOIN -&gt; phải UNION LEFT + RIGHT</span></pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">CROSS JOIN — tích Descartes</h3>
+    <pre class="cb"><span class="c">-- Mọi tổ hợp size x color (3 size x 4 color = 12 hàng)</span>
+<span class="k">SELECT</span> s.SizeName, cl.ColorName
+<span class="k">FROM</span> <span class="t">Sizes</span> s
+<span class="k">CROSS JOIN</span> <span class="t">Colors</span> cl;</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">SELF JOIN — nối bảng với chính nó</h3>
+    <pre class="cb"><span class="c">-- Bảng Employees(Id, Name, ManagerId). Lấy nhân viên kèm tên quản lý</span>
+<span class="k">SELECT</span> e.Name <span class="k">AS</span> Employee,
+       m.Name <span class="k">AS</span> Manager
+<span class="k">FROM</span> <span class="t">Employees</span> e
+<span class="k">LEFT JOIN</span> <span class="t">Employees</span> m <span class="k">ON</span> e.ManagerId = m.Id;</pre>
+
+    <div class="callout tip">
+        <strong>💡 Quy tắc vàng:</strong> điều kiện lọc bảng phải trong LEFT JOIN nên đặt trong mệnh đề <code>ON</code>, không phải <code>WHERE</code> — nếu để ở WHERE, NULL sẽ bị loại và LEFT JOIN âm thầm biến thành INNER JOIN.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">6. GROUP BY &amp; hàm tổng hợp</h2>
+    <p class="ut-sub">Hàm tổng hợp (aggregate) gom nhiều hàng thành một giá trị. <code>GROUP BY</code> chia dữ liệu thành các nhóm rồi tính tổng hợp cho từng nhóm.</p>
+
+    <table class="cmp">
+        <tr><th>Hàm</th><th>Ý nghĩa</th><th>Ghi chú NULL</th></tr>
+        <tr><td><code>COUNT(*)</code></td><td>Đếm số hàng</td><td>Đếm cả hàng có NULL</td></tr>
+        <tr><td><code>COUNT(col)</code></td><td>Đếm giá trị không NULL của cột</td><td>Bỏ qua NULL</td></tr>
+        <tr><td><code>SUM(col)</code></td><td>Tổng các giá trị</td><td>Bỏ qua NULL</td></tr>
+        <tr><td><code>AVG(col)</code></td><td>Trung bình</td><td>Bỏ qua NULL (mẫu số không tính NULL)</td></tr>
+        <tr><td><code>MIN / MAX(col)</code></td><td>Giá trị nhỏ nhất / lớn nhất</td><td>Bỏ qua NULL</td></tr>
+    </table>
+
+    <pre class="cb"><span class="c">-- Tổng quan toàn bảng (không GROUP BY -&gt; 1 hàng kết quả)</span>
+<span class="k">SELECT</span> <span class="k">COUNT</span>(*)   <span class="k">AS</span> TotalOrders,
+       <span class="k">SUM</span>(Total) <span class="k">AS</span> Revenue,
+       <span class="k">AVG</span>(Total) <span class="k">AS</span> AvgOrder,
+       <span class="k">MIN</span>(Total) <span class="k">AS</span> Smallest,
+       <span class="k">MAX</span>(Total) <span class="k">AS</span> Biggest
+<span class="k">FROM</span> <span class="t">Orders</span>;
+
+<span class="c">-- Doanh thu theo từng khách hàng</span>
+<span class="k">SELECT</span> CustomerId,
+       <span class="k">COUNT</span>(*)   <span class="k">AS</span> NumOrders,
+       <span class="k">SUM</span>(Total) <span class="k">AS</span> TotalSpent
+<span class="k">FROM</span> <span class="t">Orders</span>
+<span class="k">GROUP BY</span> CustomerId;</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">HAVING vs WHERE</h3>
+    <pre class="cb"><span class="c">-- WHERE lọc TRƯỚC khi gom nhóm (trên hàng đơn lẻ)</span>
+<span class="c">-- HAVING lọc SAU khi gom nhóm (trên kết quả tổng hợp)</span>
+<span class="k">SELECT</span> CustomerId, <span class="k">SUM</span>(Total) <span class="k">AS</span> TotalSpent
+<span class="k">FROM</span> <span class="t">Orders</span>
+<span class="k">WHERE</span> Status = <span class="s">'Paid'</span>          <span class="c">-- chỉ tính đơn đã thanh toán</span>
+<span class="k">GROUP BY</span> CustomerId
+<span class="k">HAVING</span> <span class="k">SUM</span>(Total) &gt; <span class="s">10000</span>     <span class="c">-- chỉ giữ khách chi tiêu &gt; 10000</span>
+<span class="k">ORDER BY</span> TotalSpent <span class="k">DESC</span>;</pre>
+
+    <div class="callout info">
+        <strong>WHERE vs HAVING — khác biệt cốt lõi:</strong> <code>WHERE</code> không dùng được hàm tổng hợp (<code>SUM</code>, <code>COUNT</code>...) vì nó chạy <em>trước</em> khi gom nhóm. Muốn lọc theo kết quả tổng hợp phải dùng <code>HAVING</code>. Thứ tự thực thi logic: <code>FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY</code>.
+    </div>
+
+    <pre class="cb"><span class="c">-- Ví dụ phức hợp: top sản phẩm bán chạy</span>
+<span class="k">SELECT</span> p.Name,
+       <span class="k">SUM</span>(oi.Quantity)              <span class="k">AS</span> UnitsSold,
+       <span class="k">SUM</span>(oi.Quantity * oi.UnitPrice) <span class="k">AS</span> Revenue
+<span class="k">FROM</span> <span class="t">OrderItems</span> oi
+<span class="k">JOIN</span> <span class="t">Products</span> p <span class="k">ON</span> p.Id = oi.ProductId
+<span class="k">GROUP BY</span> p.Name
+<span class="k">HAVING</span> <span class="k">SUM</span>(oi.Quantity) &gt; <span class="s">100</span>
+<span class="k">ORDER BY</span> Revenue <span class="k">DESC</span>;</pre>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">7. Khóa &amp; ràng buộc (Keys &amp; Constraints)</h2>
+    <p class="ut-sub">Khóa định danh và liên kết dữ liệu, đảm bảo tính toàn vẹn (integrity). Ràng buộc (constraint) là luật database tự bắt buộc.</p>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h4>🔑 Primary Key (PK)</h4>
+            <p>Định danh duy nhất mỗi hàng. <strong>Không NULL</strong>, <strong>không trùng</strong>. Mỗi bảng chỉ có 1 PK (có thể gồm nhiều cột).</p>
+        </div>
+        <div class="ut-card">
+            <h4>🔗 Foreign Key (FK)</h4>
+            <p>Cột tham chiếu PK của bảng khác → tạo quan hệ. Đảm bảo không có "đơn hàng mồ côi" trỏ tới khách không tồn tại.</p>
+        </div>
+        <div class="ut-card">
+            <h4>✨ UNIQUE</h4>
+            <p>Giá trị không trùng nhau (vd: email, username). Khác PK: cho phép NULL và bảng có nhiều UNIQUE.</p>
+        </div>
+        <div class="ut-card">
+            <h4>🧩 Composite Key</h4>
+            <p>Khóa gồm <strong>nhiều cột</strong> ghép lại. Thường dùng cho bảng nối nhiều-nhiều như <code>OrderItems(OrderId, ProductId)</code>.</p>
+        </div>
+    </div>
+
+    <pre class="cb"><span class="k">CREATE TABLE</span> <span class="t">Customers</span> (
+    Id        <span class="t">INT</span>          <span class="k">IDENTITY</span>(<span class="s">1</span>,<span class="s">1</span>) <span class="k">PRIMARY KEY</span>,
+    Name      <span class="t">NVARCHAR</span>(<span class="s">100</span>) <span class="k">NOT NULL</span>,
+    Email     <span class="t">NVARCHAR</span>(<span class="s">150</span>) <span class="k">NOT NULL UNIQUE</span>,        <span class="c">-- không trùng email</span>
+    City      <span class="t">NVARCHAR</span>(<span class="s">80</span>)  <span class="k">NULL</span>,
+    CreatedAt <span class="t">DATETIME2</span>     <span class="k">NOT NULL DEFAULT</span> SYSUTCDATETIME()
+);
+
+<span class="k">CREATE TABLE</span> <span class="t">Orders</span> (
+    Id         <span class="t">INT</span>           <span class="k">IDENTITY</span>(<span class="s">1</span>,<span class="s">1</span>) <span class="k">PRIMARY KEY</span>,
+    CustomerId <span class="t">INT</span>           <span class="k">NOT NULL</span>,
+    Total      <span class="t">DECIMAL</span>(<span class="s">12</span>,<span class="s">2</span>) <span class="k">NOT NULL CHECK</span> (Total &gt;= <span class="s">0</span>),  <span class="c">-- CHECK constraint</span>
+    Status     <span class="t">NVARCHAR</span>(<span class="s">20</span>)  <span class="k">NOT NULL DEFAULT</span> <span class="s">'Pending'</span>,
+    OrderDate  <span class="t">DATETIME2</span>     <span class="k">NOT NULL</span>,
+
+    <span class="c">-- Foreign Key: mỗi đơn phải trỏ tới khách có thật</span>
+    <span class="k">CONSTRAINT</span> FK_Orders_Customers
+        <span class="k">FOREIGN KEY</span> (CustomerId) <span class="k">REFERENCES</span> <span class="t">Customers</span>(Id)
+        <span class="k">ON DELETE CASCADE</span>     <span class="c">-- xóa khách -&gt; xóa luôn đơn của họ</span>
+);
+
+<span class="c">-- Composite primary key: 1 cặp (OrderId, ProductId) là duy nhất</span>
+<span class="k">CREATE TABLE</span> <span class="t">OrderItems</span> (
+    OrderId   <span class="t">INT</span> <span class="k">NOT NULL</span>,
+    ProductId <span class="t">INT</span> <span class="k">NOT NULL</span>,
+    Quantity  <span class="t">INT</span> <span class="k">NOT NULL CHECK</span> (Quantity &gt; <span class="s">0</span>),
+    UnitPrice <span class="t">DECIMAL</span>(<span class="s">12</span>,<span class="s">2</span>) <span class="k">NOT NULL</span>,
+
+    <span class="k">PRIMARY KEY</span> (OrderId, ProductId),                 <span class="c">-- composite key</span>
+    <span class="k">FOREIGN KEY</span> (OrderId)   <span class="k">REFERENCES</span> <span class="t">Orders</span>(Id),
+    <span class="k">FOREIGN KEY</span> (ProductId) <span class="k">REFERENCES</span> <span class="t">Products</span>(Id)
+);</pre>
+
+    <div class="callout warn">
+        <strong>⚠️ <code>ON DELETE</code> behavior:</strong> <code>CASCADE</code> xóa lan truyền, <code>SET NULL</code> đặt FK về NULL, <code>NO ACTION</code> / <code>RESTRICT</code> chặn xóa nếu còn bản ghi con. Cân nhắc kỹ — CASCADE mạnh nhưng dễ xóa nhầm hàng loạt.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">8. Index — Tăng tốc truy vấn</h2>
+    <p class="ut-sub">Index giống mục lục sách: thay vì quét toàn bảng (full table scan), database tra cứu nhanh qua cấu trúc B-Tree. Tăng tốc đọc nhưng làm chậm ghi.</p>
+
+    <table class="cmp">
+        <tr><th>Loại</th><th>Đặc điểm</th><th>Số lượng / bảng</th></tr>
+        <tr><td><strong>Clustered</strong></td><td>Sắp xếp <em>vật lý</em> dữ liệu theo key. Dữ liệu = chính index. PK thường là clustered.</td><td>Chỉ <strong>1</strong></td></tr>
+        <tr><td><strong>Non-clustered</strong></td><td>Cấu trúc riêng trỏ về hàng dữ liệu (qua row locator / clustered key).</td><td>Nhiều</td></tr>
+        <tr><td><strong>Covering index</strong></td><td>Index chứa đủ mọi cột query cần (qua <code>INCLUDE</code>) → không cần "lookup" về bảng.</td><td>Nhiều</td></tr>
+        <tr><td><strong>Composite index</strong></td><td>Index trên nhiều cột. Thứ tự cột rất quan trọng (left-most prefix rule).</td><td>Nhiều</td></tr>
+    </table>
+
+    <pre class="cb"><span class="c">-- Non-clustered index trên cột hay lọc/sắp xếp</span>
+<span class="k">CREATE INDEX</span> IX_Orders_CustomerId
+    <span class="k">ON</span> <span class="t">Orders</span>(CustomerId);
+
+<span class="c">-- Composite index: tối ưu WHERE CustomerId = ? AND Status = ?</span>
+<span class="k">CREATE INDEX</span> IX_Orders_Customer_Status
+    <span class="k">ON</span> <span class="t">Orders</span>(CustomerId, Status);
+
+<span class="c">-- Covering index: INCLUDE thêm cột để query không cần đụng vào bảng</span>
+<span class="k">CREATE INDEX</span> IX_Orders_Customer_Covering
+    <span class="k">ON</span> <span class="t">Orders</span>(CustomerId)
+    <span class="k">INCLUDE</span> (Total, OrderDate);</pre>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont do">
+            <h4>✅ Index giúp khi</h4>
+            <ul>
+                <li>Cột trong <code>WHERE</code>, <code>JOIN ON</code>, <code>ORDER BY</code></li>
+                <li>Cột có độ phân tán cao (selectivity tốt)</li>
+                <li>Foreign key (tăng tốc JOIN + tránh lock khi xóa)</li>
+                <li>Bảng đọc nhiều, ghi ít</li>
+            </ul>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Index làm hại khi</h4>
+            <ul>
+                <li>Bảng ghi nhiều (INSERT/UPDATE phải cập nhật index)</li>
+                <li>Cột ít giá trị phân biệt (vd: cột giới tính)</li>
+                <li>Quá nhiều index → tốn dung lượng, chậm ghi</li>
+                <li>Index không dùng tới → chỉ là gánh nặng</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="callout tip">
+        <strong>💡 Đọc execution plan:</strong> dùng <code>EXPLAIN</code> (PostgreSQL/MySQL) hoặc bật "Actual Execution Plan" (SSMS). Thấy <em>Index Seek</em> là tốt; <em>Index Scan</em> / <em>Table Scan</em> trên bảng lớn là dấu hiệu thiếu index phù hợp.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">9. Chuẩn hóa (Normalization) — 1NF, 2NF, 3NF</h2>
+    <p class="ut-sub">Chuẩn hóa tổ chức lại bảng để giảm trùng lặp dữ liệu và tránh bất thường khi thêm/sửa/xóa (anomalies). Đi từ dạng thô tới 3NF.</p>
+
+    <h3 style="color:var(--ut-primary-2)">1NF — First Normal Form</h3>
+    <p class="ut-sub">Mỗi ô chứa <strong>một giá trị nguyên tử</strong> (atomic), không nhóm lặp lại, không danh sách trong 1 cột.</p>
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont dont">
+            <h4>❌ Trước (vi phạm 1NF)</h4>
+            <pre class="cb"><span class="t">Orders</span>
+Id | Customer | Products
+<span class="s">1</span>  | An       | <span class="s">"Bút, Vở, Tẩy"</span>
+<span class="s">2</span>  | Binh     | <span class="s">"Sách"</span></pre>
+            <p>Cột <code>Products</code> chứa danh sách → không query/join được.</p>
+        </div>
+        <div class="do-dont do">
+            <h4>✅ Sau (đạt 1NF)</h4>
+            <pre class="cb"><span class="t">OrderItems</span>
+OrderId | Product
+<span class="s">1</span>       | Bút
+<span class="s">1</span>       | Vở
+<span class="s">1</span>       | Tẩy
+<span class="s">2</span>       | Sách</pre>
+            <p>Mỗi sản phẩm 1 hàng riêng — atomic.</p>
+        </div>
+    </div>
+
+    <h3 style="margin-top:1.5rem; color:var(--ut-primary-2)">2NF — Second Normal Form</h3>
+    <p class="ut-sub">Đạt 1NF + mọi cột non-key phụ thuộc vào <strong>toàn bộ</strong> khóa chính (loại bỏ phụ thuộc một phần — partial dependency). Chỉ liên quan khi PK là composite.</p>
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont dont">
+            <h4>❌ Trước (vi phạm 2NF)</h4>
+            <pre class="cb"><span class="t">OrderItems</span> (PK: OrderId+ProductId)
+OrderId | ProductId | ProductName | Qty
+<span class="s">1</span>       | <span class="s">10</span>        | Bút         | <span class="s">2</span>
+<span class="s">2</span>       | <span class="s">10</span>        | Bút         | <span class="s">5</span></pre>
+            <p><code>ProductName</code> chỉ phụ thuộc <code>ProductId</code> (một phần khóa) → lặp lại.</p>
+        </div>
+        <div class="do-dont do">
+            <h4>✅ Sau (đạt 2NF)</h4>
+            <pre class="cb"><span class="t">OrderItems</span>      <span class="t">Products</span>
+OrderId|ProductId|Qty   Id | Name
+<span class="s">1</span>      |<span class="s">10</span>       |<span class="s">2</span>     <span class="s">10</span> | Bút
+<span class="s">2</span>      |<span class="s">10</span>       |<span class="s">5</span></pre>
+            <p>Tên sản phẩm tách ra bảng <code>Products</code>, lưu 1 lần.</p>
+        </div>
+    </div>
+
+    <h3 style="margin-top:1.5rem; color:var(--ut-primary-2)">3NF — Third Normal Form</h3>
+    <p class="ut-sub">Đạt 2NF + không có phụ thuộc bắc cầu (transitive dependency): cột non-key không phụ thuộc vào cột non-key khác.</p>
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont dont">
+            <h4>❌ Trước (vi phạm 3NF)</h4>
+            <pre class="cb"><span class="t">Products</span> (PK: Id)
+Id | Name | CategoryId | CategoryName
+<span class="s">10</span> | Bút  | <span class="s">3</span>          | Văn phòng phẩm
+<span class="s">11</span> | Vở   | <span class="s">3</span>          | Văn phòng phẩm</pre>
+            <p><code>CategoryName</code> phụ thuộc <code>CategoryId</code> (không phải PK) → bắc cầu.</p>
+        </div>
+        <div class="do-dont do">
+            <h4>✅ Sau (đạt 3NF)</h4>
+            <pre class="cb"><span class="t">Products</span>           <span class="t">Categories</span>
+Id|Name|CategoryId    Id | Name
+<span class="s">10</span>|Bút |<span class="s">3</span>            <span class="s">3</span>  | Văn phòng phẩm
+<span class="s">11</span>|Vở  |<span class="s">3</span></pre>
+            <p>Danh mục tách riêng → sửa tên category 1 chỗ.</p>
+        </div>
+    </div>
+
+    <div class="callout info">
+        <strong>Khi nào denormalize?</strong> Chuẩn hóa tốt cho tính toàn vẹn nhưng nhiều JOIN có thể chậm. Hệ thống đọc nặng (reporting, analytics) đôi khi cố ý <em>denormalize</em> (lưu dư thừa) để tăng tốc đọc — đánh đổi bằng việc phải đồng bộ dữ liệu khi ghi.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">10. Transaction &amp; ACID</h2>
+    <p class="ut-sub">Transaction là một nhóm lệnh thực thi <strong>"tất cả hoặc không gì cả"</strong>. Ví dụ kinh điển: chuyển tiền — trừ tài khoản A và cộng tài khoản B phải cùng thành công.</p>
+
+    <pre class="cb"><span class="c">-- Chuyển 100 từ tài khoản 1 sang tài khoản 2</span>
+<span class="k">BEGIN TRANSACTION</span>;
+
+    <span class="k">UPDATE</span> <span class="t">Accounts</span> <span class="k">SET</span> Balance = Balance - <span class="s">100</span> <span class="k">WHERE</span> Id = <span class="s">1</span>;
+    <span class="k">UPDATE</span> <span class="t">Accounts</span> <span class="k">SET</span> Balance = Balance + <span class="s">100</span> <span class="k">WHERE</span> Id = <span class="s">2</span>;
+
+    <span class="c">-- Nếu mọi lệnh OK -&gt; lưu vĩnh viễn</span>
+<span class="k">COMMIT</span>;
+
+<span class="c">-- Nếu có lỗi giữa chừng -&gt; hủy toàn bộ, quay về trạng thái ban đầu</span>
+<span class="c">-- ROLLBACK;</span></pre>
+
+    <pre class="cb"><span class="c">-- Pattern an toàn với TRY...CATCH (SQL Server)</span>
+<span class="k">BEGIN TRY</span>
+    <span class="k">BEGIN TRANSACTION</span>;
+        <span class="k">UPDATE</span> <span class="t">Accounts</span> <span class="k">SET</span> Balance = Balance - <span class="s">100</span> <span class="k">WHERE</span> Id = <span class="s">1</span>;
+        <span class="k">UPDATE</span> <span class="t">Accounts</span> <span class="k">SET</span> Balance = Balance + <span class="s">100</span> <span class="k">WHERE</span> Id = <span class="s">2</span>;
+    <span class="k">COMMIT</span>;
+<span class="k">END TRY</span>
+<span class="k">BEGIN CATCH</span>
+    <span class="k">ROLLBACK</span>;            <span class="c">-- có lỗi -&gt; hoàn tác</span>
+    <span class="k">THROW</span>;               <span class="c">-- ném lại lỗi cho tầng trên xử lý</span>
+<span class="k">END CATCH</span>;</pre>
+
+    <table class="cmp">
+        <tr><th>Thuộc tính ACID</th><th>Ý nghĩa</th></tr>
+        <tr><td><strong>A — Atomicity</strong> (Nguyên tử)</td><td>Tất cả lệnh trong transaction thành công, hoặc không lệnh nào áp dụng. Không có trạng thái "nửa vời".</td></tr>
+        <tr><td><strong>C — Consistency</strong> (Nhất quán)</td><td>Database chuyển từ trạng thái hợp lệ này sang trạng thái hợp lệ khác — mọi ràng buộc (constraint, FK) luôn được tôn trọng.</td></tr>
+        <tr><td><strong>I — Isolation</strong> (Cô lập)</td><td>Các transaction chạy song song không "thấy" dữ liệu dở dang của nhau (tùy isolation level).</td></tr>
+        <tr><td><strong>D — Durability</strong> (Bền vững)</td><td>Sau khi COMMIT, dữ liệu được ghi bền vững — dù mất điện / crash cũng không mất.</td></tr>
+    </table>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Isolation Levels (sơ lược)</h3>
+    <table class="cmp">
+        <tr><th>Level</th><th>Ngăn được</th><th>Vẫn có thể gặp</th></tr>
+        <tr><td>READ UNCOMMITTED</td><td>(không ngăn gì)</td><td>Dirty read, non-repeatable, phantom</td></tr>
+        <tr><td>READ COMMITTED <em>(mặc định nhiều DB)</em></td><td>Dirty read</td><td>Non-repeatable read, phantom</td></tr>
+        <tr><td>REPEATABLE READ</td><td>+ Non-repeatable read</td><td>Phantom read</td></tr>
+        <tr><td>SERIALIZABLE</td><td>Tất cả (cô lập cao nhất)</td><td>Chậm nhất, dễ deadlock</td></tr>
+    </table>
+
+    <div class="callout warn">
+        <strong>⚠️ Đánh đổi:</strong> isolation càng cao càng an toàn nhưng càng nhiều lock → giảm đồng thời (concurrency), tăng nguy cơ deadlock. Đa số ứng dụng web dùng <code>READ COMMITTED</code> là đủ.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">11. SQL Injection &amp; Parameterized Query</h2>
+    <p class="ut-sub">SQL Injection là lỗ hổng bảo mật nghiêm trọng bậc nhất: kẻ tấn công chèn SQL độc hại qua input người dùng. Cách phòng chống duy nhất đúng đắn: <strong>luôn dùng tham số (parameterized query)</strong>.</p>
+
+    <div class="do-dont dont">
+        <h4>❌ KHÔNG BAO GIỜ — nối chuỗi (vulnerable)</h4>
+        <pre class="cb"><span class="c">-- Input người dùng: username = "admin"</span>
+<span class="c">-- Câu truy vấn build bằng nối chuỗi:</span>
+<span class="k">SELECT</span> * <span class="k">FROM</span> <span class="t">Users</span> <span class="k">WHERE</span> Username = <span class="s">'admin'</span>;
+
+<span class="c">-- Kẻ tấn công nhập:  ' OR '1'='1' --</span>
+<span class="c">-- Câu lệnh bị bóp méo thành (luôn TRUE, bỏ qua password):</span>
+<span class="k">SELECT</span> * <span class="k">FROM</span> <span class="t">Users</span> <span class="k">WHERE</span> Username = <span class="s">''</span> <span class="k">OR</span> <span class="s">'1'</span>=<span class="s">'1'</span> --<span class="s">'</span>;
+
+<span class="c">-- Tệ hơn:  '; DROP TABLE Users; --   -&gt; xóa sạch bảng!</span></pre>
+        <pre class="cb"><span class="c">// C# — KHÔNG BAO GIỜ viết thế này (lỗ hổng injection)</span>
+<span class="k">var</span> sql = <span class="s">$"SELECT * FROM Users WHERE Username = '{username}'"</span>;
+<span class="k">var</span> cmd = <span class="k">new</span> <span class="t">SqlCommand</span>(sql, conn);   <span class="c">// input chèn thẳng vào SQL</span></pre>
+    </div>
+
+    <div class="do-dont do">
+        <h4>✅ ĐÚNG — parameterized query</h4>
+        <pre class="cb"><span class="c">-- SQL với tham số (@p hoặc ? tùy provider)</span>
+<span class="k">SELECT</span> * <span class="k">FROM</span> <span class="t">Users</span> <span class="k">WHERE</span> Username = <span class="t">@username</span>;
+<span class="c">-- Giá trị truyền RIÊNG, DB coi nó là DỮ LIỆU thuần, không phải mã SQL</span></pre>
+        <pre class="cb"><span class="c">// C# ADO.NET — tham số hóa an toàn</span>
+<span class="k">using var</span> cmd = <span class="k">new</span> <span class="t">SqlCommand</span>(
+    <span class="s">"SELECT * FROM Users WHERE Username = @username"</span>, conn);
+
+cmd.Parameters.AddWithValue(<span class="s">"@username"</span>, username);  <span class="c">// truyền giá trị riêng</span>
+<span class="c">// Tốt hơn — chỉ định kiểu &amp; độ dài rõ ràng:</span>
+cmd.Parameters.Add(<span class="s">"@username"</span>, SqlDbType.NVarChar, <span class="s">100</span>).Value = username;
+
+<span class="k">using var</span> reader = <span class="k">await</span> cmd.ExecuteReaderAsync();</pre>
+        <pre class="cb"><span class="c">// Dapper — tham số hóa tự động qua object ẩn danh</span>
+<span class="k">var</span> user = <span class="k">await</span> conn.QueryFirstOrDefaultAsync&lt;<span class="t">User</span>&gt;(
+    <span class="s">"SELECT * FROM Users WHERE Username = @Username"</span>,
+    <span class="k">new</span> { Username = username });   <span class="c">// Dapper tự tạo SqlParameter an toàn</span></pre>
+    </div>
+
+    <div class="callout danger">
+        <strong>🚫 Tuyệt đối không nối chuỗi input vào SQL — kể cả khi "chắc chắn input an toàn".</strong> Tham số hóa vừa chống injection, vừa cho phép DB cache execution plan (tái dùng plan → nhanh hơn). Với ORM như EF Core, LINQ-to-Entities tự tham số hóa; chỉ cẩn thận khi dùng <code>FromSqlRaw</code> với chuỗi nội suy.
+    </div>
+
+    <div class="callout tip">
+        <strong>💡 Phòng thủ nhiều lớp:</strong> tham số hóa (bắt buộc) + validate input + nguyên tắc least privilege cho DB account (app không cần quyền DROP/ALTER) + dùng stored procedure khi hợp lý. Nhưng nhớ: stored procedure <em>vẫn</em> dính injection nếu bên trong nó nối chuỗi động.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">12. Thứ tự thực thi logic của một câu SELECT</h2>
+    <p class="ut-sub">Bạn viết theo thứ tự này nhưng database thực thi theo thứ tự khác. Hiểu điều này giải thích tại sao alias ở SELECT chưa dùng được trong WHERE.</p>
+
+    <ol class="steps">
+        <li><strong>FROM / JOIN</strong> — xác định &amp; ghép các bảng nguồn.</li>
+        <li><strong>WHERE</strong> — lọc hàng đơn lẻ (chưa gom nhóm, chưa có alias của SELECT).</li>
+        <li><strong>GROUP BY</strong> — gom các hàng thành nhóm.</li>
+        <li><strong>HAVING</strong> — lọc các nhóm theo kết quả tổng hợp.</li>
+        <li><strong>SELECT</strong> — chiếu cột, tính biểu thức, đặt alias.</li>
+        <li><strong>DISTINCT</strong> — loại bỏ hàng trùng.</li>
+        <li><strong>ORDER BY</strong> — sắp xếp (lúc này alias SELECT đã dùng được).</li>
+        <li><strong>LIMIT / OFFSET / TOP</strong> — cắt lấy số hàng cuối cùng.</li>
+    </ol>
+
+    <div class="callout info">
+        <strong>Hệ quả thực tế:</strong> không dùng được alias định nghĩa ở <code>SELECT</code> trong <code>WHERE</code> (vì WHERE chạy trước SELECT). Nhưng <code>ORDER BY</code> thì dùng được alias vì nó chạy sau SELECT.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">13. Common Pitfalls — Lỗi thường gặp</h2>
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont dont">
+            <h4>❌ Dùng <code>= NULL</code></h4>
+            <p>So sánh với NULL luôn trả về UNKNOWN → không khớp hàng nào.</p>
+            <p style="color:var(--ut-accent)">Fix: dùng <code>IS NULL</code> / <code>IS NOT NULL</code>.</p>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Lọc bảng phải trong WHERE của LEFT JOIN</h4>
+            <p>LEFT JOIN âm thầm biến thành INNER JOIN, mất hàng NULL.</p>
+            <p style="color:var(--ut-accent)">Fix: đặt điều kiện vào mệnh đề <code>ON</code>.</p>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ SELECT cột không có trong GROUP BY</h4>
+            <p>Cột không tổng hợp &amp; không nằm trong GROUP BY → lỗi (Postgres) hoặc kết quả không xác định (MySQL cũ).</p>
+            <p style="color:var(--ut-accent)">Fix: mọi cột non-aggregate phải có trong GROUP BY.</p>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Phân trang không ORDER BY</h4>
+            <p>Thứ tự hàng không xác định → trang lặp/sót dữ liệu.</p>
+            <p style="color:var(--ut-accent)">Fix: luôn ORDER BY trên cột duy nhất/ổn định.</p>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Nối chuỗi input vào SQL</h4>
+            <p>Mở toang cửa cho SQL Injection.</p>
+            <p style="color:var(--ut-accent)">Fix: luôn dùng parameterized query.</p>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Index lên mọi cột "cho chắc"</h4>
+            <p>Làm chậm INSERT/UPDATE, tốn dung lượng, có khi không được dùng.</p>
+            <p style="color:var(--ut-accent)">Fix: index theo query thực tế, xem execution plan.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">🎯 Checklist nắm vững SQL nền tảng</h2>
+    <div class="ut-card">
+        <ul>
+            <li>✅ Viết được SELECT với projection, alias, DISTINCT</li>
+            <li>✅ Thành thạo WHERE: so sánh, AND/OR, LIKE, IN, BETWEEN, IS NULL</li>
+            <li>✅ Hiểu &amp; chọn đúng loại JOIN (INNER, LEFT, RIGHT, FULL, CROSS, SELF)</li>
+            <li>✅ Dùng GROUP BY + aggregate (COUNT/SUM/AVG/MIN/MAX) và phân biệt WHERE vs HAVING</li>
+            <li>✅ Thiết kế bảng với PK, FK, UNIQUE, composite key, CHECK constraint</li>
+            <li>✅ Biết khi nào index giúp, khi nào hại; hiểu clustered vs non-clustered &amp; covering index</li>
+            <li>✅ Chuẩn hóa được dữ liệu tới 3NF và biết khi nào nên denormalize</li>
+            <li>✅ Dùng transaction đúng (BEGIN/COMMIT/ROLLBACK) và hiểu 4 thuộc tính ACID</li>
+            <li>✅ Phân trang đúng (OFFSET-FETCH / LIMIT) với ORDER BY ổn định</li>
+            <li>✅ <strong>Luôn</strong> dùng parameterized query — không bao giờ nối chuỗi input vào SQL</li>
+            <li>✅ Đọc được execution plan để chẩn đoán truy vấn chậm</li>
+            <li>✅ Hiểu thứ tự thực thi logic: FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY</li>
+        </ul>
+    </div>
+</section>
+
+</div>
+
+<footer style="text-align:center;padding:3rem 1.5rem;color:var(--ut-muted);border-top:1px solid var(--ut-border);margin-top:3rem;font-size:.9rem;">
+    <p>SQL &amp; Database nền tảng · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

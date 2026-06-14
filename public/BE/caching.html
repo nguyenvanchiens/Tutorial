@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caching trong .NET — A-Z</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --ut-primary: #512bd4;
+        --ut-primary-2: #8a2be2;
+        --ut-accent: #43e97b;
+        --ut-warn: #f39c12;
+        --ut-danger: #f5576c;
+        --ut-card: #1a1d2e;
+        --ut-card-2: #232640;
+        --ut-border: #2d3148;
+        --ut-text: #e2e8f0;
+        --ut-muted: #94a3b8;
+    }
+    .ut-hero { text-align: center; padding: 4rem 1.5rem 3rem; background: radial-gradient(ellipse at top, rgba(81,43,212,.18), transparent 60%); }
+    .ut-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 1rem; }
+    .ut-hero h1 .gradient { background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .ut-hero .hero-badge { display: inline-block; background: rgba(81,43,212,.15); color: var(--ut-primary-2); padding: .4rem 1rem; border-radius: 20px; font-size: .78rem; font-weight: 600; letter-spacing: 1px; margin-bottom: 1.25rem; }
+    .ut-hero p { color: var(--ut-muted); max-width: 820px; margin: 0 auto; }
+    .ut-section { padding: 2.5rem 0; }
+    .ut-title { font-size: 1.7rem; margin-bottom: 1.5rem; position: relative; padding-left: 1rem; color: var(--ut-text); }
+    .ut-title::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 4px; background: linear-gradient(180deg, var(--ut-primary), var(--ut-primary-2)); border-radius: 3px; }
+    .ut-sub { color: var(--ut-muted); margin-bottom: 1.25rem; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+    .ut-grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .ut-grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    .ut-grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .ut-card { background: var(--ut-card); border: 1px solid var(--ut-border); border-radius: 12px; padding: 1.4rem; }
+    .ut-card h3 { color: var(--ut-primary-2); margin-bottom: .6rem; font-size: 1.1rem; }
+    .ut-card h4 { color: var(--ut-accent); margin-bottom: .45rem; font-size: .98rem; }
+    .ut-card p, .ut-card li { color: var(--ut-muted); font-size: .95rem; }
+    .ut-card ul { padding-left: 1.2rem; }
+    .ut-card ul li { margin-bottom: .3rem; }
+    pre.cb { background: #0b1020; border: 1px solid var(--ut-border); border-left: 3px solid var(--ut-primary); border-radius: 8px; padding: 1rem 1.15rem; overflow-x: auto; font-family: 'JetBrains Mono', Consolas, monospace; font-size: .88rem; line-height: 1.6; margin: .75rem 0; color: #d6deeb; }
+    pre.cb .k { color: #c792ea; }
+    pre.cb .s { color: #ecc48d; }
+    pre.cb .c { color: #637777; font-style: italic; }
+    pre.cb .n { color: #82aaff; }
+    pre.cb .t { color: #ffcb8b; }
+    pre.cb .a { color: #7fdbca; }
+    code { background: #2d3148; padding: 2px 6px; border-radius: 4px; font-size: .88em; color: #f8d06b; font-family: 'JetBrains Mono', Consolas, monospace; }
+    .callout { border-radius: 10px; padding: .95rem 1.15rem; margin: 1rem 0; border: 1px solid; }
+    .callout.tip { background: rgba(67,233,123,.07); border-color: var(--ut-accent); }
+    .callout.tip strong { color: var(--ut-accent); }
+    .callout.warn { background: rgba(243,156,18,.07); border-color: var(--ut-warn); }
+    .callout.warn strong { color: var(--ut-warn); }
+    .callout.danger { background: rgba(245,87,108,.07); border-color: var(--ut-danger); }
+    .callout.danger strong { color: var(--ut-danger); }
+    .callout.info { background: rgba(81,43,212,.08); border-color: var(--ut-primary-2); }
+    .callout.info strong { color: var(--ut-primary-2); }
+    table.cmp { width: 100%; border-collapse: collapse; background: var(--ut-card); border-radius: 10px; overflow: hidden; margin: 1rem 0; font-size: .92rem; }
+    table.cmp th, table.cmp td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--ut-border); }
+    table.cmp th { background: var(--ut-card-2); color: var(--ut-primary-2); font-weight: 600; }
+    table.cmp td { color: var(--ut-muted); }
+    table.cmp tr:last-child td { border-bottom: none; }
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; position: relative; padding-left: 2.8rem; margin-bottom: 1rem; }
+    .steps li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 2rem; height: 2rem; background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .do-dont { border-left: 3px solid; padding: 1rem 1.15rem; border-radius: 8px; margin-bottom: 1rem; }
+    .do-dont.do { border-color: var(--ut-accent); background: rgba(67,233,123,.04); }
+    .do-dont.dont { border-color: var(--ut-danger); background: rgba(245,87,108,.04); }
+    .do-dont h4 { margin-bottom: .5rem; }
+    .do-dont.do h4 { color: var(--ut-accent); }
+    .do-dont.dont h4 { color: var(--ut-danger); }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo"><a href="index.html" style="color:inherit;-webkit-text-fill-color:inherit;">.NET<span class="accent">Mastery</span></a></div>
+        <div class="nav-links">
+            <a href="index.html">Roadmap</a>
+            <a href="async.html">Async</a>
+            <a href="rest-design.html">REST API</a>
+            <a href="auth-jwt.html">Auth & JWT</a>
+            <a href="caching.html" class="nav-active">Caching</a>
+            <a href="logging.html">Logging</a>
+            <a href="error-handling.html">Error & Resilience</a>
+            <a href="clean-architecture.html">Clean Arch</a>
+            <a href="design-patterns.html">SOLID & Patterns</a>
+        </div>
+        <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+</nav>
+
+<header class="ut-hero">
+    <div class="hero-badge">NÂNG CAO · INTERMEDIATE</div>
+    <h1>Caching trong <span class="gradient">.NET</span></h1>
+    <p>Tăng tốc và mở rộng ứng dụng ASP.NET Core với caching: IMemoryCache, IDistributedCache + Redis, HybridCache (.NET 9), Output Caching, các pattern cache-aside/write-through, chiến lược TTL + jitter, xử lý cache stampede và bài toán khó nhất — cache invalidation. Chính xác cho .NET 8/9.</p>
+</header>
+
+<div class="container">
+
+<section class="ut-section">
+    <h2 class="ut-title">1. Tại sao cache &amp; các tầng cache</h2>
+    <p class="ut-sub">Cache lưu lại kết quả của một thao tác "đắt" (query DB, gọi API, tính toán nặng) để lần sau trả ngay mà không cần làm lại. Mục tiêu: giảm <strong>latency</strong>, giảm tải DB/downstream, tăng <strong>throughput</strong> và tiết kiệm chi phí. Đổi lại, bạn chấp nhận dữ liệu có thể "cũ" (stale) trong một khoảng thời gian.</p>
+
+    <p class="ut-sub">Cache không phải một chỗ duy nhất — nó là nhiều tầng từ client tới server:</p>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h4>🌐 Client cache (browser)</h4>
+            <p>Trình duyệt cache theo header <code>Cache-Control</code>, <code>ETag</code>, <code>Last-Modified</code>. Rẻ nhất vì request không tới server. Dùng cho asset tĩnh (JS/CSS/ảnh) và response idempotent.</p>
+        </div>
+        <div class="ut-card">
+            <h4>🛰️ CDN / Edge cache</h4>
+            <p>CloudFront, Cloudflare, Azure Front Door cache ở gần user. Giảm round-trip xuyên lục địa. Hợp với nội dung public, ít thay đổi.</p>
+        </div>
+        <div class="ut-card">
+            <h4>⚡ In-memory cache (in-process)</h4>
+            <p><code>IMemoryCache</code> — nằm ngay trong RAM của process. Nhanh nhất (nano giây) nhưng <strong>không share</strong> giữa nhiều instance và mất khi restart.</p>
+        </div>
+        <div class="ut-card">
+            <h4>🗄️ Distributed cache (out-of-process)</h4>
+            <p>Redis / SQL Server / NCache. Share giữa tất cả instance, sống sót qua restart app. Chậm hơn in-memory (có network hop) nhưng đồng nhất.</p>
+        </div>
+    </div>
+
+    <div class="callout info">
+        <strong>Quy tắc tầng cache:</strong> tầng càng gần user càng nhanh và rẻ, nhưng càng khó kiểm soát invalidation. Chiến lược tốt thường kết hợp nhiều tầng (vd: HybridCache = L1 in-memory + L2 Redis).
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">2. IMemoryCache — cache trong process</h2>
+    <p class="ut-sub">Là cache nhanh nhất: dữ liệu nằm thẳng trong heap của process. Đăng ký bằng <code>builder.Services.AddMemoryCache();</code> rồi inject <code>IMemoryCache</code>. API tiện nhất là <code>GetOrCreateAsync</code> — atomic per-key check-or-load (theo từng key).</p>
+
+    <pre class="cb"><span class="c">// Program.cs</span>
+builder.Services.AddMemoryCache();
+
+<span class="c">// Service</span>
+<span class="k">public class</span> <span class="t">ProductService</span>(<span class="t">IMemoryCache</span> cache, <span class="t">AppDbContext</span> db)
+{
+    <span class="k">public</span> Task&lt;<span class="t">Product</span>?&gt; <span class="n">GetAsync</span>(<span class="k">int</span> id, CancellationToken ct = <span class="k">default</span>)
+    {
+        <span class="k">var</span> key = $<span class="s">"product:{id}"</span>;
+
+        <span class="k">return</span> cache.GetOrCreateAsync(key, <span class="k">async</span> entry =&gt;
+        {
+            <span class="c">// Chỉ chạy khi MISS — nhiều entry options cùng lúc</span>
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(<span class="s">10</span>);
+            entry.SlidingExpiration = TimeSpan.FromMinutes(<span class="s">2</span>);
+            entry.Size = <span class="s">1</span>; <span class="c">// bắt buộc nếu có SizeLimit</span>
+
+            <span class="k">return await</span> db.Products
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p =&gt; p.Id == id, ct);
+        });
+    }
+}</pre>
+
+    <p class="ut-sub">Hoặc cấu hình bằng <code>MemoryCacheEntryOptions</code> rõ ràng:</p>
+
+    <pre class="cb"><span class="k">var</span> options = <span class="k">new</span> <span class="t">MemoryCacheEntryOptions</span>
+{
+    <span class="c">// Hết hạn tuyệt đối: tối đa sống 10 phút kể từ khi set</span>
+    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(<span class="s">10</span>),
+    <span class="c">// Hết hạn trượt: reset đếm ngược mỗi lần được đọc; idle 2 phút thì xoá</span>
+    SlidingExpiration = TimeSpan.FromMinutes(<span class="s">2</span>),
+    <span class="c">// Mức ưu tiên khi cache bị nén (memory pressure)</span>
+    Priority = <span class="t">CacheItemPriority</span>.High,
+    Size = <span class="s">1</span>
+};
+options.RegisterPostEvictionCallback((k, v, reason, state) =&gt;
+    logger.LogInformation(<span class="s">"Evicted {Key} vì {Reason}"</span>, k, reason));
+
+cache.Set(key, product, options);</pre>
+
+    <div class="callout warn">
+        <strong>⚠️ Giới hạn bộ nhớ:</strong> mặc định <code>IMemoryCache</code> KHÔNG giới hạn dung lượng — cache có thể nuốt hết RAM. Hãy đặt <code>SizeLimit</code> khi <code>AddMemoryCache(o =&gt; o.SizeLimit = 1024)</code> và khi đó <strong>mọi entry phải khai báo</strong> <code>Size</code>, nếu không sẽ ném exception.
+    </div>
+
+    <table class="cmp">
+        <tr><th>Ưu điểm</th><th>Nhược điểm</th></tr>
+        <tr><td>Nhanh nhất (truy cập RAM trực tiếp, không serialize)</td><td>Không share giữa các instance → mỗi node có bản cache riêng (dễ lệch)</td></tr>
+        <tr><td>Lưu được object .NET nguyên gốc (không cần serialize)</td><td>Mất sạch khi restart / deploy</td></tr>
+        <tr><td>API đơn giản, không hạ tầng ngoài</td><td>Chiếm RAM của chính app; cần quản lý SizeLimit</td></tr>
+    </table>
+
+    <div class="callout info">
+        <strong>Khi nào dùng?</strong> App single-instance, hoặc dữ liệu tham chiếu (lookup tables, config, danh mục) chấp nhận lệch nhẹ giữa các node, hoặc làm L1 phía trước Redis.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">3. IDistributedCache + Redis</h2>
+    <p class="ut-sub">Khi chạy nhiều instance (sau load balancer), bạn cần một cache <strong>chia sẻ</strong>. <code>IDistributedCache</code> là abstraction chuẩn của ASP.NET Core; provider phổ biến nhất là Redis qua <code>StackExchangeRedis</code>. Lưu ý API chỉ làm việc với <code>byte[]</code>/<code>string</code> → bạn phải tự serialize (thường là JSON).</p>
+
+    <pre class="cb"><span class="c">// Program.cs — đăng ký Redis làm IDistributedCache</span>
+builder.Services.AddStackExchangeRedisCache(options =&gt;
+{
+    options.Configuration = builder.Configuration.GetConnectionString(<span class="s">"Redis"</span>);
+    options.InstanceName = <span class="s">"devhub:"</span>; <span class="c">// prefix cho mọi key</span>
+});</pre>
+
+    <pre class="cb"><span class="k">public class</span> <span class="t">UserCache</span>(<span class="t">IDistributedCache</span> cache, <span class="t">AppDbContext</span> db)
+{
+    <span class="k">private static readonly</span> <span class="t">JsonSerializerOptions</span> _json = <span class="k">new</span>(<span class="t">JsonSerializerDefaults</span>.Web);
+
+    <span class="k">public async</span> Task&lt;<span class="t">User</span>?&gt; <span class="n">GetAsync</span>(<span class="k">int</span> id, CancellationToken ct = <span class="k">default</span>)
+    {
+        <span class="k">var</span> key = $<span class="s">"user:{id}"</span>;
+
+        <span class="c">// 1) Thử đọc từ Redis (trả về byte[]?)</span>
+        <span class="k">var</span> bytes = <span class="k">await</span> cache.GetAsync(key, ct);
+        <span class="k">if</span> (bytes <span class="k">is not null</span>)
+            <span class="k">return</span> JsonSerializer.Deserialize&lt;<span class="t">User</span>&gt;(bytes, _json);
+
+        <span class="c">// 2) MISS → load từ DB</span>
+        <span class="k">var</span> user = <span class="k">await</span> db.Users.AsNoTracking()
+            .FirstOrDefaultAsync(u =&gt; u.Id == id, ct);
+        <span class="k">if</span> (user <span class="k">is null</span>) <span class="k">return null</span>;
+
+        <span class="c">// 3) Serialize JSON và set kèm TTL</span>
+        <span class="k">var</span> payload = JsonSerializer.SerializeToUtf8Bytes(user, _json);
+        <span class="k">await</span> cache.SetAsync(key, payload, <span class="k">new</span> <span class="t">DistributedCacheEntryOptions</span>
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(<span class="s">10</span>),
+            SlidingExpiration = TimeSpan.FromMinutes(<span class="s">2</span>)
+        }, ct);
+
+        <span class="k">return</span> user;
+    }
+
+    <span class="k">public</span> Task <span class="n">InvalidateAsync</span>(<span class="k">int</span> id, CancellationToken ct = <span class="k">default</span>)
+        =&gt; cache.RemoveAsync($<span class="s">"user:{id}"</span>, ct);
+}</pre>
+
+    <table class="cmp">
+        <tr><th>Tiêu chí</th><th>IMemoryCache</th><th>IDistributedCache (Redis)</th></tr>
+        <tr><td>Vị trí</td><td>RAM trong process</td><td>Server Redis riêng (network)</td></tr>
+        <tr><td>Share giữa instance</td><td>Không</td><td>Có</td></tr>
+        <tr><td>Sống sót restart app</td><td>Không</td><td>Có</td></tr>
+        <tr><td>Tốc độ</td><td>Nhanh nhất (ns)</td><td>Chậm hơn (sub-ms, có serialize + network)</td></tr>
+        <tr><td>Lưu trữ</td><td>Object .NET nguyên gốc</td><td><code>byte[]</code> — phải serialize</td></tr>
+    </table>
+
+    <div class="callout tip">
+        <strong>💡 HybridCache (.NET 9):</strong> abstraction mới <code>HybridCache</code> kết hợp <strong>L1 (in-memory)</strong> + <strong>L2 (IDistributedCache như Redis)</strong>, lo luôn serialize và <strong>stampede protection</strong> sẵn. Đăng ký <code>builder.Services.AddHybridCache();</code> rồi dùng một API duy nhất <code>cache.GetOrCreateAsync(key, factory, options, ct)</code> — đây là hướng khuyến nghị cho ứng dụng mới.
+    </div>
+
+    <pre class="cb"><span class="c">// .NET 9 HybridCache — một API, tự lo L1+L2 + chống stampede</span>
+builder.Services.AddHybridCache();
+
+<span class="k">public class</span> <span class="t">Catalog</span>(<span class="t">HybridCache</span> cache, <span class="t">AppDbContext</span> db)
+{
+    <span class="k">public</span> ValueTask&lt;<span class="t">Product</span>?&gt; <span class="n">GetAsync</span>(<span class="k">int</span> id, CancellationToken ct = <span class="k">default</span>)
+        =&gt; cache.GetOrCreateAsync(
+            $<span class="s">"product:{id}"</span>,
+            id,                                  <span class="c">// state truyền vào factory</span>
+            <span class="k">async</span> (id, token) =&gt; <span class="k">await</span> db.Products.FindAsync([id], token),
+            <span class="k">new</span> <span class="t">HybridCacheEntryOptions</span> { Expiration = TimeSpan.FromMinutes(<span class="s">10</span>) },
+            cancellationToken: ct);
+}</pre>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">4. Patterns: Cache-aside / Write-through / Write-behind</h2>
+    <table class="cmp">
+        <tr><th>Pattern</th><th>Cách hoạt động</th><th>Ưu / Nhược</th></tr>
+        <tr><td><strong>Cache-aside</strong> (lazy)</td><td>App kiểm tra cache trước; miss thì load từ DB rồi tự ghi vào cache.</td><td>Phổ biến nhất, đơn giản. Có thể có request miss đầu tiên chậm; dễ stale nếu invalidation kém.</td></tr>
+        <tr><td><strong>Write-through</strong></td><td>Mỗi lần ghi DB, ghi luôn vào cache (đồng bộ).</td><td>Cache luôn tươi sau write. Nhưng mọi write chậm hơn; cache đầy cả dữ liệu ít đọc.</td></tr>
+        <tr><td><strong>Write-behind</strong> (write-back)</td><td>Ghi vào cache trước, flush xuống DB sau (bất đồng bộ, theo batch).</td><td>Write rất nhanh, gom batch. Rủi ro mất dữ liệu nếu cache chết trước khi flush; phức tạp.</td></tr>
+    </table>
+
+    <p class="ut-sub">Cache-aside là mặc định cho hầu hết hệ thống đọc-nhiều-ghi-ít. Mẫu chuẩn:</p>
+
+    <pre class="cb"><span class="c">// CACHE-ASIDE (lazy loading) tổng quát</span>
+<span class="k">public async</span> Task&lt;<span class="t">Order</span>?&gt; <span class="n">GetOrderAsync</span>(<span class="k">int</span> id, CancellationToken ct)
+{
+    <span class="k">var</span> key = $<span class="s">"order:{id}"</span>;
+
+    <span class="c">// 1) Đọc cache</span>
+    <span class="k">if</span> (cache.TryGetValue(key, <span class="k">out</span> <span class="t">Order</span>? cached))
+        <span class="k">return</span> cached;          <span class="c">// HIT</span>
+
+    <span class="c">// 2) MISS → nguồn sự thật (DB)</span>
+    <span class="k">var</span> order = <span class="k">await</span> db.Orders.FindAsync([id], ct);
+
+    <span class="c">// 3) Ghi ngược vào cache cho lần sau</span>
+    <span class="k">if</span> (order <span class="k">is not null</span>)
+        cache.Set(key, order, TimeSpan.FromMinutes(<span class="s">5</span>));
+
+    <span class="k">return</span> order;
+}
+
+<span class="c">// WRITE-THROUGH: cập nhật DB rồi đồng bộ cache ngay</span>
+<span class="k">public async</span> Task <span class="n">UpdateAsync</span>(<span class="t">Order</span> order, CancellationToken ct)
+{
+    db.Orders.Update(order);
+    <span class="k">await</span> db.SaveChangesAsync(ct);
+    cache.Set($<span class="s">"order:{order.Id}"</span>, order, TimeSpan.FromMinutes(<span class="s">5</span>)); <span class="c">// cache luôn tươi</span>
+}</pre>
+
+    <div class="callout info">
+        <strong>Cache-aside + write-through kết hợp:</strong> đọc theo cache-aside, còn khi update thì hoặc <em>ghi đè cache</em> (write-through) hoặc đơn giản <em>xoá key</em> (để lần đọc sau tự nạp lại). Xoá key thường an toàn hơn vì tránh ghi nhầm dữ liệu chưa commit.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">5. Cache invalidation — "một trong hai việc khó nhất"</h2>
+    <p class="ut-sub">Phil Karlton: "There are only two hard things in Computer Science: cache invalidation and naming things." Vấn đề: làm sao biết dữ liệu trong cache đã cũ và bỏ nó đi đúng lúc. Dưới đây là các chiến lược, thường kết hợp nhiều cái.</p>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h4>⏱️ TTL-based (hết hạn theo thời gian)</h4>
+            <p>Đặt <code>AbsoluteExpiration</code> — cache tự hết hạn. Đơn giản nhất, chấp nhận stale tối đa = TTL. Không cần biết khi nào dữ liệu đổi.</p>
+        </div>
+        <div class="ut-card">
+            <h4>🗑️ Explicit eviction (xoá chủ động)</h4>
+            <p>Khi ghi/đổi dữ liệu, gọi <code>cache.Remove(key)</code> / <code>RemoveAsync</code>. Chính xác nhưng cần nhớ xoá ở MỌI nơi mutate dữ liệu.</p>
+        </div>
+        <div class="ut-card">
+            <h4>🏷️ Tag / key versioning</h4>
+            <p>Gắn nhiều key vào một "tag" hoặc nhúng số version vào key (<code>product:42:v7</code>). Tăng version = vô hiệu hoá hàng loạt mà không cần biết từng key.</p>
+        </div>
+        <div class="ut-card">
+            <h4>📡 Event-based</h4>
+            <p>Phát sự kiện khi dữ liệu đổi (message bus, Redis pub/sub, domain event) → các node nghe và tự xoá cache. Cần cho invalidate L1 in-memory đa node.</p>
+        </div>
+    </div>
+
+    <pre class="cb"><span class="c">// Key versioning: bump version để vô hiệu hoá hàng loạt</span>
+<span class="k">var</span> ver = <span class="k">await</span> cache.GetStringAsync(<span class="s">"catalog:ver"</span>) ?? <span class="s">"1"</span>;
+<span class="k">var</span> key = $<span class="s">"catalog:list:v{ver}"</span>;
+<span class="c">// Khi catalog đổi: tăng version → toàn bộ key cũ trở thành "mồ côi" và tự hết hạn theo TTL</span>
+<span class="k">await</span> cache.SetStringAsync(<span class="s">"catalog:ver"</span>, (<span class="k">int</span>.Parse(ver) + <span class="s">1</span>).ToString());</pre>
+
+    <div class="callout danger">
+        <strong>⚠️ Stale nguy hiểm nhất khi explicit eviction sót:</strong> chỉ cần một đường ghi dữ liệu quên xoá cache là user thấy dữ liệu cũ. Vì vậy nhiều team chọn TTL ngắn làm "lưới an toàn" kết hợp với eviction chủ động — kể cả khi quên xoá, dữ liệu cũng tự tươi lại sau TTL.
+    </div>
+
+    <div class="callout tip">
+        <strong>💡 Tag-based eviction sẵn có:</strong> Output Caching (.NET 8/9) và HybridCache (.NET 9) hỗ trợ <strong>tags</strong> để evict cả nhóm bằng một lệnh (<code>EvictByTagAsync("products")</code>) — đỡ phải tự xây cơ chế tag.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">6. Cache stampede / Thundering herd</h2>
+    <p class="ut-sub">Khi một key "nóng" hết hạn, hàng nghìn request đồng thời cùng MISS, cùng lúc đập xuống DB để nạp lại → DB quá tải, có thể sập (cascading failure). Đây gọi là <strong>cache stampede</strong> (thundering herd).</p>
+
+    <p class="ut-sub">Giải pháp kinh điển: dùng <strong>lock/semaphore</strong> để chỉ một request được nạp, các request còn lại chờ và dùng chung kết quả.</p>
+
+    <pre class="cb"><span class="c">// Chống stampede thủ công bằng SemaphoreSlim theo key</span>
+<span class="k">private static readonly</span> <span class="t">SemaphoreSlim</span> _lock = <span class="k">new</span>(<span class="s">1</span>, <span class="s">1</span>);
+
+<span class="k">public async</span> Task&lt;<span class="t">Report</span>&gt; <span class="n">GetReportAsync</span>(CancellationToken ct)
+{
+    <span class="k">if</span> (cache.TryGetValue(<span class="s">"report"</span>, <span class="k">out</span> <span class="t">Report</span>? r)) <span class="k">return</span> r!; <span class="c">// fast path</span>
+
+    <span class="k">await</span> _lock.WaitAsync(ct);
+    <span class="k">try</span>
+    {
+        <span class="c">// double-check: có thể request khác đã nạp xong trong lúc chờ lock</span>
+        <span class="k">if</span> (cache.TryGetValue(<span class="s">"report"</span>, <span class="k">out</span> r)) <span class="k">return</span> r!;
+
+        r = <span class="k">await</span> BuildExpensiveReportAsync(ct); <span class="c">// CHỈ 1 request chạy</span>
+        cache.Set(<span class="s">"report"</span>, r, TimeSpan.FromMinutes(<span class="s">5</span>));
+        <span class="k">return</span> r;
+    }
+    <span class="k">finally</span> { _lock.Release(); }
+}</pre>
+
+    <div class="callout tip">
+        <strong>💡 .NET 9 HybridCache lo sẵn:</strong> với <code>HybridCache.GetOrCreateAsync</code>, nếu nhiều request cùng miss một key, framework đảm bảo <strong>factory chỉ chạy một lần</strong> trên mỗi node và các request khác chờ kết quả — stampede protection built-in, không cần tự viết semaphore.
+    </div>
+
+    <div class="callout info">
+        <strong>Early expiration (làm tươi sớm):</strong> thay vì để hết hạn rồi mới nạp lại, một số thư viện chủ động làm mới cache trong nền <em>trước khi</em> hết hạn (vd refresh khi còn 10% TTle), để không có khoảnh khắc nào key vắng mặt → tránh herd ngay từ gốc.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">7. Chiến lược TTL &amp; jitter</h2>
+    <p class="ut-sub">TTL (time-to-live) là khoảng thời gian dữ liệu được coi là còn "đủ tươi". Chọn TTL theo mức độ dữ liệu được phép cũ:</p>
+
+    <table class="cmp">
+        <tr><th>Loại dữ liệu</th><th>Độ tươi yêu cầu</th><th>TTL gợi ý</th></tr>
+        <tr><td>Giá tiền tệ / tồn kho real-time</td><td>Rất cao</td><td>vài giây – không cache</td></tr>
+        <tr><td>Danh sách sản phẩm, bài viết</td><td>Trung bình</td><td>1 – 10 phút</td></tr>
+        <tr><td>Config, lookup table, danh mục</td><td>Thấp</td><td>30 phút – vài giờ</td></tr>
+        <tr><td>Dữ liệu gần như bất biến (mã quốc gia)</td><td>Rất thấp</td><td>nhiều giờ / tới khi deploy</td></tr>
+    </table>
+
+    <p class="ut-sub">Nếu nhiều key được nạp cùng lúc với cùng TTL, chúng sẽ <strong>hết hạn đồng loạt</strong> → tạo ra một đợt stampede đồng bộ. Thêm <strong>jitter</strong> (ngẫu nhiên hoá nhẹ TTL) để rải thời điểm hết hạn:</p>
+
+    <pre class="cb"><span class="c">// Jitter: cộng ngẫu nhiên 0–60s vào TTL gốc để tránh hết hạn đồng loạt</span>
+<span class="k">static</span> TimeSpan <span class="n">WithJitter</span>(TimeSpan baseTtl)
+{
+    <span class="k">var</span> jitter = TimeSpan.FromSeconds(Random.Shared.Next(<span class="s">0</span>, <span class="s">60</span>));
+    <span class="k">return</span> baseTtl + jitter;
+}
+
+cache.Set(key, value, <span class="k">new</span> <span class="t">MemoryCacheEntryOptions</span>
+{
+    AbsoluteExpirationRelativeToNow = WithJitter(TimeSpan.FromMinutes(<span class="s">5</span>))
+});</pre>
+
+    <div class="callout tip">
+        <strong>💡 Kết hợp:</strong> <code>AbsoluteExpiration</code> + jitter làm trần tuổi thọ và rải hết hạn; thêm <code>SlidingExpiration</code> để key ít dùng tự rơi sớm, key nóng sống lâu. Đừng đặt sliding mà không có absolute — key cực nóng có thể "bất tử" và không bao giờ tươi lại.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">8. Output Caching (.NET 8/9) vs Response Caching cũ</h2>
+    <p class="ut-sub">Thay vì cache dữ liệu trong service, bạn có thể cache <strong>toàn bộ response</strong> của một endpoint. .NET 8 giới thiệu <strong>Output Caching</strong> — middleware cache server-side mạnh hơn hẳn Response Caching cũ.</p>
+
+    <pre class="cb"><span class="c">// Program.cs</span>
+builder.Services.AddOutputCache(options =&gt;
+{
+    <span class="c">// policy mặc định</span>
+    options.AddBasePolicy(b =&gt; b.Expire(TimeSpan.FromSeconds(<span class="s">30</span>)));
+    <span class="c">// policy đặt tên, vary theo query "page"</span>
+    options.AddPolicy(<span class="s">"ProductsList"</span>, b =&gt; b
+        .Expire(TimeSpan.FromMinutes(<span class="s">5</span>))
+        .SetVaryByQuery(<span class="s">"page"</span>, <span class="s">"sort"</span>)
+        .Tag(<span class="s">"products"</span>));        <span class="c">// gắn tag để evict nhóm</span>
+});
+
+<span class="k">var</span> app = builder.Build();
+app.UseOutputCache(); <span class="c">// đặt sau UseRouting</span>
+
+<span class="c">// Áp dụng cho endpoint</span>
+app.MapGet(<span class="s">"/products"</span>, GetProducts).CacheOutput(<span class="s">"ProductsList"</span>);
+app.MapGet(<span class="s">"/health"</span>, () =&gt; <span class="s">"ok"</span>).CacheOutput(); <span class="c">// dùng base policy</span></pre>
+
+    <pre class="cb"><span class="c">// Evict theo tag khi dữ liệu đổi (vd sau khi thêm sản phẩm)</span>
+app.MapPost(<span class="s">"/products"</span>, <span class="k">async</span> (<span class="t">Product</span> p, <span class="t">AppDbContext</span> db,
+    <span class="t">IOutputCacheStore</span> store, CancellationToken ct) =&gt;
+{
+    db.Products.Add(p);
+    <span class="k">await</span> db.SaveChangesAsync(ct);
+    <span class="k">await</span> store.EvictByTagAsync(<span class="s">"products"</span>, ct); <span class="c">// xoá mọi response gắn tag "products"</span>
+    <span class="k">return</span> Results.Created($<span class="s">"/products/{p.Id}"</span>, p);
+});</pre>
+
+    <table class="cmp">
+        <tr><th>Tiêu chí</th><th>Response Caching (cũ)</th><th>Output Caching (.NET 8+)</th></tr>
+        <tr><td>Nơi cache</td><td>Dựa vào header HTTP, client/proxy quyết định</td><td>Server-side, app kiểm soát hoàn toàn</td></tr>
+        <tr><td>Tôn trọng <code>Authorization</code> / cookie</td><td>Mặc định KHÔNG cache → thường vô tác dụng</td><td>Cache được, vary-by tuỳ chọn</td></tr>
+        <tr><td>Vary-by</td><td>Theo header</td><td><code>VaryByQuery</code>, <code>VaryByHeader</code>, <code>VaryByValue</code> tuỳ ý</td></tr>
+        <tr><td>Eviction chủ động</td><td>Không</td><td>Có — <code>EvictByTagAsync</code></td></tr>
+        <tr><td>Backing store</td><td>In-memory client/proxy</td><td>In-memory; có thể dùng Redis qua HybridCache (.NET 9)</td></tr>
+    </table>
+
+    <div class="callout warn">
+        <strong>⚠️ Response Caching thường gây hiểu nhầm:</strong> nó chỉ thêm header và mặc định <em>không cache</em> request có <code>Authorization</code>. Với app server cần kiểm soát cache thực sự, hãy dùng <strong>Output Caching</strong>.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">9. Khi nào KHÔNG nên cache (Do / Don't)</h2>
+
+    <div class="do-dont dont">
+        <h4>❌ Dữ liệu thay đổi liên tục</h4>
+        <p>Tồn kho real-time, giá khớp lệnh, số dư ví. TTL phải cực ngắn để đúng → tỉ lệ hit thấp, lợi ích gần như không có mà rủi ro hiển thị sai số liệu rất cao.</p>
+    </div>
+
+    <div class="do-dont dont">
+        <h4>❌ Dữ liệu per-user nhạy cảm</h4>
+        <p>Thông tin cá nhân, quyền, số dư riêng. Cache không vary-by-user đúng cách dễ gây <strong>rò rỉ dữ liệu giữa các user</strong> (user A thấy data user B) — lỗi bảo mật nghiêm trọng.</p>
+    </div>
+
+    <div class="do-dont dont">
+        <h4>❌ Dữ liệu nhỏ &amp; rẻ để tính lại</h4>
+        <p>Nếu query đã &lt; 1ms và nhẹ, thêm cache chỉ tăng độ phức tạp, tốn RAM/Redis và sinh nguy cơ stale mà không thực sự nhanh hơn đáng kể.</p>
+    </div>
+
+    <div class="do-dont dont">
+        <h4>❌ Cache khi chưa đo</h4>
+        <p>Cache là tối ưu hoá — đừng thêm khi chưa biết nút thắt ở đâu. Cache sai chỗ che giấu vấn đề thật và tạo bug stale khó tái hiện ("máy tôi chạy đúng mà").</p>
+    </div>
+
+    <div class="do-dont do">
+        <h4>✅ Đọc nhiều, ghi ít, chấp nhận stale</h4>
+        <p>Danh mục, bài viết, lookup table, kết quả tổng hợp nặng. Tỉ lệ hit cao, dữ liệu ổn định → cache cho hiệu quả rõ rệt.</p>
+    </div>
+
+    <div class="do-dont do">
+        <h4>✅ Thao tác đắt &amp; lặp lại</h4>
+        <p>Report tổng hợp, gọi API bên thứ ba có rate limit, tính toán nặng. Cache giảm tải downstream và latency một cách thực chất.</p>
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">🎯 Checklist Caching</h2>
+    <div class="ut-card">
+        <ul>
+            <li>✅ Đã đo và xác định cache đúng nút thắt (đọc nhiều, đắt, chấp nhận stale)</li>
+            <li>✅ Single-instance hoặc dữ liệu tham chiếu → <code>IMemoryCache</code>; đa instance → <code>IDistributedCache</code> (Redis) hoặc <code>HybridCache</code> (.NET 9)</li>
+            <li>✅ Mọi entry có <code>AbsoluteExpiration</code> làm trần tuổi thọ (không sliding mà thiếu absolute)</li>
+            <li>✅ Thêm <strong>jitter</strong> vào TTL để tránh hết hạn đồng loạt</li>
+            <li>✅ Có cơ chế invalidation rõ ràng: TTL + explicit <code>Remove</code> / tag / version / event</li>
+            <li>✅ Chống cache stampede: semaphore/lock hoặc dùng <code>HybridCache</code> (stampede protection built-in)</li>
+            <li>✅ Distributed cache: serialize JSON nhất quán, đặt <code>InstanceName</code> prefix cho key</li>
+            <li>✅ <code>IMemoryCache</code> có <code>SizeLimit</code> + khai báo <code>Size</code> cho mọi entry</li>
+            <li>✅ Cache cả response bằng <strong>Output Caching</strong> (<code>.CacheOutput()</code>, tag, vary-by) thay cho Response Caching cũ</li>
+            <li>✅ KHÔNG cache dữ liệu per-user nhạy cảm nếu chưa vary-by-user đúng (tránh rò rỉ)</li>
+            <li>✅ Có log/metric cho cache hit/miss để theo dõi hiệu quả thực tế</li>
+        </ul>
+    </div>
+</section>
+
+</div>
+
+<footer style="text-align:center;padding:3rem 1.5rem;color:var(--ut-muted);border-top:1px solid var(--ut-border);margin-top:3rem;font-size:.9rem;">
+    <p>Caching · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

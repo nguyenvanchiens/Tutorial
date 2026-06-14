@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluation — Kiểm chứng output AI một cách nghiêm túc</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="ai.css">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{
+            --bg:#0B0B1A;--surface:#151528;--surface2:#1E1E3A;--border:#2A2A4A;
+            --text:#E8E8F0;--text-dim:#8888AA;--primary:#7C3AED;--accent:#06B6D4;
+            --green:#10B981;--orange:#F59E0B;--red:#EF4444;--pink:#EC4899;--blue:#3B82F6;
+            --radius:12px;--radius-sm:8px;
+        }
+        html{scroll-behavior:smooth}
+        body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.8;min-height:100vh}
+        .navbar{position:fixed;top:0;left:0;width:100%;background:rgba(11,11,26,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px}
+        .nav-logo{font-weight:800;font-size:1rem;color:var(--primary);text-decoration:none}
+        .nav-logo span{color:var(--accent)}
+        .nav-links{display:flex;gap:20px}
+        .nav-links a{color:var(--text-dim);text-decoration:none;font-size:.85rem;font-weight:500;transition:color .2s}
+        .nav-links a:hover,.nav-links a.active{color:var(--primary)}
+        .container{max-width:920px;margin:0 auto;padding:0 24px}
+        .hero{padding:90px 24px 40px;text-align:center;background:linear-gradient(180deg,rgba(124,58,237,.08) 0%,transparent 60%)}
+        .hero h1{font-size:2.4rem;font-weight:900;margin-bottom:12px}
+        .gradient-text{background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .hero p{color:var(--text-dim);font-size:.95rem;max-width:650px;margin:0 auto}
+        .hero-badge{display:inline-block;padding:4px 16px;border-radius:20px;font-size:.75rem;font-weight:700;background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(236,72,153,.2));color:var(--pink);margin-bottom:16px;letter-spacing:1px}
+        .toc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 28px;margin:0 auto 40px;max-width:920px}
+        .toc h3{font-size:1rem;font-weight:800;margin-bottom:12px;color:var(--accent)}
+        .toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px}
+        .toc a{color:var(--text-dim);text-decoration:none;font-size:.88rem;padding:4px 0;transition:color .2s;display:flex;align-items:center;gap:8px}
+        .toc a:hover{color:var(--primary)}
+        .toc-num{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;color:var(--primary);min-width:24px}
+        .section{margin-bottom:48px;scroll-margin-top:72px}
+        .section-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid var(--border)}
+        .section-num{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:900;color:var(--primary)}
+        .section-title{font-size:1.25rem;font-weight:800}
+        .section-subtitle{color:var(--text-dim);font-size:.85rem;margin-top:2px}
+        .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px;transition:border-color .2s}
+        .card:hover{border-color:rgba(124,58,237,.3)}
+        .card h4{font-size:1rem;font-weight:700;margin-bottom:8px;color:var(--text)}
+        .card p,.card li{font-size:.9rem;color:var(--text-dim);line-height:1.8}
+        .card ul{padding-left:20px}
+        .card li{margin-bottom:6px}
+        .module{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px;position:relative;overflow:hidden}
+        .module::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;border-radius:4px 0 0 4px}
+        .module.beginner::before{background:var(--green)}
+        .module.intermediate::before{background:var(--orange)}
+        .module.advanced::before{background:var(--red)}
+        .module.expert::before{background:var(--primary)}
+        .module-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+        .module h4{font-size:1.05rem;font-weight:800}
+        .module-level{padding:3px 10px;border-radius:12px;font-size:.7rem;font-weight:700;flex-shrink:0}
+        .level-beginner{background:rgba(16,185,129,.12);color:var(--green)}
+        .level-intermediate{background:rgba(245,158,11,.12);color:var(--orange)}
+        .level-advanced{background:rgba(239,68,68,.12);color:var(--red)}
+        .level-expert{background:rgba(124,58,237,.12);color:var(--primary)}
+        .module p{font-size:.88rem;color:var(--text-dim);margin-bottom:10px}
+        .module-what{font-size:.82rem;color:var(--text);margin-bottom:8px}
+        .module-what strong{color:var(--accent)}
+        .module-tools{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+        .tool-tag{padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:600;background:var(--surface2);color:var(--text-dim);border:1px solid var(--border)}
+        .code-block{background:#0D0D20;border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 20px;margin:12px 0;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.7;color:#A5B4FC;white-space:pre}
+        .code-comment{color:#6B7280}
+        .code-keyword{color:#C084FC}
+        .code-string{color:#34D399}
+        .code-fn{color:#60A5FA}
+        .highlight{border-radius:var(--radius);padding:16px 20px;margin:12px 0;font-size:.88rem}
+        .highlight-warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:var(--orange)}
+        .highlight-tip{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:var(--green)}
+        .highlight-important{background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);color:var(--primary)}
+        .highlight strong{color:var(--text)}
+        .compare-table{width:100%;border-collapse:collapse;font-size:.85rem;margin:12px 0}
+        .compare-table th{background:var(--surface2);padding:10px 14px;text-align:left;font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.5px;color:var(--accent);border-bottom:2px solid var(--border)}
+        .compare-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text-dim)}
+        .compare-table tr:hover td{background:rgba(124,58,237,.03)}
+        .footer{padding:32px 24px;text-align:center;border-top:1px solid var(--border);margin-top:40px}
+        .footer p{color:var(--text-dim);font-size:.82rem}
+        .footer a{color:var(--primary);text-decoration:none}
+        @media(max-width:768px){
+            .hero h1{font-size:1.6rem}
+            .toc-grid{grid-template-columns:1fr}
+            .module-header{flex-direction:column;gap:8px}
+            .nav-links{display:none}
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav class="navbar">
+    <a href="index.html" class="nav-logo">AI<span>Hub</span></a>
+    <div class="nav-links">
+        <a href="index.html">Tin Tuc AI</a>
+        <a href="learn.html">Hoc AI</a>
+        <a href="testing-ai.html">Testing AI</a>
+        <a href="security-ai.html">Security</a>
+        <a href="evaluation.html" class="active">Evaluation</a>
+        <a href="../BE/index.html">.NET</a>
+    </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<header class="hero">
+    <div class="hero-badge">CỰC CAO · MASTER</div>
+    <h1><span class="gradient-text">Evaluation</span> — Kiểm chứng output AI nghiêm túc</h1>
+    <p>"Chạy thử thấy ổn" KHÔNG phải là đo lường. Khi xây sản phẩm AI thật, bạn cần <strong>eval harness</strong>: dataset chuẩn, chấm điểm có rubric, regression test cho prompt & agent, và cổng pass/fail. Đây là kỹ năng tách biệt người làm demo với người làm production.</p>
+</header>
+
+<!-- ═══ TOC ═══ -->
+<div class="container">
+<div class="toc">
+    <h3>Mục Lục</h3>
+    <div class="toc-grid">
+        <a href="#s1"><span class="toc-num">01</span> Vì sao "chạy thử" là không đủ</a>
+        <a href="#s2"><span class="toc-num">02</span> Golden dataset</a>
+        <a href="#s3"><span class="toc-num">03</span> LLM-as-judge</a>
+        <a href="#s4"><span class="toc-num">04</span> Chấm điểm theo rubric</a>
+        <a href="#s5"><span class="toc-num">05</span> Xây eval harness</a>
+        <a href="#s6"><span class="toc-num">06</span> Regression eval & pass/fail gate</a>
+        <a href="#s7"><span class="toc-num">07</span> Đo độ tin cậy của agent</a>
+        <a href="#s8"><span class="toc-num">08</span> Tránh eval overfitting</a>
+    </div>
+</div>
+
+<!-- ═══ SECTION 1 ═══ -->
+<div class="section" id="s1">
+    <div class="section-header">
+        <div class="section-num">01</div>
+        <div>
+            <div class="section-title">Vì sao "chạy thử thấy ổn" là không đủ</div>
+            <div class="section-subtitle">LLM không tất định — một mẫu không nói lên gì</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Vibe-check không phải là đo lường</h4>
+        <p>LLM có tính ngẫu nhiên: cùng một prompt có thể cho output khác nhau. Bạn chỉnh prompt, thử 2-3 lần thấy "đẹp hơn" rồi deploy — đó là <strong>cảm tính</strong>, không phải bằng chứng. Khi lên production với hàng nghìn input đa dạng, prompt "nghe hay" đó có thể tệ hơn bản cũ ở 30% case mà bạn không hề biết.</p>
+        <div class="highlight highlight-important">
+            <strong>Định nghĩa Evaluation:</strong> Đo lường chất lượng output AI một cách <em>có hệ thống, lặp lại được, định lượng</em> — trên một tập input đại diện, với tiêu chí rõ ràng, cho ra con số so sánh được giữa các phiên bản.
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Eval là "unit test cho hệ thống AI"</h4>
+        <p>Code thường: input cố định → output cố định → assert bằng nhau. Hệ thống AI: input đa dạng → output không tất định → cần chấm theo tiêu chí. Eval chính là tầng test cho phần "mềm" này — giúp bạn biết một thay đổi (đổi prompt, đổi model, thêm tool) là TIẾN BỘ hay THỤT LÙI.</p>
+        <table class="compare-table">
+            <tr><th>Câu hỏi không có eval</th><th>Câu hỏi có eval</th></tr>
+            <tr><td>"Trông có vẻ tốt hơn?"</td><td>"Tăng từ 82% → 89% trên 200 case"</td></tr>
+            <tr><td>"Hình như ít lỗi hơn"</td><td>"Tỉ lệ hallucination giảm 12 điểm"</td></tr>
+            <tr><td>"Model mới chắc xịn hơn"</td><td>"Đắt hơn 3x, chỉ hơn 1% — không đáng"</td></tr>
+        </table>
+    </div>
+</div>
+
+<!-- ═══ SECTION 2 ═══ -->
+<div class="section" id="s2">
+    <div class="section-header">
+        <div class="section-num">02</div>
+        <div>
+            <div class="section-title">Golden dataset — nền móng của mọi eval</div>
+            <div class="section-subtitle">Không có dữ liệu chuẩn thì không có gì để đo</div>
+        </div>
+    </div>
+
+    <div class="module advanced">
+        <div class="module-header">
+            <h4>Module 2.1: Xây golden dataset</h4>
+            <span class="module-level level-advanced">Advanced</span>
+        </div>
+        <p>Golden dataset = tập các case <code>{input, output mong muốn / tiêu chí}</code> được chọn kỹ và (lý tưởng) được con người duyệt. Đây là "sự thật" bạn đo model dựa vào.</p>
+        <div class="module-what"><strong>Nguyên tắc xây dataset tốt:</strong></div>
+        <ul style="font-size:.88rem;color:var(--text-dim);padding-left:20px">
+            <li><strong>Đại diện:</strong> phản ánh phân bố input THẬT của production, không chỉ case dễ.</li>
+            <li><strong>Có case khó:</strong> cố tình thêm biên, mơ hồ, đối nghịch — đó là nơi model hay vỡ.</li>
+            <li><strong>Bắt đầu nhỏ, tăng dần:</strong> 30-50 case chất lượng tốt hơn 1000 case rác.</li>
+            <li><strong>Nuôi từ production:</strong> mỗi lần model sai thật → thêm case đó vào dataset (regression chống tái phát).</li>
+            <li><strong>Có nhãn người duyệt:</strong> với case quan trọng, đáp án chuẩn phải do người xác nhận.</li>
+        </ul>
+        <div class="highlight highlight-tip">
+            <strong>Mẹo khởi động:</strong> Có thể dùng model (vd <strong>claude-opus-4-8</strong>) sinh nháp case đa dạng, nhưng PHẢI có người duyệt đáp án chuẩn — đừng để AI vừa sinh đề vừa chấm chính nó mà không kiểm soát.
+        </div>
+        <div class="module-tools">
+            <span class="tool-tag">Golden set</span>
+            <span class="tool-tag">Human-labeled</span>
+            <span class="tool-tag">Production mining</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 3 ═══ -->
+<div class="section" id="s3">
+    <div class="section-header">
+        <div class="section-num">03</div>
+        <div>
+            <div class="section-title">LLM-as-judge pattern</div>
+            <div class="section-subtitle">Dùng một LLM để chấm output của LLM khác — mạnh nhưng phải kiểm soát</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Khi nào cần LLM làm giám khảo?</h4>
+        <p>Nhiều output không thể so khớp chính xác (so sánh chuỗi). "Câu trả lời này có hữu ích, đúng sự thật, đúng giọng không?" là phán đoán chất lượng — đây là lúc dùng LLM-as-judge: một model mạnh đọc input + output + tiêu chí và trả về điểm/nhãn.</p>
+        <div class="code-block"><span class="code-comment"># Judge prompt — chấm theo tiêu chí rõ ràng, trả JSON</span>
+Bạn là giám khảo nghiêm khắc. Chấm câu trả lời theo 3 tiêu chí (0-5):
+- factual: có đúng so với tài liệu tham chiếu không?
+- relevant: có trả lời đúng câu hỏi không?
+- safe: có nội dung không phù hợp không?
+
+CÂU HỎI: {question}
+TÀI LIỆU THAM CHIẾU: {reference}
+CÂU TRẢ LỜI CẦN CHẤM: {answer}
+
+Trả về JSON: {"factual": n, "relevant": n, "safe": n, "lý_do": "..."}</div>
+        <div class="highlight highlight-warn">
+            <strong>Cảnh báo bias của judge:</strong> LLM-judge có thiên kiến — thích câu dài, thích văn phong giống nó, đôi khi "thiên vị" output của chính họ model. Phải hiệu chuẩn (calibrate) judge với nhãn người trên một tập con, và đo độ khớp giữa judge và người.
+        </div>
+    </div>
+
+    <div class="module advanced">
+        <div class="module-header">
+            <h4>Module 3.1: Làm judge đáng tin</h4>
+            <span class="module-level level-advanced">Advanced</span>
+        </div>
+        <ul style="font-size:.88rem;color:var(--text-dim);padding-left:20px">
+            <li><strong>Dùng model mạnh làm judge:</strong> judge nên ngang/mạnh hơn model bị chấm (vd <strong>claude-opus-4-8</strong> chấm output <strong>claude-haiku-4-5</strong>).</li>
+            <li><strong>Tiêu chí cụ thể, không hỏi chung "tốt không":</strong> chia nhỏ thành các trục đo được.</li>
+            <li><strong>Buộc giải thích trước, điểm sau:</strong> tăng độ ổn định (chain-of-thought cho judge).</li>
+            <li><strong>So sánh cặp (pairwise):</strong> "A hay B tốt hơn?" thường ổn định hơn chấm điểm tuyệt đối.</li>
+            <li><strong>Đo agreement với người:</strong> nếu judge khớp người &gt; 85%, mới tin được để chạy tự động.</li>
+        </ul>
+        <div class="module-tools">
+            <span class="tool-tag">LLM-as-judge</span>
+            <span class="tool-tag">Pairwise compare</span>
+            <span class="tool-tag">Judge calibration</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 4 ═══ -->
+<div class="section" id="s4">
+    <div class="section-header">
+        <div class="section-num">04</div>
+        <div>
+            <div class="section-title">Chấm điểm theo rubric</div>
+            <div class="section-subtitle">Biến "chất lượng" mơ hồ thành con số lặp lại được</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Rubric: thang đo rõ ràng cho từng tiêu chí</h4>
+        <p>Rubric mô tả CỤ THỂ mỗi mức điểm nghĩa là gì. Có rubric tốt, dù người hay LLM chấm cũng ra kết quả nhất quán. Đừng dùng thang "1-10" trống rỗng — hãy định nghĩa từng bậc.</p>
+        <table class="compare-table">
+            <tr><th>Điểm</th><th>Tiêu chí "Tính đúng đắn"</th></tr>
+            <tr><td>0</td><td>Sai hoàn toàn hoặc bịa thông tin (hallucination)</td></tr>
+            <tr><td>1</td><td>Đúng một phần, có lỗi quan trọng</td></tr>
+            <tr><td>2</td><td>Phần lớn đúng, sai chi tiết nhỏ</td></tr>
+            <tr><td>3</td><td>Hoàn toàn đúng, bám sát tài liệu tham chiếu</td></tr>
+        </table>
+        <div class="highlight highlight-tip">
+            <strong>Phân loại tiêu chí eval:</strong> Tiêu chí <em>khách quan</em> (đúng JSON schema? có chứa số đúng? code có chạy?) nên chấm bằng code/assertion — nhanh, rẻ, tất định. Chỉ dùng LLM-judge cho tiêu chí <em>chủ quan</em> (giọng, độ hữu ích, mạch lạc).
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 5 ═══ -->
+<div class="section" id="s5">
+    <div class="section-header">
+        <div class="section-num">05</div>
+        <div>
+            <div class="section-title">Xây eval harness</div>
+            <div class="section-subtitle">Hệ thống chạy toàn bộ dataset, chấm, ra báo cáo — tự động</div>
+        </div>
+    </div>
+
+    <div class="module expert">
+        <div class="module-header">
+            <h4>Module 5.1: Kiến trúc một eval harness</h4>
+            <span class="module-level level-expert">Expert</span>
+        </div>
+        <p>Eval harness = vòng lặp: nạp dataset → chạy hệ thống AI trên từng case → chấm bằng (assertion + LLM-judge) → tổng hợp số liệu → so với baseline → quyết định pass/fail.</p>
+        <div class="code-block"><span class="code-comment">// TypeScript — eval harness tối giản với Agent SDK</span>
+<span class="code-keyword">import</span> { query } <span class="code-keyword">from</span> <span class="code-string">"@anthropic-ai/claude-agent-sdk"</span>;
+<span class="code-keyword">import</span> { dataset } <span class="code-keyword">from</span> <span class="code-string">"./golden.json"</span>;
+
+<span class="code-keyword">let</span> pass = 0;
+<span class="code-keyword">for</span> (<span class="code-keyword">const</span> c <span class="code-keyword">of</span> dataset) {
+  <span class="code-keyword">const</span> out = <span class="code-keyword">await</span> <span class="code-fn">runSystem</span>(c.input);          <span class="code-comment">// hệ thống cần đánh giá</span>
+  <span class="code-keyword">const</span> objective = c.mustContain.<span class="code-fn">every</span>(s => out.<span class="code-fn">includes</span>(s)); <span class="code-comment">// check khách quan</span>
+  <span class="code-keyword">const</span> judged = <span class="code-keyword">await</span> <span class="code-fn">llmJudge</span>(c.input, out, c.reference);     <span class="code-comment">// judge chủ quan</span>
+  <span class="code-keyword">if</span> (objective && judged.score &gt;= 3) pass++;
+}
+<span class="code-keyword">const</span> score = pass / dataset.length;
+<span class="code-fn">console</span>.log(<span class="code-string">`Eval score: ${(score*100).toFixed(1)}%`</span>);
+<span class="code-keyword">if</span> (score &lt; 0.85) <span class="code-fn">process</span>.exit(1);   <span class="code-comment">// pass/fail gate cho CI</span></div>
+        <div class="module-what"><strong>Số liệu harness nên xuất:</strong> điểm tổng, điểm theo từng tiêu chí, danh sách case fail (để debug), cost & latency trung bình, so sánh với lần chạy trước.</div>
+        <div class="module-tools">
+            <span class="tool-tag">@anthropic-ai/claude-agent-sdk</span>
+            <span class="tool-tag">claude-agent-sdk (Python)</span>
+            <span class="tool-tag">Promptfoo</span>
+            <span class="tool-tag">CI integration</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 6 ═══ -->
+<div class="section" id="s6">
+    <div class="section-header">
+        <div class="section-num">06</div>
+        <div>
+            <div class="section-title">Regression eval & pass/fail gate</div>
+            <div class="section-subtitle">Mỗi thay đổi prompt/agent phải chứng minh không làm tệ đi</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Prompt & agent cần regression test như code</h4>
+        <p>Sửa một dòng trong system prompt có thể cải thiện case A nhưng phá case B, C, D. Không có regression eval, bạn sẽ không bao giờ biết. Quy tắc: <strong>mọi</strong> thay đổi prompt, model, tool, hay logic agent phải chạy qua eval harness TRƯỚC khi merge.</p>
+        <div class="highlight highlight-important">
+            <strong>Eval-driven development:</strong> Coi điểm eval như test suite. Sửa prompt → chạy eval → điểm tăng hoặc giữ thì merge, điểm giảm thì revert hoặc bổ sung case. Biến việc cải tiến prompt từ "đoán mò" thành "đo lường".
+        </div>
+    </div>
+
+    <div class="module expert">
+        <div class="module-header">
+            <h4>Module 6.1: Thiết kế pass/fail gate</h4>
+            <span class="module-level level-expert">Expert</span>
+        </div>
+        <ul style="font-size:.88rem;color:var(--text-dim);padding-left:20px">
+            <li><strong>Ngưỡng tuyệt đối:</strong> điểm tổng phải &ge; X% (vd 85%) mới qua CI.</li>
+            <li><strong>Không thụt lùi (no regression):</strong> không case nào đang pass được phép chuyển sang fail.</li>
+            <li><strong>Gate an toàn tuyệt đối:</strong> 0 case vi phạm safety — fail ngay dù điểm tổng cao.</li>
+            <li><strong>Ngân sách cost/latency:</strong> nếu chậm/đắt hơn ngưỡng → fail dù chất lượng tốt.</li>
+            <li><strong>Chạy nhiều lần:</strong> vì LLM ngẫu nhiên, chạy mỗi case 3-5 lần, lấy trung bình + đo độ ổn định.</li>
+        </ul>
+        <div class="module-tools">
+            <span class="tool-tag">Regression eval</span>
+            <span class="tool-tag">CI gate</span>
+            <span class="tool-tag">Safety gate</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 7 ═══ -->
+<div class="section" id="s7">
+    <div class="section-header">
+        <div class="section-num">07</div>
+        <div>
+            <div class="section-title">Đo độ tin cậy của agent</div>
+            <div class="section-subtitle">Agent nhiều bước → lỗi tích luỹ, phải đo cả quá trình</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Reliability = đúng một cách nhất quán, không chỉ đúng một lần</h4>
+        <p>Agent chạy chuỗi nhiều bước (gọi tool, đọc kết quả, quyết định tiếp). Nếu mỗi bước đúng 95% nhưng có 10 bước, xác suất cả chuỗi đúng chỉ còn ~60%. Vì vậy đo agent khác đo một câu trả lời đơn lẻ — phải đo cả <em>kết quả cuối</em> lẫn <em>quỹ đạo</em> (trajectory).</p>
+        <table class="compare-table">
+            <tr><th>Chỉ số</th><th>Đo gì</th></tr>
+            <tr><td>Task success rate</td><td>% nhiệm vụ hoàn thành đúng đến cùng</td></tr>
+            <tr><td>Pass^k (đúng k lần liên tiếp)</td><td>Độ ổn định — chạy lại nhiều lần vẫn đúng?</td></tr>
+            <tr><td>Tool-call accuracy</td><td>Gọi đúng tool, đúng tham số không?</td></tr>
+            <tr><td>Trajectory quality</td><td>Đường đi có hợp lý, không lặp vô ích?</td></tr>
+            <tr><td>Cost / số bước</td><td>Hiệu quả — không "đốt" token để ra kết quả</td></tr>
+        </table>
+        <div class="highlight highlight-tip">
+            <strong>Mẹo đo agent:</strong> Phân biệt <em>outcome eval</em> (kết quả cuối có đúng không) và <em>process eval</em> (đường đi có đúng không). Một agent đôi khi ra kết quả đúng nhờ may mắn dù đường đi sai — process eval bắt được điều đó.
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 8 ═══ -->
+<div class="section" id="s8">
+    <div class="section-header">
+        <div class="section-num">08</div>
+        <div>
+            <div class="section-title">Tránh eval overfitting</div>
+            <div class="section-subtitle">Điểm eval cao mà production vẫn tệ — vì bạn đã "học tủ"</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Khi eval set trở thành "đề thi bị lộ"</h4>
+        <p>Nếu bạn liên tục tinh chỉnh prompt để vượt qua đúng những case trong eval set, đến lúc nào đó bạn đang tối ưu cho <em>bộ test</em> chứ không phải cho <em>chất lượng thật</em>. Điểm eval đẹp nhưng gặp input mới ngoài đời lại vỡ — đây là overfitting.</p>
+        <ul>
+            <li><strong>Tách held-out set:</strong> giữ một phần dataset KHÔNG dùng khi tinh chỉnh, chỉ để kiểm tra cuối.</li>
+            <li><strong>Làm mới dataset định kỳ:</strong> liên tục bổ sung case mới từ production để eval không "đứng yên".</li>
+            <li><strong>Cảnh giác điểm gần tuyệt đối:</strong> 99% trên eval thường nghĩa là eval quá dễ, không phải hệ thống quá tốt.</li>
+            <li><strong>Đo ngoài đời:</strong> kết hợp eval offline với metric production thật (phản hồi user, tỉ lệ escalate).</li>
+            <li><strong>Đa dạng người chấm:</strong> đừng để một judge/một người định nghĩa toàn bộ "đúng".</li>
+        </ul>
+        <div class="highlight highlight-important">
+            <strong>Sự thật cuối cùng:</strong> Eval là bản đồ, không phải lãnh thổ. Mục tiêu là chất lượng THẬT cho người dùng, không phải con số đẹp. Eval tốt giúp bạn tiến nhanh và an toàn — nhưng đừng bao giờ tôn thờ chính con số đó.
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Tổng kết — quy trình Evaluation chuẩn</h4>
+        <div class="code-block"><span class="code-comment"># EVALUATION WORKFLOW</span>
+1. Xây golden dataset đại diện (có case khó, có nhãn người)
+2. Chia tiêu chí: khách quan → assertion; chủ quan → LLM-judge (đã calibrate)
+3. Viết rubric rõ ràng cho từng tiêu chí
+4. Dựng harness: chạy toàn bộ dataset → chấm → ra số liệu
+5. Đặt pass/fail gate trong CI (ngưỡng + no-regression + safety)
+6. Mọi thay đổi prompt/agent → chạy eval TRƯỚC khi merge
+7. Giữ held-out set + làm mới dataset từ production (chống overfit)
+8. Kết hợp eval offline + metric production thật</div>
+    </div>
+</div>
+
+</div><!-- end container -->
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer">
+    <p>AI Mastery · Evaluation — <a href="learn.html">Học AI</a> · <a href="testing-ai.html">Testing với AI</a> · <a href="security-ai.html">Security review</a></p>
+</footer>
+
+</body>
+</html>

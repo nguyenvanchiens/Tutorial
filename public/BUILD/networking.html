@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Networking nền tảng cho Deploy</title>
+    <link rel="stylesheet" href="build.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .cmd-table { width:100%; border-collapse: collapse; color: var(--text); font-size: .88rem; }
+        .cmd-table th { padding:.7rem; text-align:left; border-bottom:1px solid var(--border-light); background: rgba(245,158,11,.08); color: var(--text-bright); }
+        .cmd-table td { padding:.6rem .7rem; border-bottom:1px solid var(--border); vertical-align: top; }
+        .cmd-table td:first-child { white-space: nowrap; }
+        .cmd-table code { color: var(--primary); background: transparent; padding:0; }
+        .flow-list { display:flex; flex-direction:column; gap:10px; }
+        .flow-row { display:flex; align-items:flex-start; gap:14px; padding:14px 18px; background: var(--bg-code); border:1px solid var(--border); border-radius: var(--radius-sm); }
+        .flow-n { width:30px; height:30px; border-radius:50%; background: var(--primary); color:#000; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.82rem; flex-shrink:0; }
+        .flow-row strong { color: var(--text-bright); font-size:.92rem; }
+        .flow-row p { color: var(--text-dim); font-size:.85rem; margin:0; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html">Build<span class="accent">&Deploy</span></a></div>
+            <div class="nav-links">
+                <a href="index.html">🗺️ Tổng quan</a>
+                <a href="linux-cli.html">🐧 Linux & CLI</a>
+                <a href="networking.html" class="active">🌐 Networking</a>
+                <a href="secrets.html">🔑 Secrets</a>
+                <a href="git.html">📦 Git</a>
+                <a href="cicd.html">⚙️ CI/CD</a>
+                <a href="jenkins.html">🔴 Jenkins</a>
+                <a href="docker.html">🐳 Docker</a>
+                <a href="hosting.html">☁️ Hosting</a>
+                <a href="cloud.html">⛅ Cloud</a>
+                <a href="domain.html">🌐 Domain</a>
+                <a href="ssl.html">🔒 SSL</a>
+                <a href="monitoring.html">📊 Monitoring</a>
+                <a href="workflow.html">🔄 Workflow</a>
+            </div>
+            <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <header class="build-hero">
+        <div class="hero-content">
+            <div class="hero-badge">CHƯƠNG 1.5 · NỀN TẢNG</div>
+            <h1><span class="gradient-text">Networking</span> nền tảng cho Deploy</h1>
+            <p class="hero-desc">Khi user gõ <code>myapp.com</code> đến lúc thấy trang web, có cả chục bước mạng diễn ra.<br>Hiểu IP, port, DNS, reverse proxy và firewall sẽ giúp bạn deploy đúng và debug "tại sao site không vào được" trong vài phút thay vì vài giờ.</p>
+        </div>
+    </header>
+
+    <!-- ===== SECTION 1: IP & PORTS ===== -->
+    <section class="section section-dark" id="ip-ports">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🌐</div>
+                <h2>1. IP & Cổng (Ports)</h2>
+                <p>Địa chỉ IP = "số nhà" của server. Port = "căn hộ" cụ thể trong nhà đó.</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>📍 IP Address & Port — Ví Von Đơn Giản</h3>
+                <div class="analogy-grid">
+                    <div class="analogy-box good">
+                        <h4>🏠 IP Address</h4>
+                        <p>Là địa chỉ duy nhất của một máy trên mạng, vd <code>203.0.113.10</code> (IPv4) hoặc dạng dài IPv6. Giống số nhà — để gói tin tìm đúng server.</p>
+                    </div>
+                    <div class="analogy-box good">
+                        <h4>🚪 Port</h4>
+                        <p>Một server chạy nhiều dịch vụ cùng lúc. Port (0–65535) phân biệt chúng. Web HTTP ở <code>80</code>, HTTPS ở <code>443</code>. Giống số căn hộ trong toà nhà.</p>
+                    </div>
+                </div>
+                <div class="tip-box">
+                    <strong>💡 Một địa chỉ đầy đủ là <code>IP:PORT</code></strong> — ví dụ <code>203.0.113.10:443</code>. Trình duyệt tự ngầm hiểu <code>https://</code> = port 443 nên bạn không phải gõ.
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>📋 Bảng Cổng Thường Gặp</h3>
+                <div class="cmd-card" style="overflow-x:auto;">
+                    <table class="cmd-table">
+                        <thead><tr><th>Port</th><th>Dịch vụ</th><th>Ghi chú</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>22</code></td><td>SSH</td><td>Điều khiển server từ xa</td></tr>
+                            <tr><td><code>80</code></td><td>HTTP</td><td>Web không mã hoá (thường redirect sang 443)</td></tr>
+                            <tr><td><code>443</code></td><td>HTTPS</td><td>Web có TLS/SSL — chuẩn production</td></tr>
+                            <tr><td><code>53</code></td><td>DNS</td><td>Phân giải tên miền</td></tr>
+                            <tr><td><code>3306</code></td><td>MySQL / MariaDB</td><td>Database</td></tr>
+                            <tr><td><code>5432</code></td><td>PostgreSQL</td><td>Database</td></tr>
+                            <tr><td><code>1433</code></td><td>SQL Server</td><td>Database (.NET hay dùng)</td></tr>
+                            <tr><td><code>6379</code></td><td>Redis</td><td>Cache / queue</td></tr>
+                            <tr><td><code>3000</code> / <code>5173</code></td><td>Dev server</td><td>React/Next/Vite chạy local</td></tr>
+                            <tr><td><code>5000</code> / <code>8080</code></td><td>App backend</td><td>.NET / Node nội bộ (sau reverse proxy)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="warning-box">
+                    <strong>⚠️ Cổng database KHÔNG nên mở ra internet.</strong> 3306/5432/1433 chỉ nên cho phép truy cập từ chính server app hoặc qua mạng nội bộ. Mở DB ra internet = bị quét và tấn công trong vài phút.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SECTION 2: HTTP LIFECYCLE & DNS ===== -->
+    <section class="section" id="lifecycle">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🔄</div>
+                <h2>2. Vòng Đời Một Request HTTP(S)</h2>
+                <p>Chuyện gì xảy ra giữa lúc gõ URL và lúc trang hiện ra — bao gồm cả DNS resolution.</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>🧭 Hành Trình Của Một Request</h3>
+                <div class="flow-list">
+                    <div class="flow-row"><div class="flow-n">1</div><div><strong>DNS Resolution</strong><p>Trình duyệt hỏi: "<code>myapp.com</code> có IP gì?". Hỏi DNS resolver → root server → TLD (<code>.com</code>) → nameserver của domain → trả về <code>203.0.113.10</code>. Kết quả được cache lại theo TTL.</p></div></div>
+                    <div class="flow-row"><div class="flow-n">2</div><div><strong>TCP Handshake</strong><p>Trình duyệt mở kết nối TCP tới <code>203.0.113.10:443</code> qua "bắt tay 3 bước" (SYN → SYN-ACK → ACK).</p></div></div>
+                    <div class="flow-row"><div class="flow-n">3</div><div><strong>TLS Handshake</strong><p>Với HTTPS, hai bên trao đổi chứng chỉ và thoả thuận khoá mã hoá. Từ đây mọi dữ liệu đều được mã hoá.</p></div></div>
+                    <div class="flow-row"><div class="flow-n">4</div><div><strong>HTTP Request</strong><p>Trình duyệt gửi <code>GET / HTTP/1.1</code> kèm headers (Host, Cookie, User-Agent...).</p></div></div>
+                    <div class="flow-row"><div class="flow-n">5</div><div><strong>Server xử lý</strong><p>Reverse proxy (Nginx) nhận request, chuyển tới app backend (vd .NET ở <code>:5000</code>), app truy vấn DB và dựng response.</p></div></div>
+                    <div class="flow-row"><div class="flow-n">6</div><div><strong>HTTP Response</strong><p>Server trả status code (<code>200 OK</code>, <code>404</code>, <code>500</code>...) kèm HTML/JSON. Trình duyệt render và tải tiếp CSS/JS/ảnh.</p></div></div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🔢 Status Code Cần Nhớ Khi Deploy</h3>
+                <div class="cmd-card" style="overflow-x:auto;">
+                    <table class="cmd-table">
+                        <thead><tr><th>Code</th><th>Ý nghĩa</th><th>Khi deploy thường do</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>200</code></td><td>OK</td><td>Ngon</td></tr>
+                            <tr><td><code>301 / 302</code></td><td>Redirect</td><td>Chuyển HTTP → HTTPS</td></tr>
+                            <tr><td><code>404</code></td><td>Not Found</td><td>Sai đường dẫn, thiếu file, route chưa map</td></tr>
+                            <tr><td><code>500</code></td><td>Server Error</td><td>App crash — xem log app ngay</td></tr>
+                            <tr><td><code>502</code></td><td>Bad Gateway</td><td>Nginx chạy nhưng app backend chết / chưa start</td></tr>
+                            <tr><td><code>503</code></td><td>Unavailable</td><td>App quá tải hoặc đang restart</td></tr>
+                            <tr><td><code>504</code></td><td>Gateway Timeout</td><td>App backend phản hồi quá chậm</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="tip-box">
+                    <strong>💡 <code>502 Bad Gateway</code> là lỗi deploy kinh điển:</strong> Nginx sống nhưng không gọi được app phía sau. Kiểm tra app đã <code>systemctl start</code> chưa và đúng cổng mà Nginx <code>proxy_pass</code> tới không.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SECTION 3: REVERSE PROXY ===== -->
+    <section class="section section-dark" id="reverse-proxy">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🔀</div>
+                <h2>3. Reverse Proxy (Nginx)</h2>
+                <p>Cánh cửa đứng trước app của bạn: nhận mọi request từ internet rồi chuyển vào trong.</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>📖 Reverse Proxy Là Gì & Tại Sao Cần?</h3>
+                <p>App .NET/Node của bạn chạy ở cổng nội bộ như <code>5000</code>, <strong>không</strong> nên phơi thẳng ra internet. Đặt một reverse proxy (Nginx) ở cổng 80/443 để làm "lễ tân" tiếp nhận và phân phối.</p>
+                <div class="docker-concepts">
+                    <div class="docker-concept"><strong>TLS termination</strong> — Nginx lo việc HTTPS/chứng chỉ, app không phải bận tâm.</div>
+                    <div class="docker-concept"><strong>Định tuyến</strong> — <code>/api</code> tới backend, <code>/</code> tới frontend, gom nhiều app sau 1 domain.</div>
+                    <div class="docker-concept"><strong>Load balancing</strong> — chia tải sang nhiều instance app.</div>
+                    <div class="docker-concept"><strong>Bảo vệ & cache</strong> — chặn request xấu, rate limit, phục vụ file tĩnh nhanh.</div>
+                </div>
+                <div class="pipeline-flow" style="margin-top:16px;">
+                    <div class="pipeline-step"><div class="pipe-icon">🌍</div><div class="pipe-label">Internet</div><div class="pipe-desc">User request</div></div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-step"><div class="pipe-icon">🔀</div><div class="pipe-label">Nginx :443</div><div class="pipe-desc">Reverse proxy + TLS</div></div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-step"><div class="pipe-icon">⚙️</div><div class="pipe-label">App :5000</div><div class="pipe-desc">.NET / Node nội bộ</div></div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>📝 Cấu Hình Nginx Reverse Proxy — Ví Dụ Thật</h3>
+                <div class="cmd-card">
+                    <div class="cmd-label">/etc/nginx/sites-available/myapp.conf</div>
+<pre class="code-block"><span class="c-key">server</span> {
+    <span class="c-key">listen</span> 80;
+    <span class="c-key">server_name</span> myapp.com www.myapp.com;
+    <span class="c-cmt"># Ép HTTP → HTTPS</span>
+    <span class="c-key">return</span> 301 https://$host$request_uri;
+}
+
+<span class="c-key">server</span> {
+    <span class="c-key">listen</span> 443 ssl;
+    <span class="c-key">server_name</span> myapp.com www.myapp.com;
+
+    <span class="c-key">ssl_certificate</span>     /etc/letsencrypt/live/myapp.com/fullchain.pem;
+    <span class="c-key">ssl_certificate_key</span> /etc/letsencrypt/live/myapp.com/privkey.pem;
+
+    <span class="c-cmt"># Chuyển mọi request vào app nội bộ ở cổng 5000</span>
+    <span class="c-key">location</span> / {
+        <span class="c-key">proxy_pass</span>         http://127.0.0.1:5000;
+        <span class="c-key">proxy_http_version</span> 1.1;
+        <span class="c-key">proxy_set_header</span>   Host $host;
+        <span class="c-key">proxy_set_header</span>   X-Real-IP $remote_addr;
+        <span class="c-key">proxy_set_header</span>   X-Forwarded-For $proxy_add_x_forwarded_for;
+        <span class="c-key">proxy_set_header</span>   X-Forwarded-Proto $scheme;
+    }
+}</pre>
+                </div>
+                <div class="cmd-card" style="margin-top:16px;">
+                    <div class="cmd-label">Kích hoạt & nạp lại Nginx</div>
+<pre class="code-block"><span class="c-cmd">sudo ln -s /etc/nginx/sites-available/myapp.conf /etc/nginx/sites-enabled/</span>
+<span class="c-cmd">sudo nginx -t</span>            <span class="c-cmt"># Kiểm tra cú pháp config — LÀM TRƯỚC KHI reload</span>
+<span class="c-cmd">sudo systemctl reload nginx</span>   <span class="c-cmt"># Áp dụng mà không ngắt kết nối</span></pre>
+                </div>
+                <div class="warning-box">
+                    <strong>⚠️ Luôn chạy <code>nginx -t</code> trước khi reload.</strong> Một dấu <code>;</code> thiếu trong config sẽ khiến Nginx không khởi động lại được và toàn bộ site sập. <code>nginx -t</code> bắt lỗi cú pháp an toàn.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SECTION 4: FIREWALL & BINDING ===== -->
+    <section class="section" id="firewall">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🛡️</div>
+                <h2>4. Firewall, localhost & 0.0.0.0</h2>
+                <p>Hai khái niệm gây bối rối nhất với người mới deploy — và là nguồn gốc của vô số lỗi "không kết nối được".</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>🔥 Firewall với <code>ufw</code> (Ubuntu)</h3>
+                <p>Firewall quyết định cổng nào được mở ra internet. Mặc định nên <strong>chặn hết, chỉ mở cái cần</strong>.</p>
+                <div class="cmd-card">
+                    <div class="cmd-label">Cấu hình ufw an toàn cho web server</div>
+<pre class="code-block"><span class="c-cmd">sudo ufw default deny incoming</span>    <span class="c-cmt"># Chặn mọi kết nối vào theo mặc định</span>
+<span class="c-cmd">sudo ufw default allow outgoing</span>   <span class="c-cmt"># Cho phép server gọi ra ngoài</span>
+<span class="c-cmd">sudo ufw allow 22/tcp</span>             <span class="c-cmt"># SSH — MỞ TRƯỚC kẻo tự khoá mình ra ngoài</span>
+<span class="c-cmd">sudo ufw allow 80/tcp</span>             <span class="c-cmt"># HTTP</span>
+<span class="c-cmd">sudo ufw allow 443/tcp</span>            <span class="c-cmt"># HTTPS</span>
+<span class="c-cmd">sudo ufw enable</span>                   <span class="c-cmt"># Bật firewall</span>
+<span class="c-cmd">sudo ufw status numbered</span>          <span class="c-cmt"># Xem các rule đang áp dụng</span></pre>
+                </div>
+                <div class="warning-box">
+                    <strong>⚠️ Mở cổng 22 (SSH) TRƯỚC khi <code>ufw enable</code>.</strong> Nếu bật firewall mà chưa allow SSH, bạn sẽ bị đá khỏi server và không vào lại được (trừ khi có console của nhà cung cấp VPS).
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🆚 <code>localhost</code> (127.0.0.1) vs <code>0.0.0.0</code></h3>
+                <div class="compare-grid">
+                    <div class="compare-card">
+                        <h4>🏠 127.0.0.1 / localhost</h4>
+                        <div class="compare-list">
+                            <div class="compare-item">App chỉ nghe kết nối <strong>từ chính máy đó</strong></div>
+                            <div class="compare-item">Bên ngoài KHÔNG truy cập được</div>
+                            <div class="compare-item"><strong>Dùng cho:</strong> app backend nằm sau reverse proxy — đúng cách an toàn</div>
+                            <div class="compare-item">Nginx ở cùng máy vẫn gọi được qua <code>proxy_pass http://127.0.0.1:5000</code></div>
+                        </div>
+                    </div>
+                    <div class="compare-card">
+                        <h4>🌍 0.0.0.0</h4>
+                        <div class="compare-list">
+                            <div class="compare-item">App nghe trên <strong>mọi network interface</strong></div>
+                            <div class="compare-item">Truy cập được từ bên ngoài (nếu firewall mở)</div>
+                            <div class="compare-item"><strong>Dùng cho:</strong> app trong container Docker (để host map cổng vào được)</div>
+                            <div class="compare-item">Cẩn thận — phơi app ra mạng, cần firewall che chắn</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tip-box">
+                    <strong>💡 Lỗi hay gặp:</strong> "App chạy trên máy mà gọi từ ngoài không được". Thường vì app bind vào <code>localhost</code>. Trong Docker, set <code>ASPNETCORE_URLS=http://+:8080</code> hoặc <code>http://0.0.0.0:8080</code> để nghe mọi interface trong container.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SECTION 5: SCALE — LB & CDN ===== -->
+    <section class="section section-dark" id="scale">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">📈</div>
+                <h2>5. Load Balancer & CDN</h2>
+                <p>Khi một server không đủ: chia tải và đưa nội dung tới gần user hơn.</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>⚖️ Load Balancer — Chia Tải</h3>
+                <p>Khi traffic lớn, bạn chạy nhiều bản (instance) app giống nhau. Load balancer đứng trước, phân phối request đều ra các instance — nếu một con chết, nó tự bỏ qua.</p>
+                <div class="pipeline-flow">
+                    <div class="pipeline-step"><div class="pipe-icon">🌍</div><div class="pipe-label">Users</div><div class="pipe-desc">Nhiều request</div></div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-step"><div class="pipe-icon">⚖️</div><div class="pipe-label">Load Balancer</div><div class="pipe-desc">Phân phối</div></div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-step"><div class="pipe-icon">⚙️</div><div class="pipe-label">App #1</div><div class="pipe-desc">Instance</div></div>
+                    <div class="pipeline-step"><div class="pipe-icon">⚙️</div><div class="pipe-label">App #2</div><div class="pipe-desc">Instance</div></div>
+                    <div class="pipeline-step"><div class="pipe-icon">⚙️</div><div class="pipe-label">App #3</div><div class="pipe-desc">Instance</div></div>
+                </div>
+                <div class="tip-box">
+                    <strong>💡</strong> Nginx có thể làm load balancer cơ bản (block <code>upstream</code>). Ở cloud thì dùng dịch vụ chuyên dụng: AWS ALB, Azure Load Balancer, GCP Cloud Load Balancing — tự co giãn và health check.
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🌎 CDN — Đưa Nội Dung Tới Gần User</h3>
+                <p>CDN (Content Delivery Network) là mạng máy chủ phân tán khắp thế giới, cache file tĩnh (ảnh, CSS, JS, video) ở "edge" gần user. User ở Việt Nam tải từ server Singapore thay vì bay sang Mỹ → nhanh hơn nhiều và giảm tải cho server gốc (origin).</p>
+                <div class="compare-grid">
+                    <div class="compare-card">
+                        <h4>✅ Lợi ích CDN</h4>
+                        <div class="compare-list">
+                            <div class="compare-item">Giảm latency — phục vụ từ edge gần nhất</div>
+                            <div class="compare-item">Giảm tải origin server</div>
+                            <div class="compare-item">Chống DDoS, hấp thụ traffic đột biến</div>
+                            <div class="compare-item">Tiết kiệm băng thông origin</div>
+                        </div>
+                    </div>
+                    <div class="compare-card">
+                        <h4>🏢 Nhà cung cấp phổ biến</h4>
+                        <div class="compare-list">
+                            <div class="compare-item"><strong>Cloudflare</strong> — phổ biến nhất, có free tier mạnh</div>
+                            <div class="compare-item"><strong>AWS CloudFront</strong></div>
+                            <div class="compare-item"><strong>Fastly</strong>, <strong>Akamai</strong> — enterprise</div>
+                            <div class="compare-item">Vercel/Netlify đã tích hợp CDN sẵn cho frontend</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="warning-box">
+                    <strong>⚠️ Cẩn thận cache:</strong> CDN cache file tĩnh nên sau khi deploy bản mới, user có thể vẫn thấy bản cũ. Giải pháp: đặt tên file kèm hash (<code>app.4f8a2.js</code>) hoặc "purge cache" sau mỗi lần deploy.
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🛠️ Lệnh Debug Mạng Hữu Ích</h3>
+                <div class="cmd-card">
+                    <div class="cmd-label">Bộ công cụ khi "site không vào được"</div>
+<pre class="code-block"><span class="c-cmd">ping myapp.com</span>            <span class="c-cmt"># Server có sống & phân giải DNS được không</span>
+<span class="c-cmd">curl -I https://myapp.com</span>   <span class="c-cmt"># Xem status code + headers (không tải body)</span>
+<span class="c-cmd">curl -v http://localhost:5000</span>   <span class="c-cmt"># Test app nội bộ từ trên server</span>
+<span class="c-cmd">dig myapp.com</span>             <span class="c-cmt"># Tra cứu DNS records chi tiết</span>
+<span class="c-cmd">nslookup myapp.com</span>        <span class="c-cmt"># Domain trỏ về IP nào</span>
+<span class="c-cmd">ss -tulpn</span>                 <span class="c-cmt"># Liệt kê cổng đang lắng nghe + tiến trình</span>
+<span class="c-cmd">traceroute myapp.com</span>      <span class="c-cmt"># Gói tin đi qua những chặng nào</span></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="closing-box">
+                <div class="closing-nav">
+                    <a href="index.html" class="closing-btn">🗺️ Tổng quan</a>
+                    <a href="linux-cli.html" class="closing-btn">🐧 Linux & CLI</a>
+                    <a href="secrets.html" class="closing-btn">🔑 Secrets →</a>
+                    <a href="domain.html" class="closing-btn">🌐 Domain</a>
+                    <a href="ssl.html" class="closing-btn">🔒 SSL</a>
+                    <a href="hosting.html" class="closing-btn">☁️ Hosting</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Build & Deploy — Triển khai website từ A→Z cho web developer</p>
+            <p class="footer-note">Networking — IP, port, DNS, reverse proxy, firewall: nền tảng để hiểu hệ thống live</p>
+        </div>
+    </footer>
+
+    <script src="build.js"></script>
+</body>
+</html>

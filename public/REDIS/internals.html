@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Redis Internals &amp; Consistency — Encodings, Event Loop, WAIT, RESP3</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">Redis<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="install.html">Cài đặt</a>
+      <a href="basics.html">Cơ Bản</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="lua.html">Lua</a>
+      <a href="production.html">Production</a>
+      <a href="internals.html" class="active">Internals</a>
+      <a href="interview.html">Phỏng Vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">L4 · MASTER</div>
+  <h1>Redis <span class="gradient">Internals</span> &amp; Consistency</h1>
+  <p class="hero-desc">Bên trong cỗ máy: memory encodings, expiration chủ động/thụ động, mô hình single-thread &amp; event loop, replication bất đồng bộ &amp; mất data lúc failover (WAIT), client-side caching RESP3, và cục diện Redis vs Valkey năm 2026.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">1. Memory Encodings — Cùng một type, nhiều cách lưu</h2>
+    <p class="section-sub">Mỗi data type có nhiều biểu diễn nội bộ. Redis tự chọn encoding gọn nhẹ khi nhỏ, và "nâng cấp" sang encoding tổng quát khi vượt ngưỡng. Hiểu điều này = tiết kiệm RAM khổng lồ.</p>
+
+    <pre class="code"><span class="prompt">&gt;</span> <span class="cmd">RPUSH</span> mylist a b c
+<span class="prompt">&gt;</span> <span class="cmd">OBJECT ENCODING</span> mylist
+<span class="ret">"listpack"</span>            <span class="c"># nhỏ → đóng gói liền mạch, tiết kiệm</span>
+<span class="prompt">&gt;</span> <span class="cmd">HSET</span> h f1 v1
+<span class="prompt">&gt;</span> <span class="cmd">OBJECT ENCODING</span> h
+<span class="ret">"listpack"</span>
+<span class="prompt">&gt;</span> <span class="cmd">SADD</span> nums <span class="s">1</span> <span class="s">2</span> <span class="s">3</span>
+<span class="prompt">&gt;</span> <span class="cmd">OBJECT ENCODING</span> nums
+<span class="ret">"intset"</span>             <span class="c"># set toàn số nguyên → mảng int gói chặt</span>
+<span class="prompt">&gt;</span> <span class="cmd">SET</span> n <span class="s">12345</span>
+<span class="prompt">&gt;</span> <span class="cmd">OBJECT ENCODING</span> n
+<span class="ret">"int"</span></pre>
+
+    <table class="cmp">
+      <tr><th>Type</th><th>Encoding nhỏ</th><th>Nâng cấp lên</th><th>Ngưỡng (config)</th></tr>
+      <tr><td>Hash</td><td><code>listpack</code></td><td><code>hashtable</code></td><td><code>hash-max-listpack-entries</code> 128 / <code>-value</code> 64</td></tr>
+      <tr><td>List</td><td><code>listpack</code></td><td><code>quicklist</code></td><td><code>list-max-listpack-size</code> 128</td></tr>
+      <tr><td>Set (số)</td><td><code>intset</code></td><td><code>hashtable</code></td><td><code>set-max-intset-entries</code> 512</td></tr>
+      <tr><td>Set (string nhỏ)</td><td><code>listpack</code></td><td><code>hashtable</code></td><td><code>set-max-listpack-entries</code> 128</td></tr>
+      <tr><td>Sorted Set</td><td><code>listpack</code></td><td><code>skiplist</code></td><td><code>zset-max-listpack-entries</code> 128 / <code>-value</code> 64</td></tr>
+      <tr><td>String</td><td><code>int</code> / <code>embstr</code></td><td><code>raw</code></td><td>embstr ≤ 44 bytes</td></tr>
+    </table>
+
+    <div class="info-box"><strong>Lịch sử tên gọi:</strong> <code>listpack</code> là kế thừa của <code>ziplist</code> cũ (thay từ Redis 7.0, fix lỗi tràn của ziplist). Nếu thấy <code>ziplist</code> trong tài liệu cũ → giờ là <code>listpack</code>. <code>quicklist</code> là linked list của các listpack node.</div>
+
+    <div class="tip"><strong>Tuning thực chiến:</strong> Nếu bạn lưu hàng triệu hash nhỏ (vd shard user thành <code>user:{1000}</code> chứa nhiều field), giữ chúng dưới ngưỡng <code>listpack</code> để tiết kiệm tới <strong>5-10×</strong> RAM so với hashtable. Đây là kỹ thuật "hash sharding" kinh điển của Instagram. Đừng nâng ngưỡng quá cao — listpack lớn thì thao tác O(n).</div>
+
+    <pre class="code"><span class="c"># redis.conf — chỉnh ngưỡng nếu hiểu rõ trade-off</span>
+hash-max-listpack-entries <span class="s">128</span>
+hash-max-listpack-value <span class="s">64</span>
+zset-max-listpack-entries <span class="s">128</span>
+set-max-intset-entries <span class="s">512</span></pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">2. Expiration — Active vs Passive</h2>
+    <p class="section-sub">Key có TTL không bị xoá đúng từng mili-giây. Redis dùng kết hợp 2 chiến lược để cân bằng CPU và độ chính xác.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>🐢 Passive (lazy)</h3>
+        <p>Khi một client <strong>truy cập</strong> key, Redis kiểm tra TTL — nếu hết hạn thì xoá ngay rồi trả nil. Không tốn CPU nếu key không bao giờ bị đụng tới... nhưng key "chết" vẫn chiếm RAM cho tới khi có người gọi.</p>
+      </div>
+      <div class="card">
+        <h3>⚡ Active (chủ động)</h3>
+        <p>10 lần/giây, Redis lấy <strong>mẫu ngẫu nhiên 20 key</strong> có TTL trong mỗi DB. Xoá những cái đã hết hạn. Nếu &gt;25% mẫu hết hạn → lặp lại ngay (vì có vẻ nhiều key chết). Cơ chế xác suất, giữ tỉ lệ key hết hạn còn sống ở mức thấp.</p>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      <strong>Hệ quả vận hành:</strong> RAM có thể cao hơn dự kiến vì key hết hạn chưa kịp xoá. Nếu bạn set hàng loạt key cùng TTL ngắn, active expiration có thể gây <strong>spike CPU/latency</strong> khi chúng đồng loạt hết hạn. Thêm jitter ngẫu nhiên vào TTL để rải đều.
+    </div>
+
+    <pre class="code"><span class="c"># Replica KHÔNG tự xoá key hết hạn (chờ DEL từ master)</span>
+<span class="c"># → đọc trên replica vẫn trả nil cho key đã hết hạn (logic đúng),</span>
+<span class="c">#   nhưng key vẫn chiếm RAM trên replica tới khi master gửi DEL.</span>
+
+<span class="cmd">INFO</span> stats
+<span class="c"># expired_keys — tổng key đã hết hạn bị xoá</span></pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">3. Single-thread model &amp; Event loop</h2>
+    <p class="section-sub">"Redis chạy 1 thread mà sao nhanh thế?" — vì thao tác in-memory và một event loop tối ưu (<code>ae</code>) ghép kênh I/O. Đây là gốc rễ của tính atomic.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Vòng lặp xử lý</h3>
+        <ol style="padding-left:1.2rem;color:var(--muted)">
+          <li>epoll/kqueue chờ socket sẵn sàng</li>
+          <li>Đọc request từ các client</li>
+          <li>Thực thi command <strong>tuần tự, từng cái một</strong></li>
+          <li>Ghi reply trở lại socket</li>
+          <li>Chạy background task (expire, rehash...)</li>
+        </ol>
+        <p style="margin-top:.5rem">Vì command chạy nối tiếp → không có lock, không race → mọi command (và script Lua) đều atomic.</p>
+      </div>
+      <div class="card">
+        <h3>Không hẳn "1 thread"</h3>
+        <p>Phần <strong>thực thi command</strong> là single-thread. Nhưng từ Redis 6 có <strong>I/O threads</strong> (đọc/ghi socket song song) và nhiều task chạy thread riêng:</p>
+        <ul>
+          <li>BGSAVE / AOF rewrite → fork tiến trình con</li>
+          <li><code>UNLINK</code>, <code>FLUSHALL ASYNC</code> → lazy-free thread giải phóng RAM nền</li>
+          <li>I/O threads (<code>io-threads</code>) cho network</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="danger-box">
+      <strong>Hệ quả #1 cần nhớ:</strong> một lệnh O(n) chậm <strong>chặn toàn bộ server</strong>. <code>KEYS *</code>, <code>SMEMBERS</code> trên set 10 triệu phần tử, <code>HGETALL</code> hash khổng lồ, hay script Lua nặng — tất cả làm đơ mọi client khác. Đây là vì sao trang Cơ Bản nhắc dùng <code>SCAN</code> thay <code>KEYS</code>.
+    </div>
+
+    <pre class="code"><span class="c"># Xoá key lớn không block: UNLINK thay DEL</span>
+<span class="cmd">UNLINK</span> huge:key        <span class="c"># giải phóng RAM ở background thread</span>
+<span class="cmd">DEL</span> huge:key           <span class="c"># giải phóng ngay → block nếu key cực lớn</span></pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">4. Async Replication &amp; mất data lúc failover</h2>
+    <p class="section-sub">Replication của Redis là <strong>bất đồng bộ</strong> mặc định: master ack write cho client <em>trước</em> khi replica nhận được. Điều này nhanh, nhưng mở ra cửa sổ mất data khi failover.</p>
+
+    <div class="warn-box">
+      <strong>Kịch bản mất data:</strong>
+      <ol style="padding-left:1.2rem;margin-top:.3rem">
+        <li>Client <code>SET x 1</code> → master ack OK</li>
+        <li>Master chết <strong>trước khi</strong> kịp gửi write này sang replica</li>
+        <li>Sentinel promote replica thành master mới</li>
+        <li>Master mới <strong>không có <code>x=1</code></strong> → write đã "thành công" với client nhưng biến mất</li>
+      </ol>
+    </div>
+
+    <h3 style="color:var(--primary);margin:1.5rem 0 .5rem">WAIT — đợi replica xác nhận</h3>
+    <p class="section-sub"><code>WAIT numreplicas timeout</code> chặn cho tới khi write trước đó được ít nhất <code>numreplicas</code> replica nhận (hoặc hết timeout). Đẩy độ bền lên gần đồng bộ.</p>
+
+    <div class="cli">
+<span class="prompt">&gt;</span> <span class="cmd">SET</span> payment:1001 <span class="s">"confirmed"</span>
+<span class="ret">OK</span>
+<span class="prompt">&gt;</span> <span class="cmd">WAIT</span> <span class="s">1</span> <span class="s">500</span>          <span class="comment"># đợi ≥1 replica ack, tối đa 500ms</span>
+<span class="ret">(integer) 1</span>            <span class="comment"># số replica đã xác nhận; <numreplicas = chưa đủ bền</span>
+    </div>
+
+    <div class="info-box">
+      <strong>WAIT KHÔNG phải là transaction phân tán.</strong> Nó chỉ tăng xác suất bền vững — vẫn có thể mất data trong các kịch bản network partition hiếm. Để đảm bảo mạnh hơn, Redis Enterprise/Cluster có <strong>WAITAOF</strong> (đợi fsync xuống AOF) và quorum-based config. Với tiền bạc thật sự critical, đừng coi một Redis đơn là source of truth.
+    </div>
+
+    <pre class="code"><span class="cmd">WAITAOF</span> <span class="s">1</span> <span class="s">1</span> <span class="s">1000</span>   <span class="c"># đợi 1 local fsync + 1 replica fsync, timeout 1s</span>
+                  <span class="c"># yêu cầu appendonly=yes; bền hơn WAIT (chống mất khi cả cụm restart)</span></pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">5. Client-side Caching — RESP3 CLIENT TRACKING</h2>
+    <p class="section-sub">Cache phía client (in-process) cho latency gần như 0, nhưng làm sao biết khi data đổi để invalidate? Redis 6 giải quyết bằng <strong>server-assisted client-side caching</strong>: server chủ động báo client khi key bị thay đổi.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>🔔 Default mode (RESP3)</h3>
+        <p>Client bật <code>CLIENT TRACKING ON</code>. Server nhớ các key client đã đọc. Khi key đó bị sửa/xoá, server đẩy thông điệp <strong>invalidation</strong> (push type <code>&gt;</code> của RESP3) tới đúng client đó. Client xoá entry khỏi cache local.</p>
+        <pre class="code"><span class="prompt">&gt;</span> <span class="cmd">HELLO</span> <span class="s">3</span>
+<span class="prompt">&gt;</span> <span class="cmd">CLIENT TRACKING</span> ON
+<span class="ret">OK</span>
+<span class="prompt">&gt;</span> <span class="cmd">GET</span> user:5     <span class="comment"># server bắt đầu "theo dõi" key này cho ta</span>
+<span class="comment"># khi ai đó SET user:5 → ta nhận push invalidate</span></pre>
+      </div>
+      <div class="card">
+        <h3>📢 Broadcast mode (BCAST)</h3>
+        <p>Đăng ký theo <strong>prefix</strong>. Server gửi invalidation cho mọi key khớp prefix mà không cần nhớ từng client đọc gì → tốn ít bộ nhớ server hơn, nhưng nhận cả thông báo không liên quan.</p>
+        <pre class="code"><span class="prompt">&gt;</span> <span class="cmd">CLIENT TRACKING</span> ON BCAST PREFIX user:</pre>
+        <p style="margin-top:.5rem">RESP2 client dùng được qua chế độ redirect (gửi invalidation tới 1 connection Pub/Sub riêng).</p>
+      </div>
+    </div>
+
+    <h3 style="color:var(--primary);margin:1.5rem 0 .5rem">Trong code — StackExchange.Redis</h3>
+    <pre class="code"><span class="c">// StackExchange.Redis hỗ trợ tracking qua tích hợp; nhiều team</span>
+<span class="c">// dùng lớp cache 2 tầng (L1 in-memory + L2 Redis) tự invalidate.</span>
+<span class="c">// ioredis: dùng client.subscribe('__redis__:invalidate') ở chế độ redirect.</span>
+<span class="k">var</span> sub = mux.GetSubscriber();
+sub.Subscribe(<span class="s">"__redis__:invalidate"</span>, (ch, key) =&gt; localCache.Remove(key));</pre>
+
+    <div class="tip"><strong>Khi nào dùng:</strong> dữ liệu đọc cực nhiều / ghi ít (config, feature flag, profile). Cho hit ratio L1 cao mà vẫn nhất quán nhờ invalidation đẩy. Cẩn thận memory phía client và "thundering herd" khi invalidate hàng loạt.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">6. Redis vs Valkey — Cục diện 2024 → 2026</h2>
+    <p class="section-sub">Tháng 3/2024, Redis Inc. đổi license từ BSD sang RSALv2/SSPLv1 (không còn open source theo định nghĩa OSI). Cộng đồng + các nhà cung cấp cloud phản ứng bằng cách fork.</p>
+
+    <table class="cmp">
+      <tr><th></th><th>Redis (Redis Inc.)</th><th>Valkey (Linux Foundation)</th></tr>
+      <tr><td>Nguồn gốc</td><td>Bản gốc của Salvatore Sanfilippo</td><td>Fork từ Redis 7.2.4 (3/2024)</td></tr>
+      <tr><td>License</td><td>RSALv2 / SSPLv1; Redis 8 thêm AGPLv3</td><td>BSD-3 (open source thuần)</td></tr>
+      <tr><td>Hậu thuẫn</td><td>Redis Inc. (thương mại)</td><td>AWS, Google, Oracle, Ericsson...</td></tr>
+      <tr><td>Tương thích</td><td>—</td><td>Drop-in cho Redis 7.2; cùng RESP, cùng client</td></tr>
+      <tr><td>Hướng phát triển</td><td>Redis 8: tích hợp Search/JSON/TimeSeries, vector set</td><td>Valkey 8: hiệu năng đa luồng, RDMA, hash field TTL</td></tr>
+      <tr><td>Cloud mặc định</td><td>Redis Cloud</td><td>ElastiCache, MemoryDB, Memorystore đã chuyển sang Valkey</td></tr>
+    </table>
+
+    <div class="info-box">
+      <strong>Trạng thái 2026:</strong> Đáng chú ý, tháng 5/2025 Redis 8 <strong>thêm lại tùy chọn AGPLv3</strong> — một phần để đáp lại đà tăng của Valkey. Hai dự án giờ phát triển song song và đang dần phân kỳ tính năng. Với code ứng dụng thông thường, cả hai vẫn <strong>tương thích lệnh</strong>: StackExchange.Redis và ioredis chạy với cả hai mà không sửa gì.
+    </div>
+
+    <div class="tip">
+      <strong>Chọn thế nào?</strong> Cần license open source thuần / đang dùng AWS-GCP managed → <strong>Valkey</strong> là đường mặc định, miễn phí license. Cần module đặc thù của Redis Inc. (vector search tích hợp, RedisJSON cao cấp, hỗ trợ thương mại) → <strong>Redis</strong>. Kiểm tra license version cụ thể trước khi nhúng vào sản phẩm bán lại (SSPL ràng buộc khi cung cấp như dịch vụ).
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🧠 Tóm tắt cho phỏng vấn L4</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>Phải nói được</h4>
+        <ul>
+          <li>Vì sao single-thread mà nhanh + hệ quả O(n) blocking</li>
+          <li>Encoding chuyển đổi theo ngưỡng → tuning RAM</li>
+          <li>Active + passive expiration, replica không tự xoá</li>
+          <li>Replication async → cửa sổ mất data, WAIT/WAITAOF giảm thiểu</li>
+          <li>RESP3 client tracking cho cache 2 tầng nhất quán</li>
+          <li>Bối cảnh license Redis/Valkey 2024-2026</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Câu hỏi tự kiểm tra</h4>
+        <ul>
+          <li>Vì sao Lua script atomic mà không cần lock?</li>
+          <li>Set 1M hash nhỏ — làm sao tiết kiệm RAM?</li>
+          <li>SET trả OK rồi master chết — data còn không?</li>
+          <li>Khác nhau giữa <code>DEL</code> và <code>UNLINK</code>?</li>
+          <li><code>WAIT 1 0</code> nghĩa là gì?</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tip" style="margin-top:1rem"><strong>Ôn vận hành thực tế?</strong> <a href="production.html" style="color:var(--primary)">→ Trang Production</a> — persistence, Sentinel, Cluster, eviction, monitoring.</div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Redis Mastery · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

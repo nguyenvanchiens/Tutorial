@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication & JWT trong ASP.NET Core — A-Z</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --ut-primary: #512bd4;
+        --ut-primary-2: #8a2be2;
+        --ut-accent: #43e97b;
+        --ut-warn: #f39c12;
+        --ut-danger: #f5576c;
+        --ut-card: #1a1d2e;
+        --ut-card-2: #232640;
+        --ut-border: #2d3148;
+        --ut-text: #e2e8f0;
+        --ut-muted: #94a3b8;
+    }
+    .ut-hero { text-align: center; padding: 4rem 1.5rem 3rem; background: radial-gradient(ellipse at top, rgba(81,43,212,.18), transparent 60%); }
+    .ut-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 1rem; }
+    .ut-hero h1 .gradient { background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .ut-hero .hero-badge { display: inline-block; background: rgba(81,43,212,.15); color: var(--ut-primary-2); padding: .4rem 1rem; border-radius: 20px; font-size: .78rem; font-weight: 600; letter-spacing: 1px; margin-bottom: 1.25rem; }
+    .ut-hero p { color: var(--ut-muted); max-width: 820px; margin: 0 auto; }
+    .ut-section { padding: 2.5rem 0; }
+    .ut-title { font-size: 1.7rem; margin-bottom: 1.5rem; position: relative; padding-left: 1rem; color: var(--ut-text); }
+    .ut-title::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 4px; background: linear-gradient(180deg, var(--ut-primary), var(--ut-primary-2)); border-radius: 3px; }
+    .ut-sub { color: var(--ut-muted); margin-bottom: 1.25rem; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+    .ut-grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .ut-grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    .ut-grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .ut-card { background: var(--ut-card); border: 1px solid var(--ut-border); border-radius: 12px; padding: 1.4rem; }
+    .ut-card h3 { color: var(--ut-primary-2); margin-bottom: .6rem; font-size: 1.1rem; }
+    .ut-card h4 { color: var(--ut-accent); margin-bottom: .45rem; font-size: .98rem; }
+    .ut-card p, .ut-card li { color: var(--ut-muted); font-size: .95rem; }
+    .ut-card ul { padding-left: 1.2rem; }
+    .ut-card ul li { margin-bottom: .3rem; }
+    pre.cb { background: #0b1020; border: 1px solid var(--ut-border); border-left: 3px solid var(--ut-primary); border-radius: 8px; padding: 1rem 1.15rem; overflow-x: auto; font-family: 'JetBrains Mono', Consolas, monospace; font-size: .88rem; line-height: 1.6; margin: .75rem 0; color: #d6deeb; }
+    pre.cb .k { color: #c792ea; }
+    pre.cb .s { color: #ecc48d; }
+    pre.cb .c { color: #637777; font-style: italic; }
+    pre.cb .n { color: #82aaff; }
+    pre.cb .t { color: #ffcb8b; }
+    pre.cb .a { color: #7fdbca; }
+    code { background: #2d3148; padding: 2px 6px; border-radius: 4px; font-size: .88em; color: #f8d06b; font-family: 'JetBrains Mono', Consolas, monospace; }
+    .callout { border-radius: 10px; padding: .95rem 1.15rem; margin: 1rem 0; border: 1px solid; }
+    .callout.tip { background: rgba(67,233,123,.07); border-color: var(--ut-accent); }
+    .callout.tip strong { color: var(--ut-accent); }
+    .callout.warn { background: rgba(243,156,18,.07); border-color: var(--ut-warn); }
+    .callout.warn strong { color: var(--ut-warn); }
+    .callout.danger { background: rgba(245,87,108,.07); border-color: var(--ut-danger); }
+    .callout.danger strong { color: var(--ut-danger); }
+    .callout.info { background: rgba(81,43,212,.08); border-color: var(--ut-primary-2); }
+    .callout.info strong { color: var(--ut-primary-2); }
+    table.cmp { width: 100%; border-collapse: collapse; background: var(--ut-card); border-radius: 10px; overflow: hidden; margin: 1rem 0; font-size: .92rem; }
+    table.cmp th, table.cmp td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--ut-border); }
+    table.cmp th { background: var(--ut-card-2); color: var(--ut-primary-2); font-weight: 600; }
+    table.cmp td { color: var(--ut-muted); }
+    table.cmp tr:last-child td { border-bottom: none; }
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; position: relative; padding-left: 2.8rem; margin-bottom: 1rem; }
+    .steps li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 2rem; height: 2rem; background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .do-dont { border-left: 3px solid; padding: 1rem 1.15rem; border-radius: 8px; margin-bottom: 1rem; }
+    .do-dont.do { border-color: var(--ut-accent); background: rgba(67,233,123,.04); }
+    .do-dont.dont { border-color: var(--ut-danger); background: rgba(245,87,108,.04); }
+    .do-dont h4 { margin-bottom: .5rem; }
+    .do-dont.do h4 { color: var(--ut-accent); }
+    .do-dont.dont h4 { color: var(--ut-danger); }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo"><a href="index.html" style="color:inherit;-webkit-text-fill-color:inherit;">.NET<span class="accent">Mastery</span></a></div>
+        <div class="nav-links">
+            <a href="index.html">Roadmap</a>
+            <a href="async.html">Async</a>
+            <a href="rest-design.html">REST API</a>
+            <a href="auth-jwt.html" class="nav-active">Auth & JWT</a>
+            <a href="caching.html">Caching</a>
+            <a href="logging.html">Logging</a>
+            <a href="error-handling.html">Error & Resilience</a>
+            <a href="clean-architecture.html">Clean Arch</a>
+            <a href="design-patterns.html">SOLID & Patterns</a>
+        </div>
+        <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+</nav>
+
+<header class="ut-hero">
+    <div class="hero-badge">NÂNG CAO · INTERMEDIATE</div>
+    <h1>Authentication &amp; <span class="gradient">JWT</span></h1>
+    <p>Hiểu sâu cách xác thực trong ASP.NET Core .NET 8/9: phân biệt Authentication vs Authorization, cấu trúc JWT (header.payload.signature), access token vs refresh token, cấu hình JwtBearer & TokenValidationParameters, policy/role authorization, đọc claims, refresh token rotation và những lỗi bảo mật chết người. Code C# chính xác, dùng được ngay.</p>
+</header>
+
+<div class="container">
+
+<section class="ut-section">
+    <h2 class="ut-title">1. Authentication vs Authorization</h2>
+    <p class="ut-sub">Hai khái niệm thường bị nhầm lẫn. <strong>Authentication</strong> (AuthN — xác thực) trả lời câu hỏi <em>"Bạn là ai?"</em>. <strong>Authorization</strong> (AuthZ — phân quyền) trả lời <em>"Bạn được phép làm gì?"</em>. Luôn xác thực TRƯỚC, phân quyền SAU.</p>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h3>🪪 Authentication (AuthN)</h3>
+            <p>Chứng minh danh tính: kiểm tra username/password, validate JWT, kiểm tra API key, OAuth/OpenID. Kết quả: một <code>ClaimsPrincipal</code> đại diện cho người dùng (đã đăng nhập hay anonymous).</p>
+        </div>
+        <div class="ut-card">
+            <h3>🔐 Authorization (AuthZ)</h3>
+            <p>Quyết định người đã xác thực có được truy cập tài nguyên không, dựa trên role, claim, policy. Trong ASP.NET Core: middleware <code>UseAuthorization()</code>, attribute <code>[Authorize]</code>, policy.</p>
+        </div>
+    </div>
+
+    <table class="cmp">
+        <tr><th>Tiêu chí</th><th>Authentication</th><th>Authorization</th></tr>
+        <tr><td>Câu hỏi</td><td>"Bạn là ai?"</td><td>"Bạn được làm gì?"</td></tr>
+        <tr><td>Thực hiện khi</td><td>Trước (xác định danh tính)</td><td>Sau (kiểm tra quyền)</td></tr>
+        <tr><td>Dữ liệu dùng</td><td>Credentials, token, cookie</td><td>Roles, claims, policies</td></tr>
+        <tr><td>Lỗi trả về</td><td><code>401 Unauthorized</code></td><td><code>403 Forbidden</code></td></tr>
+        <tr><td>Middleware</td><td><code>UseAuthentication()</code></td><td><code>UseAuthorization()</code></td></tr>
+    </table>
+
+    <div class="callout info">
+        <strong>Thứ tự middleware quan trọng:</strong> trong pipeline phải đặt <code>app.UseAuthentication();</code> TRƯỚC <code>app.UseAuthorization();</code>. Sai thứ tự thì <code>HttpContext.User</code> chưa được dựng khi authorization chạy → mọi request đều bị 401/403.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">2. Cấu trúc JWT (JSON Web Token)</h2>
+    <p class="ut-sub">JWT là chuỗi gồm 3 phần ngăn cách bằng dấu chấm: <code>header.payload.signature</code>. Mỗi phần được mã hoá <strong>Base64Url</strong> (không phải mã hoá bảo mật — chỉ là encoding).</p>
+
+    <pre class="cb"><span class="c">// Một JWT trông như thế này (3 phần ngăn bởi dấu chấm):</span>
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9   <span class="c">// HEADER  (base64url)</span>
+.eyJzdWIiOiIxMjMiLCJuYW1lIjoiQ2hpZW4iLCJleHAiOjE3MTg0MDAwMDB9  <span class="c">// PAYLOAD</span>
+.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c   <span class="c">// SIGNATURE</span></pre>
+
+    <div class="ut-grid ut-grid-3">
+        <div class="ut-card">
+            <h4>1. Header</h4>
+            <p>Khai báo thuật toán ký và loại token.</p>
+            <pre class="cb">{
+  <span class="s">"alg"</span>: <span class="s">"HS256"</span>,
+  <span class="s">"typ"</span>: <span class="s">"JWT"</span>
+}</pre>
+        </div>
+        <div class="ut-card">
+            <h4>2. Payload (Claims)</h4>
+            <p>Chứa các claim mô tả người dùng & metadata token.</p>
+            <pre class="cb">{
+  <span class="s">"sub"</span>: <span class="s">"123"</span>,
+  <span class="s">"name"</span>: <span class="s">"Chien"</span>,
+  <span class="s">"role"</span>: <span class="s">"Admin"</span>,
+  <span class="s">"iss"</span>: <span class="s">"devhub"</span>,
+  <span class="s">"aud"</span>: <span class="s">"devhub-api"</span>,
+  <span class="s">"exp"</span>: <span class="s">1718400000</span>
+}</pre>
+        </div>
+        <div class="ut-card">
+            <h4>3. Signature</h4>
+            <p>Ký <code>base64url(header) + "." + base64url(payload)</code> bằng secret key → đảm bảo token không bị sửa.</p>
+            <pre class="cb"><span class="n">HMACSHA256</span>(
+  base64Url(header) + <span class="s">"."</span> +
+  base64Url(payload),
+  <span class="t">secret</span>
+)</pre>
+        </div>
+    </div>
+
+    <table class="cmp">
+        <tr><th>Claim chuẩn</th><th>Ý nghĩa</th></tr>
+        <tr><td><code>sub</code> (subject)</td><td>ID định danh người dùng</td></tr>
+        <tr><td><code>iss</code> (issuer)</td><td>Bên phát hành token (server của bạn)</td></tr>
+        <tr><td><code>aud</code> (audience)</td><td>Bên được phép dùng token (API đích)</td></tr>
+        <tr><td><code>exp</code> (expiration)</td><td>Thời điểm hết hạn (Unix timestamp)</td></tr>
+        <tr><td><code>iat</code> (issued at)</td><td>Thời điểm phát hành</td></tr>
+        <tr><td><code>nbf</code> (not before)</td><td>Token chỉ hợp lệ sau thời điểm này</td></tr>
+        <tr><td><code>jti</code> (JWT ID)</td><td>ID duy nhất của token (dùng để revoke)</td></tr>
+    </table>
+
+    <div class="callout danger">
+        <strong>⚠️ Payload KHÔNG được mã hoá:</strong> phần payload chỉ <em>encode Base64Url</em>, không phải encrypt. Ai cũng có thể giải mã và đọc nội dung claim (dán vào jwt.io là thấy hết). <strong>Tuyệt đối KHÔNG để dữ liệu nhạy cảm</strong> (mật khẩu, số thẻ, secret) trong payload. Signature chỉ chống <em>sửa đổi</em>, không chống <em>đọc</em>.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">3. Access Token vs Refresh Token</h2>
+    <p class="ut-sub">Mô hình hai token là nền tảng của xác thực hiện đại: <strong>access token sống ngắn</strong>, <strong>refresh token sống dài</strong>. Tách ra để cân bằng giữa bảo mật và trải nghiệm.</p>
+
+    <table class="cmp">
+        <tr><th>Tiêu chí</th><th>Access Token</th><th>Refresh Token</th></tr>
+        <tr><td>Tuổi thọ</td><td>Ngắn (~5–15 phút)</td><td>Dài (vài ngày → vài tuần)</td></tr>
+        <tr><td>Mục đích</td><td>Gọi API, truy cập tài nguyên</td><td>Lấy access token mới khi hết hạn</td></tr>
+        <tr><td>Định dạng</td><td>JWT (self-contained)</td><td>Chuỗi opaque ngẫu nhiên (thường lưu DB)</td></tr>
+        <tr><td>Gửi kèm</td><td>Mỗi request (<code>Authorization: Bearer</code>)</td><td>Chỉ khi refresh</td></tr>
+        <tr><td>Thu hồi (revoke)</td><td>Khó (stateless) → để hết hạn nhanh</td><td>Dễ (xoá/đánh dấu trong DB)</td></tr>
+        <tr><td>Lưu ở client</td><td>Memory (an toàn nhất)</td><td>HttpOnly cookie (khuyến nghị)</td></tr>
+    </table>
+
+    <div class="callout info">
+        <strong>Vì sao tách hai token?</strong> Nếu access token bị lộ, nó hết hạn nhanh (vài phút) nên thiệt hại giới hạn. Refresh token sống lâu nhưng được giữ kín hơn, ít gửi đi, và có thể <em>thu hồi</em> trong DB. Người dùng không phải đăng nhập lại liên tục — UX tốt mà vẫn an toàn.
+    </div>
+
+    <div class="callout warn">
+        <strong>Đánh đổi:</strong> access token là <em>stateless</em> — server không thể "huỷ" nó trước khi hết hạn. Vì thế access token PHẢI sống ngắn. Nếu cần huỷ tức thì (logout ngay, ban user), dùng cơ chế bổ sung: blacklist <code>jti</code>, kiểm tra version token, hoặc rút ngắn <code>exp</code>.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">4. Cấu hình & phát hành token trong ASP.NET Core</h2>
+    <p class="ut-sub">Luồng dựng JWT authentication đầy đủ cho .NET 8/9. Cài package <code>Microsoft.AspNetCore.Authentication.JwtBearer</code>. Thư viện tạo/đọc token: <code>Microsoft.IdentityModel.JsonWebTokens</code> (mới, khuyến nghị) hoặc <code>System.IdentityModel.Tokens.Jwt</code> (cũ hơn).</p>
+
+    <ol class="steps">
+        <li>
+            <strong>Cấu hình settings</strong> trong <code>appsettings.json</code> — secret thật phải lấy từ User Secrets / Key Vault, không hardcode.
+            <pre class="cb">{
+  <span class="s">"Jwt"</span>: {
+    <span class="s">"Issuer"</span>: <span class="s">"https://devhub.local"</span>,
+    <span class="s">"Audience"</span>: <span class="s">"devhub-api"</span>,
+    <span class="s">"Key"</span>: <span class="s">"&lt;lay-tu-secret-store-toi-thieu-32-bytes&gt;"</span>,
+    <span class="s">"AccessTokenMinutes"</span>: <span class="s">15</span>,
+    <span class="s">"RefreshTokenDays"</span>: <span class="s">7</span>
+  }
+}</pre>
+        </li>
+        <li>
+            <strong>Đăng ký authentication</strong> với <code>AddJwtBearer</code> trong <code>Program.cs</code>.
+            <pre class="cb"><span class="k">var</span> jwt = builder.Configuration.GetSection(<span class="s">"Jwt"</span>);
+<span class="k">var</span> key = <span class="k">new</span> <span class="t">SymmetricSecurityKey</span>(
+    Encoding.UTF8.GetBytes(jwt[<span class="s">"Key"</span>]!));
+
+builder.Services
+    .AddAuthentication(<span class="t">JwtBearerDefaults</span>.AuthenticationScheme)
+    .AddJwtBearer(options =&gt;
+    {
+        options.TokenValidationParameters = <span class="k">new</span> <span class="t">TokenValidationParameters</span>
+        {
+            ValidateIssuer = <span class="k">true</span>,
+            ValidIssuer = jwt[<span class="s">"Issuer"</span>],
+            ValidateAudience = <span class="k">true</span>,
+            ValidAudience = jwt[<span class="s">"Audience"</span>],
+            ValidateLifetime = <span class="k">true</span>,
+            ValidateIssuerSigningKey = <span class="k">true</span>,
+            IssuerSigningKey = key,
+            ClockSkew = TimeSpan.Zero   <span class="c">// bỏ 5 phút mặc định để exp chính xác</span>
+        };
+    });
+
+builder.Services.AddAuthorization();</pre>
+        </li>
+        <li>
+            <strong>Bật middleware</strong> đúng thứ tự trong pipeline.
+            <pre class="cb"><span class="k">var</span> app = builder.Build();
+
+app.UseAuthentication();   <span class="c">// dựng HttpContext.User trước</span>
+app.UseAuthorization();    <span class="c">// rồi mới kiểm tra quyền</span>
+
+app.MapControllers();
+app.Run();</pre>
+        </li>
+        <li>
+            <strong>Sinh access token</strong> bằng <code>JsonWebTokenHandler</code> (API mới của Microsoft.IdentityModel).
+            <pre class="cb"><span class="k">public class</span> <span class="t">TokenService</span>(<span class="t">IConfiguration</span> config)
+{
+    <span class="k">public string</span> <span class="n">CreateAccessToken</span>(<span class="t">User</span> user)
+    {
+        <span class="k">var</span> jwt = config.GetSection(<span class="s">"Jwt"</span>);
+        <span class="k">var</span> key = <span class="k">new</span> <span class="t">SymmetricSecurityKey</span>(
+            Encoding.UTF8.GetBytes(jwt[<span class="s">"Key"</span>]!));
+
+        <span class="k">var</span> descriptor = <span class="k">new</span> <span class="t">SecurityTokenDescriptor</span>
+        {
+            Issuer = jwt[<span class="s">"Issuer"</span>],
+            Audience = jwt[<span class="s">"Audience"</span>],
+            Expires = DateTime.UtcNow.AddMinutes(
+                <span class="k">int</span>.Parse(jwt[<span class="s">"AccessTokenMinutes"</span>]!)),
+            Subject = <span class="k">new</span> <span class="t">ClaimsIdentity</span>(<span class="k">new</span>[]
+            {
+                <span class="k">new</span> <span class="t">Claim</span>(<span class="t">JwtRegisteredClaimNames</span>.Sub, user.Id.ToString()),
+                <span class="k">new</span> <span class="t">Claim</span>(<span class="t">JwtRegisteredClaimNames</span>.Jti, Guid.NewGuid().ToString()),
+                <span class="k">new</span> <span class="t">Claim</span>(<span class="t">ClaimTypes</span>.Name, user.UserName),
+                <span class="k">new</span> <span class="t">Claim</span>(<span class="t">ClaimTypes</span>.Role, user.Role)
+            }),
+            SigningCredentials = <span class="k">new</span> <span class="t">SigningCredentials</span>(
+                key, <span class="t">SecurityAlgorithms</span>.HmacSha256)
+        };
+
+        <span class="k">var</span> handler = <span class="k">new</span> <span class="t">JsonWebTokenHandler</span>();
+        <span class="k">return</span> handler.CreateToken(descriptor);
+    }
+
+    <span class="c">// Refresh token: chuỗi ngẫu nhiên mạnh, KHÔNG phải JWT</span>
+    <span class="k">public string</span> <span class="n">CreateRefreshToken</span>() =&gt;
+        Convert.ToBase64String(RandomNumberGenerator.GetBytes(<span class="s">64</span>));
+}</pre>
+        </li>
+        <li>
+            <strong>Endpoint <code>/auth/login</code></strong> — xác thực credential, trả về access + refresh token.
+            <pre class="cb">[<span class="a">ApiController</span>]
+[<span class="a">Route</span>(<span class="s">"auth"</span>)]
+<span class="k">public class</span> <span class="t">AuthController</span>(
+    <span class="t">IUserService</span> users,
+    <span class="t">TokenService</span> tokens,
+    <span class="t">IRefreshTokenStore</span> store) : <span class="t">ControllerBase</span>
+{
+    [<span class="a">HttpPost</span>(<span class="s">"login"</span>)]
+    [<span class="a">AllowAnonymous</span>]
+    <span class="k">public async</span> Task&lt;<span class="t">IActionResult</span>&gt; <span class="n">Login</span>(
+        <span class="t">LoginRequest</span> req, CancellationToken ct)
+    {
+        <span class="k">var</span> user = <span class="k">await</span> users.ValidateCredentialsAsync(
+            req.UserName, req.Password, ct);
+        <span class="k">if</span> (user <span class="k">is null</span>)
+            <span class="k">return</span> Unauthorized(<span class="k">new</span> { error = <span class="s">"Sai tài khoản hoặc mật khẩu"</span> });
+
+        <span class="k">var</span> access = tokens.CreateAccessToken(user);
+        <span class="k">var</span> refresh = tokens.CreateRefreshToken();
+
+        <span class="c">// Lưu refresh token đã HASH vào DB (xem mục 8)</span>
+        <span class="k">await</span> store.SaveAsync(user.Id, refresh, ct);
+
+        <span class="k">return</span> Ok(<span class="k">new</span>
+        {
+            accessToken = access,
+            refreshToken = refresh,
+            expiresIn = <span class="s">900</span>   <span class="c">// 15 phút (giây)</span>
+        });
+    }
+}</pre>
+        </li>
+    </ol>
+
+    <div class="callout tip">
+        <strong>💡 <code>JsonWebTokenHandler</code> vs <code>JwtSecurityTokenHandler</code>:</strong> Microsoft khuyến nghị <code>JsonWebTokenHandler</code> (namespace <code>Microsoft.IdentityModel.JsonWebTokens</code>) cho code mới — nhanh hơn, ít allocation hơn. <code>JwtSecurityTokenHandler</code> (<code>System.IdentityModel.Tokens.Jwt</code>) là API cũ, vẫn dùng được nhưng đang dần bị thay thế.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">5. Token Validation — kiểm tra gì?</h2>
+    <p class="ut-sub">Mỗi request có <code>Authorization: Bearer &lt;token&gt;</code>, middleware JwtBearer tự động validate dựa trên <code>TokenValidationParameters</code>. Validate ĐẦY ĐỦ là tuyến phòng thủ then chốt.</p>
+
+    <table class="cmp">
+        <tr><th>Tham số</th><th>Kiểm tra</th><th>Vì sao quan trọng</th></tr>
+        <tr><td><code>ValidateIssuerSigningKey</code></td><td>Chữ ký hợp lệ với key</td><td>Chống token giả mạo / tự ký</td></tr>
+        <tr><td><code>ValidateIssuer</code></td><td><code>iss</code> đúng server phát hành</td><td>Chống token từ hệ thống khác</td></tr>
+        <tr><td><code>ValidateAudience</code></td><td><code>aud</code> đúng API đích</td><td>Chống dùng token của service khác</td></tr>
+        <tr><td><code>ValidateLifetime</code></td><td><code>exp</code>/<code>nbf</code> còn hiệu lực</td><td>Chống token hết hạn</td></tr>
+        <tr><td><code>ClockSkew</code></td><td>Độ lệch đồng hồ cho phép</td><td>Mặc định 5 phút; set <code>Zero</code> để exp chính xác</td></tr>
+    </table>
+
+    <pre class="cb"><span class="c">// Validate thủ công (vd khi refresh, đọc token đã hết hạn)</span>
+<span class="k">var</span> handler = <span class="k">new</span> <span class="t">JsonWebTokenHandler</span>();
+<span class="k">var</span> result = <span class="k">await</span> handler.ValidateTokenAsync(token, <span class="k">new</span> <span class="t">TokenValidationParameters</span>
+{
+    ValidateIssuer = <span class="k">true</span>,  ValidIssuer = jwt[<span class="s">"Issuer"</span>],
+    ValidateAudience = <span class="k">true</span>, ValidAudience = jwt[<span class="s">"Audience"</span>],
+    ValidateLifetime = <span class="k">true</span>,
+    ValidateIssuerSigningKey = <span class="k">true</span>,
+    IssuerSigningKey = key,
+    ClockSkew = TimeSpan.Zero
+});
+
+<span class="k">if</span> (!result.IsValid)
+    <span class="k">throw new</span> <span class="t">SecurityTokenException</span>(<span class="s">"Token không hợp lệ"</span>, result.Exception);
+
+<span class="t">ClaimsIdentity</span> identity = result.ClaimsIdentity; <span class="c">// claims đã parse</span></pre>
+
+    <div class="callout warn">
+        <strong>⚠️ Symmetric key phải đủ mạnh:</strong> với HS256, key tối thiểu 256-bit (32 bytes). Key yếu/ngắn dễ bị brute-force để giả token. Lấy key từ <code>dotnet user-secrets</code> (dev) hoặc Azure Key Vault / biến môi trường (prod) — KHÔNG commit vào <code>appsettings.json</code>. Nếu nhiều service chia sẻ key, cân nhắc dùng RSA (asymmetric, RS256): server ký bằng private key, các service validate bằng public key.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">6. [Authorize] — Policies & Roles</h2>
+    <p class="ut-sub">Sau khi xác thực, dùng <code>[Authorize]</code> để phân quyền. Có hai cách: <strong>role-based</strong> (đơn giản) và <strong>policy-based</strong> (linh hoạt, khuyến nghị cho logic phức tạp).</p>
+
+    <pre class="cb"><span class="c">// Đăng ký policies trong Program.cs</span>
+builder.Services.AddAuthorization(options =&gt;
+{
+    <span class="c">// Policy theo role</span>
+    options.AddPolicy(<span class="s">"AdminOnly"</span>, p =&gt; p.RequireRole(<span class="s">"Admin"</span>));
+
+    <span class="c">// Policy theo claim</span>
+    options.AddPolicy(<span class="s">"CanPublish"</span>, p =&gt;
+        p.RequireClaim(<span class="s">"permission"</span>, <span class="s">"articles:publish"</span>));
+
+    <span class="c">// Policy gộp nhiều điều kiện</span>
+    options.AddPolicy(<span class="s">"SeniorEditor"</span>, p =&gt; p
+        .RequireRole(<span class="s">"Editor"</span>)
+        .RequireClaim(<span class="s">"level"</span>, <span class="s">"senior"</span>)
+        .RequireAuthenticatedUser());
+});</pre>
+
+    <pre class="cb"><span class="c">// Áp dụng trên controller / action</span>
+[<span class="a">Authorize</span>]                              <span class="c">// chỉ cần đã đăng nhập</span>
+[<span class="a">Authorize</span>(Roles = <span class="s">"Admin,Manager"</span>)]      <span class="c">// role-based</span>
+[<span class="a">Authorize</span>(Policy = <span class="s">"AdminOnly"</span>)]          <span class="c">// policy-based</span>
+[<span class="a">AllowAnonymous</span>]                        <span class="c">// mở public dù controller có [Authorize]</span>
+<span class="k">public class</span> <span class="t">ArticlesController</span> : <span class="t">ControllerBase</span>
+{
+    [<span class="a">HttpPost</span>(<span class="s">"publish"</span>)]
+    [<span class="a">Authorize</span>(Policy = <span class="s">"CanPublish"</span>)]
+    <span class="k">public</span> <span class="t">IActionResult</span> <span class="n">Publish</span>() =&gt; Ok();
+}</pre>
+
+    <table class="cmp">
+        <tr><th>Tiêu chí</th><th>Role-based</th><th>Policy-based</th></tr>
+        <tr><td>Cách dùng</td><td><code>[Authorize(Roles="...")]</code></td><td><code>[Authorize(Policy="...")]</code></td></tr>
+        <tr><td>Logic</td><td>Chỉ kiểm tra role</td><td>Role + claim + handler tùy biến</td></tr>
+        <tr><td>Linh hoạt</td><td>Thấp</td><td>Cao (logic phức tạp, requirement)</td></tr>
+        <tr><td>Bảo trì</td><td>Rải rác string role khắp nơi</td><td>Tập trung khi khai báo policy</td></tr>
+        <tr><td>Khuyến nghị</td><td>App nhỏ, role cố định</td><td>App thật, cần mở rộng</td></tr>
+    </table>
+
+    <div class="callout tip">
+        <strong>💡 Ưu tiên policy-based:</strong> role thực chất chỉ là một loại claim. Policy gom logic phân quyền vào một chỗ, dễ test và đổi yêu cầu mà không phải sửa string rải rác. Với logic rất phức tạp (vd resource-based: "chỉ chủ sở hữu mới sửa được bài"), viết <code>IAuthorizationHandler</code> tùy biến.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">7. Claims & ClaimsPrincipal</h2>
+    <p class="ut-sub">Sau xác thực, danh tính người dùng nằm trong <code>HttpContext.User</code> (kiểu <code>ClaimsPrincipal</code>). Mỗi mẩu thông tin là một <code>Claim</code> (cặp type/value), được nạp từ payload JWT.</p>
+
+    <pre class="cb"><span class="c">// Đọc claims trong controller (User = ClaimsPrincipal)</span>
+[<span class="a">Authorize</span>]
+[<span class="a">HttpGet</span>(<span class="s">"me"</span>)]
+<span class="k">public</span> <span class="t">IActionResult</span> <span class="n">Me</span>()
+{
+    <span class="c">// sub được map sang NameIdentifier</span>
+    <span class="k">var</span> userId = User.FindFirst(<span class="t">ClaimTypes</span>.NameIdentifier)?.Value
+                 ?? User.FindFirstValue(<span class="t">JwtRegisteredClaimNames</span>.Sub);
+
+    <span class="k">var</span> name  = User.Identity?.Name;            <span class="c">// ClaimTypes.Name</span>
+    <span class="k">var</span> isAdmin = User.IsInRole(<span class="s">"Admin"</span>);        <span class="c">// kiểm tra role</span>
+    <span class="k">var</span> perms = User.FindAll(<span class="s">"permission"</span>)       <span class="c">// nhiều claim cùng type</span>
+                    .Select(c =&gt; c.Value).ToArray();
+
+    <span class="k">return</span> Ok(<span class="k">new</span> { userId, name, isAdmin, perms });
+}</pre>
+
+    <div class="callout info">
+        <strong>Lưu ý mapping claim:</strong> mặc định JwtBearer ánh xạ vài claim chuẩn sang URI dài của <code>ClaimTypes</code> (vd <code>sub</code> → <code>ClaimTypes.NameIdentifier</code>). Nếu muốn giữ tên claim gốc (<code>sub</code>, <code>role</code>...), tắt mapping: <code>JsonWebTokenHandler.DefaultInboundClaimTypeMap.Clear();</code> hoặc set <code>options.MapInboundClaims = false;</code> trong <code>AddJwtBearer</code>.
+    </div>
+
+    <div class="callout warn">
+        <strong>⚠️ Claim không phải nguồn chân lý tuyệt đối:</strong> claim được "đóng băng" vào token lúc đăng nhập. Nếu bạn thu hồi quyền của user, các token cũ vẫn mang claim cũ cho tới khi hết hạn. Đây là lý do access token phải sống ngắn. Dữ liệu nhạy cảm/biến động nên kiểm tra lại từ DB, đừng tin mù vào claim.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">8. Refresh Token Rotation</h2>
+    <p class="ut-sub">Rotation là pattern bảo mật: mỗi lần dùng refresh token để lấy access token mới, refresh token cũ bị <strong>vô hiệu hoá</strong> và phát hành refresh token MỚI. Nếu một refresh token đã dùng lại xuất hiện lần nữa → dấu hiệu bị đánh cắp → thu hồi cả chuỗi (token family).</p>
+
+    <ol class="steps">
+        <li><strong>Lưu refresh token đã HASH</strong> trong DB (không lưu plaintext) — kèm <code>UserId</code>, <code>ExpiresAt</code>, <code>IsRevoked</code>, và <code>ReplacedByToken</code> để truy vết chuỗi.</li>
+        <li><strong>Khi client gọi <code>/auth/refresh</code></strong>: hash token nhận được, tra DB tìm bản ghi khớp còn hiệu lực.</li>
+        <li><strong>Nếu token đã bị revoke (reuse detection)</strong>: thu hồi TOÀN BỘ token của user (token family) → buộc đăng nhập lại. Đây là dấu hiệu token bị lộ.</li>
+        <li><strong>Nếu hợp lệ</strong>: đánh dấu token cũ là revoked, sinh access + refresh MỚI, lưu refresh mới (hash), trả về cho client.</li>
+    </ol>
+
+    <pre class="cb">[<span class="a">HttpPost</span>(<span class="s">"refresh"</span>)]
+[<span class="a">AllowAnonymous</span>]
+<span class="k">public async</span> Task&lt;<span class="t">IActionResult</span>&gt; <span class="n">Refresh</span>(
+    <span class="t">RefreshRequest</span> req, CancellationToken ct)
+{
+    <span class="c">// 1. Hash token để so với DB (so sánh hash, không lưu plaintext)</span>
+    <span class="k">var</span> hash = Sha256(req.RefreshToken);
+    <span class="k">var</span> stored = <span class="k">await</span> store.FindByHashAsync(hash, ct);
+
+    <span class="k">if</span> (stored <span class="k">is null</span> || stored.ExpiresAt &lt; DateTime.UtcNow)
+        <span class="k">return</span> Unauthorized();
+
+    <span class="c">// 2. Reuse detection: token đã bị revoke mà còn dùng lại → bị lộ</span>
+    <span class="k">if</span> (stored.IsRevoked)
+    {
+        <span class="k">await</span> store.RevokeAllForUserAsync(stored.UserId, ct); <span class="c">// thu hồi cả family</span>
+        <span class="k">return</span> Unauthorized(<span class="k">new</span> { error = <span class="s">"Token reuse detected"</span> });
+    }
+
+    <span class="c">// 3. Rotate: revoke token cũ, phát hành cặp mới</span>
+    <span class="k">var</span> user = <span class="k">await</span> users.GetByIdAsync(stored.UserId, ct);
+    <span class="k">var</span> newAccess  = tokens.CreateAccessToken(user);
+    <span class="k">var</span> newRefresh = tokens.CreateRefreshToken();
+
+    stored.IsRevoked = <span class="k">true</span>;
+    stored.ReplacedByToken = Sha256(newRefresh);   <span class="c">// nối chuỗi để truy vết</span>
+    <span class="k">await</span> store.SaveAsync(user.Id, newRefresh, ct);
+    <span class="k">await</span> store.UpdateAsync(stored, ct);
+
+    <span class="k">return</span> Ok(<span class="k">new</span> { accessToken = newAccess, refreshToken = newRefresh });
+}
+
+<span class="k">private static string</span> <span class="n">Sha256</span>(<span class="k">string</span> input) =&gt;
+    Convert.ToHexString(
+        SHA256.HashData(Encoding.UTF8.GetBytes(input)));</pre>
+
+    <div class="callout tip">
+        <strong>💡 Vì sao hash refresh token trong DB?</strong> Giống lưu mật khẩu: nếu DB bị lộ, attacker không có token plaintext để dùng. So sánh bằng hash khi xác thực. Với refresh token (entropy cao, ngẫu nhiên 64 bytes), SHA-256 là đủ — không cần bcrypt như mật khẩu người dùng.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">9. Cạm bẫy bảo mật (Do / Don't)</h2>
+
+    <div class="do-dont dont">
+        <h4>❌ Lưu JWT trong localStorage</h4>
+        <pre class="cb">localStorage.setItem(<span class="s">"token"</span>, accessToken); <span class="c">// 💀 dễ bị XSS đánh cắp</span></pre>
+        <p>Bất kỳ script độc nào (XSS) đều đọc được <code>localStorage</code> và lấy token. Nguy hiểm hơn nữa với refresh token sống lâu.</p>
+    </div>
+
+    <div class="do-dont do">
+        <h4>✅ Refresh token trong HttpOnly Secure cookie</h4>
+        <pre class="cb">Response.Cookies.Append(<span class="s">"refreshToken"</span>, refresh, <span class="k">new</span> <span class="t">CookieOptions</span>
+{
+    HttpOnly = <span class="k">true</span>,   <span class="c">// JS không đọc được → chống XSS</span>
+    Secure   = <span class="k">true</span>,   <span class="c">// chỉ gửi qua HTTPS</span>
+    SameSite = <span class="t">SameSiteMode</span>.Strict <span class="c">// chống CSRF</span>
+});</pre>
+        <p>Giữ access token ngắn hạn trong memory (biến JS), refresh token trong HttpOnly cookie. JS không chạm được cookie → an toàn trước XSS.</p>
+    </div>
+
+    <div class="do-dont dont">
+        <h4>❌ Signing key yếu / hardcode</h4>
+        <pre class="cb"><span class="k">var</span> key = <span class="s">"secret123"</span>; <span class="c">// quá ngắn, lại còn commit vào git</span></pre>
+        <p>Key yếu bị brute-force để giả token. Key trong source code = lộ ngay. Dùng key ngẫu nhiên ≥ 32 bytes, lấy từ Key Vault / User Secrets / env var.</p>
+    </div>
+
+    <div class="do-dont dont">
+        <h4>❌ Tắt bớt validation cho "nhanh"</h4>
+        <pre class="cb">ValidateIssuer = <span class="k">false</span>;
+ValidateAudience = <span class="k">false</span>;
+ValidateLifetime = <span class="k">false</span>; <span class="c">// 💀 token hết hạn vẫn xài được</span></pre>
+        <p>Mỗi cờ tắt là một lỗ hổng. Luôn validate đầy đủ: issuer, audience, lifetime, signing key.</p>
+    </div>
+
+    <div class="do-dont dont">
+        <h4>❌ Để secret/PII trong claim</h4>
+        <pre class="cb"><span class="k">new</span> <span class="t">Claim</span>(<span class="s">"password"</span>, user.Password); <span class="c">// 💀 ai cũng decode đọc được</span></pre>
+        <p>Payload chỉ encode chứ không mã hoá. Đừng để mật khẩu, số CMND/thẻ, secret nội bộ vào claim. Chỉ để ID & metadata cần cho authz.</p>
+    </div>
+
+    <div class="do-dont do">
+        <h4>✅ Buộc HTTPS + access token sống ngắn</h4>
+        <pre class="cb">app.UseHttpsRedirection();        <span class="c">// token chỉ đi qua kênh mã hoá</span>
+<span class="c">// AccessTokenMinutes = 15 → thiệt hại giới hạn nếu lộ</span></pre>
+        <p>Luôn HTTPS để token không bị nghe lén. Access token ngắn (5–15 phút) giới hạn cửa sổ tấn công; cần phiên dài thì dùng refresh token rotation.</p>
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">🎯 Checklist Auth & JWT</h2>
+    <div class="ut-card">
+        <ul>
+            <li>✅ <code>UseAuthentication()</code> đặt TRƯỚC <code>UseAuthorization()</code> trong pipeline</li>
+            <li>✅ Validate đầy đủ: Issuer, Audience, Lifetime, IssuerSigningKey; cân nhắc <code>ClockSkew = Zero</code></li>
+            <li>✅ Signing key ≥ 32 bytes, lấy từ User Secrets / Key Vault / env — KHÔNG hardcode</li>
+            <li>✅ Access token sống ngắn (5–15 phút), refresh token sống dài & thu hồi được</li>
+            <li>✅ Refresh token lưu DẠNG HASH trong DB, áp dụng rotation + reuse detection</li>
+            <li>✅ KHÔNG để mật khẩu / PII / secret trong claim (payload chỉ encode, không mã hoá)</li>
+            <li>✅ Refresh token trong HttpOnly + Secure + SameSite cookie; access token giữ trong memory</li>
+            <li>✅ Bật <code>UseHttpsRedirection()</code> — token chỉ truyền qua HTTPS</li>
+            <li>✅ Ưu tiên policy-based authorization cho logic phức tạp; dùng <code>IsInRole</code>/<code>FindFirst</code> để đọc claim</li>
+            <li>✅ Dùng <code>JsonWebTokenHandler</code> (Microsoft.IdentityModel.JsonWebTokens) cho code mới</li>
+        </ul>
+    </div>
+</section>
+
+</div>
+
+<footer style="text-align:center;padding:3rem 1.5rem;color:var(--ut-muted);border-top:1px solid var(--ut-border);margin-top:3rem;font-size:.9rem;">
+    <p>Authentication & JWT · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

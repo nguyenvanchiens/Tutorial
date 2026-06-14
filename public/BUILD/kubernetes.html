@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes & Orchestration — Điều Phối Container</title>
+    <link rel="stylesheet" href="build.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><a href="index.html">Build<span class="accent">&Deploy</span></a></div>
+            <div class="nav-links">
+                <a href="index.html">🗺️ Tổng quan</a>
+                <a href="git.html">📦 Git</a>
+                <a href="cicd.html">⚙️ CI/CD</a>
+                <a href="jenkins.html">🔴 Jenkins</a>
+                <a href="docker.html">🐳 Docker</a>
+                <a href="kubernetes.html" class="active">☸️ Kubernetes</a>
+                <a href="iac.html">🏗️ IaC</a>
+                <a href="sre.html">🚨 SRE</a>
+                <a href="devsecops.html">🛡️ DevSecOps</a>
+                <a href="hosting.html">☁️ Hosting</a>
+                <a href="cloud.html">⛅ Cloud</a>
+                <a href="monitoring.html">📊 Monitoring</a>
+                <a href="workflow.html">🔄 Workflow</a>
+            </div>
+            <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <header class="build-hero">
+        <div class="hero-content">
+            <div class="hero-badge">CHƯƠNG 11 · ORCHESTRATION</div>
+            <h1>Kubernetes & <span class="gradient-text">Orchestration</span></h1>
+            <p class="hero-desc">Khi 1 container không đủ — điều phối hàng trăm container tự động: scale, self-healing, rolling update, zero downtime. K8s là "hệ điều hành của data center".</p>
+            <div class="hero-stats">
+                <div class="stat"><span class="stat-number">8</span><span class="stat-label">Core objects</span></div>
+                <div class="stat"><span class="stat-number">3</span><span class="stat-label">Loại probe</span></div>
+                <div class="stat"><span class="stat-number">AKS/EKS/GKE</span><span class="stat-label">Managed K8s</span></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== SECTION 1: WHY ORCHESTRATION ===== -->
+    <section class="section section-dark" id="why">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🤔</div>
+                <h2>11.1 — Tại Sao Cần Orchestration?</h2>
+                <p>Docker giải quyết "đóng gói app". Kubernetes giải quyết "chạy hàng trăm container trên nhiều server"</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>🐳 Docker là đủ? — Vấn đề khi scale</h3>
+                <p>Bạn có Dockerfile, build image, <code>docker run</code> — ngon. Nhưng production thực tế:</p>
+                <div class="analogy-grid">
+                    <div class="analogy-box">
+                        <h4>❌ Chỉ có Docker — Đau đầu</h4>
+                        <p>Container chết lúc 3h sáng → ai restart? Cần 10 replicas → chạy <code>docker run</code> 10 lần thủ công? Server đầy → di chuyển container sang server khác bằng tay? Deploy version mới → tắt hết rồi bật lại = downtime?</p>
+                    </div>
+                    <div class="analogy-box good">
+                        <h4>✅ Có Kubernetes — Tự động</h4>
+                        <p>Container chết → K8s tự restart (self-healing). Khai báo "muốn 10 replicas" → K8s đảm bảo luôn có 10. Server chết → K8s reschedule container sang node khác. Deploy → rolling update, zero downtime tự động.</p>
+                    </div>
+                </div>
+                <div class="tip-box">
+                    <strong>💡 Bản chất:</strong> Kubernetes là <strong>declarative</strong> — bạn khai báo "trạng thái mong muốn" (desired state), K8s liên tục so sánh với "trạng thái thực tế" (actual state) và tự động điều chỉnh để khớp. Đây gọi là <strong>reconciliation loop</strong>.
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🧩 Kiến Trúc K8s — Control Plane vs Nodes</h3>
+                <div class="jenkins-arch">
+                    <div class="arch-card">
+                        <div class="arch-icon">🧠</div>
+                        <strong>Control Plane</strong>
+                        <p>Bộ não cluster: <code>api-server</code> (cổng vào), <code>etcd</code> (DB lưu state), <code>scheduler</code> (xếp pod vào node), <code>controller-manager</code> (reconcile loop).</p>
+                    </div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-card">
+                        <div class="arch-icon">⚙️</div>
+                        <strong>Worker Node</strong>
+                        <p><code>kubelet</code> (agent chạy pod), <code>kube-proxy</code> (network/routing), container runtime (containerd). Đây là nơi app của bạn thực sự chạy.</p>
+                    </div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-card">
+                        <div class="arch-icon">📦</div>
+                        <strong>Pods</strong>
+                        <p>Đơn vị nhỏ nhất K8s quản lý. 1 pod = 1+ container chia sẻ network/storage. App của bạn chạy trong pod.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SECTION 2: CORE OBJECTS ===== -->
+    <section class="section" id="objects">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🧱</div>
+                <h2>11.2 — Core Objects — 8 Khái Niệm Phải Biết</h2>
+                <p>Mọi thứ trong K8s đều là "object" khai báo bằng YAML. Đây là 8 object cốt lõi</p>
+            </div>
+
+            <div class="concept-card">
+                <div class="docker-concepts">
+                    <div class="docker-concept"><strong>Pod</strong> — đơn vị deploy nhỏ nhất. 1+ container cùng chia sẻ IP, volume. Thường 1 pod = 1 app container. Ephemeral (có thể chết bất kỳ lúc nào).</div>
+                    <div class="docker-concept"><strong>ReplicaSet</strong> — đảm bảo luôn có N pod chạy. Pod chết → tạo pod mới. Ít khi dùng trực tiếp, Deployment quản lý hộ.</div>
+                    <div class="docker-concept"><strong>Deployment</strong> — quản lý ReplicaSet, lo rolling update & rollback. Object bạn dùng nhiều nhất cho stateless app (API, web).</div>
+                    <div class="docker-concept"><strong>Service</strong> — IP/DNS ổn định cho nhóm pod. Pod đổi IP liên tục → Service làm "load balancer nội bộ" ổn định.</div>
+                    <div class="docker-concept"><strong>Ingress</strong> — định tuyến HTTP/HTTPS từ ngoài vào Service theo host/path. Cộng SSL termination. Cần Ingress Controller (nginx, Traefik).</div>
+                    <div class="docker-concept"><strong>ConfigMap</strong> — lưu config dạng key-value (non-secret): connection string, feature flag, app settings. Mount vào pod qua env hoặc file.</div>
+                    <div class="docker-concept"><strong>Secret</strong> — lưu dữ liệu nhạy cảm (password, token, cert). Giống ConfigMap nhưng base64 + RBAC chặt hơn. Nên dùng external secret store cho production.</div>
+                    <div class="docker-concept"><strong>Namespace</strong> — chia cluster thành "phòng" logic: <code>dev</code>, <code>staging</code>, <code>prod</code>. Cô lập resource, RBAC, quota theo team/môi trường.</div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🔌 Service Types — Phơi App Ra Ngoài Thế Nào</h3>
+                <div class="cmd-grid">
+                    <div class="cmd-card">
+                        <div class="cmd-label">ClusterIP (mặc định)</div>
+                        <pre class="code-block"><span class="c-cmt"># Chỉ truy cập trong cluster</span>
+<span class="c-cmt"># Dùng cho: DB, service nội bộ</span>
+type: ClusterIP</pre>
+                    </div>
+                    <div class="cmd-card">
+                        <div class="cmd-label">NodePort</div>
+                        <pre class="code-block"><span class="c-cmt"># Mở port trên mọi node (30000-32767)</span>
+<span class="c-cmt"># Dùng cho: dev/test, không nên prod</span>
+type: NodePort</pre>
+                    </div>
+                    <div class="cmd-card">
+                        <div class="cmd-label">LoadBalancer</div>
+                        <pre class="code-block"><span class="c-cmt"># Cloud LB (Azure/AWS) cấp IP public</span>
+<span class="c-cmt"># Dùng cho: phơi 1 service ra internet</span>
+type: LoadBalancer</pre>
+                    </div>
+                    <div class="cmd-card">
+                        <div class="cmd-label">Ingress (khuyến nghị)</div>
+                        <pre class="code-block"><span class="c-cmt"># 1 LB + route nhiều service theo host/path</span>
+<span class="c-cmt"># Dùng cho: nhiều app, SSL, prod</span>
+kind: Ingress</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SECTION 3: KUBECTL ===== -->
+    <section class="section section-dark" id="kubectl">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">⌨️</div>
+                <h2>11.3 — kubectl — Lệnh Cơ Bản Phải Thuộc</h2>
+                <p>kubectl là CLI nói chuyện với api-server. 90% công việc hằng ngày nằm ở vài lệnh này</p>
+            </div>
+
+            <div class="concept-card">
+                <div class="cmd-grid">
+                    <div class="cmd-card">
+                        <div class="cmd-label">Xem tài nguyên</div>
+                        <pre class="code-block"><span class="c-cmd">kubectl</span> get pods <span class="c-cmt"># list pod</span>
+<span class="c-cmd">kubectl</span> get pods -n prod <span class="c-cmt"># theo namespace</span>
+<span class="c-cmd">kubectl</span> get all <span class="c-cmt"># mọi resource</span>
+<span class="c-cmd">kubectl</span> get pods -o wide <span class="c-cmt"># thêm IP/node</span>
+<span class="c-cmd">kubectl</span> get pods -w <span class="c-cmt"># watch realtime</span></pre>
+                    </div>
+                    <div class="cmd-card">
+                        <div class="cmd-label">Debug & điều tra</div>
+                        <pre class="code-block"><span class="c-cmd">kubectl</span> describe pod my-api <span class="c-cmt"># chi tiết + events</span>
+<span class="c-cmd">kubectl</span> logs my-api <span class="c-cmt"># xem log</span>
+<span class="c-cmd">kubectl</span> logs -f my-api <span class="c-cmt"># follow log</span>
+<span class="c-cmd">kubectl</span> exec -it my-api -- sh <span class="c-cmt"># vào shell</span>
+<span class="c-cmd">kubectl</span> get events --sort-by=.lastTimestamp</pre>
+                    </div>
+                    <div class="cmd-card">
+                        <div class="cmd-label">Apply & xóa (declarative)</div>
+                        <pre class="code-block"><span class="c-cmd">kubectl</span> apply -f deploy.yaml <span class="c-cmt"># tạo/cập nhật</span>
+<span class="c-cmd">kubectl</span> apply -f ./k8s/ <span class="c-cmt"># cả thư mục</span>
+<span class="c-cmd">kubectl</span> delete -f deploy.yaml
+<span class="c-cmd">kubectl</span> diff -f deploy.yaml <span class="c-cmt"># xem sẽ đổi gì</span></pre>
+                    </div>
+                    <div class="cmd-card">
+                        <div class="cmd-label">Scale & rollout</div>
+                        <pre class="code-block"><span class="c-cmd">kubectl</span> scale deploy my-api --replicas=5
+<span class="c-cmd">kubectl</span> rollout status deploy/my-api
+<span class="c-cmd">kubectl</span> rollout undo deploy/my-api <span class="c-cmt"># rollback</span>
+<span class="c-cmd">kubectl</span> rollout history deploy/my-api
+<span class="c-cmd">kubectl</span> port-forward svc/my-api 8080:80</pre>
+                    </div>
+                </div>
+                <div class="tip-box">
+                    <strong>💡 Mẹo pro:</strong> Đặt alias <code>alias k=kubectl</code> và bật autocomplete. Dùng <code>kubectl apply -f</code> (declarative) thay vì <code>kubectl create/run</code> (imperative) để mọi thứ versioned trong Git — đây là nền tảng của GitOps.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SECTION 4: WORKED MANIFEST ===== -->
+    <section class="section" id="manifest">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">📄</div>
+                <h2>11.4 — Manifest Hoàn Chỉnh — Deploy .NET API</h2>
+                <p>Một bộ YAML thực tế production-ready cho ASP.NET Core API: Deployment + Service + Ingress + Config + Secret</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>📦 deployment.yaml — Deployment + Service</h3>
+                <pre class="code-block"><span class="c-key">apiVersion:</span> apps/v1
+<span class="c-key">kind:</span> Deployment
+<span class="c-key">metadata:</span>
+  <span class="c-key">name:</span> dotnet-api
+  <span class="c-key">namespace:</span> prod
+  <span class="c-key">labels:</span> { app: dotnet-api }
+<span class="c-key">spec:</span>
+  <span class="c-key">replicas:</span> 3                       <span class="c-cmt"># muốn 3 pod chạy</span>
+  <span class="c-key">selector:</span>
+    <span class="c-key">matchLabels:</span> { app: dotnet-api }
+  <span class="c-key">strategy:</span>
+    <span class="c-key">type:</span> RollingUpdate            <span class="c-cmt"># cập nhật dần, zero downtime</span>
+    <span class="c-key">rollingUpdate:</span> { maxSurge: 1, maxUnavailable: 0 }
+  <span class="c-key">template:</span>
+    <span class="c-key">metadata:</span>
+      <span class="c-key">labels:</span> { app: dotnet-api }
+    <span class="c-key">spec:</span>
+      <span class="c-key">containers:</span>
+        - <span class="c-key">name:</span> api
+          <span class="c-key">image:</span> myregistry.azurecr.io/dotnet-api:<span class="c-str">1.4.2</span>  <span class="c-cmt"># pin tag, không dùng :latest</span>
+          <span class="c-key">ports:</span>
+            - <span class="c-key">containerPort:</span> 8080
+          <span class="c-key">env:</span>
+            - <span class="c-key">name:</span> ASPNETCORE_URLS
+              <span class="c-key">value:</span> <span class="c-str">"http://+:8080"</span>
+          <span class="c-key">envFrom:</span>
+            - <span class="c-key">configMapRef:</span> { name: api-config }
+            - <span class="c-key">secretRef:</span> { name: api-secret }
+          <span class="c-key">resources:</span>                   <span class="c-cmt"># luôn đặt requests/limits</span>
+            <span class="c-key">requests:</span> { cpu: "100m", memory: "128Mi" }
+            <span class="c-key">limits:</span>   { cpu: "500m", memory: "256Mi" }
+          <span class="c-key">livenessProbe:</span>             <span class="c-cmt"># còn sống không?</span>
+            <span class="c-key">httpGet:</span> { path: /healthz/live, port: 8080 }
+            <span class="c-key">initialDelaySeconds:</span> 10
+            <span class="c-key">periodSeconds:</span> 10
+          <span class="c-key">readinessProbe:</span>            <span class="c-cmt"># sẵn sàng nhận traffic chưa?</span>
+            <span class="c-key">httpGet:</span> { path: /healthz/ready, port: 8080 }
+            <span class="c-key">initialDelaySeconds:</span> 5
+            <span class="c-key">periodSeconds:</span> 5
+---
+<span class="c-key">apiVersion:</span> v1
+<span class="c-key">kind:</span> Service
+<span class="c-key">metadata:</span> { name: dotnet-api, namespace: prod }
+<span class="c-key">spec:</span>
+  <span class="c-key">selector:</span> { app: dotnet-api }      <span class="c-cmt"># khớp pod qua label</span>
+  <span class="c-key">ports:</span>
+    - <span class="c-key">port:</span> 80                       <span class="c-cmt"># cổng service</span>
+      <span class="c-key">targetPort:</span> 8080               <span class="c-cmt"># cổng container</span>
+  <span class="c-key">type:</span> ClusterIP</pre>
+            </div>
+
+            <div class="concept-card">
+                <h3>🔑 config.yaml — ConfigMap + Secret + Ingress</h3>
+                <pre class="code-block"><span class="c-key">apiVersion:</span> v1
+<span class="c-key">kind:</span> ConfigMap
+<span class="c-key">metadata:</span> { name: api-config, namespace: prod }
+<span class="c-key">data:</span>
+  ASPNETCORE_ENVIRONMENT: <span class="c-str">"Production"</span>
+  Logging__LogLevel__Default: <span class="c-str">"Information"</span>
+---
+<span class="c-key">apiVersion:</span> v1
+<span class="c-key">kind:</span> Secret
+<span class="c-key">metadata:</span> { name: api-secret, namespace: prod }
+<span class="c-key">type:</span> Opaque
+<span class="c-key">stringData:</span>                          <span class="c-cmt"># stringData = plaintext, K8s tự base64</span>
+  ConnectionStrings__Default: <span class="c-str">"Server=db;Database=app;User=sa;Password=..."</span>
+---
+<span class="c-key">apiVersion:</span> networking.k8s.io/v1
+<span class="c-key">kind:</span> Ingress
+<span class="c-key">metadata:</span>
+  <span class="c-key">name:</span> dotnet-api
+  <span class="c-key">namespace:</span> prod
+  <span class="c-key">annotations:</span>
+    cert-manager.io/cluster-issuer: <span class="c-str">"letsencrypt-prod"</span>  <span class="c-cmt"># auto SSL</span>
+<span class="c-key">spec:</span>
+  <span class="c-key">ingressClassName:</span> nginx
+  <span class="c-key">tls:</span>
+    - <span class="c-key">hosts:</span> [api.myapp.com]
+      <span class="c-key">secretName:</span> api-tls
+  <span class="c-key">rules:</span>
+    - <span class="c-key">host:</span> api.myapp.com
+      <span class="c-key">http:</span>
+        <span class="c-key">paths:</span>
+          - <span class="c-key">path:</span> /
+            <span class="c-key">pathType:</span> Prefix
+            <span class="c-key">backend:</span>
+              <span class="c-key">service:</span> { name: dotnet-api, port: { number: 80 } }</pre>
+                <div class="warning-box">
+                    <strong>⚠️ Secret KHÔNG phải mã hóa:</strong> Secret chỉ base64-encode (ai cũng decode được). Production thật phải bật <strong>encryption at rest</strong> cho etcd + dùng external store: <strong>Azure Key Vault / AWS Secrets Manager + External Secrets Operator</strong>, hoặc <strong>Sealed Secrets</strong>. Đừng commit Secret YAML có plaintext vào Git.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SECTION 5: PROBES & SCALING ===== -->
+    <section class="section section-dark" id="probes">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">❤️</div>
+                <h2>11.5 — Health Probes, Scaling & Rolling Update</h2>
+                <p>Self-healing và auto-scaling chỉ hoạt động đúng khi probe được cấu hình chuẩn</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>🩺 3 Loại Probe — Đừng Nhầm Lẫn</h3>
+                <div class="cicd-explain">
+                    <div class="cicd-box ci-box">
+                        <h4>Liveness Probe</h4>
+                        <p>"App còn sống không?"</p>
+                        <div class="cicd-step">Fail → K8s <strong>restart</strong> container</div>
+                        <div class="cicd-step">Dùng cho: phát hiện deadlock, treo</div>
+                        <div class="cicd-goal">Endpoint phải nhẹ, không check DB (tránh restart oan khi DB chậm)</div>
+                    </div>
+                    <div class="cicd-box cd-box">
+                        <h4>Readiness Probe</h4>
+                        <p>"Sẵn sàng nhận traffic chưa?"</p>
+                        <div class="cicd-step">Fail → K8s <strong>ngắt traffic</strong> (không restart)</div>
+                        <div class="cicd-step">Dùng cho: warmup, chờ DB/cache sẵn sàng</div>
+                        <div class="cicd-goal">Quan trọng nhất cho zero-downtime deploy</div>
+                    </div>
+                </div>
+                <div class="cicd-box" style="margin-top:16px; border-top-color:var(--accent-purple);">
+                    <h4>Startup Probe</h4>
+                    <p>"App khởi động xong chưa?" — dành cho app khởi động chậm (legacy .NET, JVM)</p>
+                    <div class="cicd-step">Trong khi startup chạy, liveness/readiness bị tạm hoãn → tránh K8s giết app đang boot</div>
+                    <div class="cicd-goal">Đặt <code>failureThreshold</code> cao để cho app đủ thời gian khởi động</div>
+                </div>
+                <div class="tip-box">
+                    <strong>💡 ASP.NET Core:</strong> Dùng package <code>Microsoft.Extensions.Diagnostics.HealthChecks</code> → <code>app.MapHealthChecks("/healthz/ready")</code> với DB/cache check, và <code>/healthz/live</code> chỉ trả 200 đơn thuần.
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>📈 HPA — Horizontal Pod Autoscaler</h3>
+                <p>Tự động tăng/giảm số pod theo tải (CPU, memory, hoặc custom metric). Cần Metrics Server cài sẵn.</p>
+                <pre class="code-block"><span class="c-key">apiVersion:</span> autoscaling/v2
+<span class="c-key">kind:</span> HorizontalPodAutoscaler
+<span class="c-key">metadata:</span> { name: dotnet-api, namespace: prod }
+<span class="c-key">spec:</span>
+  <span class="c-key">scaleTargetRef:</span>
+    <span class="c-key">apiVersion:</span> apps/v1
+    <span class="c-key">kind:</span> Deployment
+    <span class="c-key">name:</span> dotnet-api
+  <span class="c-key">minReplicas:</span> 3
+  <span class="c-key">maxReplicas:</span> 20
+  <span class="c-key">metrics:</span>
+    - <span class="c-key">type:</span> Resource
+      <span class="c-key">resource:</span>
+        <span class="c-key">name:</span> cpu
+        <span class="c-key">target:</span> { type: Utilization, averageUtilization: 70 }  <span class="c-cmt"># scale khi CPU > 70%</span></pre>
+                <div class="warning-box">
+                    <strong>⚠️ HPA cần resource requests:</strong> HPA tính % dựa trên <code>resources.requests</code>. Không khai báo requests → HPA không biết tính theo gì → không hoạt động. Đây là lỗi #1 của người mới. Cho scale theo queue length / RPS, dùng <strong>KEDA</strong> (event-driven autoscaling), 2026 đã là chuẩn cho workload theo sự kiện.
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🔄 Rolling Update — Cập Nhật Không Downtime</h3>
+                <div class="workflow-timeline">
+                    <div class="wf-step">
+                        <div class="wf-num">1</div>
+                        <div class="wf-content">
+                            <h4>Đổi image tag → apply</h4>
+                            <p><code>kubectl set image deploy/dotnet-api api=...:1.4.3</code> hoặc sửa YAML rồi <code>kubectl apply</code>.</p>
+                        </div>
+                    </div>
+                    <div class="wf-step">
+                        <div class="wf-num">2</div>
+                        <div class="wf-content">
+                            <h4>K8s tạo pod mới (maxSurge)</h4>
+                            <p>Tạo thêm pod version mới. Chờ readiness probe PASS mới đưa vào Service.</p>
+                        </div>
+                    </div>
+                    <div class="wf-step">
+                        <div class="wf-num">3</div>
+                        <div class="wf-content">
+                            <h4>Tắt dần pod cũ (maxUnavailable)</h4>
+                            <p>Pod mới ready → drain & terminate pod cũ từng cái. Luôn có pod phục vụ traffic.</p>
+                        </div>
+                    </div>
+                    <div class="wf-step">
+                        <div class="wf-num">4</div>
+                        <div class="wf-content">
+                            <h4>Lỗi? Rollback tức thì</h4>
+                            <p><code>kubectl rollout undo deploy/dotnet-api</code> → quay về ReplicaSet trước đó trong vài giây.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SECTION 6: MANAGED, HELM, K3S ===== -->
+    <section class="section" id="ecosystem">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">🌐</div>
+                <h2>11.6 — Managed K8s, Helm & Học Tập</h2>
+                <p>Đừng tự vận hành control plane — dùng managed. Helm để đóng gói. k3s để học trên laptop</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>☁️ Managed Kubernetes — Big 3</h3>
+                <div class="cloud-grid">
+                    <div class="cloud-card cloud-azure">
+                        <h4>AKS — Azure Kubernetes Service</h4>
+                        <div class="cloud-best">Tốt nhất cho: hệ sinh thái .NET / Microsoft</div>
+                        <div class="cloud-services">
+                            <div>Control plane miễn phí (trả tiền node)</div>
+                            <div>Tích hợp Entra ID, ACR, Key Vault</div>
+                            <div>Workload Identity (OIDC) sẵn</div>
+                        </div>
+                        <div class="cloud-why">Lựa chọn tự nhiên nếu team đã dùng Azure DevOps + .NET.</div>
+                    </div>
+                    <div class="cloud-card cloud-aws">
+                        <h4>EKS — Elastic Kubernetes Service</h4>
+                        <div class="cloud-best">Tốt nhất cho: hạ tầng đã ở AWS</div>
+                        <div class="cloud-services">
+                            <div>Control plane ~$0.10/giờ/cluster</div>
+                            <div>IRSA / Pod Identity (OIDC → IAM)</div>
+                            <div>Fargate (serverless node) tùy chọn</div>
+                        </div>
+                        <div class="cloud-why">Hệ sinh thái rộng nhất, nhiều dịch vụ tích hợp.</div>
+                    </div>
+                    <div class="cloud-card cloud-gcp">
+                        <h4>GKE — Google Kubernetes Engine</h4>
+                        <div class="cloud-best">Tốt nhất cho: trải nghiệm K8s mượt nhất</div>
+                        <div class="cloud-services">
+                            <div>GKE Autopilot — Google lo node hộ bạn</div>
+                            <div>Google là cha đẻ Kubernetes</div>
+                            <div>Auto-upgrade, auto-repair mạnh</div>
+                        </div>
+                        <div class="cloud-why">Vận hành ít công nhất, đặc biệt với Autopilot.</div>
+                    </div>
+                </div>
+                <div class="tip-box">
+                    <strong>💡 Đừng dựng K8s thủ công cho production.</strong> Tự quản control plane + etcd backup + upgrade = full-time job. Managed K8s lo control plane, bạn chỉ lo workload. Chi phí thêm rất đáng so với rủi ro vận hành.
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>⎈ Helm — Package Manager cho K8s</h3>
+                <p>Khi có 10 môi trường × 20 microservice, copy-paste YAML là địa ngục. Helm đóng gói YAML thành <strong>chart</strong> có biến (values), template hóa và versioned.</p>
+                <div class="cmd-grid">
+                    <div class="cmd-card">
+                        <div class="cmd-label">Lệnh Helm cơ bản</div>
+                        <pre class="code-block"><span class="c-cmd">helm</span> repo add bitnami https://...
+<span class="c-cmd">helm</span> install my-api ./chart \
+  -f values.prod.yaml
+<span class="c-cmd">helm</span> upgrade my-api ./chart --install
+<span class="c-cmd">helm</span> rollback my-api 1
+<span class="c-cmd">helm</span> list -n prod</pre>
+                    </div>
+                    <div class="cmd-card">
+                        <div class="cmd-label">templates/deployment.yaml (template hóa)</div>
+                        <pre class="code-block"><span class="c-key">spec:</span>
+  <span class="c-key">replicas:</span> {{ .Values.replicas }}
+  <span class="c-cmt"># values.yaml: replicas: 3</span>
+<span class="c-key">image:</span> {{ .Values.image.repo }}:{{ .Values.image.tag }}
+  <span class="c-cmt"># 1 chart, nhiều values theo môi trường</span></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>🎓 Học K8s — Bắt Đầu Nhẹ Nhàng</h3>
+                <div class="tools-grid">
+                    <div class="tool-card tool-rec">
+                        <span class="tool-badge">KHUYÊN DÙNG</span>
+                        <div class="tool-logo">🐑</div>
+                        <h4>k3s</h4>
+                        <p>K8s rút gọn của Rancher, nhẹ &lt;100MB, chạy ngon trên laptop/Raspberry Pi. Single binary, full tương thích API.</p>
+                        <div class="tool-pros">✓ Cài 1 lệnh, học cực nhanh</div>
+                        <div class="tool-for">Học, dev, edge, homelab</div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-logo">🐳</div>
+                        <h4>kind / Docker Desktop</h4>
+                        <p>kind = K8s in Docker. Docker Desktop có toggle bật K8s 1 click. Tốt cho test CI local.</p>
+                        <div class="tool-pros">✓ Có sẵn nếu đã dùng Docker</div>
+                        <div class="tool-for">Test nhanh, CI pipeline</div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-logo">📦</div>
+                        <h4>minikube</h4>
+                        <p>Cluster 1 node trong VM. Nhiều addon (dashboard, ingress, registry) bật dễ. Kinh điển để học.</p>
+                        <div class="tool-pros">✓ Addon phong phú, tài liệu nhiều</div>
+                        <div class="tool-for">Học theo tutorial chính thống</div>
+                    </div>
+                </div>
+                <div class="tip-box">
+                    <strong>💡 Lộ trình học:</strong> (1) Hiểu Docker trước. (2) Cài k3s, chạy <code>kubectl run</code> một pod. (3) Viết Deployment + Service YAML cho 1 app .NET. (4) Thêm probe + HPA. (5) Học Helm. (6) Cuối cùng mới đụng managed cloud K8s + GitOps (xem trang IaC).
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section section-dark">
+        <div class="container">
+            <div class="closing-box">
+                <div class="closing-nav">
+                    <a href="index.html" class="closing-btn">🗺️ Tổng quan</a>
+                    <a href="docker.html" class="closing-btn">🐳 Docker</a>
+                    <a href="iac.html" class="closing-btn">🏗️ IaC</a>
+                    <a href="sre.html" class="closing-btn">🚨 SRE</a>
+                    <a href="devsecops.html" class="closing-btn">🛡️ DevSecOps</a>
+                    <a href="monitoring.html" class="closing-btn">📊 Monitoring</a>
+                    <a href="workflow.html" class="closing-btn">🔄 Workflow</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Build & Deploy — Triển khai website từ A→Z cho web developer</p>
+            <p class="footer-note">Kubernetes & Orchestration — Pod, Deployment, Service, Ingress, probes, HPA, Helm, managed K8s</p>
+        </div>
+    </footer>
+
+    <script src="build.js"></script>
+</body>
+</html>

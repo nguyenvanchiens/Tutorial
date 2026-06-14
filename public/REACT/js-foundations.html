@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>JavaScript &amp; ES6+ Nền Tảng - Trước Khi Học React</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">React<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="js-foundations.html" class="active">JS Nền tảng</a>
+      <a href="basics.html">Cơ bản</a>
+      <a href="hooks.html">Hooks</a>
+      <a href="typescript.html">TypeScript</a>
+      <a href="advanced.html">Nâng cao</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="ecosystem.html">Ecosystem</a>
+      <a href="interview.html">Phỏng vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">LEVEL 0 · FOUNDATION</div>
+  <h1>JavaScript &amp; ES6+ <span class="gradient">Nền Tảng</span></h1>
+  <p class="hero-desc">React <strong>là</strong> JavaScript. Mọi "phép màu" của React (state immutability, props, hooks, render) đều dựa trên cú pháp JS hiện đại. Nắm chắc 14 khái niệm dưới đây trước khi chạm tay vào React — bạn sẽ học nhanh gấp đôi và đỡ bug.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">1. <code>let</code> / <code>const</code> &amp; Scope</h2>
+    <p class="section-sub">Quên <code>var</code> đi. Năm 2026 chỉ dùng <code>const</code> mặc định, đổi sang <code>let</code> khi cần gán lại. Cả hai có <strong>block scope</strong> (giới hạn trong <code>{ }</code>), khác <code>var</code> là function scope.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>Block scope vs function scope</h4>
+        <pre class="code"><span class="k">for</span> (<span class="k">let</span> i = <span class="s">0</span>; i &lt; <span class="s">3</span>; i++) { <span class="c">/* ... */</span> }
+console.log(i); <span class="c">// ❌ ReferenceError (i chết ngoài for)</span>
+
+<span class="k">for</span> (<span class="k">var</span> j = <span class="s">0</span>; j &lt; <span class="s">3</span>; j++) {}
+console.log(j); <span class="c">// 3 (var rò rỉ ra ngoài — nguồn bug)</span></pre>
+      </div>
+      <div class="card">
+        <h4><code>const</code> không phải "bất biến"</h4>
+        <pre class="code"><span class="k">const</span> n = <span class="s">5</span>;
+n = <span class="s">6</span>;             <span class="c">// ❌ không gán lại biến được</span>
+
+<span class="k">const</span> user = { name: <span class="s">'Chiến'</span> };
+user.name = <span class="s">'Lan'</span>;  <span class="c">// ✅ vẫn sửa được nội dung object</span>
+<span class="c">// const khoá BIẾN, không khoá GIÁ TRỊ bên trong</span></pre>
+      </div>
+    </div>
+
+    <div class="info-box"><strong>Vì sao quan trọng cho React:</strong> bạn sẽ viết <code>const [count, setCount] = useState(0)</code> hàng nghìn lần. Hiểu vì sao <code>count</code> là <code>const</code> mà vẫn "đổi" được (thực ra mỗi render là một biến <code>const</code> mới) là chìa khoá hiểu mental model của React.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">2. Closures &amp; bẫy "stale closure"</h2>
+    <p class="section-sub">Closure = hàm "nhớ" được biến ở scope nơi nó được <strong>tạo ra</strong>, kể cả khi scope đó đã kết thúc. Đây là cơ chế nền của <code>useState</code>, <code>useEffect</code> và là nguồn của bug khó nhất khi mới học hooks.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>Closure cơ bản</h4>
+        <pre class="code"><span class="k">function</span> <span class="n">makeCounter</span>() {
+  <span class="k">let</span> count = <span class="s">0</span>;
+  <span class="k">return</span> () =&gt; ++count; <span class="c">// nhớ "count"</span>
+}
+<span class="k">const</span> inc = <span class="n">makeCounter</span>();
+inc(); <span class="c">// 1</span>
+inc(); <span class="c">// 2  — count sống dai nhờ closure</span></pre>
+      </div>
+      <div class="card">
+        <h4>🐛 Stale closure cổ điển</h4>
+        <pre class="code"><span class="c">// Mỗi callback bắt CÙNG biến i (var)</span>
+<span class="k">for</span> (<span class="k">var</span> i = <span class="s">0</span>; i &lt; <span class="s">3</span>; i++) {
+  setTimeout(() =&gt; console.log(i), <span class="s">100</span>);
+}
+<span class="c">// In ra: 3, 3, 3  (không phải 0,1,2!)</span>
+
+<span class="c">// Sửa: let tạo binding mới mỗi vòng lặp</span>
+<span class="k">for</span> (<span class="k">let</span> i = <span class="s">0</span>; i &lt; <span class="s">3</span>; i++) {
+  setTimeout(() =&gt; console.log(i), <span class="s">100</span>);
+}
+<span class="c">// In ra: 0, 1, 2 ✅</span></pre>
+      </div>
+    </div>
+
+    <div class="warn-box"><strong>Bẫy này quay lại trong React:</strong> một <code>setInterval</code> đặt trong <code>useEffect</code> sẽ "đóng băng" giá trị state tại lần render đó. Đó là lý do bạn thấy counter luôn in <code>0</code>. Cách xử lý: dùng functional update <code>setCount(c =&gt; c + 1)</code> hoặc <code>useRef</code>. Sẽ học kỹ ở trang Hooks.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">3. <code>this</code> — và vì sao React ghét nó</h2>
+    <p class="section-sub"><code>this</code> trong JS không trỏ tới "object hiện tại" như Java/C#. Nó phụ thuộc vào <strong>cách hàm được gọi</strong>. Arrow function <em>không</em> có <code>this</code> riêng — nó mượn từ scope ngoài (lexical <code>this</code>).</p>
+
+    <pre class="code"><span class="k">const</span> obj = {
+  name: <span class="s">'Chiến'</span>,
+  hello() { console.log(<span class="s">this</span>.name); },        <span class="c">// "this" = obj khi gọi obj.hello()</span>
+  helloArrow: () =&gt; console.log(<span class="s">this</span>.name),  <span class="c">// "this" = scope ngoài, KHÔNG phải obj</span>
+};
+
+obj.hello();        <span class="c">// "Chiến"</span>
+<span class="k">const</span> fn = obj.hello;
+fn();               <span class="c">// undefined — mất "this" khi tách khỏi obj</span></pre>
+
+    <div class="info-box"><strong>Vì sao quan trọng cho React:</strong> React hiện đại dùng <strong>function component</strong>, gần như không còn <code>this</code>. Đây chính là lý do hooks ra đời — để né hoàn toàn cơn ác mộng <code>this.handleClick = this.handleClick.bind(this)</code> của class component cũ. Hiểu <code>this</code> giúp bạn đọc được code legacy.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">4. ES Modules — <code>import</code> / <code>export</code></h2>
+    <p class="section-sub">React chia code thành module. Mỗi file là một module có scope riêng. Có <strong>named export</strong> (nhiều/file) và <strong>default export</strong> (một/file).</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>Export</h4>
+        <pre class="code"><span class="c">// utils.js</span>
+<span class="k">export const</span> PI = <span class="s">3.14</span>;          <span class="c">// named</span>
+<span class="k">export function</span> <span class="n">sum</span>(a, b) {     <span class="c">// named</span>
+  <span class="k">return</span> a + b;
+}
+<span class="k">export default function</span> <span class="n">App</span>() {} <span class="c">// default (1/file)</span></pre>
+      </div>
+      <div class="card">
+        <h4>Import</h4>
+        <pre class="code"><span class="c">// app.js</span>
+<span class="k">import</span> App <span class="k">from</span> <span class="s">'./utils.js'</span>;        <span class="c">// default — tên tuỳ ý</span>
+<span class="k">import</span> { PI, sum } <span class="k">from</span> <span class="s">'./utils.js'</span>; <span class="c">// named — đúng tên</span>
+<span class="k">import</span> { sum <span class="k">as</span> add } <span class="k">from</span> <span class="s">'./utils.js'</span>; <span class="c">// đổi tên</span>
+<span class="k">import</span> * <span class="k">as</span> utils <span class="k">from</span> <span class="s">'./utils.js'</span>;    <span class="c">// gom hết</span></pre>
+      </div>
+    </div>
+
+    <div class="tip"><strong>Vì sao quan trọng cho React:</strong> <code>import React from 'react'</code>, <code>import { useState } from 'react'</code> — bạn dùng cú pháp này ở MỌI file. Phân biệt default vs named giúp tránh lỗi <code>"X is not exported"</code> kinh điển.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">5. Destructuring</h2>
+    <p class="section-sub">"Bóc tách" giá trị từ object/array ra biến riêng. React dùng destructuring ở khắp nơi: props, useState, useContext.</p>
+
+    <pre class="code"><span class="c">// Object destructuring</span>
+<span class="k">const</span> user = { name: <span class="s">'Chiến'</span>, age: <span class="s">25</span>, city: <span class="s">'HN'</span> };
+<span class="k">const</span> { name, age } = user;
+<span class="k">const</span> { city: queQuan } = user;        <span class="c">// đổi tên</span>
+<span class="k">const</span> { role = <span class="s">'user'</span> } = user;        <span class="c">// default nếu undefined</span>
+
+<span class="c">// Array destructuring — useState chính là cái này!</span>
+<span class="k">const</span> [first, second] = [<span class="s">10</span>, <span class="s">20</span>];
+<span class="k">const</span> [count, setCount] = useState(<span class="s">0</span>);
+
+<span class="c">// Destructuring ngay trên tham số hàm (kiểu props React)</span>
+<span class="k">function</span> <span class="n">Card</span>({ title, children }) { <span class="c">/* ... */</span> }
+
+<span class="c">// Lồng nhau</span>
+<span class="k">const</span> { data: { items = [] } = {} } = response;</pre>
+
+    <div class="info-box"><strong>Vì sao quan trọng cho React:</strong> <code>function Comp({ name, age })</code> chính là destructuring props. Và <code>const [x, setX] = useState()</code> trả về một array được destructure — không có nó React API sẽ xấu hơn nhiều.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">6. Spread <code>...</code> &amp; Rest <code>...</code></h2>
+    <p class="section-sub">Cùng ký hiệu <code>...</code> nhưng hai vai trò: <strong>spread</strong> trải phần tử ra, <strong>rest</strong> gom phần tử lại. Đây là công cụ #1 để làm <em>immutable update</em> trong React.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>Spread — sao chép + ghi đè</h4>
+        <pre class="code"><span class="c">// Object — copy nông + override</span>
+<span class="k">const</span> a = { x: <span class="s">1</span>, y: <span class="s">2</span> };
+<span class="k">const</span> b = { ...a, y: <span class="s">99</span> }; <span class="c">// {x:1, y:99}</span>
+
+<span class="c">// Array — copy + thêm</span>
+<span class="k">const</span> arr = [<span class="s">1</span>, <span class="s">2</span>];
+<span class="k">const</span> arr2 = [...arr, <span class="s">3</span>];  <span class="c">// [1,2,3]</span>
+
+<span class="c">// Trải tham số vào hàm</span>
+Math.max(...[<span class="s">3</span>, <span class="s">7</span>, <span class="s">2</span>]); <span class="c">// 7</span></pre>
+      </div>
+      <div class="card">
+        <h4>Rest — gom phần còn lại</h4>
+        <pre class="code"><span class="c">// Trong destructuring</span>
+<span class="k">const</span> { id, ...rest } = user; <span class="c">// rest = mọi field trừ id</span>
+<span class="k">const</span> [head, ...tail] = [<span class="s">1</span>, <span class="s">2</span>, <span class="s">3</span>]; <span class="c">// tail = [2,3]</span>
+
+<span class="c">// Tham số hàm không giới hạn</span>
+<span class="k">function</span> <span class="n">log</span>(...args) {
+  console.log(args); <span class="c">// luôn là array</span>
+}</pre>
+      </div>
+    </div>
+
+    <div class="tip"><strong>Vì sao quan trọng cho React:</strong> React render lại khi reference state thay đổi. Bạn <em>không</em> được <code>user.name = 'x'</code> rồi <code>setUser(user)</code> — reference không đổi, React không render. Phải <code>setUser({ ...user, name: 'x' })</code> để tạo object mới. Spread là cách chuẩn làm immutable update.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">7. Template Literals</h2>
+    <p class="section-sub">Chuỗi với dấu backtick <code>`</code>, cho phép nội suy biến <code>${...}</code> và xuống dòng. Dùng để ghép className động, URL, message.</p>
+
+    <pre class="code"><span class="k">const</span> name = <span class="s">'Chiến'</span>;
+<span class="k">const</span> age = <span class="s">25</span>;
+
+<span class="c">// Nội suy biến + biểu thức</span>
+<span class="k">const</span> msg = <span class="s">`Xin chào ${name}, năm sau bạn ${age + 1} tuổi`</span>;
+
+<span class="c">// Multi-line</span>
+<span class="k">const</span> html = <span class="s">`
+  &lt;div&gt;${name}&lt;/div&gt;
+`</span>;
+
+<span class="c">// className động trong JSX (rất hay gặp)</span>
+&lt;<span class="t">button</span> className={<span class="s">`btn ${isActive ? 'active' : ''}`</span>} /&gt;</pre>
+
+    <div class="info-box"><strong>Vì sao quan trọng cho React:</strong> ghép className theo điều kiện, dựng URL gọi API, hiển thị message i18n — tất cả dùng template literal. Thư viện <code>clsx</code>/<code>cn</code> bạn sẽ gặp sau cũng chỉ là bản nâng cấp của ý tưởng này.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">8. Optional chaining <code>?.</code> &amp; Nullish <code>??</code></h2>
+    <p class="section-sub">Hai toán tử cứu mạng khi làm việc với dữ liệu API có thể <code>null</code>/<code>undefined</code>.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4><code>?.</code> — truy cập an toàn</h4>
+        <pre class="code"><span class="k">const</span> user = { profile: <span class="k">null</span> };
+
+user.profile.avatar;   <span class="c">// ❌ TypeError, app crash</span>
+user.profile?.avatar;  <span class="c">// ✅ undefined, không crash</span>
+
+<span class="c">// Chuỗi dài an toàn</span>
+data?.user?.address?.city;
+
+<span class="c">// Gọi hàm có thể không tồn tại</span>
+onClick?.(); <span class="c">// chỉ gọi nếu onClick có</span></pre>
+      </div>
+      <div class="card">
+        <h4><code>??</code> — chỉ thay khi null/undefined</h4>
+        <pre class="code"><span class="c">// || coi 0, '', false là "rỗng" → bug</span>
+<span class="k">const</span> count = data.count || <span class="s">10</span>; <span class="c">// count=0 → ra 10 ❌</span>
+
+<span class="c">// ?? chỉ thay khi null/undefined</span>
+<span class="k">const</span> count2 = data.count ?? <span class="s">10</span>; <span class="c">// count=0 → ra 0 ✅</span>
+
+<span class="k">const</span> name = user.name ?? <span class="s">'Khách'</span>;</pre>
+      </div>
+    </div>
+
+    <div class="warn-box"><strong>Vì sao quan trọng cho React:</strong> render trước khi data về, <code>{user?.name ?? 'Đang tải...'}</code> tránh crash trang trắng. Phân biệt <code>||</code> và <code>??</code> tránh bug số <code>0</code> bị hiểu nhầm là rỗng — cực kỳ hay gặp với badge đếm số.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">9. Array methods — map / filter / reduce / find</h2>
+    <p class="section-sub">React render list bằng <code>.map()</code>, lọc dữ liệu bằng <code>.filter()</code>. Các method này trả về <strong>array mới</strong> (immutable) — đúng triết lý React.</p>
+
+    <pre class="code"><span class="k">const</span> nums = [<span class="s">1</span>, <span class="s">2</span>, <span class="s">3</span>, <span class="s">4</span>];
+
+<span class="c">// map — biến đổi từng phần tử (DÙNG ĐỂ RENDER LIST)</span>
+nums.map(n =&gt; n * <span class="s">2</span>);              <span class="c">// [2,4,6,8]</span>
+users.map(u =&gt; &lt;<span class="t">li</span> key={u.id}&gt;{u.name}&lt;/<span class="t">li</span>&gt;); <span class="c">// JSX!</span>
+
+<span class="c">// filter — giữ phần tử thoả điều kiện</span>
+nums.filter(n =&gt; n % <span class="s">2</span> === <span class="s">0</span>);    <span class="c">// [2,4]</span>
+
+<span class="c">// reduce — gộp về 1 giá trị</span>
+nums.reduce((sum, n) =&gt; sum + n, <span class="s">0</span>); <span class="c">// 10</span>
+cart.reduce((t, item) =&gt; t + item.price, <span class="s">0</span>); <span class="c">// tổng tiền</span>
+
+<span class="c">// find — phần tử đầu thoả điều kiện (hoặc undefined)</span>
+users.find(u =&gt; u.id === <span class="s">3</span>);
+
+<span class="c">// some / every — kiểm tra boolean</span>
+todos.some(t =&gt; !t.done);   <span class="c">// còn việc chưa xong?</span>
+todos.every(t =&gt; t.done);   <span class="c">// xong hết chưa?</span></pre>
+
+    <div class="info-box"><strong>Vì sao quan trọng cho React:</strong> <code>{items.map(...)}</code> là cách DUY NHẤT render danh sách trong JSX. <code>filter</code>/<code>map</code> tạo array mới nên dùng update state an toàn. Tránh <code>forEach</code>/<code>push</code> (mutate, không trả giá trị) trong render.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">10. Immutability Patterns</h2>
+    <p class="section-sub">React phát hiện thay đổi bằng so sánh <strong>reference</strong> (<code>===</code>), không deep-compare. Vì vậy mọi update phải tạo object/array <strong>mới</strong>, không sửa cái cũ.</p>
+
+    <table class="cmp">
+      <tr><th>❌ Mutate (React không thấy)</th><th>✅ Immutable (tạo mới)</th></tr>
+      <tr><td><code>arr.push(x)</code></td><td><code>[...arr, x]</code></td></tr>
+      <tr><td><code>arr.splice(i, 1)</code></td><td><code>arr.filter((_, idx) =&gt; idx !== i)</code></td></tr>
+      <tr><td><code>arr[i] = x</code></td><td><code>arr.map((v, idx) =&gt; idx === i ? x : v)</code></td></tr>
+      <tr><td><code>obj.key = x</code></td><td><code>{ ...obj, key: x }</code></td></tr>
+      <tr><td><code>arr.sort()</code> (mutate!)</td><td><code>[...arr].sort()</code> hoặc <code>arr.toSorted()</code></td></tr>
+      <tr><td><code>delete obj.key</code></td><td><code>const { key, ...rest } = obj</code></td></tr>
+    </table>
+
+    <pre class="code"><span class="c">// Cập nhật phần tử lồng trong array of objects</span>
+<span class="k">const</span> nextTodos = todos.map(t =&gt;
+  t.id === id ? { ...t, done: !t.done } : t
+);
+setTodos(nextTodos);
+
+<span class="c">// Cập nhật object lồng sâu — spread từng tầng</span>
+setState(s =&gt; ({
+  ...s,
+  user: { ...s.user, address: { ...s.user.address, city: <span class="s">'HN'</span> } }
+}));</pre>
+
+    <div class="tip"><strong>Vì sao quan trọng cho React:</strong> đây là lỗi #1 của người mới — "vì sao state đổi mà màn hình không update?". 90% là do mutate. Khi update lồng sâu mệt mỏi, dùng thư viện <code>immer</code> (sẽ học ở Patterns).</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">11. Promises &amp; async/await</h2>
+    <p class="section-sub">JS chạy bất đồng bộ. Promise là "lời hứa" sẽ có kết quả sau. <code>async/await</code> là cú pháp đẹp để xử lý nó như code đồng bộ.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>Promise (cách cũ — then/catch)</h4>
+        <pre class="code">fetch(<span class="s">'/api/users'</span>)
+  .then(res =&gt; res.json())
+  .then(data =&gt; console.log(data))
+  .catch(err =&gt; console.error(err))
+  .finally(() =&gt; setLoading(<span class="k">false</span>));</pre>
+      </div>
+      <div class="card">
+        <h4>async/await (chuẩn 2026)</h4>
+        <pre class="code"><span class="k">async function</span> <span class="n">loadUsers</span>() {
+  <span class="k">try</span> {
+    <span class="k">const</span> res = <span class="k">await</span> fetch(<span class="s">'/api/users'</span>);
+    <span class="k">if</span> (!res.ok) <span class="k">throw new</span> Error(res.status);
+    <span class="k">const</span> data = <span class="k">await</span> res.json();
+    <span class="k">return</span> data;
+  } <span class="k">catch</span> (err) {
+    console.error(err);
+  } <span class="k">finally</span> {
+    setLoading(<span class="k">false</span>);
+  }
+}</pre>
+      </div>
+    </div>
+
+    <pre class="code"><span class="c">// Chạy SONG SONG nhiều request (nhanh hơn await tuần tự)</span>
+<span class="k">const</span> [users, posts] = <span class="k">await</span> Promise.all([
+  fetch(<span class="s">'/api/users'</span>).then(r =&gt; r.json()),
+  fetch(<span class="s">'/api/posts'</span>).then(r =&gt; r.json()),
+]);</pre>
+
+    <div class="info-box"><strong>Vì sao quan trọng cho React:</strong> mọi lần gọi API trong <code>useEffect</code> hoặc event handler đều là async. Hiểu Promise giúp bạn quản lý loading/error state đúng. Lưu ý: bản thân function truyền cho <code>useEffect</code> KHÔNG được là <code>async</code> — phải khai báo hàm async bên trong rồi gọi.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">12. <code>fetch</code> &amp; AbortController</h2>
+    <p class="section-sub"><code>fetch</code> là API gọi HTTP có sẵn trong trình duyệt. <code>AbortController</code> dùng để <strong>huỷ</strong> request — cực quan trọng để tránh race condition và memory leak trong React.</p>
+
+    <pre class="code"><span class="k">async function</span> <span class="n">search</span>(query, signal) {
+  <span class="k">const</span> res = <span class="k">await</span> fetch(<span class="s">`/api/search?q=${query}`</span>, {
+    method: <span class="s">'GET'</span>,
+    headers: { <span class="s">'Content-Type'</span>: <span class="s">'application/json'</span> },
+    signal, <span class="c">// gắn signal để có thể huỷ</span>
+  });
+  <span class="k">return</span> res.json();
+}
+
+<span class="c">// Trong useEffect — huỷ request cũ khi query đổi / unmount</span>
+<span class="k">useEffect</span>(() =&gt; {
+  <span class="k">const</span> controller = <span class="k">new</span> AbortController();
+
+  search(query, controller.signal)
+    .then(setResults)
+    .catch(err =&gt; {
+      <span class="k">if</span> (err.name !== <span class="s">'AbortError'</span>) console.error(err);
+    });
+
+  <span class="k">return</span> () =&gt; controller.abort(); <span class="c">// cleanup: huỷ request</span>
+}, [query]);</pre>
+
+    <div class="warn-box"><strong>Vì sao quan trọng cho React:</strong> nếu user gõ nhanh ô search, request cũ về sau request mới sẽ ghi đè kết quả đúng (race condition). <code>AbortController</code> trong cleanup function của <code>useEffect</code> giải quyết triệt để. Đây là pattern phỏng vấn rất hay hỏi.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">13. DOM &amp; Event Model (cơ bản)</h2>
+    <p class="section-sub">React tự quản DOM cho bạn, nhưng hiểu DOM thật giúp bạn hiểu React làm gì "dưới mui xe" và khi nào cần <code>ref</code> để chạm DOM trực tiếp.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>DOM thuần (cái React thay thế)</h4>
+        <pre class="code"><span class="k">const</span> el = document.getElementById(<span class="s">'root'</span>);
+el.textContent = <span class="s">'Hello'</span>;
+el.addEventListener(<span class="s">'click'</span>, handler);
+<span class="c">// React: bạn KHÔNG viết kiểu này nữa</span></pre>
+      </div>
+      <div class="card">
+        <h4>Event bubbling &amp; delegation</h4>
+        <pre class="code"><span class="c">// Click con → nổi bọt lên cha</span>
+parent.addEventListener(<span class="s">'click'</span>, (e) =&gt; {
+  console.log(e.target);  <span class="c">// phần tử bị click</span>
+  e.stopPropagation();    <span class="c">// chặn nổi bọt</span>
+  e.preventDefault();     <span class="c">// chặn hành vi mặc định</span>
+});</pre>
+      </div>
+    </div>
+
+    <div class="info-box"><strong>Vì sao quan trọng cho React:</strong> React dùng <strong>Virtual DOM</strong> — mô tả UI bằng object JS rồi tự tính diff để cập nhật DOM thật tối thiểu. React cũng gắn event ở root và dùng delegation (Synthetic Events). Khi cần focus input, đo kích thước, tích hợp thư viện ngoài → bạn dùng <code>useRef</code> để chạm DOM thật.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">14. npm / npx &amp; vai trò của Bundler</h2>
+    <p class="section-sub">Hệ sinh thái React sống trên npm. Bundler (Vite) gom hàng trăm file module + dependency thành bundle tối ưu cho trình duyệt.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>npm vs npx</h4>
+        <pre class="code"><span class="c"># npm: cài package vào project</span>
+npm install react react-dom
+npm install -D vite        <span class="c"># dev dependency</span>
+
+<span class="c"># npx: chạy package mà không cần cài global</span>
+npx create-vite@latest my-app
+
+<span class="c"># scripts trong package.json</span>
+npm run dev     <span class="c"># chạy script "dev"</span>
+npm run build</pre>
+      </div>
+      <div class="card">
+        <h4>Bundler làm gì?</h4>
+        <ul>
+          <li><strong>Resolve modules</strong>: nối các <code>import</code> lại</li>
+          <li><strong>Transpile</strong>: JSX/TS → JS trình duyệt hiểu (Babel/esbuild)</li>
+          <li><strong>Bundle &amp; split</strong>: gom code, tách chunk lazy-load</li>
+          <li><strong>Tree-shaking</strong>: bỏ code không dùng</li>
+          <li><strong>HMR</strong>: cập nhật nóng khi đang dev</li>
+          <li><strong>Minify</strong>: nén code cho production</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tip"><strong>Vì sao quan trọng cho React:</strong> JSX và <code>import './style.css'</code> KHÔNG phải JS hợp lệ với trình duyệt — bundler biến chúng thành code chạy được. Vite là chuẩn 2026 (esbuild + Rollup): dev server khởi động tức thì, HMR nhanh. Hiểu bundler giúp bạn debug lỗi build và tối ưu bundle size.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">💡 Bài tập thực hành</h2>
+    <ol class="steps">
+      <li><strong>Refactor sang ES6+</strong><br/><span style="color:var(--muted)">Cho đoạn code dùng <code>var</code> + <code>function</code> + nối chuỗi bằng <code>+</code>. Viết lại bằng <code>const</code>/<code>let</code>, arrow, destructuring, template literal.</span></li>
+      <li><strong>Sửa stale closure</strong><br/><span style="color:var(--muted)">Vòng <code>for(var i...)</code> + <code>setTimeout</code> in 3,3,3. Sửa thành 0,1,2 bằng cả 2 cách: dùng <code>let</code> và dùng IIFE.</span></li>
+      <li><strong>Chuỗi array methods</strong><br/><span style="color:var(--muted)">Cho mảng đơn hàng. Tính tổng tiền các đơn "đã thanh toán" chỉ bằng <code>filter</code> + <code>map</code> + <code>reduce</code> (không dùng vòng lặp).</span></li>
+      <li><strong>Immutable update</strong><br/><span style="color:var(--muted)">Cho object <code>user</code> lồng 3 tầng. Viết hàm đổi <code>user.address.city</code> mà KHÔNG mutate bản gốc. Kiểm tra <code>oldUser !== newUser</code> nhưng <code>oldUser.posts === newUser.posts</code>.</span></li>
+      <li><strong>Fetch có huỷ</strong><br/><span style="color:var(--muted)">Viết hàm <code>async</code> gọi một public API (vd JSONPlaceholder), có try/catch, đo thời gian, và hỗ trợ huỷ bằng <code>AbortController</code>.</span></li>
+    </ol>
+
+    <div class="tip" style="margin-top:1.5rem">
+      <strong>Tự check:</strong> đọc hiểu &amp; tự viết được 5 bài này = bạn đã sẵn sàng. Sang <a href="basics.html" style="color:var(--primary)">React Cơ bản</a> mọi cú pháp sẽ trở nên hiển nhiên.
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>ReactJS Mastery · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

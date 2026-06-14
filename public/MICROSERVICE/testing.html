@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Microservices · Testing Hệ Phân Tán</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">Microservice<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="modular-monolith.html">Modular Monolith</a>
+      <a href="basics.html">Cơ Bản</a>
+      <a href="ddd-tactical.html">DDD</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="communication.html">Giao Tiếp</a>
+      <a href="testing.html" class="active">Testing</a>
+      <a href="production.html">Production</a>
+      <a href="architect.html">Architect</a>
+      <a href="interview.html">Phỏng Vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">L2-L3 · NÂNG CAO</div>
+  <h1>Testing <span class="gradient">Hệ Phân Tán</span></h1>
+  <p class="hero-desc">Trong microservices, "tất cả unit test xanh" không có nghĩa hệ thống chạy. Học test pyramid đúng cho distributed system: Testcontainers, contract testing với Pact, test Saga &amp; idempotency, test luồng event bất đồng bộ.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Test Pyramid cho Microservices</h2>
+    <p class="section-sub">Nhiều test nhanh &amp; rẻ ở đáy, ít test chậm &amp; đắt ở đỉnh. Microservices thêm 1 tầng quan trọng mà monolith không có: <strong>contract test</strong>.</p>
+    <div class="arch-diagram">
+      <div class="arch-row"><div class="arch-box db" style="min-width:180px">🔺 E2E (rất ít, chậm, dễ vỡ)</div></div>
+      <div class="arch-row"><div class="arch-box mq" style="min-width:300px">Contract Test (consumer-driven)</div></div>
+      <div class="arch-row"><div class="arch-box gw" style="min-width:420px">Integration Test (DB, broker thật qua Testcontainers)</div></div>
+      <div class="arch-row"><div class="arch-box svc" style="min-width:520px">Component Test (1 service in-memory, mock dependency ngoài)</div></div>
+      <div class="arch-row"><div class="arch-box svc" style="min-width:640px">Unit Test (domain/aggregate, thuần, hàng nghìn cái, &lt;ms)</div></div>
+    </div>
+    <table class="cmp">
+      <thead><tr><th>Loại</th><th>Phạm vi</th><th>Tốc độ</th><th>Số lượng</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Unit</strong></td><td>1 class/aggregate, không I/O</td><td>&lt;1ms</td><td>Hàng nghìn</td></tr>
+        <tr><td><strong>Component</strong></td><td>Cả 1 service, dependency ngoài bị mock</td><td>10-100ms</td><td>Hàng trăm</td></tr>
+        <tr><td><strong>Integration</strong></td><td>Service + DB/broker thật (container)</td><td>0.1-2s</td><td>Hàng chục</td></tr>
+        <tr><td><strong>Contract</strong></td><td>Hợp đồng API/message giữa 2 service</td><td>nhanh</td><td>1/cặp tương tác</td></tr>
+        <tr><td><strong>E2E</strong></td><td>Nhiều service thật + hạ tầng</td><td>giây→phút</td><td>Vài luồng critical</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Unit vs Component — ranh giới</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Unit test — domain thuần</h3>
+        <pre class="code">[<span class="t">Fact</span>]
+<span class="k">public void</span> <span class="n">Place_order_with_no_lines_throws</span>()
+{
+    <span class="k">var</span> act = () =&gt; <span class="t">Order</span>.<span class="n">Place</span>(
+        <span class="t">Guid</span>.<span class="n">NewGuid</span>(), <span class="t">Array</span>.<span class="n">Empty</span>&lt;<span class="t">OrderLine</span>&gt;());
+
+    act.<span class="n">Should</span>().<span class="n">Throw</span>&lt;<span class="t">DomainException</span>&gt;();
+}</pre>
+        <p>Không DB, không HTTP. Test business rule của aggregate. Phải cực nhanh, cực nhiều.</p>
+      </div>
+      <div class="card">
+        <h3>Component test — cả service in-process</h3>
+        <pre class="code"><span class="c">// WebApplicationFactory: chạy API in-memory</span>
+[<span class="t">Fact</span>]
+<span class="k">public async</span> <span class="t">Task</span> <span class="n">Post_order_returns_201</span>()
+{
+    <span class="k">var</span> client = _factory.<span class="n">CreateClient</span>();
+    <span class="k">var</span> resp = <span class="k">await</span> client.<span class="n">PostAsJsonAsync</span>(
+        <span class="s">"/orders"</span>, <span class="k">new</span> <span class="t">PlaceOrderRequest</span>(...));
+
+    resp.<span class="p">StatusCode</span>.<span class="n">Should</span>().<span class="n">Be</span>(<span class="t">HttpStatusCode</span>.<span class="p">Created</span>);
+}</pre>
+        <p>Test cả pipeline HTTP→handler→domain, nhưng <strong>mock</strong> Payment/broker bên ngoài.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Integration Test với Testcontainers</h2>
+    <p class="section-sub">Đừng test với SQLite in-memory rồi prod dùng Postgres — hành vi khác nhau (JSON, ngày giờ, lock). <strong>Testcontainers</strong> spin up Postgres/RabbitMQ/Kafka thật trong Docker cho mỗi test run, rồi dọn sạch.</p>
+    <pre class="code"><span class="c">// Testcontainers.PostgreSql + Testcontainers.RabbitMq (2026)</span>
+<span class="k">public class</span> <span class="t">OrderIntegrationFixture</span> : <span class="t">IAsyncLifetime</span>
+{
+    <span class="k">private readonly</span> <span class="t">PostgreSqlContainer</span> _db = <span class="k">new</span> <span class="t">PostgreSqlBuilder</span>()
+        .<span class="n">WithImage</span>(<span class="s">"postgres:17-alpine"</span>)
+        .<span class="n">WithDatabase</span>(<span class="s">"orders"</span>)
+        .<span class="n">Build</span>();
+
+    <span class="k">private readonly</span> <span class="t">RabbitMqContainer</span> _mq = <span class="k">new</span> <span class="t">RabbitMqBuilder</span>()
+        .<span class="n">WithImage</span>(<span class="s">"rabbitmq:4-management"</span>)
+        .<span class="n">Build</span>();
+
+    <span class="k">public</span> <span class="t">string</span> DbConnString =&gt; _db.<span class="n">GetConnectionString</span>();
+
+    <span class="k">public async</span> <span class="t">Task</span> <span class="n">InitializeAsync</span>()
+    {
+        <span class="k">await</span> <span class="t">Task</span>.<span class="n">WhenAll</span>(_db.<span class="n">StartAsync</span>(), _mq.<span class="n">StartAsync</span>());
+        <span class="c">// chạy EF migration lên DB container thật</span>
+    }
+
+    <span class="k">public async</span> <span class="t">Task</span> <span class="n">DisposeAsync</span>() =&gt;
+        <span class="k">await</span> <span class="t">Task</span>.<span class="n">WhenAll</span>(_db.<span class="n">DisposeAsync</span>().<span class="n">AsTask</span>(), _mq.<span class="n">DisposeAsync</span>().<span class="n">AsTask</span>());
+}
+
+[<span class="t">Fact</span>]
+<span class="k">public async</span> <span class="t">Task</span> <span class="n">SaveOrder_persists_to_real_postgres</span>()
+{
+    <span class="k">await using var</span> ctx = <span class="k">new</span> <span class="t">OrderDbContext</span>(_fixture.<span class="p">DbConnString</span>);
+    <span class="k">var</span> order = <span class="t">Order</span>.<span class="n">Place</span>(_customerId, _lines);
+    ctx.<span class="p">Orders</span>.<span class="n">Add</span>(order);
+    <span class="k">await</span> ctx.<span class="n">SaveChangesAsync</span>();
+
+    <span class="k">var</span> reloaded = <span class="k">await</span> ctx.<span class="p">Orders</span>.<span class="n">FindAsync</span>(order.<span class="p">Id</span>);
+    reloaded!.<span class="p">Total</span>.<span class="n">Should</span>().<span class="n">Be</span>(order.<span class="p">Total</span>);  <span class="c">// đúng với DB thật</span>
+}</pre>
+    <div class="tip"><strong>💡 2026 best practice:</strong> Dùng <code>respawn</code> để reset state DB giữa các test thay vì restart container (nhanh hơn nhiều). Chạy container 1 lần / test class qua shared fixture.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Consumer-Driven Contract Testing (Pact)</h2>
+    <p class="section-sub">Vấn đề lớn nhất của micro: Provider đổi API → tất cả Consumer vỡ ở production, không ai biết trước. Contract test bắt điều này ở CI, <strong>không cần chạy cả 2 service cùng lúc</strong>.</p>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Cách hoạt động</h3>
+        <ol class="steps" style="margin-top:.5rem">
+          <li>Consumer viết test mô tả "tôi mong API trả gì" → sinh ra file <strong>pact (contract)</strong>.</li>
+          <li>Contract đẩy lên <strong>Pact Broker</strong>.</li>
+          <li>Provider chạy <strong>verification</strong>: replay contract lên API thật của mình, đảm bảo đáp ứng đúng.</li>
+          <li><code>can-i-deploy</code> chặn deploy nếu phá vỡ contract của consumer đang chạy.</li>
+        </ol>
+      </div>
+      <div class="card">
+        <h3>Consumer side (.NET — PactNet)</h3>
+        <pre class="code">_pact.<span class="n">UponReceiving</span>(<span class="s">"yêu cầu order theo id"</span>)
+    .<span class="n">WithRequest</span>(<span class="t">HttpMethod</span>.<span class="p">Get</span>, <span class="s">"/orders/42"</span>)
+  .<span class="n">WillRespond</span>()
+    .<span class="n">WithStatus</span>(<span class="t">HttpStatusCode</span>.<span class="p">OK</span>)
+    .<span class="n">WithJsonBody</span>(<span class="k">new</span> {
+        id = <span class="t">Match</span>.<span class="n">Type</span>(<span class="s">42</span>),
+        status = <span class="t">Match</span>.<span class="n">Regex</span>(<span class="s">"Confirmed"</span>, <span class="s">"Pending|Confirmed"</span>)
+    });
+
+<span class="c">// chạy client thật của consumer với mock server Pact dựng</span>
+<span class="k">await</span> _pact.<span class="n">VerifyAsync</span>(<span class="k">async</span> ctx =&gt; {
+    <span class="k">var</span> order = <span class="k">await</span> sut.<span class="n">GetOrderAsync</span>(<span class="s">42</span>);
+    order.<span class="p">Status</span>.<span class="n">Should</span>().<span class="n">Be</span>(<span class="s">"Confirmed"</span>);
+});</pre>
+      </div>
+    </div>
+    <div class="info-box"><strong>📦 Async/message contract:</strong> Pact cũng test message contract — consumer khai báo nó mong event <code>OrderPlaced</code> có schema gì; provider verify event mình publish khớp. Cực kỳ quan trọng cho hệ event-driven.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Test Saga &amp; Idempotency</h2>
+    <p class="section-sub">Đây là phần dễ vỡ nhất nhưng ít người test: compensating action, retry trùng message, thứ tự event đảo lộn.</p>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Test compensation path</h3>
+        <pre class="code">[<span class="t">Fact</span>]
+<span class="k">public async</span> <span class="t">Task</span> <span class="n">Payment_fails_releases_stock</span>()
+{
+    <span class="c">// arrange: Payment trả Failed</span>
+    _paymentStub.<span class="n">SetupFail</span>();
+
+    <span class="k">await</span> _harness.<span class="n">Bus</span>.<span class="n">Publish</span>(<span class="k">new</span> <span class="t">OrderPlaced</span>(id, total));
+
+    <span class="c">// assert: stock đã được release (compensate)</span>
+    (<span class="k">await</span> _harness.<span class="n">Published</span>
+        .<span class="n">Any</span>&lt;<span class="t">StockReleased</span>&gt;()).<span class="n">Should</span>().<span class="n">BeTrue</span>();
+    (<span class="k">await</span> _harness.<span class="n">Published</span>
+        .<span class="n">Any</span>&lt;<span class="t">OrderCancelled</span>&gt;()).<span class="n">Should</span>().<span class="n">BeTrue</span>();
+}</pre>
+        <p>MassTransit <code>InMemoryTestHarness</code> cho phép test Saga state machine không cần broker thật.</p>
+      </div>
+      <div class="card">
+        <h3>Test idempotency — gửi 2 lần</h3>
+        <pre class="code">[<span class="t">Fact</span>]
+<span class="k">public async</span> <span class="t">Task</span> <span class="n">Duplicate_message_processed_once</span>()
+{
+    <span class="k">var</span> evt = <span class="k">new</span> <span class="t">OrderPlaced</span>(orderId, total);
+
+    <span class="k">await</span> _handler.<span class="n">HandleAsync</span>(evt);
+    <span class="k">await</span> _handler.<span class="n">HandleAsync</span>(evt);  <span class="c">// gửi lại cùng MessageId</span>
+
+    <span class="c">// chỉ tạo 1 invoice dù nhận 2 lần</span>
+    (<span class="k">await</span> db.<span class="p">Invoices</span>.<span class="n">CountAsync</span>(
+        i =&gt; i.<span class="p">OrderId</span> == orderId)).<span class="n">Should</span>().<span class="n">Be</span>(<span class="s">1</span>);
+}</pre>
+        <p>Bắt buộc test: broker at-least-once → message lặp là chuyện <em>bình thường</em>, không phải ngoại lệ.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Test luồng bất đồng bộ (async / event flow)</h2>
+    <p class="section-sub">Khó: bạn publish event rồi assert ngay → fail vì handler chưa chạy xong. Đừng dùng <code>Thread.Sleep</code> cứng — dùng <strong>polling / await condition</strong>.</p>
+    <pre class="code"><span class="c">// ❌ Sai: flaky, chậm</span>
+<span class="k">await</span> bus.<span class="n">Publish</span>(evt);
+<span class="t">Thread</span>.<span class="n">Sleep</span>(<span class="s">2000</span>);
+<span class="t">Assert</span>.<span class="n">True</span>(handled);
+
+<span class="c">// ✅ Đúng: chờ điều kiện với timeout (vd thư viện Polly / AwaitHelpers)</span>
+<span class="k">await</span> bus.<span class="n">Publish</span>(evt);
+<span class="k">await</span> <span class="t">Wait</span>.<span class="n">UntilAsync</span>(
+    condition: <span class="k">async</span> () =&gt; <span class="k">await</span> db.<span class="p">Invoices</span>.<span class="n">AnyAsync</span>(i =&gt; i.<span class="p">OrderId</span> == id),
+    timeout: <span class="t">TimeSpan</span>.<span class="n">FromSeconds</span>(<span class="s">5</span>),
+    pollInterval: <span class="t">TimeSpan</span>.<span class="n">FromMilliseconds</span>(<span class="s">100</span>));</pre>
+    <div class="warn-box"><strong>⚠️ Test thứ tự &amp; out-of-order:</strong> Event có thể đến không đúng thứ tự. Viết test cố tình đảo thứ tự (vd <code>PaymentSucceeded</code> đến trước <code>OrderPlaced</code>) để chắc handler xử lý đúng (buffer/idempotent), không crash.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Chiến lược CI cho microservices</h2>
+    <ol class="steps">
+      <li><strong>Pipeline mỗi service riêng:</strong> chỉ chạy khi code service đó đổi (path filter). Mỗi service deploy độc lập.</li>
+      <li><strong>Stage nhanh trước:</strong> unit + component (in-memory) chạy trên mọi commit, &lt;1 phút. Fail nhanh, feedback nhanh.</li>
+      <li><strong>Integration với Testcontainers:</strong> chạy trên PR. Cần Docker runner. Song song hoá theo service.</li>
+      <li><strong>Contract verification:</strong> consumer publish pact; provider verify; <code>can-i-deploy</code> gate trước khi release.</li>
+      <li><strong>E2E tối thiểu:</strong> chỉ vài happy-path critical (checkout, payment) chạy trên staging sau deploy, không chạy mọi PR.</li>
+      <li><strong>Quan sát production thay vì test thêm:</strong> dùng synthetic monitoring + canary + feature flag. Ở scale lớn, observability bù cho việc không thể E2E mọi thứ.</li>
+    </ol>
+    <div class="tip"><strong>💡 Quy tắc:</strong> Càng lên cao pyramid càng ít test. Nếu thấy mình viết nhiều E2E để bắt bug logic → bug đó đáng lẽ phải bắt ở unit/contract. E2E flaky là thuế, không phải tài sản.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Checklist — Testing hệ phân tán</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>✅ Coverage đúng tầng</h3>
+        <ul>
+          <li>Domain logic phủ bằng unit test, không I/O</li>
+          <li>Integration test dùng Testcontainers (DB/broker thật), không SQLite giả</li>
+          <li>Mỗi cặp tương tác service có contract test (Pact)</li>
+          <li>Message/event có schema contract, không chỉ REST</li>
+          <li>E2E giới hạn ở vài luồng business critical</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>✅ Distributed-specific</h3>
+        <ul>
+          <li>Test cả compensation path của Saga, không chỉ happy path</li>
+          <li>Test idempotency: gửi message trùng → side-effect 1 lần</li>
+          <li>Test out-of-order event</li>
+          <li>Không <code>Sleep</code> cứng — dùng await-condition với timeout</li>
+          <li><code>can-i-deploy</code> gate trong CI trước release</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Tiếp theo: <a href="production.html" style="color:var(--primary)">Production hardening →</a></p>
+</footer>
+
+</body>
+</html>

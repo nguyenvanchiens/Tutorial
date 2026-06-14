@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CQRS + MediatR — Tách Command/Query chuẩn production</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --ut-primary: #512bd4;
+        --ut-primary-2: #8a2be2;
+        --ut-accent: #43e97b;
+        --ut-warn: #f39c12;
+        --ut-danger: #f5576c;
+        --ut-card: #1a1d2e;
+        --ut-card-2: #232640;
+        --ut-border: #2d3148;
+        --ut-text: #e2e8f0;
+        --ut-muted: #94a3b8;
+    }
+    .ut-hero { text-align: center; padding: 4rem 1.5rem 3rem; background: radial-gradient(ellipse at top, rgba(81,43,212,.18), transparent 60%); }
+    .ut-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 1rem; }
+    .ut-hero h1 .gradient { background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .ut-hero .hero-badge { display: inline-block; background: rgba(81,43,212,.15); color: var(--ut-primary-2); padding: .4rem 1rem; border-radius: 20px; font-size: .78rem; font-weight: 600; letter-spacing: 1px; margin-bottom: 1.25rem; }
+    .ut-hero p { color: var(--ut-muted); max-width: 820px; margin: 0 auto; }
+    .ut-section { padding: 2.5rem 0; }
+    .ut-title { font-size: 1.7rem; margin-bottom: 1.5rem; position: relative; padding-left: 1rem; color: var(--ut-text); }
+    .ut-title::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 4px; background: linear-gradient(180deg, var(--ut-primary), var(--ut-primary-2)); border-radius: 3px; }
+    .ut-sub { color: var(--ut-muted); margin-bottom: 1.25rem; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+    .ut-grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .ut-grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    .ut-grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .ut-card { background: var(--ut-card); border: 1px solid var(--ut-border); border-radius: 12px; padding: 1.4rem; }
+    .ut-card h3 { color: var(--ut-primary-2); margin-bottom: .6rem; font-size: 1.1rem; }
+    .ut-card h4 { color: var(--ut-accent); margin-bottom: .45rem; font-size: .98rem; }
+    .ut-card p, .ut-card li { color: var(--ut-muted); font-size: .95rem; }
+    .ut-card ul { padding-left: 1.2rem; }
+    .ut-card ul li { margin-bottom: .3rem; }
+    pre.cb { background: #0b1020; border: 1px solid var(--ut-border); border-left: 3px solid var(--ut-primary); border-radius: 8px; padding: 1rem 1.15rem; overflow-x: auto; font-family: 'JetBrains Mono', Consolas, monospace; font-size: .88rem; line-height: 1.6; margin: .75rem 0; color: #d6deeb; }
+    pre.cb .k { color: #c792ea; }
+    pre.cb .s { color: #ecc48d; }
+    pre.cb .c { color: #637777; font-style: italic; }
+    pre.cb .n { color: #82aaff; }
+    pre.cb .t { color: #ffcb8b; }
+    pre.cb .a { color: #7fdbca; }
+    code { background: #2d3148; padding: 2px 6px; border-radius: 4px; font-size: .88em; color: #f8d06b; font-family: 'JetBrains Mono', Consolas, monospace; }
+    .callout { border-radius: 10px; padding: .95rem 1.15rem; margin: 1rem 0; border: 1px solid; }
+    .callout.tip { background: rgba(67,233,123,.07); border-color: var(--ut-accent); }
+    .callout.tip strong { color: var(--ut-accent); }
+    .callout.warn { background: rgba(243,156,18,.07); border-color: var(--ut-warn); }
+    .callout.warn strong { color: var(--ut-warn); }
+    .callout.danger { background: rgba(245,87,108,.07); border-color: var(--ut-danger); }
+    .callout.danger strong { color: var(--ut-danger); }
+    .callout.info { background: rgba(81,43,212,.08); border-color: var(--ut-primary-2); }
+    .callout.info strong { color: var(--ut-primary-2); }
+    table.cmp { width: 100%; border-collapse: collapse; background: var(--ut-card); border-radius: 10px; overflow: hidden; margin: 1rem 0; font-size: .92rem; }
+    table.cmp th, table.cmp td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--ut-border); }
+    table.cmp th { background: var(--ut-card-2); color: var(--ut-primary-2); font-weight: 600; }
+    table.cmp td { color: var(--ut-muted); }
+    table.cmp tr:last-child td { border-bottom: none; }
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; position: relative; padding-left: 2.8rem; margin-bottom: 1rem; }
+    .steps li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 2rem; height: 2rem; background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .do-dont { border-left: 3px solid; padding: 1rem 1.15rem; border-radius: 8px; margin-bottom: 1rem; }
+    .do-dont.do { border-color: var(--ut-accent); background: rgba(67,233,123,.04); }
+    .do-dont.dont { border-color: var(--ut-danger); background: rgba(245,87,108,.04); }
+    .do-dont h4 { margin-bottom: .5rem; }
+    .do-dont.do h4 { color: var(--ut-accent); }
+    .do-dont.dont h4 { color: var(--ut-danger); }
+    .flow { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; justify-content: center; margin: 1.25rem 0; }
+    .flow .node { background: var(--ut-card-2); border: 1px solid var(--ut-border); border-radius: 10px; padding: .7rem 1rem; font-size: .85rem; color: var(--ut-text); text-align: center; }
+    .flow .node.cmd { border-color: var(--ut-danger); }
+    .flow .node.qry { border-color: var(--ut-accent); }
+    .flow .arrow { color: var(--ut-primary-2); font-weight: 700; font-size: 1.1rem; }
+    .pipeline { display: flex; flex-direction: column; gap: .35rem; margin: 1rem 0; }
+    .pipeline .layer { border: 1px solid var(--ut-border); border-radius: 8px; padding: .65rem 1rem; font-size: .88rem; background: var(--ut-card-2); }
+    .pipeline .layer.b { border-left: 3px solid var(--ut-primary-2); }
+    .pipeline .layer.h { border-left: 3px solid var(--ut-accent); background: rgba(67,233,123,.05); }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo"><a href="index.html" style="color:inherit;-webkit-text-fill-color:inherit;">.NET<span class="accent">Mastery</span></a></div>
+        <div class="nav-links">
+            <a href="index.html">Roadmap</a>
+            <a href="cqrs.html" class="nav-active">CQRS</a>
+            <a href="ddd.html">DDD</a>
+            <a href="messaging.html">Messaging</a>
+            <a href="system-design.html">System Design</a>
+            <a href="security.html">Security</a>
+            <a href="aspnet-testing.html">Unit Test</a>
+        </div>
+        <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+</nav>
+
+<header class="ut-hero">
+    <div class="hero-badge">MASTER · ADVANCED</div>
+    <h1>CQRS + MediatR — Tách <span class="gradient">Command</span> &amp; <span class="gradient">Query</span></h1>
+    <p>Command Query Responsibility Segregation: tách rõ write-model và read-model, dùng MediatR làm in-process bus, pipeline behaviors cho validation/logging/transaction. Kèm phân tích khi NÊN và khi KHÔNG nên dùng, quan hệ với Event Sourcing, và các pitfall thực chiến.</p>
+</header>
+
+<div class="container">
+
+<section class="ut-section">
+    <h2 class="ut-title">1. CQRS là gì &mdash; và không phải là gì</h2>
+    <p class="ut-sub">CQRS chỉ là một nguyên tắc đơn giản: <strong>thao tác thay đổi state (Command) tách khỏi thao tác đọc state (Query)</strong>. Mỗi bên có model, code path, và đôi khi database riêng.</p>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h4>✍️ Command (write)</h4>
+            <p>Thể hiện <em>ý định thay đổi</em>. Trả về void hoặc id/ack, không trả về data đọc.</p>
+            <ul>
+                <li><code>CreateOrderCommand</code></li>
+                <li><code>CancelOrderCommand</code></li>
+                <li>Validate &rarr; thay đổi aggregate &rarr; persist</li>
+                <li>Đi qua business rules, transaction</li>
+            </ul>
+        </div>
+        <div class="ut-card">
+            <h4>🔍 Query (read)</h4>
+            <p>Chỉ <em>đọc</em>, không side-effect. Trả về DTO/ViewModel tối ưu cho UI.</p>
+            <ul>
+                <li><code>GetOrderByIdQuery</code></li>
+                <li><code>SearchOrdersQuery</code></li>
+                <li>Có thể bypass domain model, query thẳng</li>
+                <li>Dùng Dapper/projection cho tốc độ</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="callout warn">
+        <strong>⚠️ Hiểu nhầm phổ biến:</strong> CQRS <em>không</em> bắt buộc 2 database, không bắt buộc Event Sourcing, không bắt buộc message bus. Ở mức cơ bản nhất nó chỉ là tách interface read/write trên cùng một DB. Đừng "over-engineer".
+    </div>
+
+    <div class="flow">
+        <div class="node cmd">Client</div>
+        <span class="arrow">&rarr;</span>
+        <div class="node cmd">Command</div>
+        <span class="arrow">&rarr;</span>
+        <div class="node cmd">Handler + Domain</div>
+        <span class="arrow">&rarr;</span>
+        <div class="node">Write DB</div>
+    </div>
+    <div class="flow">
+        <div class="node qry">Client</div>
+        <span class="arrow">&rarr;</span>
+        <div class="node qry">Query</div>
+        <span class="arrow">&rarr;</span>
+        <div class="node qry">Handler (projection)</div>
+        <span class="arrow">&rarr;</span>
+        <div class="node">Read DB / View</div>
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">2. Setup MediatR</h2>
+    <p class="ut-sub">MediatR là in-process mediator: decouple sender khỏi handler. Lưu ý license: từ v12.4 (cuối 2024) MediatR chuyển sang <strong>commercial license cho công ty &gt; 5M USD doanh thu</strong>; OSS thay thế là <code>Mediator</code> (source-generator) hoặc tự viết.</p>
+
+    <ol class="steps">
+        <li><strong>Cài package</strong>
+            <pre class="cb">dotnet add package MediatR
+dotnet add package FluentValidation
+dotnet add package FluentValidation.DependencyInjectionExtensions</pre>
+        </li>
+        <li><strong>Đăng ký DI</strong>
+            <pre class="cb"><span class="c">// Program.cs</span>
+builder.Services.AddMediatR(cfg =&gt;
+{
+    cfg.RegisterServicesFromAssembly(<span class="k">typeof</span>(Program).Assembly);
+
+    <span class="c">// Pipeline behaviors chạy theo thứ tự đăng ký</span>
+    cfg.AddOpenBehavior(<span class="k">typeof</span>(<span class="t">LoggingBehavior</span>&lt;,&gt;));
+    cfg.AddOpenBehavior(<span class="k">typeof</span>(<span class="t">ValidationBehavior</span>&lt;,&gt;));
+    cfg.AddOpenBehavior(<span class="k">typeof</span>(<span class="t">TransactionBehavior</span>&lt;,&gt;));
+});
+
+builder.Services.AddValidatorsFromAssembly(<span class="k">typeof</span>(Program).Assembly);</pre>
+        </li>
+    </ol>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">3. Command end-to-end</h2>
+    <p class="ut-sub">Một command đầy đủ: record bất biến, validator, handler. Handler là nơi duy nhất orchestrate domain + persistence.</p>
+
+    <pre class="cb"><span class="c">// 1. Command — record bất biến, implement IRequest&lt;TResult&gt;</span>
+<span class="k">public record</span> <span class="t">CreateOrderCommand</span>(
+    Guid CustomerId,
+    IReadOnlyList&lt;OrderLineDto&gt; Lines) : <span class="t">IRequest</span>&lt;Guid&gt;;
+
+<span class="c">// 2. Validator — tách rule khỏi handler</span>
+<span class="k">public class</span> <span class="t">CreateOrderValidator</span> : <span class="t">AbstractValidator</span>&lt;<span class="t">CreateOrderCommand</span>&gt;
+{
+    <span class="k">public</span> <span class="n">CreateOrderValidator</span>()
+    {
+        RuleFor(x =&gt; x.CustomerId).NotEmpty();
+        RuleFor(x =&gt; x.Lines).NotEmpty().WithMessage(<span class="s">"Đơn hàng phải có ít nhất 1 dòng"</span>);
+        RuleForEach(x =&gt; x.Lines).ChildRules(l =&gt;
+            l.RuleFor(x =&gt; x.Quantity).GreaterThan(<span class="s">0</span>));
+    }
+}
+
+<span class="c">// 3. Handler — orchestrate domain, KHÔNG chứa business rule sâu</span>
+<span class="k">public class</span> <span class="t">CreateOrderHandler</span> : <span class="t">IRequestHandler</span>&lt;<span class="t">CreateOrderCommand</span>, Guid&gt;
+{
+    <span class="k">private readonly</span> <span class="t">IOrderRepository</span> _repo;
+    <span class="k">private readonly</span> <span class="t">IUnitOfWork</span> _uow;
+
+    <span class="k">public</span> <span class="n">CreateOrderHandler</span>(<span class="t">IOrderRepository</span> repo, <span class="t">IUnitOfWork</span> uow)
+        =&gt; (_repo, _uow) = (repo, uow);
+
+    <span class="k">public async</span> Task&lt;Guid&gt; <span class="n">Handle</span>(<span class="t">CreateOrderCommand</span> cmd, CancellationToken ct)
+    {
+        <span class="c">// Business rule sống trong aggregate, không ở đây</span>
+        <span class="k">var</span> order = <span class="t">Order</span>.Create(cmd.CustomerId);
+        <span class="k">foreach</span> (<span class="k">var</span> line <span class="k">in</span> cmd.Lines)
+            order.AddLine(line.ProductId, line.Quantity, line.UnitPrice);
+
+        <span class="k">await</span> _repo.AddAsync(order, ct);
+        <span class="k">await</span> _uow.SaveChangesAsync(ct);  <span class="c">// commit + dispatch domain events</span>
+        <span class="k">return</span> order.Id;
+    }
+}</pre>
+
+    <div class="callout tip">
+        <strong>💡 Controller mỏng:</strong> Controller chỉ map HTTP &rarr; command rồi <code>_mediator.Send(cmd)</code>. Toàn bộ logic nằm trong handler &mdash; dễ test, dễ tái dùng từ background job/gRPC.
+    </div>
+
+    <pre class="cb">[<span class="a">ApiController</span>, <span class="a">Route</span>(<span class="s">"api/orders"</span>)]
+<span class="k">public class</span> <span class="t">OrdersController</span>(<span class="t">ISender</span> mediator) : <span class="t">ControllerBase</span>
+{
+    [<span class="a">HttpPost</span>]
+    <span class="k">public async</span> Task&lt;<span class="t">IActionResult</span>&gt; <span class="n">Create</span>(<span class="t">CreateOrderCommand</span> cmd)
+    {
+        <span class="k">var</span> id = <span class="k">await</span> mediator.Send(cmd);
+        <span class="k">return</span> CreatedAtAction(<span class="k">nameof</span>(GetById), <span class="k">new</span> { id }, <span class="k">null</span>);
+    }
+}</pre>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">4. Query &mdash; read-model tối ưu</h2>
+    <p class="ut-sub">Query không cần đi qua domain model. Project thẳng ra DTO, hoặc dùng Dapper cho query nặng. Đây là điểm CQRS phát huy: read và write tối ưu độc lập.</p>
+
+    <pre class="cb"><span class="k">public record</span> <span class="t">GetOrderByIdQuery</span>(Guid Id) : <span class="t">IRequest</span>&lt;<span class="t">OrderDetailDto</span>?&gt;;
+
+<span class="k">public class</span> <span class="t">GetOrderByIdHandler</span>
+    : <span class="t">IRequestHandler</span>&lt;<span class="t">GetOrderByIdQuery</span>, <span class="t">OrderDetailDto</span>?&gt;
+{
+    <span class="k">private readonly</span> <span class="t">AppDbContext</span> _db;
+    <span class="k">public</span> <span class="n">GetOrderByIdHandler</span>(<span class="t">AppDbContext</span> db) =&gt; _db = db;
+
+    <span class="k">public async</span> Task&lt;<span class="t">OrderDetailDto</span>?&gt; <span class="n">Handle</span>(<span class="t">GetOrderByIdQuery</span> q, CancellationToken ct)
+        =&gt; <span class="k">await</span> _db.Orders
+            .AsNoTracking()                       <span class="c">// read-only, nhanh hơn</span>
+            .Where(o =&gt; o.Id == q.Id)
+            .Select(o =&gt; <span class="k">new</span> <span class="t">OrderDetailDto</span>(   <span class="c">// projection, chỉ lấy field cần</span>
+                o.Id,
+                o.Customer.Name,
+                o.Lines.Sum(l =&gt; l.Quantity * l.UnitPrice),
+                o.Status.ToString()))
+            .FirstOrDefaultAsync(ct);
+}</pre>
+
+    <div class="callout info">
+        <strong>Read-model có thể khác hẳn write-model:</strong> write dùng aggregate <code>Order</code> với invariant nghiêm ngặt; read dùng <code>OrderDetailDto</code> phẳng, denormalized, join sẵn tên khách hàng. Hai mô hình phục vụ hai mục đích khác nhau.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">5. Pipeline Behaviors &mdash; cross-cutting concerns</h2>
+    <p class="ut-sub">Behavior bọc quanh mỗi handler giống middleware. Đây là sức mạnh thật của MediatR: validation, logging, transaction, caching tập trung một chỗ.</p>
+
+    <div class="pipeline">
+        <div class="layer b">LoggingBehavior &mdash; log request + thời gian</div>
+        <div class="layer b">ValidationBehavior &mdash; chạy FluentValidation, throw nếu fail</div>
+        <div class="layer b">TransactionBehavior &mdash; mở transaction quanh command</div>
+        <div class="layer h">➤ Handler (CreateOrderHandler) chạy ở giữa</div>
+        <div class="layer b">TransactionBehavior &mdash; commit / rollback</div>
+        <div class="layer b">LoggingBehavior &mdash; log kết quả + elapsed</div>
+    </div>
+
+    <h3 style="color:var(--ut-primary-2)">Validation behavior</h3>
+    <pre class="cb"><span class="k">public class</span> <span class="t">ValidationBehavior</span>&lt;TRequest, TResponse&gt;
+    : <span class="t">IPipelineBehavior</span>&lt;TRequest, TResponse&gt;
+    <span class="k">where</span> TRequest : <span class="t">IRequest</span>&lt;TResponse&gt;
+{
+    <span class="k">private readonly</span> IEnumerable&lt;<span class="t">IValidator</span>&lt;TRequest&gt;&gt; _validators;
+    <span class="k">public</span> <span class="n">ValidationBehavior</span>(IEnumerable&lt;<span class="t">IValidator</span>&lt;TRequest&gt;&gt; v) =&gt; _validators = v;
+
+    <span class="k">public async</span> Task&lt;TResponse&gt; <span class="n">Handle</span>(
+        TRequest request, <span class="t">RequestHandlerDelegate</span>&lt;TResponse&gt; next, CancellationToken ct)
+    {
+        <span class="k">if</span> (_validators.Any())
+        {
+            <span class="k">var</span> ctx = <span class="k">new</span> ValidationContext&lt;TRequest&gt;(request);
+            <span class="k">var</span> failures = (<span class="k">await</span> Task.WhenAll(
+                    _validators.Select(v =&gt; v.ValidateAsync(ctx, ct))))
+                .SelectMany(r =&gt; r.Errors)
+                .Where(f =&gt; f <span class="k">is not null</span>)
+                .ToList();
+
+            <span class="k">if</span> (failures.Count != <span class="s">0</span>)
+                <span class="k">throw new</span> ValidationException(failures);
+        }
+        <span class="k">return await</span> next();  <span class="c">// gọi handler tiếp theo trong chain</span>
+    }
+}</pre>
+
+    <h3 style="color:var(--ut-primary-2)">Logging behavior</h3>
+    <pre class="cb"><span class="k">public class</span> <span class="t">LoggingBehavior</span>&lt;TReq, TRes&gt; : <span class="t">IPipelineBehavior</span>&lt;TReq, TRes&gt;
+    <span class="k">where</span> TReq : <span class="t">IRequest</span>&lt;TRes&gt;
+{
+    <span class="k">private readonly</span> <span class="t">ILogger</span>&lt;<span class="t">LoggingBehavior</span>&lt;TReq, TRes&gt;&gt; _log;
+    <span class="k">public</span> <span class="n">LoggingBehavior</span>(<span class="t">ILogger</span>&lt;<span class="t">LoggingBehavior</span>&lt;TReq, TRes&gt;&gt; log) =&gt; _log = log;
+
+    <span class="k">public async</span> Task&lt;TRes&gt; <span class="n">Handle</span>(TReq req, <span class="t">RequestHandlerDelegate</span>&lt;TRes&gt; next, CancellationToken ct)
+    {
+        <span class="k">var</span> name = <span class="k">typeof</span>(TReq).Name;
+        <span class="k">var</span> sw = Stopwatch.StartNew();
+        _log.LogInformation(<span class="s">"➤ Handling {Request}"</span>, name);
+        <span class="k">try</span>
+        {
+            <span class="k">var</span> res = <span class="k">await</span> next();
+            _log.LogInformation(<span class="s">"✔ {Request} done in {Ms}ms"</span>, name, sw.ElapsedMilliseconds);
+            <span class="k">return</span> res;
+        }
+        <span class="k">catch</span> (Exception ex)
+        {
+            _log.LogError(ex, <span class="s">"✘ {Request} failed in {Ms}ms"</span>, name, sw.ElapsedMilliseconds);
+            <span class="k">throw</span>;
+        }
+    }
+}</pre>
+
+    <h3 style="color:var(--ut-primary-2)">Transaction behavior (chỉ cho Command)</h3>
+    <pre class="cb"><span class="c">// Marker interface để phân biệt command cần transaction</span>
+<span class="k">public interface</span> <span class="t">ITransactionalRequest</span> { }
+
+<span class="k">public class</span> <span class="t">TransactionBehavior</span>&lt;TReq, TRes&gt; : <span class="t">IPipelineBehavior</span>&lt;TReq, TRes&gt;
+    <span class="k">where</span> TReq : <span class="t">ITransactionalRequest</span>
+{
+    <span class="k">private readonly</span> <span class="t">AppDbContext</span> _db;
+    <span class="k">public</span> <span class="n">TransactionBehavior</span>(<span class="t">AppDbContext</span> db) =&gt; _db = db;
+
+    <span class="k">public async</span> Task&lt;TRes&gt; <span class="n">Handle</span>(TReq req, <span class="t">RequestHandlerDelegate</span>&lt;TRes&gt; next, CancellationToken ct)
+    {
+        <span class="k">await using var</span> tx = <span class="k">await</span> _db.Database.BeginTransactionAsync(ct);
+        <span class="k">try</span>
+        {
+            <span class="k">var</span> res = <span class="k">await</span> next();
+            <span class="k">await</span> tx.CommitAsync(ct);
+            <span class="k">return</span> res;
+        }
+        <span class="k">catch</span>
+        {
+            <span class="k">await</span> tx.RollbackAsync(ct);
+            <span class="k">throw</span>;
+        }
+    }
+}</pre>
+
+    <div class="callout warn">
+        <strong>⚠️ Thứ tự behavior quan trọng:</strong> Logging ngoài cùng (đo cả validation), Validation trước Transaction (đừng mở tx khi input đã sai), Transaction sát handler nhất. Đăng ký đúng thứ tự bạn muốn chúng bọc.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">6. Khi NÊN và khi KHÔNG nên dùng CQRS</h2>
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont do">
+            <h4>✅ Nên dùng khi</h4>
+            <ul>
+                <li>Read và write có tải/scale rất khác nhau (đọc nhiều gấp 100×)</li>
+                <li>Read-model phức tạp, cần denormalize cho nhiều màn hình khác nhau</li>
+                <li>Business logic write phức tạp (nhiều invariant, domain rules)</li>
+                <li>Cần audit/event log từng thay đổi</li>
+                <li>Nhiều team làm chung, muốn tách rõ trách nhiệm</li>
+            </ul>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Không nên khi</h4>
+            <ul>
+                <li>CRUD đơn giản, đọc = ghi cùng shape &mdash; thêm CQRS chỉ là boilerplate</li>
+                <li>Team nhỏ, chưa quen pattern &mdash; tăng độ phức tạp vô ích</li>
+                <li>App nhỏ, ít domain logic</li>
+                <li>Bạn nghĩ "CQRS = phải có 2 DB + event sourcing" (sai và đắt)</li>
+            </ul>
+        </div>
+    </div>
+    <div class="callout tip">
+        <strong>Áp dụng theo bounded context:</strong> Không phải toàn app dùng CQRS. Một context phức tạp (Ordering) dùng CQRS đầy đủ; context CRUD đơn giản (Settings) chỉ cần repository thường.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">7. Quan hệ với Event Sourcing</h2>
+    <p class="ut-sub">CQRS và Event Sourcing (ES) thường đi cùng nhưng <strong>độc lập</strong>. Bạn có thể dùng CQRS mà không ES, và ngược lại.</p>
+
+    <table class="cmp">
+        <tr><th>Khía cạnh</th><th>CQRS thường</th><th>CQRS + Event Sourcing</th></tr>
+        <tr><td>Lưu state</td><td>State hiện tại (row trong table)</td><td>Chuỗi sự kiện bất biến (event store)</td></tr>
+        <tr><td>Read-model</td><td>Query thẳng write-DB hoặc replica</td><td>Projection build từ event stream</td></tr>
+        <tr><td>Audit / lịch sử</td><td>Phải tự thêm audit log</td><td>Miễn phí &mdash; mọi thay đổi là event</td></tr>
+        <tr><td>Time-travel / replay</td><td>Không</td><td>Replay event để rebuild bất kỳ state nào</td></tr>
+        <tr><td>Độ phức tạp</td><td>Trung bình</td><td>Cao (eventual consistency, versioning event)</td></tr>
+    </table>
+
+    <pre class="cb"><span class="c">// Với ES, aggregate sinh ra events thay vì sửa state trực tiếp</span>
+<span class="k">public class</span> <span class="t">Order</span> : <span class="t">AggregateRoot</span>
+{
+    <span class="k">public void</span> <span class="n">Cancel</span>(<span class="k">string</span> reason)
+    {
+        <span class="k">if</span> (Status == OrderStatus.Shipped)
+            <span class="k">throw new</span> DomainException(<span class="s">"Không thể huỷ đơn đã giao"</span>);
+
+        <span class="c">// Apply event — state thay đổi qua When(), event được lưu vào store</span>
+        Raise(<span class="k">new</span> <span class="t">OrderCancelledEvent</span>(Id, reason, DateTime.UtcNow));
+    }
+
+    <span class="k">private void</span> <span class="n">When</span>(<span class="t">OrderCancelledEvent</span> e)
+    {
+        Status = OrderStatus.Cancelled;
+        CancelReason = e.Reason;
+    }
+}</pre>
+
+    <div class="callout danger">
+        <strong>Đừng nhảy thẳng vào Event Sourcing.</strong> ES là công cụ mạnh nhưng chi phí lớn: versioning event schema, snapshot, eventual consistency. Chỉ dùng khi domain thật sự cần lịch sử/replay (finance, audit). Phần lớn app dùng CQRS thường là đủ.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">8. Pitfalls thực chiến</h2>
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont dont">
+            <h4>❌ Query có side-effect</h4>
+            <p>Query "ghi log lần truy cập" vào DB &rarr; phá nguyên tắc đọc thuần. Khó cache, khó scale read.</p>
+            <p style="color:var(--ut-accent)">Fix: side-effect thành command/event riêng, fire-and-forget.</p>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Handler chứa business logic</h4>
+            <p>Nhồi rule vào handler &rarr; anemic domain, logic rải rác, khó test.</p>
+            <p style="color:var(--ut-accent)">Fix: logic sống trong aggregate/domain service, handler chỉ orchestrate.</p>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Command trả về data đọc</h4>
+            <p><code>CreateOrderCommand</code> trả về full DTO order &rarr; mờ ranh giới read/write.</p>
+            <p style="color:var(--ut-accent)">Fix: trả id/ack thôi; muốn data thì gọi query sau.</p>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Một validator khổng lồ</h4>
+            <p>Validate cả business rule (số dư đủ tiền) trong FluentValidation &rarr; cần DB call.</p>
+            <p style="color:var(--ut-accent)">Fix: validator chỉ validate <em>input format</em>; business rule ở domain.</p>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Read-model cập nhật trễ mà không lường</h4>
+            <p>Read replica/projection eventual consistency &rarr; user tạo xong không thấy ngay.</p>
+            <p style="color:var(--ut-accent)">Fix: read-your-write từ write-DB cho user vừa thao tác, hoặc thông báo UI.</p>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Lạm dụng MediatR cho mọi method call</h4>
+            <p>Dùng <code>Send</code> thay cho gọi service trực tiếp ở mọi nơi &rarr; khó trace, overhead.</p>
+            <p style="color:var(--ut-accent)">Fix: MediatR cho use-case boundary, không cho mọi internal call.</p>
+        </div>
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">🎯 Checklist áp dụng CQRS</h2>
+    <div class="ut-card">
+        <ul>
+            <li>✅ Command là record bất biến, trả về void/id/ack &mdash; không trả read-data</li>
+            <li>✅ Query <code>AsNoTracking()</code> + projection, không side-effect</li>
+            <li>✅ Business logic ở aggregate/domain, handler chỉ orchestrate</li>
+            <li>✅ ValidationBehavior validate input; business rule ở domain</li>
+            <li>✅ TransactionBehavior chỉ bọc command (marker interface)</li>
+            <li>✅ Behavior đăng ký đúng thứ tự: Logging &rarr; Validation &rarr; Transaction &rarr; Handler</li>
+            <li>✅ Chỉ áp CQRS cho context phức tạp, CRUD đơn giản giữ repository thường</li>
+            <li>✅ Cân nhắc license MediatR &mdash; hoặc dùng <code>Mediator</code> source-gen</li>
+            <li>✅ Event Sourcing chỉ thêm khi domain thật sự cần lịch sử/replay</li>
+            <li>✅ Lường trước eventual consistency của read-model</li>
+        </ul>
+    </div>
+</section>
+
+</div>
+
+<footer style="text-align:center;padding:3rem 1.5rem;color:var(--ut-muted);border-top:1px solid var(--ut-border);margin-top:3rem;font-size:.9rem;">
+    <p>CQRS + MediatR · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

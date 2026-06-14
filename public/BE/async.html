@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Async/Await & Threading trong .NET — A-Z</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --ut-primary: #512bd4;
+        --ut-primary-2: #8a2be2;
+        --ut-accent: #43e97b;
+        --ut-warn: #f39c12;
+        --ut-danger: #f5576c;
+        --ut-card: #1a1d2e;
+        --ut-card-2: #232640;
+        --ut-border: #2d3148;
+        --ut-text: #e2e8f0;
+        --ut-muted: #94a3b8;
+    }
+    .ut-hero { text-align: center; padding: 4rem 1.5rem 3rem; background: radial-gradient(ellipse at top, rgba(81,43,212,.18), transparent 60%); }
+    .ut-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 1rem; }
+    .ut-hero h1 .gradient { background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .ut-hero .hero-badge { display: inline-block; background: rgba(81,43,212,.15); color: var(--ut-primary-2); padding: .4rem 1rem; border-radius: 20px; font-size: .78rem; font-weight: 600; letter-spacing: 1px; margin-bottom: 1.25rem; }
+    .ut-hero p { color: var(--ut-muted); max-width: 820px; margin: 0 auto; }
+    .ut-section { padding: 2.5rem 0; }
+    .ut-title { font-size: 1.7rem; margin-bottom: 1.5rem; position: relative; padding-left: 1rem; color: var(--ut-text); }
+    .ut-title::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 4px; background: linear-gradient(180deg, var(--ut-primary), var(--ut-primary-2)); border-radius: 3px; }
+    .ut-sub { color: var(--ut-muted); margin-bottom: 1.25rem; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+    .ut-grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .ut-grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    .ut-grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .ut-card { background: var(--ut-card); border: 1px solid var(--ut-border); border-radius: 12px; padding: 1.4rem; }
+    .ut-card h3 { color: var(--ut-primary-2); margin-bottom: .6rem; font-size: 1.1rem; }
+    .ut-card h4 { color: var(--ut-accent); margin-bottom: .45rem; font-size: .98rem; }
+    .ut-card p, .ut-card li { color: var(--ut-muted); font-size: .95rem; }
+    .ut-card ul { padding-left: 1.2rem; }
+    .ut-card ul li { margin-bottom: .3rem; }
+    pre.cb { background: #0b1020; border: 1px solid var(--ut-border); border-left: 3px solid var(--ut-primary); border-radius: 8px; padding: 1rem 1.15rem; overflow-x: auto; font-family: 'JetBrains Mono', Consolas, monospace; font-size: .88rem; line-height: 1.6; margin: .75rem 0; color: #d6deeb; }
+    pre.cb .k { color: #c792ea; }
+    pre.cb .s { color: #ecc48d; }
+    pre.cb .c { color: #637777; font-style: italic; }
+    pre.cb .n { color: #82aaff; }
+    pre.cb .t { color: #ffcb8b; }
+    pre.cb .a { color: #7fdbca; }
+    code { background: #2d3148; padding: 2px 6px; border-radius: 4px; font-size: .88em; color: #f8d06b; font-family: 'JetBrains Mono', Consolas, monospace; }
+    .callout { border-radius: 10px; padding: .95rem 1.15rem; margin: 1rem 0; border: 1px solid; }
+    .callout.tip { background: rgba(67,233,123,.07); border-color: var(--ut-accent); }
+    .callout.tip strong { color: var(--ut-accent); }
+    .callout.warn { background: rgba(243,156,18,.07); border-color: var(--ut-warn); }
+    .callout.warn strong { color: var(--ut-warn); }
+    .callout.danger { background: rgba(245,87,108,.07); border-color: var(--ut-danger); }
+    .callout.danger strong { color: var(--ut-danger); }
+    .callout.info { background: rgba(81,43,212,.08); border-color: var(--ut-primary-2); }
+    .callout.info strong { color: var(--ut-primary-2); }
+    table.cmp { width: 100%; border-collapse: collapse; background: var(--ut-card); border-radius: 10px; overflow: hidden; margin: 1rem 0; font-size: .92rem; }
+    table.cmp th, table.cmp td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--ut-border); }
+    table.cmp th { background: var(--ut-card-2); color: var(--ut-primary-2); font-weight: 600; }
+    table.cmp td { color: var(--ut-muted); }
+    table.cmp tr:last-child td { border-bottom: none; }
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; position: relative; padding-left: 2.8rem; margin-bottom: 1rem; }
+    .steps li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 2rem; height: 2rem; background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .do-dont { border-left: 3px solid; padding: 1rem 1.15rem; border-radius: 8px; margin-bottom: 1rem; }
+    .do-dont.do { border-color: var(--ut-accent); background: rgba(67,233,123,.04); }
+    .do-dont.dont { border-color: var(--ut-danger); background: rgba(245,87,108,.04); }
+    .do-dont h4 { margin-bottom: .5rem; }
+    .do-dont.do h4 { color: var(--ut-accent); }
+    .do-dont.dont h4 { color: var(--ut-danger); }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo"><a href="index.html" style="color:inherit;-webkit-text-fill-color:inherit;">.NET<span class="accent">Mastery</span></a></div>
+        <div class="nav-links">
+            <a href="index.html">Roadmap</a>
+            <a href="async.html" class="nav-active">Async</a>
+            <a href="rest-design.html">REST API</a>
+            <a href="auth-jwt.html">Auth & JWT</a>
+            <a href="caching.html">Caching</a>
+            <a href="logging.html">Logging</a>
+            <a href="error-handling.html">Error & Resilience</a>
+            <a href="clean-architecture.html">Clean Arch</a>
+            <a href="design-patterns.html">SOLID & Patterns</a>
+        </div>
+        <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+</nav>
+
+<header class="ut-hero">
+    <div class="hero-badge">NÂNG CAO · INTERMEDIATE</div>
+    <h1>Async/Await &amp; <span class="gradient">Threading</span> trong .NET</h1>
+    <p>Hiểu sâu cơ chế async/await ("there is no thread"), Task, ConfigureAwait, CancellationToken, parallel vs concurrent, deadlock, Task.WhenAll, IAsyncEnumerable và những lỗi chết người như async void, .Result/.Wait. Chính xác cho .NET 8/9.</p>
+</header>
+
+<div class="container">
+
+<section class="ut-section">
+    <h2 class="ut-title">1. Tại sao cần async?</h2>
+    <p class="ut-sub">Async giúp giải phóng thread trong lúc chờ I/O (DB, HTTP, file). Trên web server, thread là tài nguyên đắt đỏ — mỗi request blocking giữ 1 thread khỏi thread pool. Async cho phép xử lý hàng nghìn request đồng thời với ít thread.</p>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h4>🚫 Đồng bộ (blocking)</h4>
+            <p>Thread "đứng yên" chờ DB trả về. 1000 request đồng thời = 1000 thread bị giữ. Thread pool cạn → request mới phải xếp hàng → throughput sụp.</p>
+        </div>
+        <div class="ut-card">
+            <h4>✅ Bất đồng bộ (async)</h4>
+            <p>Thread được trả lại pool trong lúc chờ I/O. Khi I/O xong, một thread bất kỳ pick up tiếp. 1000 request có thể chỉ cần vài chục thread.</p>
+        </div>
+    </div>
+
+    <div class="callout info">
+        <strong>Async ≠ nhanh hơn:</strong> async không làm 1 request chạy nhanh hơn. Nó làm tăng <em>throughput</em> (scalability) — server chịu được nhiều request đồng thời hơn với cùng số thread.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">2. "There is no thread"</h2>
+    <p class="ut-sub">Câu nói nổi tiếng của Stephen Cleary. Khi bạn <code>await</code> một I/O operation thực sự (đọc file, gọi HTTP, query DB), <strong>không có thread nào đang chờ</strong>.</p>
+
+    <pre class="cb"><span class="k">public async</span> Task&lt;<span class="k">string</span>&gt; <span class="n">DownloadAsync</span>(<span class="k">string</span> url)
+{
+    <span class="k">using var</span> client = <span class="k">new</span> <span class="t">HttpClient</span>();
+    <span class="c">// Tại điểm await này: thread KHÔNG đứng chờ.</span>
+    <span class="c">// Nó được trả lại thread pool. OS/network card lo việc nhận dữ liệu.</span>
+    <span class="k">var</span> result = <span class="k">await</span> client.GetStringAsync(url);
+    <span class="c">// Khi dữ liệu về, runtime lấy 1 thread để chạy tiếp dòng dưới.</span>
+    <span class="k">return</span> result.ToUpper();
+}</pre>
+
+    <p class="ut-sub">Cơ chế: compiler biến method async thành một <strong>state machine</strong>. Mỗi <code>await</code> là 1 "checkpoint". Khi gặp await chưa hoàn thành, method <em>return</em> về caller (trả lại thread). Khi awaitable hoàn tất, continuation được lên lịch chạy phần còn lại.</p>
+
+    <div class="callout warn">
+        <strong>Phân biệt:</strong> <code>Task.Run(() =&gt; CpuWork())</code> THỰC SỰ dùng 1 thread (CPU-bound). Còn <code>await httpClient.GetAsync()</code> (I/O-bound) thì không. Đừng dùng <code>Task.Run</code> để "async hoá" I/O — đó là lãng phí thread.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">3. Task, Task&lt;T&gt;, ValueTask</h2>
+    <table class="cmp">
+        <tr><th>Kiểu</th><th>Ý nghĩa</th><th>Khi dùng</th></tr>
+        <tr><td><code>Task</code></td><td>Thao tác async không trả giá trị</td><td>Method async thông thường</td></tr>
+        <tr><td><code>Task&lt;T&gt;</code></td><td>Thao tác async trả về <code>T</code></td><td>Đa số trường hợp trả giá trị</td></tr>
+        <tr><td><code>ValueTask&lt;T&gt;</code></td><td>Tránh cấp phát heap khi kết quả thường có sẵn (sync)</td><td>Hot path, cache hit (vd IMemoryCache, channel)</td></tr>
+        <tr><td><code>void</code> (async void)</td><td>Không thể await, exception không bắt được</td><td>CHỈ event handler — tránh tuyệt đối chỗ khác</td></tr>
+    </table>
+
+    <pre class="cb"><span class="c">// ValueTask: tránh allocate Task khi cache hit (đường nóng)</span>
+<span class="k">public</span> ValueTask&lt;<span class="t">User</span>&gt; <span class="n">GetUserAsync</span>(<span class="k">int</span> id)
+{
+    <span class="k">if</span> (_cache.TryGetValue(id, <span class="k">out var</span> user))
+        <span class="k">return</span> <span class="k">new</span> ValueTask&lt;<span class="t">User</span>&gt;(user);   <span class="c">// đồng bộ, 0 allocation</span>
+
+    <span class="k">return new</span> ValueTask&lt;<span class="t">User</span>&gt;(LoadFromDbAsync(id)); <span class="c">// bất đồng bộ</span>
+}</pre>
+
+    <div class="callout danger">
+        <strong>⚠️ ValueTask có ràng buộc:</strong> KHÔNG await/lấy kết quả 2 lần, KHÔNG dùng đồng thời, KHÔNG dùng <code>.Result</code>. Nếu cần lưu hoặc await nhiều lần → gọi <code>.AsTask()</code>. Mặc định cứ dùng <code>Task</code>; chỉ tối ưu sang <code>ValueTask</code> khi đo được là hot path.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">4. ConfigureAwait(false)</h2>
+    <p class="ut-sub">Mặc định, await sẽ cố quay lại <code>SynchronizationContext</code> ban đầu (UI thread trong WPF/WinForms, hoặc request context trong ASP.NET cũ). <code>ConfigureAwait(false)</code> bỏ qua điều đó.</p>
+
+    <pre class="cb"><span class="c">// Trong THƯ VIỆN (library) — luôn dùng ConfigureAwait(false)</span>
+<span class="k">public async</span> Task&lt;<span class="k">int</span>&gt; <span class="n">ComputeAsync</span>()
+{
+    <span class="k">var</span> data = <span class="k">await</span> _http.GetStringAsync(_url).ConfigureAwait(<span class="k">false</span>);
+    <span class="k">return</span> Parse(data);
+}</pre>
+
+    <table class="cmp">
+        <tr><th>Bối cảnh</th><th>Khuyến nghị</th></tr>
+        <tr><td>Thư viện dùng chung (NuGet, shared lib)</td><td>Luôn <code>ConfigureAwait(false)</code></td></tr>
+        <tr><td>ASP.NET Core (controller, service)</td><td>Không cần — ASP.NET Core <strong>không có</strong> SynchronizationContext</td></tr>
+        <tr><td>WPF / WinForms / MAUI (code cần update UI)</td><td>Không dùng (cần quay lại UI thread)</td></tr>
+        <tr><td>WPF/WinForms code không đụng UI</td><td>Nên <code>ConfigureAwait(false)</code> để tránh deadlock</td></tr>
+    </table>
+
+    <div class="callout info">
+        <strong>ASP.NET Core đặc biệt:</strong> Từ ASP.NET Core không còn <code>SynchronizationContext</code>, nên <code>ConfigureAwait(false)</code> ở tầng app gần như vô hại/vô tác dụng. Nhưng trong thư viện tái sử dụng (có thể bị gọi từ WPF) thì vẫn nên giữ thói quen này.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">5. CancellationToken</h2>
+    <p class="ut-sub">Cho phép hủy thao tác đang chạy: user đóng tab, request timeout, app shutdown. Truyền token xuyên suốt chuỗi async.</p>
+
+    <pre class="cb"><span class="c">// Controller nhận token tự động từ ASP.NET Core (request aborted)</span>
+[<span class="a">HttpGet</span>]
+<span class="k">public async</span> Task&lt;<span class="t">IActionResult</span>&gt; <span class="n">Search</span>(<span class="k">string</span> q, CancellationToken ct)
+{
+    <span class="k">var</span> results = <span class="k">await</span> _service.SearchAsync(q, ct);
+    <span class="k">return</span> Ok(results);
+}
+
+<span class="k">public async</span> Task&lt;List&lt;<span class="t">Item</span>&gt;&gt; <span class="n">SearchAsync</span>(<span class="k">string</span> q, CancellationToken ct)
+{
+    <span class="c">// Truyền token xuống EF Core / HttpClient</span>
+    <span class="k">return await</span> _db.Items
+        .Where(i =&gt; i.Name.Contains(q))
+        .ToListAsync(ct);
+}</pre>
+
+    <pre class="cb"><span class="c">// Tạo timeout + kết hợp nhiều token</span>
+<span class="k">using var</span> timeoutCts = <span class="k">new</span> CancellationTokenSource(TimeSpan.FromSeconds(<span class="s">5</span>));
+<span class="k">using var</span> linked = CancellationTokenSource.CreateLinkedTokenSource(
+    requestAborted, timeoutCts.Token);
+
+<span class="k">await</span> DoWorkAsync(linked.Token);
+
+<span class="c">// Trong vòng lặp dài, chủ động kiểm tra</span>
+<span class="k">while</span> (hasMore)
+{
+    ct.ThrowIfCancellationRequested();
+    <span class="k">await</span> ProcessBatchAsync(ct);
+}</pre>
+
+    <div class="callout tip">
+        <strong>💡 Nguyên tắc:</strong> mọi public async method nên nhận <code>CancellationToken</code> (đặt cuối, default <code>= default</code>) và truyền nó xuống tận đáy. Hủy là một phần của API hợp đồng async tốt.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">6. Parallel vs Concurrent</h2>
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h3>Concurrency (đồng thời)</h3>
+            <p>Nhiều việc <em>tiến triển</em> xen kẽ nhau, không nhất thiết cùng lúc. Async/await là concurrency cho I/O. Có thể chạy trên 1 thread.</p>
+        </div>
+        <div class="ut-card">
+            <h3>Parallelism (song song)</h3>
+            <p>Nhiều việc chạy <em>thực sự cùng lúc</em> trên nhiều CPU core. Dành cho CPU-bound: <code>Parallel.For</code>, PLINQ, <code>Task.Run</code> nhiều task.</p>
+        </div>
+    </div>
+
+    <pre class="cb"><span class="c">// CONCURRENT I/O: gọi 3 API cùng lúc, await tất cả</span>
+<span class="k">var</span> t1 = _http.GetStringAsync(<span class="s">"/a"</span>);
+<span class="k">var</span> t2 = _http.GetStringAsync(<span class="s">"/b"</span>);
+<span class="k">var</span> t3 = _http.GetStringAsync(<span class="s">"/c"</span>);
+<span class="k">var</span> all = <span class="k">await</span> Task.WhenAll(t1, t2, t3); <span class="c">// 3 việc I/O đồng thời</span>
+
+<span class="c">// PARALLEL CPU-bound: tính toán nặng trên nhiều core</span>
+Parallel.For(<span class="s">0</span>, items.Length, i =&gt; Process(items[i]));
+
+<span class="c">// .NET 6+: Parallel.ForEachAsync — song song có giới hạn + async</span>
+<span class="k">await</span> Parallel.ForEachAsync(urls,
+    <span class="k">new</span> ParallelOptions { MaxDegreeOfParallelism = <span class="s">4</span> },
+    <span class="k">async</span> (url, ct) =&gt; <span class="k">await</span> DownloadAsync(url, ct));</pre>
+
+    <div class="callout warn">
+        <strong>⚠️ Đừng <code>Task.Run</code> cho I/O:</strong> <code>Task.Run(() =&gt; httpClient.GetAsync(url))</code> chiếm 1 thread pool thread chỉ để đẩy việc async — vô nghĩa. Gọi thẳng <code>await httpClient.GetAsync(url)</code>.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">7. Task.WhenAll / WhenAny / WhenEach</h2>
+    <pre class="cb"><span class="c">// WhenAll: chờ tất cả xong, gom kết quả. Throughput cao.</span>
+<span class="k">var</span> userIds = <span class="k">new</span>[] { <span class="s">1</span>, <span class="s">2</span>, <span class="s">3</span> };
+<span class="k">var</span> tasks = userIds.Select(id =&gt; _api.GetUserAsync(id));
+<span class="t">User</span>[] users = <span class="k">await</span> Task.WhenAll(tasks);
+
+<span class="c">// WhenAny: lấy task hoàn thành đầu tiên (vd: dùng cho timeout)</span>
+<span class="k">var</span> work = LongOperationAsync();
+<span class="k">var</span> timeout = Task.Delay(TimeSpan.FromSeconds(<span class="s">5</span>));
+<span class="k">if</span> (<span class="k">await</span> Task.WhenAny(work, timeout) == timeout)
+    <span class="k">throw new</span> TimeoutException();
+<span class="k">await</span> work; <span class="c">// observe exception nếu có</span>
+
+<span class="c">// .NET 9: Task.WhenEach — xử lý kết quả ngay khi từng task xong</span>
+<span class="k">await foreach</span> (<span class="k">var</span> finished <span class="k">in</span> Task.WhenEach(tasks))
+{
+    Console.WriteLine(<span class="k">await</span> finished); <span class="c">// xử lý theo thứ tự hoàn thành</span>
+}</pre>
+
+    <div class="callout danger">
+        <strong>⚠️ Exception trong WhenAll:</strong> nếu nhiều task ném exception, <code>await Task.WhenAll(...)</code> chỉ ném ra <em>exception đầu tiên</em>. Để xem hết, kiểm tra <code>task.Exception</code> hoặc bọc trong <code>AggregateException</code>. Đừng quên await để không nuốt lỗi (unobserved task exception).
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">8. IAsyncEnumerable&lt;T&gt; — streaming async</h2>
+    <p class="ut-sub">Trả về dữ liệu dạng luồng (stream) không cần load hết vào memory. Lý tưởng cho query lớn, đọc file lớn, server-sent events.</p>
+
+    <pre class="cb"><span class="c">// Producer: yield từng phần tử khi sẵn sàng</span>
+<span class="k">public async</span> IAsyncEnumerable&lt;<span class="t">Order</span>&gt; <span class="n">StreamOrdersAsync</span>(
+    [<span class="a">EnumeratorCancellation</span>] CancellationToken ct = <span class="k">default</span>)
+{
+    <span class="k">await foreach</span> (<span class="k">var</span> order <span class="k">in</span> _db.Orders.AsAsyncEnumerable().WithCancellation(ct))
+    {
+        <span class="k">yield return</span> Enrich(order);
+    }
+}
+
+<span class="c">// Consumer</span>
+<span class="k">await foreach</span> (<span class="k">var</span> order <span class="k">in</span> StreamOrdersAsync(ct))
+{
+    Process(order); <span class="c">// xử lý ngay, không chờ load hết</span>
+}</pre>
+
+    <div class="callout tip">
+        <strong>💡 ASP.NET Core:</strong> trả thẳng <code>IAsyncEnumerable&lt;T&gt;</code> từ action — framework sẽ stream JSON cho client (không buffer toàn bộ). Tốt cho dataset lớn. Nhớ truyền token qua <code>[EnumeratorCancellation]</code>.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">9. Deadlock — kẻ giết người thầm lặng</h2>
+    <p class="ut-sub">Deadlock kinh điển: blocking trên async code có SynchronizationContext (WPF, WinForms, ASP.NET cũ). Thread giữ context bị block chờ task, task lại cần context đó để chạy tiếp → kẹt vĩnh viễn.</p>
+
+    <pre class="cb"><span class="c">// ❌ Code này DEADLOCK trong WPF/WinForms/ASP.NET (Framework)</span>
+<span class="k">public void</span> <span class="n">Button_Click</span>(...)
+{
+    <span class="c">// .Result block UI thread, nhưng continuation của GetDataAsync</span>
+    <span class="c">// cần đúng UI thread đó để chạy tiếp → kẹt nhau.</span>
+    <span class="k">var</span> data = GetDataAsync().Result;   <span class="c">// 💀 DEADLOCK</span>
+}
+
+<span class="c">// ✅ Sửa: async all the way</span>
+<span class="k">public async void</span> <span class="n">Button_Click</span>(...) <span class="c">// async void chỉ chấp nhận cho event handler</span>
+{
+    <span class="k">var</span> data = <span class="k">await</span> GetDataAsync();
+}</pre>
+
+    <div class="callout info">
+        <strong>Vì sao ASP.NET Core ít deadlock hơn?</strong> Vì không có SynchronizationContext. Nhưng <code>.Result</code>/<code>.Wait()</code> vẫn nguy hiểm: gây <em>thread pool starvation</em> (block thread pool thread → pool phải spawn thread mới chậm chạp → throughput sụp dưới tải cao). Đừng block.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">10. Những lỗi phổ biến (Do / Don't)</h2>
+
+    <div class="do-dont dont">
+        <h4>❌ async void (trừ event handler)</h4>
+        <pre class="cb"><span class="k">public async void</span> <span class="n">ProcessAsync</span>() { <span class="k">await</span> ...; } <span class="c">// không await được</span></pre>
+        <p>Caller không thể await, không bắt được exception (crash process), không test được. Dùng <code>async Task</code>.</p>
+    </div>
+
+    <div class="do-dont dont">
+        <h4>❌ .Result / .Wait() / GetAwaiter().GetResult()</h4>
+        <pre class="cb"><span class="k">var</span> x = GetAsync().Result;        <span class="c">// deadlock + starvation</span>
+GetAsync().Wait();</pre>
+        <p>Gây deadlock (có context) hoặc thread pool starvation. Luôn <code>await</code>.</p>
+    </div>
+
+    <div class="do-dont dont">
+        <h4>❌ async over sync giả tạo</h4>
+        <pre class="cb"><span class="k">public</span> Task&lt;<span class="k">int</span>&gt; <span class="n">GetAsync</span>() =&gt; Task.Run(() =&gt; HeavySyncCpu());</pre>
+        <p>Bọc CPU-sync trong Task.Run để "giả async" trên web — chỉ đẩy việc sang thread khác, không tăng scalability. Nếu thật sự CPU-bound, hãy giữ sync hoặc offload có chủ đích.</p>
+    </div>
+
+    <div class="do-dont dont">
+        <h4>❌ Quên await (fire-and-forget vô tình)</h4>
+        <pre class="cb">_service.SaveAsync(data); <span class="c">// thiếu await → exception bị nuốt, có thể chưa chạy xong</span></pre>
+        <p>Compiler cảnh báo CS4014. Nếu cố ý fire-and-forget, dùng pattern an toàn (Channel + background service) và log exception.</p>
+    </div>
+
+    <div class="do-dont do">
+        <h4>✅ Async all the way</h4>
+        <pre class="cb"><span class="k">public async</span> Task&lt;<span class="t">IActionResult</span>&gt; <span class="n">Get</span>() =&gt; Ok(<span class="k">await</span> _svc.GetAsync());</pre>
+        <p>Từ endpoint xuống tới DB đều async, truyền CancellationToken xuyên suốt.</p>
+    </div>
+
+    <div class="do-dont do">
+        <h4>✅ Chạy đồng thời khi độc lập</h4>
+        <pre class="cb"><span class="k">var</span> (a, b) = (GetAAsync(), GetBAsync());
+<span class="k">await</span> Task.WhenAll(a, b); <span class="c">// nhanh hơn await tuần tự</span></pre>
+        <p>Các call I/O độc lập nên chạy song song với WhenAll thay vì await lần lượt.</p>
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">🎯 Checklist Async</h2>
+    <div class="ut-card">
+        <ul>
+            <li>✅ Mọi I/O đều <code>await</code>, không <code>.Result</code> / <code>.Wait()</code> ở bất kỳ đâu</li>
+            <li>✅ Không có <code>async void</code> ngoài event handler</li>
+            <li>✅ Public async method nhận và truyền <code>CancellationToken</code></li>
+            <li>✅ Library code dùng <code>ConfigureAwait(false)</code></li>
+            <li>✅ Call I/O độc lập chạy song song bằng <code>Task.WhenAll</code></li>
+            <li>✅ Không bọc I/O trong <code>Task.Run</code></li>
+            <li>✅ Dataset lớn dùng <code>IAsyncEnumerable</code> để streaming</li>
+            <li>✅ Luôn await (hoặc observe) Task để không nuốt exception</li>
+            <li>✅ Method async đặt hậu tố <code>Async</code> theo convention</li>
+        </ul>
+    </div>
+</section>
+
+</div>
+
+<footer style="text-align:center;padding:3rem 1.5rem;color:var(--ut-muted);border-top:1px solid var(--ut-border);margin-top:3rem;font-size:.9rem;">
+    <p>Async/Await &amp; Threading · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

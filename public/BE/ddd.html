@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domain-Driven Design — Strategic &amp; Tactical cho .NET</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --ut-primary: #512bd4;
+        --ut-primary-2: #8a2be2;
+        --ut-accent: #43e97b;
+        --ut-warn: #f39c12;
+        --ut-danger: #f5576c;
+        --ut-card: #1a1d2e;
+        --ut-card-2: #232640;
+        --ut-border: #2d3148;
+        --ut-text: #e2e8f0;
+        --ut-muted: #94a3b8;
+    }
+    .ut-hero { text-align: center; padding: 4rem 1.5rem 3rem; background: radial-gradient(ellipse at top, rgba(81,43,212,.18), transparent 60%); }
+    .ut-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 1rem; }
+    .ut-hero h1 .gradient { background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .ut-hero .hero-badge { display: inline-block; background: rgba(81,43,212,.15); color: var(--ut-primary-2); padding: .4rem 1rem; border-radius: 20px; font-size: .78rem; font-weight: 600; letter-spacing: 1px; margin-bottom: 1.25rem; }
+    .ut-hero p { color: var(--ut-muted); max-width: 820px; margin: 0 auto; }
+    .ut-section { padding: 2.5rem 0; }
+    .ut-title { font-size: 1.7rem; margin-bottom: 1.5rem; position: relative; padding-left: 1rem; color: var(--ut-text); }
+    .ut-title::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 4px; background: linear-gradient(180deg, var(--ut-primary), var(--ut-primary-2)); border-radius: 3px; }
+    .ut-sub { color: var(--ut-muted); margin-bottom: 1.25rem; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+    .ut-grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .ut-grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    .ut-grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .ut-card { background: var(--ut-card); border: 1px solid var(--ut-border); border-radius: 12px; padding: 1.4rem; }
+    .ut-card h3 { color: var(--ut-primary-2); margin-bottom: .6rem; font-size: 1.1rem; }
+    .ut-card h4 { color: var(--ut-accent); margin-bottom: .45rem; font-size: .98rem; }
+    .ut-card p, .ut-card li { color: var(--ut-muted); font-size: .95rem; }
+    .ut-card ul { padding-left: 1.2rem; }
+    .ut-card ul li { margin-bottom: .3rem; }
+    pre.cb { background: #0b1020; border: 1px solid var(--ut-border); border-left: 3px solid var(--ut-primary); border-radius: 8px; padding: 1rem 1.15rem; overflow-x: auto; font-family: 'JetBrains Mono', Consolas, monospace; font-size: .88rem; line-height: 1.6; margin: .75rem 0; color: #d6deeb; }
+    pre.cb .k { color: #c792ea; }
+    pre.cb .s { color: #ecc48d; }
+    pre.cb .c { color: #637777; font-style: italic; }
+    pre.cb .n { color: #82aaff; }
+    pre.cb .t { color: #ffcb8b; }
+    pre.cb .a { color: #7fdbca; }
+    code { background: #2d3148; padding: 2px 6px; border-radius: 4px; font-size: .88em; color: #f8d06b; font-family: 'JetBrains Mono', Consolas, monospace; }
+    .callout { border-radius: 10px; padding: .95rem 1.15rem; margin: 1rem 0; border: 1px solid; }
+    .callout.tip { background: rgba(67,233,123,.07); border-color: var(--ut-accent); }
+    .callout.tip strong { color: var(--ut-accent); }
+    .callout.warn { background: rgba(243,156,18,.07); border-color: var(--ut-warn); }
+    .callout.warn strong { color: var(--ut-warn); }
+    .callout.danger { background: rgba(245,87,108,.07); border-color: var(--ut-danger); }
+    .callout.danger strong { color: var(--ut-danger); }
+    .callout.info { background: rgba(81,43,212,.08); border-color: var(--ut-primary-2); }
+    .callout.info strong { color: var(--ut-primary-2); }
+    table.cmp { width: 100%; border-collapse: collapse; background: var(--ut-card); border-radius: 10px; overflow: hidden; margin: 1rem 0; font-size: .92rem; }
+    table.cmp th, table.cmp td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--ut-border); }
+    table.cmp th { background: var(--ut-card-2); color: var(--ut-primary-2); font-weight: 600; }
+    table.cmp td { color: var(--ut-muted); }
+    table.cmp tr:last-child td { border-bottom: none; }
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; position: relative; padding-left: 2.8rem; margin-bottom: 1rem; }
+    .steps li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 2rem; height: 2rem; background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .do-dont { border-left: 3px solid; padding: 1rem 1.15rem; border-radius: 8px; margin-bottom: 1rem; }
+    .do-dont.do { border-color: var(--ut-accent); background: rgba(67,233,123,.04); }
+    .do-dont.dont { border-color: var(--ut-danger); background: rgba(245,87,108,.04); }
+    .do-dont h4 { margin-bottom: .5rem; }
+    .do-dont.do h4 { color: var(--ut-accent); }
+    .do-dont.dont h4 { color: var(--ut-danger); }
+    .ctx-map { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1.25rem 0; }
+    .ctx { border: 2px dashed var(--ut-primary-2); border-radius: 12px; padding: 1rem; background: rgba(138,43,226,.06); }
+    .ctx h4 { color: var(--ut-primary-2); margin-bottom: .4rem; }
+    .ctx .rel { font-size: .78rem; color: var(--ut-accent); margin-top: .5rem; display: block; }
+    .agg-box { border: 2px solid var(--ut-accent); border-radius: 12px; padding: 1rem 1.2rem; background: rgba(67,233,123,.05); margin: 1rem 0; }
+    .agg-box .root { display: inline-block; background: var(--ut-accent); color: #07210f; font-weight: 700; font-size: .8rem; padding: .25rem .7rem; border-radius: 6px; margin-bottom: .6rem; }
+    .agg-box .member { display: inline-block; background: var(--ut-card-2); border: 1px solid var(--ut-border); border-radius: 6px; padding: .25rem .7rem; margin: .2rem; font-size: .82rem; color: var(--ut-muted); }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo"><a href="index.html" style="color:inherit;-webkit-text-fill-color:inherit;">.NET<span class="accent">Mastery</span></a></div>
+        <div class="nav-links">
+            <a href="index.html">Roadmap</a>
+            <a href="cqrs.html">CQRS</a>
+            <a href="ddd.html" class="nav-active">DDD</a>
+            <a href="messaging.html">Messaging</a>
+            <a href="system-design.html">System Design</a>
+            <a href="security.html">Security</a>
+            <a href="aspnet-testing.html">Unit Test</a>
+        </div>
+        <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+</nav>
+
+<header class="ut-hero">
+    <div class="hero-badge">MASTER · ADVANCED</div>
+    <h1>Domain-Driven Design cho <span class="gradient">.NET</span></h1>
+    <p>Mô hình hoá phần mềm theo nghiệp vụ thực. Strategic Design (bounded context, ubiquitous language, context mapping) định hình kiến trúc lớn; Tactical Design (entity, value object, aggregate, domain event, repository, ACL) cho code sạch. Kèm ví dụ C# hoàn chỉnh.</p>
+</header>
+
+<div class="container">
+
+<section class="ut-section">
+    <h2 class="ut-title">1. Vì sao DDD?</h2>
+    <p class="ut-sub">DDD giải quyết vấn đề <strong>độ phức tạp nghiệp vụ</strong>, không phải phức tạp kỹ thuật. Nó đặt domain (nghiệp vụ) làm trung tâm, code phản ánh đúng cách chuyên gia nghiệp vụ nói chuyện.</p>
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont do">
+            <h4>✅ Hợp với DDD</h4>
+            <ul>
+                <li>Domain phức tạp, nhiều rule, nhiều thay đổi</li>
+                <li>Cần cộng tác chặt với chuyên gia nghiệp vụ</li>
+                <li>Hệ thống sống lâu, nhiều team</li>
+                <li>VD: banking, logistics, insurance, e-commerce lớn</li>
+            </ul>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Không cần DDD đầy đủ</h4>
+            <ul>
+                <li>CRUD đơn giản, data-entry app</li>
+                <li>Prototype/MVP cần ra nhanh</li>
+                <li>Domain mỏng, chủ yếu là kỹ thuật (ETL, reporting)</li>
+                <li>Team chưa quen &mdash; chỉ lấy tactical patterns hữu ích</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">2. Strategic Design</h2>
+    <h3 style="color:var(--ut-primary-2)">Ubiquitous Language</h3>
+    <p class="ut-sub">Ngôn ngữ chung giữa dev và domain expert. Cùng một từ, cùng một nghĩa, dùng trong cả hội thoại lẫn code. Tránh "translation layer" trong đầu lập trình viên.</p>
+    <div class="callout info">
+        <strong>Ví dụ:</strong> Trong context Vận chuyển, "Cargo" được "routed" theo một "Itinerary" gồm nhiều "Leg". Code dùng đúng class <code>Cargo</code>, <code>Itinerary</code>, <code>Leg</code> &mdash; không phải <code>ShipmentData</code>, <code>RouteInfo</code>.
+    </div>
+
+    <h3 style="color:var(--ut-primary-2)">Bounded Context</h3>
+    <p class="ut-sub">Ranh giới rõ ràng trong đó một model + ubiquitous language có hiệu lực. Cùng một từ "Customer" có thể có nghĩa khác nhau giữa các context.</p>
+    <div class="ctx-map">
+        <div class="ctx">
+            <h4>Sales Context</h4>
+            <p style="font-size:.85rem">Customer = lead, có credit limit, sales rep.</p>
+        </div>
+        <div class="ctx">
+            <h4>Billing Context</h4>
+            <p style="font-size:.85rem">Customer = bên thanh toán, có invoice, payment terms.</p>
+        </div>
+        <div class="ctx">
+            <h4>Support Context</h4>
+            <p style="font-size:.85rem">Customer = người mở ticket, có SLA, lịch sử liên hệ.</p>
+        </div>
+    </div>
+    <div class="callout warn">
+        <strong>⚠️ Cạm bẫy "Shared Model":</strong> Cố ép một class <code>Customer</code> khổng lồ dùng chung mọi context &rarr; god object, coupling cao. Mỗi context có model riêng của "Customer" là điều bình thường và đúng đắn.
+    </div>
+
+    <h3 style="color:var(--ut-primary-2)">Context Mapping</h3>
+    <p class="ut-sub">Mô tả quan hệ giữa các bounded context khi chúng phải tích hợp.</p>
+    <table class="cmp">
+        <tr><th>Pattern</th><th>Ý nghĩa</th></tr>
+        <tr><td>Partnership</td><td>Hai team phụ thuộc nhau, phối hợp thay đổi cùng lúc</td></tr>
+        <tr><td>Shared Kernel</td><td>Chia sẻ một phần model nhỏ (cẩn trọng, dễ coupling)</td></tr>
+        <tr><td>Customer/Supplier</td><td>Downstream phụ thuộc upstream; upstream cân nhắc nhu cầu downstream</td></tr>
+        <tr><td>Conformist</td><td>Downstream chấp nhận model upstream như-là (không có quyền thương lượng)</td></tr>
+        <tr><td>Anti-Corruption Layer (ACL)</td><td>Downstream dịch model upstream sang model riêng &mdash; cách ly</td></tr>
+        <tr><td>Open Host Service / Published Language</td><td>Upstream công bố API/contract ổn định (vd: REST + JSON schema)</td></tr>
+    </table>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">3. Tactical Design &mdash; building blocks</h2>
+
+    <div class="ut-grid ut-grid-3">
+        <div class="ut-card">
+            <h4>Entity</h4>
+            <p>Có <strong>identity</strong> kéo dài theo thời gian. Hai entity bằng nhau khi cùng Id, dù thuộc tính khác.</p>
+        </div>
+        <div class="ut-card">
+            <h4>Value Object</h4>
+            <p>Không có identity, định nghĩa bằng <strong>giá trị</strong>. Bất biến. VD: Money, Address, DateRange.</p>
+        </div>
+        <div class="ut-card">
+            <h4>Aggregate</h4>
+            <p>Cụm entity + VO được coi là <strong>một đơn vị nhất quán</strong>. Có một Aggregate Root làm cổng vào.</p>
+        </div>
+        <div class="ut-card">
+            <h4>Domain Event</h4>
+            <p>Sự kiện có ý nghĩa nghiệp vụ vừa xảy ra. VD: <code>OrderPlaced</code>. Quá khứ, bất biến.</p>
+        </div>
+        <div class="ut-card">
+            <h4>Repository</h4>
+            <p>Abstraction lưu/lấy aggregate. Một repository cho mỗi aggregate root.</p>
+        </div>
+        <div class="ut-card">
+            <h4>Domain Service</h4>
+            <p>Logic không thuộc về entity/VO nào cụ thể. Stateless. VD: <code>PricingService</code>.</p>
+        </div>
+    </div>
+
+    <h3 style="color:var(--ut-primary-2)">Value Object &mdash; ví dụ Money</h3>
+    <pre class="cb"><span class="c">// VO bất biến, equality theo giá trị (record cho free Equals/GetHashCode)</span>
+<span class="k">public record</span> <span class="t">Money</span>
+{
+    <span class="k">public decimal</span> Amount { <span class="k">get</span>; }
+    <span class="k">public</span> <span class="t">Currency</span> Currency { <span class="k">get</span>; }
+
+    <span class="k">public</span> <span class="n">Money</span>(<span class="k">decimal</span> amount, <span class="t">Currency</span> currency)
+    {
+        <span class="k">if</span> (amount &lt; <span class="s">0</span>) <span class="k">throw new</span> ArgumentException(<span class="s">"Amount không âm"</span>);
+        Amount = amount;
+        Currency = currency;
+    }
+
+    <span class="k">public</span> <span class="t">Money</span> <span class="n">Add</span>(<span class="t">Money</span> other)
+    {
+        <span class="k">if</span> (Currency != other.Currency)
+            <span class="k">throw new</span> DomainException(<span class="s">"Không thể cộng tiền khác loại"</span>);
+        <span class="k">return new</span>(Amount + other.Amount, Currency);  <span class="c">// trả VO mới, không mutate</span>
+    }
+
+    <span class="k">public static</span> <span class="t">Money</span> Zero(<span class="t">Currency</span> c) =&gt; <span class="k">new</span>(<span class="s">0</span>, c);
+}</pre>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">4. Aggregate &amp; Aggregate Root</h2>
+    <p class="ut-sub">Aggregate là biên giới của tính nhất quán (consistency boundary). Mọi thay đổi đi qua Root; Root bảo vệ invariant. Tham chiếu giữa aggregate <strong>chỉ bằng Id</strong>, không bằng object.</p>
+
+    <div class="agg-box">
+        <span class="root">Order (Aggregate Root)</span><br>
+        <span class="member">OrderLine (entity nội bộ)</span>
+        <span class="member">OrderLine</span>
+        <span class="member">Money Total (VO)</span>
+        <span class="member">CustomerId (chỉ Id, không object)</span>
+        <span class="member">OrderStatus (enum)</span>
+    </div>
+
+    <pre class="cb"><span class="k">public class</span> <span class="t">Order</span> : <span class="t">AggregateRoot</span>&lt;Guid&gt;
+{
+    <span class="k">private readonly</span> List&lt;<span class="t">OrderLine</span>&gt; _lines = <span class="k">new</span>();
+    <span class="k">public</span> IReadOnlyList&lt;<span class="t">OrderLine</span>&gt; Lines =&gt; _lines.AsReadOnly();  <span class="c">// không expose List để sửa ngoài</span>
+
+    <span class="k">public</span> Guid CustomerId { <span class="k">get</span>; <span class="k">private set</span>; }   <span class="c">// ref aggregate khác = Id</span>
+    <span class="k">public</span> <span class="t">OrderStatus</span> Status { <span class="k">get</span>; <span class="k">private set</span>; }
+    <span class="k">public</span> <span class="t">Money</span> Total =&gt; _lines.Aggregate(
+        <span class="t">Money</span>.Zero(Currency.VND), (acc, l) =&gt; acc.Add(l.LineTotal));
+
+    <span class="k">private</span> <span class="n">Order</span>() { }  <span class="c">// cho EF Core</span>
+
+    <span class="c">// Factory method — đặt tên theo ubiquitous language</span>
+    <span class="k">public static</span> <span class="t">Order</span> <span class="n">Place</span>(Guid customerId)
+    {
+        <span class="k">var</span> order = <span class="k">new</span> <span class="t">Order</span> { Id = Guid.NewGuid(), CustomerId = customerId, Status = OrderStatus.Draft };
+        order.Raise(<span class="k">new</span> <span class="t">OrderPlacedEvent</span>(order.Id, customerId));  <span class="c">// domain event</span>
+        <span class="k">return</span> order;
+    }
+
+    <span class="c">// Mọi thay đổi qua method bảo vệ invariant</span>
+    <span class="k">public void</span> <span class="n">AddLine</span>(Guid productId, <span class="k">int</span> qty, <span class="t">Money</span> unitPrice)
+    {
+        <span class="k">if</span> (Status != OrderStatus.Draft)
+            <span class="k">throw new</span> DomainException(<span class="s">"Chỉ thêm dòng khi đơn ở Draft"</span>);
+        <span class="k">if</span> (qty &lt;= <span class="s">0</span>)
+            <span class="k">throw new</span> DomainException(<span class="s">"Số lượng phải > 0"</span>);
+
+        <span class="k">var</span> existing = _lines.FirstOrDefault(l =&gt; l.ProductId == productId);
+        <span class="k">if</span> (existing is <span class="k">not null</span>) existing.IncreaseQty(qty);
+        <span class="k">else</span> _lines.Add(<span class="k">new</span> <span class="t">OrderLine</span>(productId, qty, unitPrice));
+    }
+
+    <span class="k">public void</span> <span class="n">Confirm</span>()
+    {
+        <span class="k">if</span> (_lines.Count == <span class="s">0</span>)
+            <span class="k">throw new</span> DomainException(<span class="s">"Không thể xác nhận đơn rỗng"</span>);  <span class="c">// invariant</span>
+        Status = OrderStatus.Confirmed;
+        Raise(<span class="k">new</span> <span class="t">OrderConfirmedEvent</span>(Id, Total.Amount));
+    }
+}</pre>
+
+    <div class="callout tip">
+        <strong>💡 Quy tắc thiết kế aggregate (Vaughn Vernon):</strong> (1) Bảo vệ invariant trong một aggregate. (2) Aggregate nhỏ. (3) Tham chiếu aggregate khác bằng Id. (4) Cập nhật aggregate khác qua eventual consistency (domain event), không trong cùng transaction.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">5. Domain Events</h2>
+    <p class="ut-sub">Aggregate raise event khi có sự kiện nghiệp vụ. Event được dispatch sau khi persist thành công &mdash; thường ngay trước/sau <code>SaveChanges</code>.</p>
+
+    <pre class="cb"><span class="k">public abstract class</span> <span class="t">AggregateRoot</span>&lt;TId&gt;
+{
+    <span class="k">public</span> TId Id { <span class="k">get</span>; <span class="k">protected set</span>; } = <span class="k">default</span>!;
+    <span class="k">private readonly</span> List&lt;<span class="t">IDomainEvent</span>&gt; _events = <span class="k">new</span>();
+    <span class="k">public</span> IReadOnlyList&lt;<span class="t">IDomainEvent</span>&gt; DomainEvents =&gt; _events.AsReadOnly();
+    <span class="k">protected void</span> <span class="n">Raise</span>(<span class="t">IDomainEvent</span> e) =&gt; _events.Add(e);
+    <span class="k">public void</span> <span class="n">ClearEvents</span>() =&gt; _events.Clear();
+}
+
+<span class="k">public record</span> <span class="t">OrderConfirmedEvent</span>(Guid OrderId, <span class="k">decimal</span> Total) : <span class="t">IDomainEvent</span>;</pre>
+
+    <pre class="cb"><span class="c">// Dispatch events trong SaveChanges override (EF Core + MediatR)</span>
+<span class="k">public override async</span> Task&lt;<span class="k">int</span>&gt; <span class="n">SaveChangesAsync</span>(CancellationToken ct = <span class="k">default</span>)
+{
+    <span class="k">var</span> entities = ChangeTracker.Entries&lt;<span class="t">AggregateRoot</span>&lt;Guid&gt;&gt;()
+        .Where(e =&gt; e.Entity.DomainEvents.Any())
+        .Select(e =&gt; e.Entity).ToList();
+
+    <span class="k">var</span> events = entities.SelectMany(e =&gt; e.DomainEvents).ToList();
+    <span class="k">var</span> result = <span class="k">await base</span>.SaveChangesAsync(ct);  <span class="c">// persist trước</span>
+
+    entities.ForEach(e =&gt; e.ClearEvents());
+    <span class="k">foreach</span> (<span class="k">var</span> e <span class="k">in</span> events)
+        <span class="k">await</span> _mediator.Publish(e, ct);          <span class="c">// rồi mới publish</span>
+
+    <span class="k">return</span> result;
+}</pre>
+
+    <div class="callout warn">
+        <strong>⚠️ In-process domain event vs integration event:</strong> Domain event ở trên là <em>trong cùng process</em>. Để thông báo sang bounded context/service khác, chuyển thành <strong>integration event</strong> publish qua message bus (xem trang Messaging) &mdash; thường kèm Outbox pattern để đảm bảo nhất quán.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">6. Repository</h2>
+    <p class="ut-sub">Một repository cho mỗi aggregate root. Interface sống ở tầng Domain; implementation ở Infrastructure (EF Core). Repository load/save <em>nguyên cụm aggregate</em>.</p>
+
+    <pre class="cb"><span class="c">// Domain layer — interface, không biết EF Core</span>
+<span class="k">public interface</span> <span class="t">IOrderRepository</span>
+{
+    Task&lt;<span class="t">Order</span>?&gt; <span class="n">GetByIdAsync</span>(Guid id, CancellationToken ct);
+    Task <span class="n">AddAsync</span>(<span class="t">Order</span> order, CancellationToken ct);
+    <span class="k">void</span> <span class="n">Remove</span>(<span class="t">Order</span> order);
+}
+
+<span class="c">// Infrastructure layer — implement bằng EF Core</span>
+<span class="k">public class</span> <span class="t">OrderRepository</span> : <span class="t">IOrderRepository</span>
+{
+    <span class="k">private readonly</span> <span class="t">AppDbContext</span> _db;
+    <span class="k">public</span> <span class="n">OrderRepository</span>(<span class="t">AppDbContext</span> db) =&gt; _db = db;
+
+    <span class="k">public</span> Task&lt;<span class="t">Order</span>?&gt; <span class="n">GetByIdAsync</span>(Guid id, CancellationToken ct)
+        =&gt; _db.Orders
+            .Include(o =&gt; o.Lines)   <span class="c">// load nguyên aggregate</span>
+            .FirstOrDefaultAsync(o =&gt; o.Id == id, ct);
+
+    <span class="k">public async</span> Task <span class="n">AddAsync</span>(<span class="t">Order</span> o, CancellationToken ct) =&gt; <span class="k">await</span> _db.Orders.AddAsync(o, ct);
+    <span class="k">public void</span> <span class="n">Remove</span>(<span class="t">Order</span> o) =&gt; _db.Orders.Remove(o);
+}</pre>
+
+    <div class="callout danger">
+        <strong>❌ Anti-pattern:</strong> Repository "generic" <code>IRepository&lt;T&gt;</code> expose <code>IQueryable</code> ra ngoài &rarr; query logic rò rỉ khắp nơi, không còn aggregate boundary. Dùng repository chuyên biệt theo aggregate, hoặc tách hẳn read sang CQRS query.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">7. Anti-Corruption Layer (ACL)</h2>
+    <p class="ut-sub">Khi tích hợp hệ thống legacy/bên thứ ba có model "bẩn", ACL dịch sang model sạch của domain bạn &mdash; cách ly domain khỏi sự lộn xộn bên ngoài.</p>
+
+    <pre class="cb"><span class="c">// Model "bẩn" từ ERP legacy (SOAP, field viết tắt khó hiểu)</span>
+<span class="k">public class</span> <span class="t">LegacyCustomerDto</span>
+{
+    <span class="k">public string</span> CUST_NM { <span class="k">get</span>; <span class="k">set</span>; }     <span class="c">// tên</span>
+    <span class="k">public string</span> CR_LMT { <span class="k">get</span>; <span class="k">set</span>; }      <span class="c">// credit limit dạng string "1.000.000"</span>
+    <span class="k">public string</span> ST_CD { <span class="k">get</span>; <span class="k">set</span>; }       <span class="c">// "A"=active, "I"=inactive</span>
+}
+
+<span class="c">// ACL: translator dịch sang domain model sạch</span>
+<span class="k">public class</span> <span class="t">CustomerAcl</span> : <span class="t">ICustomerProvider</span>
+{
+    <span class="k">private readonly</span> <span class="t">ILegacyErpClient</span> _erp;
+    <span class="k">public</span> <span class="n">CustomerAcl</span>(<span class="t">ILegacyErpClient</span> erp) =&gt; _erp = erp;
+
+    <span class="k">public async</span> Task&lt;<span class="t">Customer</span>&gt; <span class="n">GetAsync</span>(<span class="k">string</span> code, CancellationToken ct)
+    {
+        <span class="k">var</span> dto = <span class="k">await</span> _erp.FetchCustomerAsync(code, ct);
+
+        <span class="c">// Dịch sang ubiquitous language của domain mình</span>
+        <span class="k">return new</span> <span class="t">Customer</span>(
+            name: dto.CUST_NM.Trim(),
+            creditLimit: <span class="k">new</span> <span class="t">Money</span>(<span class="t">decimal</span>.Parse(dto.CR_LMT, CultureInfo.GetCultureInfo(<span class="s">"vi-VN"</span>)), Currency.VND),
+            isActive: dto.ST_CD == <span class="s">"A"</span>);
+    }
+}</pre>
+
+    <div class="callout tip">
+        <strong>💡 Lợi ích ACL:</strong> Khi ERP đổi field/format, chỉ ACL phải sửa; domain không đụng tới. Domain luôn nói "ngôn ngữ của mình".
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">8. Kiến trúc tầng (Clean / Onion)</h2>
+    <p class="ut-sub">DDD thường đi với Clean Architecture: dependency hướng vào trong, Domain ở lõi không phụ thuộc gì.</p>
+    <pre class="cb">┌─────────────────────────────────────────┐
+│  API / UI         (Controllers, Minimal API)   │  ← phụ thuộc vào trong
+│  ┌───────────────────────────────────┐  │
+│  │  Application   (Command/Query handlers,  │  │
+│  │                use cases, MediatR)       │  │
+│  │  ┌─────────────────────────────┐  │  │
+│  │  │  Domain  (Entity, VO, Aggregate, │  │  │  ← LÕI, không ref ra ngoài
+│  │  │          Domain Event, interface)│  │  │
+│  │  └─────────────────────────────┘  │  │
+│  └───────────────────────────────────┘  │
+│  Infrastructure (EF Core, repos, ACL, MQ)      │  ← implement interface của Domain
+└─────────────────────────────────────────┘</pre>
+    <div class="callout info">
+        <strong>Dependency Inversion:</strong> Domain định nghĩa interface <code>IOrderRepository</code>; Infrastructure implement. Domain không bao giờ <code>using Microsoft.EntityFrameworkCore</code>. Đây là điều giúp domain test được và bền với thay đổi hạ tầng.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">🎯 Checklist DDD</h2>
+    <div class="ut-card">
+        <ul>
+            <li>✅ Có ubiquitous language &mdash; code dùng đúng từ nghiệp vụ</li>
+            <li>✅ Mỗi bounded context có model riêng, không share god-object</li>
+            <li>✅ Vẽ context map, xác định quan hệ (ACL/Conformist/...)</li>
+            <li>✅ Value object bất biến, equality theo giá trị (dùng <code>record</code>)</li>
+            <li>✅ Aggregate nhỏ; ref aggregate khác bằng Id, không object</li>
+            <li>✅ Mọi thay đổi qua method của Root, bảo vệ invariant</li>
+            <li>✅ Constructor private + factory method đặt tên nghiệp vụ</li>
+            <li>✅ Domain event dispatch sau khi persist thành công</li>
+            <li>✅ Một repository / aggregate root; interface ở Domain</li>
+            <li>✅ ACL cách ly hệ thống ngoài; Domain không phụ thuộc Infrastructure</li>
+        </ul>
+    </div>
+</section>
+
+</div>
+
+<footer style="text-align:center;padding:3rem 1.5rem;color:var(--ut-muted);border-top:1px solid var(--ut-border);margin-top:3rem;font-size:.9rem;">
+    <p>Domain-Driven Design · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

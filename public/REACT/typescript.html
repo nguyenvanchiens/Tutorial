@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TypeScript với React - Typing Props, State, Hooks</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">React<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="js-foundations.html">JS Nền tảng</a>
+      <a href="basics.html">Cơ bản</a>
+      <a href="hooks.html">Hooks</a>
+      <a href="typescript.html" class="active">TypeScript</a>
+      <a href="advanced.html">Nâng cao</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="ecosystem.html">Ecosystem</a>
+      <a href="interview.html">Phỏng vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">LEVEL 2 · JUNIOR</div>
+  <h1>TypeScript với <span class="gradient">React</span></h1>
+  <p class="hero-desc">Năm 2026, TypeScript là <strong>mặc định</strong> cho dự án React nghiêm túc. Nó bắt lỗi ngay khi gõ, biến IDE thành tài liệu sống, và giúp refactor an toàn. Trang này dạy bạn type chính xác props, state, hooks, context và reducer — đúng React 19 + TS 5.x.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">1. Vì sao dùng TypeScript?</h2>
+    <p class="section-sub">TS là JS + hệ thống kiểu (type). Code TS được biên dịch (type-check) rồi <em>xoá type</em> để ra JS thường. Type chỉ tồn tại lúc dev — runtime hoàn toàn là JS.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>✅ TypeScript cho bạn</h4>
+        <ul>
+          <li>Bắt lỗi <strong>trước khi chạy</strong> (typo prop, sai kiểu)</li>
+          <li>Autocomplete &amp; "go to definition" chính xác</li>
+          <li>Refactor an toàn — đổi tên field, IDE báo mọi chỗ hỏng</li>
+          <li>Type như tài liệu: nhìn signature biết cách dùng</li>
+          <li>Tự tin hơn khi làm team / codebase lớn</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>JS vs TS — lỗi bắt được sớm</h4>
+        <pre class="code"><span class="c">// JS — chạy mới crash</span>
+<span class="k">function</span> <span class="n">greet</span>(user) {
+  <span class="k">return</span> <span class="s">`Hi ${user.naem}`</span>; <span class="c">// typo, im lặng</span>
+}
+
+<span class="c">// TS — báo đỏ ngay lúc gõ</span>
+<span class="k">function</span> <span class="n">greet</span>(user: User) {
+  <span class="k">return</span> <span class="s">`Hi ${user.naem}`</span>;
+  <span class="c">// ❌ Property 'naem' does not exist on type 'User'</span>
+}</pre>
+      </div>
+    </div>
+
+    <div class="tip"><strong>Setup nhanh:</strong> <code>npm create vite@latest my-app -- --template react-ts</code>. File component đổi đuôi <code>.tsx</code>, file logic dùng <code>.ts</code>.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">2. Các kiểu cơ bản</h2>
+    <pre class="code"><span class="c">// Primitive</span>
+<span class="k">let</span> name: <span class="t">string</span> = <span class="s">'Chiến'</span>;
+<span class="k">let</span> age: <span class="t">number</span> = <span class="s">25</span>;
+<span class="k">let</span> active: <span class="t">boolean</span> = <span class="k">true</span>;
+
+<span class="c">// Array</span>
+<span class="k">let</span> ids: <span class="t">number</span>[] = [<span class="s">1</span>, <span class="s">2</span>, <span class="s">3</span>];
+<span class="k">let</span> names: <span class="t">Array</span>&lt;<span class="t">string</span>&gt; = [<span class="s">'a'</span>, <span class="s">'b'</span>];
+
+<span class="c">// Object &amp; optional (?)</span>
+<span class="k">let</span> user: { id: <span class="t">number</span>; nick?: <span class="t">string</span> } = { id: <span class="s">1</span> };
+
+<span class="c">// Union — một trong nhiều kiểu</span>
+<span class="k">let</span> status: <span class="s">'idle'</span> | <span class="s">'loading'</span> | <span class="s">'error'</span> = <span class="s">'idle'</span>;
+
+<span class="c">// Function</span>
+<span class="k">const</span> add = (a: <span class="t">number</span>, b: <span class="t">number</span>): <span class="t">number</span> =&gt; a + b;
+
+<span class="c">// any (tránh!) vs unknown (an toàn) vs never</span>
+<span class="k">let</span> x: <span class="t">unknown</span>; <span class="c">// phải narrow trước khi dùng</span></pre>
+
+    <div class="warn-box"><strong>Tránh <code>any</code>:</strong> nó tắt mọi kiểm tra — mất hết lợi ích TS. Khi không rõ kiểu, dùng <code>unknown</code> rồi thu hẹp (narrow) bằng <code>typeof</code>/<code>in</code>. Bật <code>"noImplicitAny": true</code> để TS không lén dùng <code>any</code>.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">3. <code>interface</code> vs <code>type</code></h2>
+    <p class="section-sub">Cả hai mô tả "hình dạng" object. Khác biệt nhỏ — chọn nhất quán trong dự án.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>interface — hay dùng cho object/props</h4>
+        <pre class="code"><span class="k">interface</span> <span class="t">User</span> {
+  id: <span class="t">number</span>;
+  name: <span class="t">string</span>;
+  role?: <span class="t">string</span>; <span class="c">// optional</span>
+}
+
+<span class="c">// Kế thừa</span>
+<span class="k">interface</span> <span class="t">Admin</span> <span class="k">extends</span> <span class="t">User</span> {
+  perms: <span class="t">string</span>[];
+}
+
+<span class="c">// Declaration merging (gộp tự động)</span>
+<span class="k">interface</span> <span class="t">User</span> { age: <span class="t">number</span>; }</pre>
+      </div>
+      <div class="card">
+        <h4>type — linh hoạt hơn (union, tuple)</h4>
+        <pre class="code"><span class="k">type</span> <span class="t">ID</span> = <span class="t">number</span> | <span class="t">string</span>;       <span class="c">// union</span>
+<span class="k">type</span> <span class="t">Point</span> = [<span class="t">number</span>, <span class="t">number</span>];     <span class="c">// tuple</span>
+
+<span class="k">type</span> <span class="t">User</span> = {
+  id: <span class="t">ID</span>;
+  name: <span class="t">string</span>;
+};
+
+<span class="c">// Giao kiểu (intersection)</span>
+<span class="k">type</span> <span class="t">Admin</span> = <span class="t">User</span> &amp; { perms: <span class="t">string</span>[] };</pre>
+      </div>
+    </div>
+
+    <table class="cmp">
+      <tr><th>Tiêu chí</th><th>interface</th><th>type</th></tr>
+      <tr><td>Object shape</td><td>✅ tốt</td><td>✅ tốt</td></tr>
+      <tr><td>Union / tuple / primitive alias</td><td>❌ không</td><td>✅ được</td></tr>
+      <tr><td>Kế thừa / mở rộng</td><td><code>extends</code></td><td><code>&amp;</code> (intersection)</td></tr>
+      <tr><td>Declaration merging</td><td>✅ có</td><td>❌ không</td></tr>
+    </table>
+
+    <div class="info-box"><strong>Khuyến nghị thực tế:</strong> dùng <code>interface</code> cho props &amp; shape object công khai, dùng <code>type</code> cho union/utility/phép biến đổi kiểu. Quan trọng nhất là <em>nhất quán</em> trong team.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">4. Type Props</h2>
+    <p class="section-sub">Định nghĩa một <code>interface</code> cho props rồi annotate tham số. Năm 2026 không còn dùng <code>React.FC</code> (vì ép kiểu <code>children</code> ngầm gây phiền).</p>
+
+    <pre class="code"><span class="k">interface</span> <span class="t">ButtonProps</span> {
+  label: <span class="t">string</span>;
+  variant?: <span class="s">'primary'</span> | <span class="s">'danger'</span>;        <span class="c">// optional union</span>
+  disabled?: <span class="t">boolean</span>;
+  onClick: () =&gt; <span class="t">void</span>;                       <span class="c">// hàm không trả gì</span>
+  children: <span class="t">React.ReactNode</span>;               <span class="c">// bất kỳ thứ render được</span>
+}
+
+<span class="k">function</span> <span class="n">Button</span>({ label, variant = <span class="s">'primary'</span>, onClick, children }: <span class="t">ButtonProps</span>) {
+  <span class="k">return</span> (
+    &lt;<span class="t">button</span> className={variant} onClick={onClick}&gt;
+      {label} {children}
+    &lt;/<span class="t">button</span>&gt;
+  );
+}
+
+<span class="c">// Mở rộng prop của thẻ HTML gốc (giữ onClick, type, ...)</span>
+<span class="k">interface</span> <span class="t">InputProps</span> <span class="k">extends</span> <span class="t">React.ComponentProps</span>&lt;<span class="s">'input'</span>&gt; {
+  label: <span class="t">string</span>;
+}</pre>
+
+    <div class="tip"><strong>React 19 lưu ý:</strong> <code>React.ReactNode</code> cho <code>children</code> bất kỳ; <code>React.ReactElement</code> nếu chỉ nhận đúng 1 element. <code>React.ComponentProps&lt;'button'&gt;</code> kế thừa toàn bộ attribute hợp lệ của thẻ HTML — khỏi khai báo tay.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">5. Type State — <code>useState&lt;T&gt;</code></h2>
+    <p class="section-sub">Thường TS tự suy ra kiểu từ giá trị khởi tạo. Chỉ cần annotate khi giá trị ban đầu là <code>null</code>/<code>[]</code> hoặc union.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>Suy luận tự động</h4>
+        <pre class="code"><span class="c">// TS tự biết: number / string / boolean</span>
+<span class="k">const</span> [count, setCount] = useState(<span class="s">0</span>);
+<span class="k">const</span> [name, setName] = useState(<span class="s">''</span>);
+<span class="k">const</span> [open, setOpen] = useState(<span class="k">false</span>);
+
+setCount(<span class="s">'x'</span>); <span class="c">// ❌ TS báo lỗi ngay</span></pre>
+      </div>
+      <div class="card">
+        <h4>Cần annotate generic</h4>
+        <pre class="code"><span class="c">// null ban đầu → phải nói rõ kiểu</span>
+<span class="k">const</span> [user, setUser] = useState&lt;<span class="t">User</span> | <span class="t">null</span>&gt;(<span class="k">null</span>);
+
+<span class="c">// array rỗng ban đầu</span>
+<span class="k">const</span> [items, setItems] = useState&lt;<span class="t">Todo</span>[]&gt;([]);
+
+<span class="c">// union literal</span>
+<span class="k">const</span> [tab, setTab] = useState&lt;<span class="s">'home'</span> | <span class="s">'profile'</span>&gt;(<span class="s">'home'</span>);</pre>
+      </div>
+    </div>
+
+    <div class="info-box"><strong>Quy tắc:</strong> để TS suy luận khi giá trị khởi tạo đã đủ rõ; chỉ ghi <code>useState&lt;T&gt;</code> khi khởi tạo là <code>null</code>, <code>[]</code>, <code>{}</code> hoặc bạn muốn union rộng hơn giá trị ban đầu.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">6. Type Event handlers</h2>
+    <p class="section-sub">Đừng để event là <code>any</code>. Dùng đúng kiểu để có autocomplete <code>e.target.value</code>, <code>e.key</code>...</p>
+
+    <pre class="code"><span class="c">// onClick button</span>
+<span class="k">const</span> onClick = (e: <span class="t">React.MouseEvent</span>&lt;<span class="t">HTMLButtonElement</span>&gt;) =&gt; {
+  console.log(e.currentTarget);
+};
+
+<span class="c">// onChange input</span>
+<span class="k">const</span> onChange = (e: <span class="t">React.ChangeEvent</span>&lt;<span class="t">HTMLInputElement</span>&gt;) =&gt; {
+  setName(e.target.value); <span class="c">// value được biết là string</span>
+};
+
+<span class="c">// onSubmit form</span>
+<span class="k">const</span> onSubmit = (e: <span class="t">React.FormEvent</span>&lt;<span class="t">HTMLFormElement</span>&gt;) =&gt; {
+  e.preventDefault();
+};
+
+<span class="c">// onKeyDown</span>
+<span class="k">const</span> onKeyDown = (e: <span class="t">React.KeyboardEvent</span>) =&gt; {
+  <span class="k">if</span> (e.key === <span class="s">'Enter'</span>) submit();
+};
+
+<span class="c">// MẸO: gắn handler inline → TS tự suy ra kiểu e, khỏi annotate</span>
+&lt;<span class="t">input</span> onChange={(e) =&gt; setName(e.target.value)} /&gt;</pre>
+
+    <div class="tip"><strong>Mẹo tiết kiệm:</strong> nếu viết handler <em>inline</em> ngay trên JSX, TS tự suy ra kiểu event từ thuộc tính (contextual typing) — không cần annotate tay. Chỉ annotate khi tách handler ra biến/hàm riêng.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">7. Generics trong Component</h2>
+    <p class="section-sub">Generic giúp viết component tái sử dụng giữ nguyên kiểu dữ liệu. Ví dụ kinh điển: một <code>&lt;List&gt;</code> nhận bất kỳ kiểu item nào.</p>
+
+    <pre class="code"><span class="c">// Component generic — &lt;T,&gt; (dấu phẩy để TS không nhầm là JSX)</span>
+<span class="k">interface</span> <span class="t">ListProps</span>&lt;<span class="t">T</span>&gt; {
+  items: <span class="t">T</span>[];
+  renderItem: (item: <span class="t">T</span>) =&gt; <span class="t">React.ReactNode</span>;
+  keyOf: (item: <span class="t">T</span>) =&gt; <span class="t">string</span> | <span class="t">number</span>;
+}
+
+<span class="k">function</span> <span class="n">List</span>&lt;<span class="t">T</span>,&gt;({ items, renderItem, keyOf }: <span class="t">ListProps</span>&lt;<span class="t">T</span>&gt;) {
+  <span class="k">return</span> (
+    &lt;<span class="t">ul</span>&gt;
+      {items.map((it) =&gt; (
+        &lt;<span class="t">li</span> key={keyOf(it)}&gt;{renderItem(it)}&lt;/<span class="t">li</span>&gt;
+      ))}
+    &lt;/<span class="t">ul</span>&gt;
+  );
+}
+
+<span class="c">// Dùng — TS tự suy T = User, item trong renderItem được biết là User</span>
+&lt;<span class="t">List</span>
+  items={users}
+  keyOf={(u) =&gt; u.id}
+  renderItem={(u) =&gt; u.name}
+/&gt;</pre>
+
+    <div class="info-box"><strong>Vì sao mạnh:</strong> không cần tạo <code>UserList</code>, <code>PostList</code> riêng. Một <code>List&lt;T&gt;</code> hoạt động cho mọi kiểu mà vẫn full type-safe bên trong <code>renderItem</code>. Đây là nền của nhiều thư viện table/select.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">8. Type Hooks &amp; Custom Hooks</h2>
+    <p class="section-sub">Annotate giá trị trả về của custom hook giúp nơi dùng có autocomplete chuẩn. Dùng <code>as const</code> để giữ kiểu tuple.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>useRef &amp; useReducer</h4>
+        <pre class="code"><span class="c">// ref tới DOM (khởi tạo null)</span>
+<span class="k">const</span> inputRef = useRef&lt;<span class="t">HTMLInputElement</span>&gt;(<span class="k">null</span>);
+inputRef.current?.focus();
+
+<span class="c">// ref lưu giá trị mutable</span>
+<span class="k">const</span> id = useRef&lt;<span class="t">number</span>&gt;(<span class="s">0</span>);</pre>
+      </div>
+      <div class="card">
+        <h4>Custom hook có kiểu</h4>
+        <pre class="code"><span class="k">function</span> <span class="n">useToggle</span>(init = <span class="k">false</span>) {
+  <span class="k">const</span> [on, setOn] = useState(init);
+  <span class="k">const</span> toggle = () =&gt; setOn((o) =&gt; !o);
+  <span class="c">// as const → trả về tuple [boolean, () =&gt; void]</span>
+  <span class="k">return</span> [on, toggle] <span class="k">as const</span>;
+}
+
+<span class="k">const</span> [open, toggle] = <span class="n">useToggle</span>();</pre>
+      </div>
+    </div>
+
+    <pre class="code"><span class="c">// Custom hook fetch generic — trả về union state đầy đủ</span>
+<span class="k">interface</span> <span class="t">FetchState</span>&lt;<span class="t">T</span>&gt; {
+  data: <span class="t">T</span> | <span class="t">null</span>;
+  loading: <span class="t">boolean</span>;
+  error: <span class="t">Error</span> | <span class="t">null</span>;
+}
+
+<span class="k">function</span> <span class="n">useFetch</span>&lt;<span class="t">T</span>&gt;(url: <span class="t">string</span>): <span class="t">FetchState</span>&lt;<span class="t">T</span>&gt; {
+  <span class="k">const</span> [state, setState] = useState&lt;<span class="t">FetchState</span>&lt;<span class="t">T</span>&gt;&gt;({
+    data: <span class="k">null</span>, loading: <span class="k">true</span>, error: <span class="k">null</span>,
+  });
+  <span class="c">// ... useEffect gọi fetch, set state ...</span>
+  <span class="k">return</span> state;
+}
+
+<span class="c">// Nơi dùng chỉ định T → data biết đúng kiểu</span>
+<span class="k">const</span> { data, loading } = <span class="n">useFetch</span>&lt;<span class="t">User</span>[]&gt;(<span class="s">'/api/users'</span>);</pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">9. Discriminated Union cho Reducer</h2>
+    <p class="section-sub">Pattern quan trọng nhất khi dùng <code>useReducer</code> với TS. Mỗi action có một <code>type</code> literal làm "discriminant" — TS tự thu hẹp <code>payload</code> theo từng case.</p>
+
+    <pre class="code"><span class="k">interface</span> <span class="t">State</span> { count: <span class="t">number</span>; step: <span class="t">number</span>; }
+
+<span class="c">// Mỗi action có "type" riêng + payload tương ứng</span>
+<span class="k">type</span> <span class="t">Action</span> =
+  | { type: <span class="s">'increment'</span> }
+  | { type: <span class="s">'decrement'</span> }
+  | { type: <span class="s">'setStep'</span>; step: <span class="t">number</span> }
+  | { type: <span class="s">'reset'</span>; payload: <span class="t">State</span> };
+
+<span class="k">function</span> <span class="n">reducer</span>(state: <span class="t">State</span>, action: <span class="t">Action</span>): <span class="t">State</span> {
+  <span class="k">switch</span> (action.type) {
+    <span class="k">case</span> <span class="s">'increment'</span>:
+      <span class="k">return</span> { ...state, count: state.count + state.step };
+    <span class="k">case</span> <span class="s">'setStep'</span>:
+      <span class="k">return</span> { ...state, step: action.step }; <span class="c">// TS biết có .step</span>
+    <span class="k">case</span> <span class="s">'reset'</span>:
+      <span class="k">return</span> action.payload;                  <span class="c">// TS biết có .payload</span>
+    <span class="k">default</span>:
+      <span class="k">const</span> _exhaustive: <span class="t">never</span> = action;       <span class="c">// ✅ ép xử lý hết case</span>
+      <span class="k">return</span> state;
+  }
+}
+
+<span class="k">const</span> [state, dispatch] = useReducer(reducer, { count: <span class="s">0</span>, step: <span class="s">1</span> });
+dispatch({ type: <span class="s">'setStep'</span>, step: <span class="s">5</span> }); <span class="c">// ✅ thiếu step → TS báo lỗi</span></pre>
+
+    <div class="tip"><strong>Mẹo exhaustiveness:</strong> gán <code>action</code> vào biến kiểu <code>never</code> ở <code>default</code>. Nếu sau này thêm action mới mà quên xử lý, TS sẽ báo lỗi compile — không bao giờ sót case.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">10. Type Context</h2>
+    <p class="section-sub">Type context an toàn + một custom hook kiểm tra <code>undefined</code> giúp tránh lỗi "dùng context ngoài Provider".</p>
+
+    <pre class="code"><span class="k">interface</span> <span class="t">AuthContextValue</span> {
+  user: <span class="t">User</span> | <span class="t">null</span>;
+  login: (email: <span class="t">string</span>) =&gt; <span class="t">Promise</span>&lt;<span class="t">void</span>&gt;;
+  logout: () =&gt; <span class="t">void</span>;
+}
+
+<span class="c">// Khởi tạo null + union, KHÔNG fake giá trị mặc định</span>
+<span class="k">const</span> AuthContext = createContext&lt;<span class="t">AuthContextValue</span> | <span class="t">null</span>&gt;(<span class="k">null</span>);
+
+<span class="c">// React 19: dùng &lt;AuthContext&gt; trực tiếp làm Provider (bỏ .Provider)</span>
+<span class="k">export function</span> <span class="n">AuthProvider</span>({ children }: { children: <span class="t">React.ReactNode</span> }) {
+  <span class="k">const</span> [user, setUser] = useState&lt;<span class="t">User</span> | <span class="t">null</span>&gt;(<span class="k">null</span>);
+  <span class="k">const</span> value: <span class="t">AuthContextValue</span> = {
+    user,
+    login: <span class="k">async</span> (email) =&gt; { <span class="c">/* ... */</span> },
+    logout: () =&gt; setUser(<span class="k">null</span>),
+  };
+  <span class="k">return</span> &lt;<span class="t">AuthContext</span> value={value}&gt;{children}&lt;/<span class="t">AuthContext</span>&gt;;
+}
+
+<span class="c">// Custom hook: ép kiểm tra Provider, trả về kiểu KHÔNG null</span>
+<span class="k">export function</span> <span class="n">useAuth</span>(): <span class="t">AuthContextValue</span> {
+  <span class="k">const</span> ctx = useContext(AuthContext);
+  <span class="k">if</span> (!ctx) <span class="k">throw new</span> Error(<span class="s">'useAuth phải dùng trong &lt;AuthProvider&gt;'</span>);
+  <span class="k">return</span> ctx;
+}</pre>
+
+    <div class="info-box"><strong>React 19:</strong> bạn có thể render <code>&lt;AuthContext value={...}&gt;</code> trực tiếp thay cho <code>&lt;AuthContext.Provider&gt;</code>. Mẫu <code>createContext&lt;T | null&gt;(null)</code> + custom hook ném lỗi là cách type context an toàn nhất, tránh phải kiểm tra <code>undefined</code> ở mọi nơi dùng.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">11. Utility Types</h2>
+    <p class="section-sub">TS có sẵn các kiểu biến đổi giúp tái dùng type mà không lặp lại. Cực hữu ích cho form, API, props.</p>
+
+    <table class="cmp">
+      <tr><th>Utility</th><th>Làm gì</th><th>Ví dụ</th></tr>
+      <tr><td><code>Partial&lt;T&gt;</code></td><td>Mọi field thành optional</td><td><code>Partial&lt;User&gt;</code> — patch update</td></tr>
+      <tr><td><code>Required&lt;T&gt;</code></td><td>Mọi field thành bắt buộc</td><td><code>Required&lt;Config&gt;</code></td></tr>
+      <tr><td><code>Pick&lt;T, K&gt;</code></td><td>Chọn vài field</td><td><code>Pick&lt;User, 'id' | 'name'&gt;</code></td></tr>
+      <tr><td><code>Omit&lt;T, K&gt;</code></td><td>Bỏ vài field</td><td><code>Omit&lt;User, 'password'&gt;</code></td></tr>
+      <tr><td><code>Record&lt;K, V&gt;</code></td><td>Object map key→value</td><td><code>Record&lt;string, number&gt;</code></td></tr>
+      <tr><td><code>Readonly&lt;T&gt;</code></td><td>Mọi field chỉ đọc</td><td><code>Readonly&lt;Props&gt;</code></td></tr>
+      <tr><td><code>ReturnType&lt;F&gt;</code></td><td>Kiểu trả về của hàm</td><td><code>ReturnType&lt;typeof useAuth&gt;</code></td></tr>
+    </table>
+
+    <pre class="code"><span class="k">interface</span> <span class="t">User</span> {
+  id: <span class="t">number</span>;
+  name: <span class="t">string</span>;
+  email: <span class="t">string</span>;
+  password: <span class="t">string</span>;
+}
+
+<span class="c">// Tạo user: bỏ id (server cấp), bỏ ngày tạo</span>
+<span class="k">type</span> <span class="t">NewUser</span> = <span class="t">Omit</span>&lt;<span class="t">User</span>, <span class="s">'id'</span>&gt;;
+
+<span class="c">// Hồ sơ công khai: chỉ lấy id + name</span>
+<span class="k">type</span> <span class="t">PublicUser</span> = <span class="t">Pick</span>&lt;<span class="t">User</span>, <span class="s">'id'</span> | <span class="s">'name'</span>&gt;;
+
+<span class="c">// Form update từng phần</span>
+<span class="k">function</span> <span class="n">updateUser</span>(id: <span class="t">number</span>, patch: <span class="t">Partial</span>&lt;<span class="t">User</span>&gt;) { <span class="c">/* ... */</span> }
+updateUser(<span class="s">1</span>, { name: <span class="s">'Lan'</span> }); <span class="c">// ✅ chỉ cần field muốn đổi</span></pre>
+
+    <div class="tip"><strong>Vì sao đắt giá:</strong> một <code>interface User</code> nguồn → derive ra <code>NewUser</code>, <code>PublicUser</code>, <code>UserForm</code>. Khi <code>User</code> đổi, tất cả tự cập nhật. Đừng copy-paste type — hãy biến đổi.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">12. tsconfig — những cờ quan trọng</h2>
+    <p class="section-sub">Với Vite, phần biên dịch do esbuild lo; <code>tsconfig.json</code> chủ yếu để type-check. Vài cờ nên bật:</p>
+
+    <pre class="code">{
+  <span class="s">"compilerOptions"</span>: {
+    <span class="s">"strict"</span>: <span class="k">true</span>,              <span class="c">// BẬT — gom mọi check nghiêm ngặt</span>
+    <span class="s">"noUncheckedIndexedAccess"</span>: <span class="k">true</span>, <span class="c">// arr[i] có thể undefined → an toàn hơn</span>
+    <span class="s">"noImplicitAny"</span>: <span class="k">true</span>,       <span class="c">// cấm any ngầm (đã nằm trong strict)</span>
+    <span class="s">"jsx"</span>: <span class="s">"react-jsx"</span>,        <span class="c">// React 17+ JSX transform, khỏi import React</span>
+    <span class="s">"moduleResolution"</span>: <span class="s">"bundler"</span>, <span class="c">// chuẩn cho Vite</span>
+    <span class="s">"target"</span>: <span class="s">"ES2022"</span>,
+    <span class="s">"lib"</span>: [<span class="s">"ES2022"</span>, <span class="s">"DOM"</span>, <span class="s">"DOM.Iterable"</span>],
+    <span class="s">"skipLibCheck"</span>: <span class="k">true</span>,        <span class="c">// bỏ check .d.ts của lib → build nhanh</span>
+    <span class="s">"verbatimModuleSyntax"</span>: <span class="k">true</span>  <span class="c">// rõ ràng import type vs import value</span>
+  }
+}</pre>
+
+    <div class="info-box"><strong>Cờ quan trọng nhất:</strong> <code>"strict": true</code> — nó bật cả gói <code>strictNullChecks</code>, <code>noImplicitAny</code>... Nếu chỉ nhớ một cờ, nhớ cái này. Dự án mới của Vite đã bật sẵn.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">13. Lỗi thường gặp &amp; cách sửa</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>"Object is possibly 'null'"</h4>
+        <pre class="code"><span class="k">const</span> ref = useRef&lt;<span class="t">HTMLInputElement</span>&gt;(<span class="k">null</span>);
+ref.current.focus(); <span class="c">// ❌ current có thể null</span>
+ref.current?.focus(); <span class="c">// ✅ optional chaining</span></pre>
+      </div>
+      <div class="card">
+        <h4>"Type 'string' is not assignable to..."</h4>
+        <pre class="code"><span class="c">// state là union literal hẹp</span>
+<span class="k">const</span> [tab, setTab] = useState&lt;<span class="s">'a'</span> | <span class="s">'b'</span>&gt;(<span class="s">'a'</span>);
+setTab(someString); <span class="c">// ❌ string quá rộng</span>
+setTab(x <span class="k">as</span> <span class="s">'a'</span> | <span class="s">'b'</span>); <span class="c">// hoặc validate trước</span></pre>
+      </div>
+      <div class="card">
+        <h4>Sự kiện là implicit any</h4>
+        <pre class="code"><span class="c">// ❌ Parameter 'e' implicitly has 'any'</span>
+<span class="k">const</span> onChange = (e) =&gt; setX(e.target.value);
+<span class="c">// ✅ annotate kiểu</span>
+<span class="k">const</span> onChange = (e: <span class="t">React.ChangeEvent</span>&lt;<span class="t">HTMLInputElement</span>&gt;) =&gt; {};</pre>
+      </div>
+      <div class="card">
+        <h4>"Property does not exist on type '{}'"</h4>
+        <pre class="code"><span class="c">// quên annotate useState({}) → kiểu {}</span>
+<span class="k">const</span> [u, setU] = useState({}); <span class="c">// ❌ u.name lỗi</span>
+<span class="k">const</span> [u, setU] = useState&lt;<span class="t">User</span> | <span class="t">null</span>&gt;(<span class="k">null</span>); <span class="c">// ✅</span></pre>
+      </div>
+    </div>
+
+    <div class="warn-box"><strong>Mẹo đọc lỗi TS:</strong> đọc từ dòng cuối lên — dòng cuối thường là nguyên nhân gốc. Lỗi dài với <code>Type X is not assignable to Y</code> nghĩa là bạn đưa kiểu rộng vào chỗ cần kiểu hẹp. Dùng <code>as const</code>, narrowing (<code>typeof</code>/<code>in</code>), hoặc sửa type gốc — hạn chế tối đa <code>as any</code>.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">💡 Bài tập thực hành</h2>
+    <ol class="steps">
+      <li><strong>Type lại component JS</strong><br/><span style="color:var(--muted)">Lấy <code>Button</code>, <code>UserCard</code> ở bài React Cơ bản, viết <code>interface</code> props, bỏ hết <code>any</code>, mở rộng prop từ <code>React.ComponentProps&lt;'button'&gt;</code>.</span></li>
+      <li><strong>Generic List + Select</strong><br/><span style="color:var(--muted)">Viết <code>&lt;List&lt;T&gt;&gt;</code> và <code>&lt;Select&lt;T&gt;&gt;</code> nhận <code>options: T[]</code> + <code>getLabel</code>, giữ type-safe trong callback.</span></li>
+      <li><strong>useReducer + discriminated union</strong><br/><span style="color:var(--muted)">Cài đặt reducer cho giỏ hàng (add/remove/updateQty/clear). Thêm check <code>never</code> ở default để đảm bảo exhaustive.</span></li>
+      <li><strong>Typed Context + custom hook</strong><br/><span style="color:var(--muted)">Tạo <code>ThemeContext</code> (<code>'light' | 'dark'</code>) + <code>useTheme()</code> ném lỗi khi dùng ngoài Provider. Dùng cú pháp Provider của React 19.</span></li>
+      <li><strong>useFetch&lt;T&gt; generic</strong><br/><span style="color:var(--muted)">Hoàn thiện <code>useFetch&lt;T&gt;</code> trả về <code>{ data, loading, error }</code> có type. Gọi với <code>User[]</code> và render an toàn với optional chaining.</span></li>
+    </ol>
+
+    <div class="tip" style="margin-top:1.5rem">
+      <strong>Tự check:</strong> nếu bạn type được props, state, event, reducer, context mà không dùng <code>any</code> → bạn đã đạt chuẩn TypeScript Junior React 2026. Tiếp theo: <a href="advanced.html" style="color:var(--primary)">React Nâng cao</a>.
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>ReactJS Mastery · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

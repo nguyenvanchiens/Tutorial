@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lua Scripting trong Redis — EVAL, Atomicity, Functions</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">Redis<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="install.html">Cài đặt</a>
+      <a href="basics.html">Cơ Bản</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="lua.html" class="active">Lua</a>
+      <a href="production.html">Production</a>
+      <a href="internals.html">Internals</a>
+      <a href="interview.html">Phỏng Vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">L2-L3 · NÂNG CAO</div>
+  <h1>Lua <span class="gradient">Scripting</span> trong Redis</h1>
+  <p class="hero-desc">Gói nhiều lệnh thành một thao tác nguyên tử chạy server-side. EVAL / EVALSHA / Functions, KEYS vs ARGV, rate limiter thật, và khi nào nên dùng thay cho MULTI/EXEC.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">1. Vì sao cần Lua? — Atomicity + Round-trip</h2>
+    <p class="section-sub">Redis thực thi script Lua như <strong>một lệnh duy nhất</strong>: không client nào xen vào giữa chừng. Đó là chìa khoá giải bài toán "read-modify-write" mà nếu làm bằng nhiều lệnh rời sẽ dính race condition.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>❌ 3 round-trip — có race</h4>
+        <pre class="code"><span class="k">val</span> = redis.get(<span class="s">"stock:42"</span>)   <span class="c"># RTT 1</span>
+<span class="k">if</span> val &gt; <span class="s">0</span>:
+    redis.decr(<span class="s">"stock:42"</span>)       <span class="c"># RTT 2 — client khác đã mua giữa chừng!</span>
+    redis.lpush(<span class="s">"orders"</span>, id)   <span class="c"># RTT 3</span></pre>
+        <p style="margin-top:.5rem">Giữa GET và DECR, client khác có thể chen vào → bán âm kho (oversell).</p>
+      </div>
+      <div class="card">
+        <h4>✅ 1 script Lua — nguyên tử</h4>
+        <pre class="code"><span class="c">-- Toàn bộ logic chạy không gián đoạn, 1 round-trip</span>
+<span class="k">local</span> stock = <span class="n">tonumber</span>(redis.call(<span class="s">'GET'</span>, KEYS[<span class="s">1</span>]))
+<span class="k">if</span> stock <span class="k">and</span> stock &gt; <span class="s">0</span> <span class="k">then</span>
+  redis.call(<span class="s">'DECR'</span>, KEYS[<span class="s">1</span>])
+  redis.call(<span class="s">'LPUSH'</span>, KEYS[<span class="s">2</span>], ARGV[<span class="s">1</span>])
+  <span class="k">return</span> <span class="s">1</span>
+<span class="k">end</span>
+<span class="k">return</span> <span class="s">0</span></pre>
+      </div>
+    </div>
+
+    <div class="info-box"><strong>3 lý do dùng Lua:</strong> (1) <strong>Atomicity</strong> — không race vì single-thread chạy hết script mới qua client khác; (2) <strong>Giảm round-trip</strong> — logic chạy ngay tại server; (3) <strong>Logic có điều kiện</strong> — if/loop mà MULTI/EXEC không làm được.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">2. EVAL — chạy script</h2>
+    <p class="section-sub">Cú pháp: <code>EVAL script numkeys key [key ...] arg [arg ...]</code>. <code>numkeys</code> nói cho Redis biết bao nhiêu tham số đầu là KEY.</p>
+
+    <div class="cli">
+<span class="prompt">&gt;</span> <span class="cmd">EVAL</span> <span class="s">"return 'Hello ' .. ARGV[1]"</span> <span class="s">0</span> <span class="s">Chien</span>
+<span class="ret">"Hello Chien"</span>
+<span class="prompt">&gt;</span> <span class="cmd">EVAL</span> <span class="s">"return redis.call('SET', KEYS[1], ARGV[1])"</span> <span class="s">1</span> mykey <span class="s">hello</span>
+<span class="ret">OK</span>
+<span class="prompt">&gt;</span> <span class="cmd">EVAL</span> <span class="s">"return redis.call('GET', KEYS[1])"</span> <span class="s">1</span> mykey
+<span class="ret">"hello"</span>
+<span class="prompt">&gt;</span> <span class="cmd">EVAL</span> <span class="s">"return {1, 2, 3, 'foo'}"</span> <span class="s">0</span>
+<span class="ret">1) (integer) 1
+2) (integer) 2
+3) (integer) 3
+4) "foo"</span>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>📡 redis.call vs redis.pcall</h4>
+        <p><code>redis.call</code> — lỗi sẽ <strong>abort</strong> script, trả error lên client. <code>redis.pcall</code> — bắt lỗi thành table, script chạy tiếp. Dùng <code>call</code> trừ khi bạn chủ động xử lý lỗi.</p>
+      </div>
+      <div class="card">
+        <h4>🔢 Chuyển kiểu</h4>
+        <p>Redis trả string. Muốn so sánh số phải <code>tonumber()</code>. Trả về số thì Lua number bị cắt phần thập phân thành integer khi sang RESP — trả string nếu cần float chính xác.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">3. KEYS vs ARGV — Quy tắc bắt buộc</h2>
+    <p class="section-sub">Đây là điểm hay sai nhất. <strong>Mọi key bạn truy cập phải đi qua KEYS[]</strong>, mọi tham số khác qua ARGV[].</p>
+
+    <table class="cmp">
+      <tr><th></th><th><code>KEYS[]</code></th><th><code>ARGV[]</code></th></tr>
+      <tr><td>Chứa gì</td><td>Tên các key Redis</td><td>Tham số/giá trị tuỳ ý</td></tr>
+      <tr><td>Truyền sao</td><td>Sau <code>numkeys</code></td><td>Sau danh sách key</td></tr>
+      <tr><td>Vì sao quan trọng</td><td>Để Redis Cluster route đúng slot &amp; kiểm tra cùng node</td><td>Không ảnh hưởng routing</td></tr>
+      <tr><td>Index</td><td>1-based: <code>KEYS[1]</code></td><td>1-based: <code>ARGV[1]</code></td></tr>
+    </table>
+
+    <div class="danger-box">
+      <strong>🚫 Đừng hardcode tên key trong script!</strong> Viết <code>redis.call('GET', 'user:5')</code> sẽ vỡ trên Cluster vì Redis không biết script chạm key nào → không route được. Luôn truyền key qua <code>KEYS[]</code>.
+      <pre class="code" style="margin-top:.5rem"><span class="c">-- ❌ SAI</span>
+redis.call(<span class="s">'GET'</span>, <span class="s">'user:5'</span>)
+<span class="c">-- ✅ ĐÚNG</span>
+redis.call(<span class="s">'GET'</span>, KEYS[<span class="s">1</span>])</pre>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">4. EVALSHA &amp; SCRIPT LOAD — Cache script</h2>
+    <p class="section-sub">Gửi cả script qua mạng mỗi lần là phí băng thông. Nạp 1 lần lấy SHA1, sau đó chỉ gửi SHA.</p>
+
+    <div class="cli">
+<span class="prompt">&gt;</span> <span class="cmd">SCRIPT LOAD</span> <span class="s">"return redis.call('GET', KEYS[1])"</span>
+<span class="ret">"a5260dd66ce02462c5b5231c727b3f7772c0bcc5"</span>
+<span class="prompt">&gt;</span> <span class="cmd">EVALSHA</span> a5260dd66ce02462c5b5231c727b3f7772c0bcc5 <span class="s">1</span> mykey
+<span class="ret">"hello"</span>
+<span class="prompt">&gt;</span> <span class="cmd">SCRIPT EXISTS</span> a5260dd66ce02462c5b5231c727b3f7772c0bcc5
+<span class="ret">1) (integer) 1</span>
+<span class="prompt">&gt;</span> <span class="cmd">SCRIPT FLUSH</span>            <span class="comment"># xoá cache script (vd sau deploy)</span>
+<span class="ret">OK</span>
+    </div>
+
+    <div class="tip"><strong>Pattern chuẩn của client lib:</strong> thử <code>EVALSHA</code> trước; nếu Redis trả <code>NOSCRIPT</code> (sau restart/flush) thì fallback sang <code>EVAL</code> (tự nạp lại) rồi cache SHA. StackExchange.Redis &amp; ioredis làm việc này tự động giúp bạn.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">5. Worked example — Sliding-window Rate Limiter</h2>
+    <p class="section-sub">Đếm request trong cửa sổ thời gian, atomic. Đây là use case kinh điển của Lua vì cần "check + incr + set TTL" không gián đoạn.</p>
+
+    <pre class="code"><span class="c">-- rate_limit.lua</span>
+<span class="c">-- KEYS[1] = rate key (vd: ratelimit:user:5)</span>
+<span class="c">-- ARGV[1] = limit (số request tối đa)</span>
+<span class="c">-- ARGV[2] = window (giây)</span>
+<span class="k">local</span> current = redis.call(<span class="s">'INCR'</span>, KEYS[<span class="s">1</span>])
+<span class="k">if</span> current == <span class="s">1</span> <span class="k">then</span>
+  <span class="c">-- request đầu tiên: đặt TTL = window</span>
+  redis.call(<span class="s">'EXPIRE'</span>, KEYS[<span class="s">1</span>], ARGV[<span class="s">2</span>])
+<span class="k">end</span>
+<span class="k">if</span> current &gt; <span class="n">tonumber</span>(ARGV[<span class="s">1</span>]) <span class="k">then</span>
+  <span class="k">return</span> <span class="s">0</span>            <span class="c">-- vượt giới hạn → từ chối</span>
+<span class="k">end</span>
+<span class="k">return</span> <span class="s">1</span>              <span class="c">-- cho qua</span></pre>
+
+    <div class="cli">
+<span class="prompt">&gt;</span> <span class="cmd">EVAL</span> <span class="s">"&lt;script trên&gt;"</span> <span class="s">1</span> ratelimit:user:5 <span class="s">10</span> <span class="s">60</span>
+<span class="comment"># Cho phép 10 request / 60 giây cho user:5</span>
+<span class="ret">(integer) 1</span>      <span class="comment"># 9 lần đầu trả 1</span>
+<span class="ret">(integer) 0</span>      <span class="comment"># lần 11 trả 0 → block</span>
+    </div>
+
+    <h3 style="color:var(--primary);margin:1.5rem 0 .5rem">Gọi từ C# — StackExchange.Redis</h3>
+    <pre class="code"><span class="k">const</span> <span class="k">string</span> RateScript = <span class="s">@"
+  local current = redis.call('INCR', KEYS[1])
+  if current == 1 then redis.call('EXPIRE', KEYS[1], ARGV[2]) end
+  if current > tonumber(ARGV[1]) then return 0 end
+  return 1"</span>;
+
+<span class="c">// ScriptEvaluate tự dùng EVALSHA + fallback EVAL</span>
+<span class="k">var</span> allowed = (<span class="k">int</span>)<span class="k">await</span> db.ScriptEvaluateAsync(
+    RateScript,
+    keys: <span class="k">new</span> RedisKey[] { <span class="s">"ratelimit:user:5"</span> },
+    values: <span class="k">new</span> RedisValue[] { <span class="s">10</span>, <span class="s">60</span> });
+
+<span class="k">if</span> (allowed == <span class="s">0</span>) <span class="k">return</span> Results.StatusCode(<span class="s">429</span>);  <span class="c">// Too Many Requests</span></pre>
+
+    <h3 style="color:var(--primary);margin:1.5rem 0 .5rem">Gọi từ Node.js — ioredis defineCommand</h3>
+    <pre class="code"><span class="c">// Đăng ký script như 1 method tuỳ chỉnh — ioredis lo EVALSHA/cache</span>
+redis.defineCommand(<span class="s">'rateLimit'</span>, {
+  numberOfKeys: <span class="s">1</span>,
+  lua: <span class="s">`
+    local current = redis.call('INCR', KEYS[1])
+    if current == 1 then redis.call('EXPIRE', KEYS[1], ARGV[2]) end
+    if current > tonumber(ARGV[1]) then return 0 end
+    return 1`</span>,
+});
+
+<span class="k">const</span> allowed = <span class="k">await</span> redis.rateLimit(<span class="s">'ratelimit:user:5'</span>, <span class="s">10</span>, <span class="s">60</span>);
+<span class="k">if</span> (allowed === <span class="s">0</span>) res.status(<span class="s">429</span>).send(<span class="s">'Rate limited'</span>);</pre>
+
+    <div class="info-box"><strong>Biến thể hay gặp:</strong> đổi sang <strong>conditional update</strong> (chỉ SET nếu version khớp — optimistic lock), <strong>atomic dequeue</strong> (RPOP + ghi vào processing list, an toàn hơn BRPOP trần), hoặc <strong>token bucket</strong> (tính token còn lại theo timestamp). Cùng một khuôn: read → tính → write, tất cả trong 1 script.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">6. Return types — Lua ↔ Redis</h2>
+    <table class="cmp">
+      <tr><th>Lua trả về</th><th>Client nhận</th><th>Ghi chú</th></tr>
+      <tr><td><code>number</code> (1.9)</td><td>Integer (1)</td><td>Bị cắt thập phân! Trả string cho float</td></tr>
+      <tr><td><code>string</code></td><td>Bulk string</td><td></td></tr>
+      <tr><td><code>true</code></td><td>Integer 1</td><td>RESP2</td></tr>
+      <tr><td><code>false</code> / <code>nil</code></td><td>Null (nil)</td><td></td></tr>
+      <tr><td><code>table</code> (mảng)</td><td>Array</td><td>Dừng ở phần tử nil đầu tiên</td></tr>
+      <tr><td><code>{err='msg'}</code></td><td>Error reply</td><td>Trả lỗi tường minh</td></tr>
+      <tr><td><code>{ok='msg'}</code></td><td>Status reply</td><td>Như +OK</td></tr>
+      <tr><td><code>redis.status_reply('OK')</code></td><td>Status</td><td>Helper</td></tr>
+      <tr><td><code>redis.error_reply('...')</code></td><td>Error</td><td>Helper</td></tr>
+    </table>
+    <div class="warn-box"><strong>Bẫy float:</strong> <code>return 3.99</code> trả về client là <code>3</code>, không phải 3.99. Muốn giữ chính xác: <code>return tostring(3.99)</code> rồi parse phía client.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">7. Debug, giới hạn &amp; best practices</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>🐞 Debug</h3>
+        <pre class="code"><span class="c">-- Ghi log từ trong script</span>
+redis.log(redis.LOG_WARNING, <span class="s">"current="</span> .. current)
+
+<span class="c"># LDB — Lua debugger tương tác</span>
+redis-cli --ldb --eval rate_limit.lua \
+  ratelimit:user:5 , <span class="s">10</span> <span class="s">60</span>
+<span class="c"># dấu ',' phân tách KEYS với ARGV trong --eval</span></pre>
+      </div>
+      <div class="card">
+        <h3>⛔ Giới hạn cứng</h3>
+        <ul>
+          <li><strong>Script phải tất định</strong> (deterministic) — không dùng <code>os.time()</code>, random tự do; truyền timestamp qua ARGV</li>
+          <li>Không I/O ngoài, không network</li>
+          <li>Block cả server khi chạy → giữ script <strong>ngắn &amp; nhanh</strong></li>
+          <li><code>busy-reply-threshold</code> (mặc định 5s) → script lâu bị báo <code>BUSY</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="danger-box">
+      <strong>Script chạy quá lâu chặn toàn bộ Redis!</strong> Vì single-thread, một vòng lặp Lua nặng làm đơ mọi client. Nếu lỡ chạy script vô tận:
+      <pre class="code" style="margin-top:.5rem"><span class="cmd">SCRIPT KILL</span>      <span class="c"># dừng script đang chạy (nếu chưa ghi gì)</span>
+<span class="cmd">SHUTDOWN NOSAVE</span>  <span class="c"># biện pháp cuối nếu script đã ghi và không kill được</span></pre>
+    </div>
+
+    <div class="tip"><strong>Best practices:</strong> giữ script nhỏ và đơn nhiệm; truyền mọi key qua KEYS và mọi biến động (time, random seed) qua ARGV để tất định; ưu tiên <code>EVALSHA</code>; test kỹ trên staging vì lỗi script ảnh hưởng toàn cluster.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">8. Lua vs MULTI/EXEC vs Functions</h2>
+    <table class="cmp">
+      <tr><th>Tiêu chí</th><th>MULTI/EXEC</th><th>Lua (EVAL)</th><th>Functions (Redis 7+)</th></tr>
+      <tr><td>Atomic</td><td>Có</td><td>Có</td><td>Có</td></tr>
+      <tr><td>Logic if/loop giữa lệnh</td><td><strong>Không</strong></td><td>Có</td><td>Có</td></tr>
+      <tr><td>Dùng kết quả lệnh trước</td><td>Không (queue trước rồi exec)</td><td>Có</td><td>Có</td></tr>
+      <tr><td>Lưu bền trên server</td><td>—</td><td>Không (cache tạm, mất khi restart)</td><td><strong>Có</strong> (lưu trong RDB/AOF, replicate)</td></tr>
+      <tr><td>Tổ chức code</td><td>—</td><td>Script rời rạc</td><td>Library nhiều hàm, đặt tên</td></tr>
+      <tr><td>Lệnh gọi</td><td><code>MULTI..EXEC</code></td><td><code>EVAL/EVALSHA</code></td><td><code>FCALL fname</code></td></tr>
+    </table>
+
+    <h3 style="color:var(--primary);margin:1.5rem 0 .5rem">Redis Functions — kế thừa Lua, lưu bền</h3>
+    <pre class="code"><span class="c">#!lua name=mylib</span>
+redis.register_function(<span class="s">'rate_limit'</span>, <span class="k">function</span>(keys, args)
+  <span class="k">local</span> current = redis.call(<span class="s">'INCR'</span>, keys[<span class="s">1</span>])
+  <span class="k">if</span> current == <span class="s">1</span> <span class="k">then</span> redis.call(<span class="s">'EXPIRE'</span>, keys[<span class="s">1</span>], args[<span class="s">2</span>]) <span class="k">end</span>
+  <span class="k">if</span> current &gt; <span class="n">tonumber</span>(args[<span class="s">1</span>]) <span class="k">then</span> <span class="k">return</span> <span class="s">0</span> <span class="k">end</span>
+  <span class="k">return</span> <span class="s">1</span>
+<span class="k">end</span>)</pre>
+    <div class="cli">
+<span class="prompt">$</span> redis-cli -x <span class="cmd">FUNCTION LOAD</span> &lt; mylib.lua
+<span class="ret">"mylib"</span>
+<span class="prompt">&gt;</span> <span class="cmd">FCALL</span> rate_limit <span class="s">1</span> ratelimit:user:5 <span class="s">10</span> <span class="s">60</span>
+<span class="ret">(integer) 1</span>
+<span class="prompt">&gt;</span> <span class="cmd">FUNCTION LIST</span>          <span class="comment"># liệt kê library đã nạp</span>
+    </div>
+
+    <div class="info-box"><strong>Chọn cái nào (2026):</strong> MULTI/EXEC cho gom lệnh đơn giản không cần điều kiện; <strong>Lua EVAL</strong> vẫn là lựa chọn phổ biến nhất, client lib hỗ trợ tốt; <strong>Functions</strong> khi muốn quản lý logic như "stored procedure" bền vững, dùng lại giữa nhiều app — nhưng tooling client còn ít hơn Lua.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">💡 Bài tập</h2>
+    <ol class="steps">
+      <li><strong>Atomic GETDEL có điều kiện:</strong> viết script lấy giá trị rồi xoá key chỉ khi nó khớp ARGV (nền tảng của unlock distributed lock an toàn).</li>
+      <li><strong>Token bucket:</strong> rate limiter mượt hơn — lưu tokens + last_refill, tính token bù theo thời gian truyền qua ARGV.</li>
+      <li><strong>Atomic dequeue + ack:</strong> RPOP từ queue và LPUSH sang processing list trong 1 script.</li>
+      <li><strong>Chuyển sang Functions:</strong> đóng gói 3 script trên thành 1 library <code>mylib</code>, gọi bằng FCALL.</li>
+    </ol>
+    <div class="tip" style="margin-top:1rem"><strong>Muốn hiểu vì sao single-thread khiến Lua nguyên tử?</strong> <a href="internals.html" style="color:var(--primary)">→ Trang Internals</a> — event loop, encoding, consistency.</div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Redis Mastery · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

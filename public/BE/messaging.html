@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Queues &amp; Event-Driven — RabbitMQ, Kafka, MassTransit</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --ut-primary: #512bd4;
+        --ut-primary-2: #8a2be2;
+        --ut-accent: #43e97b;
+        --ut-warn: #f39c12;
+        --ut-danger: #f5576c;
+        --ut-card: #1a1d2e;
+        --ut-card-2: #232640;
+        --ut-border: #2d3148;
+        --ut-text: #e2e8f0;
+        --ut-muted: #94a3b8;
+    }
+    .ut-hero { text-align: center; padding: 4rem 1.5rem 3rem; background: radial-gradient(ellipse at top, rgba(81,43,212,.18), transparent 60%); }
+    .ut-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 1rem; }
+    .ut-hero h1 .gradient { background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .ut-hero .hero-badge { display: inline-block; background: rgba(81,43,212,.15); color: var(--ut-primary-2); padding: .4rem 1rem; border-radius: 20px; font-size: .78rem; font-weight: 600; letter-spacing: 1px; margin-bottom: 1.25rem; }
+    .ut-hero p { color: var(--ut-muted); max-width: 820px; margin: 0 auto; }
+    .ut-section { padding: 2.5rem 0; }
+    .ut-title { font-size: 1.7rem; margin-bottom: 1.5rem; position: relative; padding-left: 1rem; color: var(--ut-text); }
+    .ut-title::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 4px; background: linear-gradient(180deg, var(--ut-primary), var(--ut-primary-2)); border-radius: 3px; }
+    .ut-sub { color: var(--ut-muted); margin-bottom: 1.25rem; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+    .ut-grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .ut-grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    .ut-grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .ut-card { background: var(--ut-card); border: 1px solid var(--ut-border); border-radius: 12px; padding: 1.4rem; }
+    .ut-card h3 { color: var(--ut-primary-2); margin-bottom: .6rem; font-size: 1.1rem; }
+    .ut-card h4 { color: var(--ut-accent); margin-bottom: .45rem; font-size: .98rem; }
+    .ut-card p, .ut-card li { color: var(--ut-muted); font-size: .95rem; }
+    .ut-card ul { padding-left: 1.2rem; }
+    .ut-card ul li { margin-bottom: .3rem; }
+    pre.cb { background: #0b1020; border: 1px solid var(--ut-border); border-left: 3px solid var(--ut-primary); border-radius: 8px; padding: 1rem 1.15rem; overflow-x: auto; font-family: 'JetBrains Mono', Consolas, monospace; font-size: .88rem; line-height: 1.6; margin: .75rem 0; color: #d6deeb; }
+    pre.cb .k { color: #c792ea; }
+    pre.cb .s { color: #ecc48d; }
+    pre.cb .c { color: #637777; font-style: italic; }
+    pre.cb .n { color: #82aaff; }
+    pre.cb .t { color: #ffcb8b; }
+    pre.cb .a { color: #7fdbca; }
+    code { background: #2d3148; padding: 2px 6px; border-radius: 4px; font-size: .88em; color: #f8d06b; font-family: 'JetBrains Mono', Consolas, monospace; }
+    .callout { border-radius: 10px; padding: .95rem 1.15rem; margin: 1rem 0; border: 1px solid; }
+    .callout.tip { background: rgba(67,233,123,.07); border-color: var(--ut-accent); }
+    .callout.tip strong { color: var(--ut-accent); }
+    .callout.warn { background: rgba(243,156,18,.07); border-color: var(--ut-warn); }
+    .callout.warn strong { color: var(--ut-warn); }
+    .callout.danger { background: rgba(245,87,108,.07); border-color: var(--ut-danger); }
+    .callout.danger strong { color: var(--ut-danger); }
+    .callout.info { background: rgba(81,43,212,.08); border-color: var(--ut-primary-2); }
+    .callout.info strong { color: var(--ut-primary-2); }
+    table.cmp { width: 100%; border-collapse: collapse; background: var(--ut-card); border-radius: 10px; overflow: hidden; margin: 1rem 0; font-size: .92rem; }
+    table.cmp th, table.cmp td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--ut-border); }
+    table.cmp th { background: var(--ut-card-2); color: var(--ut-primary-2); font-weight: 600; }
+    table.cmp td { color: var(--ut-muted); }
+    table.cmp tr:last-child td { border-bottom: none; }
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; position: relative; padding-left: 2.8rem; margin-bottom: 1rem; }
+    .steps li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 2rem; height: 2rem; background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .do-dont { border-left: 3px solid; padding: 1rem 1.15rem; border-radius: 8px; margin-bottom: 1rem; }
+    .do-dont.do { border-color: var(--ut-accent); background: rgba(67,233,123,.04); }
+    .do-dont.dont { border-color: var(--ut-danger); background: rgba(245,87,108,.04); }
+    .do-dont h4 { margin-bottom: .5rem; }
+    .do-dont.do h4 { color: var(--ut-accent); }
+    .do-dont.dont h4 { color: var(--ut-danger); }
+    .flow { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; justify-content: center; margin: 1.25rem 0; }
+    .flow .node { background: var(--ut-card-2); border: 1px solid var(--ut-border); border-radius: 10px; padding: .7rem 1rem; font-size: .85rem; color: var(--ut-text); text-align: center; }
+    .flow .node.p { border-color: var(--ut-primary-2); }
+    .flow .node.b { border-color: var(--ut-warn); }
+    .flow .node.c { border-color: var(--ut-accent); }
+    .flow .arrow { color: var(--ut-primary-2); font-weight: 700; font-size: 1.1rem; }
+    .flow .stack { display: flex; flex-direction: column; gap: .35rem; }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo"><a href="index.html" style="color:inherit;-webkit-text-fill-color:inherit;">.NET<span class="accent">Mastery</span></a></div>
+        <div class="nav-links">
+            <a href="index.html">Roadmap</a>
+            <a href="cqrs.html">CQRS</a>
+            <a href="ddd.html">DDD</a>
+            <a href="messaging.html" class="nav-active">Messaging</a>
+            <a href="system-design.html">System Design</a>
+            <a href="security.html">Security</a>
+            <a href="aspnet-testing.html">Unit Test</a>
+        </div>
+        <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+</nav>
+
+<header class="ut-hero">
+    <div class="hero-badge">MASTER · ADVANCED</div>
+    <h1>Message Queues &amp; <span class="gradient">Event-Driven</span></h1>
+    <p>Tách rời service bằng messaging bất đồng bộ. RabbitMQ vs Kafka, pub/sub vs queue, đảm bảo at-least-once + idempotent consumer, Outbox pattern, Saga (orchestration vs choreography), ordering &amp; dead-letter. Ví dụ MassTransit thực chiến trên .NET.</p>
+</header>
+
+<div class="container">
+
+<section class="ut-section">
+    <h2 class="ut-title">1. Vì sao dùng messaging?</h2>
+    <p class="ut-sub">Gọi HTTP đồng bộ giữa các service tạo coupling thời gian: A phải chờ B, B sập thì A sập. Messaging cho phép <strong>tách rời (decoupling)</strong> và <strong>chịu tải (buffering)</strong>.</p>
+    <div class="ut-grid ut-grid-3">
+        <div class="ut-card">
+            <h4>⏱️ Bất đồng bộ</h4>
+            <p>Producer gửi rồi đi tiếp, không chờ consumer xử lý xong. Giảm độ trễ phản hồi user.</p>
+        </div>
+        <div class="ut-card">
+            <h4>🔌 Decoupling</h4>
+            <p>Producer không biết ai consume. Thêm consumer mới không sửa producer.</p>
+        </div>
+        <div class="ut-card">
+            <h4>🌊 Buffering / spike</h4>
+            <p>Tải đột biến được queue hấp thụ; consumer xử lý theo nhịp của mình.</p>
+        </div>
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">2. Queue vs Pub/Sub</h2>
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h4>📥 Point-to-Point (Queue)</h4>
+            <p>Một message &rarr; đúng <strong>một</strong> consumer xử lý (competing consumers để scale). Dùng cho "công việc cần làm": gửi email, xử lý đơn.</p>
+            <div class="flow">
+                <div class="node p">Producer</div>
+                <span class="arrow">&rarr;</span>
+                <div class="node b">Queue</div>
+                <span class="arrow">&rarr;</span>
+                <div class="stack">
+                    <div class="node c">Consumer 1</div>
+                    <div class="node c">Consumer 2</div>
+                </div>
+            </div>
+        </div>
+        <div class="ut-card">
+            <h4>📡 Publish/Subscribe</h4>
+            <p>Một message &rarr; <strong>tất cả</strong> subscriber đều nhận một bản. Dùng cho "sự kiện đã xảy ra": <code>OrderPlaced</code> &rarr; Inventory + Email + Analytics đều phản ứng.</p>
+            <div class="flow">
+                <div class="node p">Publisher</div>
+                <span class="arrow">&rarr;</span>
+                <div class="node b">Topic / Exchange</div>
+                <span class="arrow">&rarr;</span>
+                <div class="stack">
+                    <div class="node c">Sub A</div>
+                    <div class="node c">Sub B</div>
+                    <div class="node c">Sub C</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="callout info">
+        <strong>Command vs Event (đặt tên đúng):</strong> Command (<code>SendEmailCommand</code>) gửi tới một queue, kỳ vọng được xử lý &mdash; mệnh lệnh. Event (<code>OrderPlacedEvent</code>) publish, ai quan tâm thì nghe &mdash; thông báo quá khứ. Đừng publish command, đừng "ra lệnh" bằng event.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">3. RabbitMQ vs Kafka</h2>
+    <p class="ut-sub">Hai công cụ giải hai bài toán khác nhau. Đừng hỏi "cái nào tốt hơn" mà hỏi "bài toán của tôi là gì".</p>
+    <table class="cmp">
+        <tr><th>Tiêu chí</th><th>RabbitMQ</th><th>Apache Kafka</th></tr>
+        <tr><td>Mô hình</td><td>Message broker (smart broker, dumb consumer)</td><td>Distributed log (dumb broker, smart consumer)</td></tr>
+        <tr><td>Routing</td><td>Linh hoạt: exchange (direct/topic/fanout/headers)</td><td>Topic + partition, đơn giản</td></tr>
+        <tr><td>Lưu trữ message</td><td>Xoá sau khi ack (thường)</td><td>Giữ theo retention (giờ/ngày/vô hạn) &mdash; replay được</td></tr>
+        <tr><td>Throughput</td><td>Cao (chục nghìn/s)</td><td>Rất cao (triệu/s), thiết kế cho stream lớn</td></tr>
+        <tr><td>Ordering</td><td>Theo queue</td><td>Đảm bảo trong 1 partition (theo key)</td></tr>
+        <tr><td>Consumer model</td><td>Push, broker theo dõi ack</td><td>Pull, consumer giữ offset</td></tr>
+        <tr><td>Use case lý tưởng</td><td>Task queue, RPC, routing phức tạp, microservice commands</td><td>Event streaming, log, analytics, event sourcing, replay</td></tr>
+    </table>
+    <div class="callout tip">
+        <strong>💡 Tóm gọn:</strong> Cần <em>task queue + routing linh hoạt</em> &rarr; RabbitMQ. Cần <em>stream khối lượng lớn, replay, nhiều consumer độc lập đọc cùng dữ liệu</em> &rarr; Kafka. Nhiều hệ thống lớn dùng cả hai cho từng phần.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">4. Delivery guarantees &amp; Idempotent Consumer</h2>
+    <p class="ut-sub">Trong hệ phân tán, <strong>exactly-once delivery</strong> gần như không khả thi end-to-end. Thực tế ta dùng <em>at-least-once</em> + consumer idempotent để đạt hiệu ứng "exactly-once processing".</p>
+    <table class="cmp">
+        <tr><th>Mức</th><th>Ý nghĩa</th><th>Rủi ro</th></tr>
+        <tr><td>At-most-once</td><td>Gửi tối đa 1 lần, ack trước khi xử lý</td><td>Có thể mất message</td></tr>
+        <tr><td>At-least-once</td><td>Gửi lại đến khi ack, ack sau khi xử lý</td><td>Có thể xử lý trùng (duplicate)</td></tr>
+        <tr><td>Exactly-once (processing)</td><td>At-least-once + dedup/idempotent</td><td>Phức tạp, cần lưu trạng thái đã xử lý</td></tr>
+    </table>
+
+    <h3 style="color:var(--ut-primary-2)">Idempotent consumer &mdash; chống xử lý trùng</h3>
+    <pre class="cb"><span class="c">// Lưu MessageId đã xử lý; nếu thấy lại thì bỏ qua</span>
+<span class="k">public class</span> <span class="t">PaymentConsumer</span> : <span class="t">IConsumer</span>&lt;<span class="t">OrderPlaced</span>&gt;
+{
+    <span class="k">private readonly</span> <span class="t">AppDbContext</span> _db;
+    <span class="k">public</span> <span class="n">PaymentConsumer</span>(<span class="t">AppDbContext</span> db) =&gt; _db = db;
+
+    <span class="k">public async</span> Task <span class="n">Consume</span>(<span class="t">ConsumeContext</span>&lt;<span class="t">OrderPlaced</span>&gt; ctx)
+    {
+        <span class="k">var</span> msgId = ctx.MessageId!.Value;
+
+        <span class="c">// Dedup check — unique constraint trên ProcessedMessageId</span>
+        <span class="k">if</span> (<span class="k">await</span> _db.ProcessedMessages.AnyAsync(p =&gt; p.Id == msgId))
+            <span class="k">return</span>;  <span class="c">// đã xử lý rồi → idempotent, bỏ qua</span>
+
+        <span class="c">// Xử lý nghiệp vụ + ghi dấu đã xử lý TRONG CÙNG transaction</span>
+        <span class="k">await</span> ChargeAsync(ctx.Message);
+        _db.ProcessedMessages.Add(<span class="k">new</span>(msgId, DateTime.UtcNow));
+        <span class="k">await</span> _db.SaveChangesAsync();
+    }
+}</pre>
+    <div class="callout warn">
+        <strong>⚠️ Idempotency là trách nhiệm của consumer.</strong> Đừng giả định broker đảm bảo "đúng một lần". Mọi consumer phải an toàn khi nhận lại cùng message (retry, redelivery sau crash). Dùng natural key (orderId) hoặc messageId làm khoá dedup.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">5. Outbox Pattern &mdash; dual-write problem</h2>
+    <p class="ut-sub">Vấn đề: cần (1) lưu order vào DB và (2) publish event ra broker. Nếu DB commit xong rồi broker chết &rarr; mất event. Nếu publish xong rồi DB rollback &rarr; event ma. Hai hệ thống, không có transaction chung.</p>
+
+    <div class="flow">
+        <div class="node p">Save Order + Outbox row<br>(1 transaction)</div>
+        <span class="arrow">&rarr;</span>
+        <div class="node b">Outbox table</div>
+        <span class="arrow">&rarr;</span>
+        <div class="node c">Relay đọc &amp; publish<br>→ broker</div>
+        <span class="arrow">&rarr;</span>
+        <div class="node">Mark sent</div>
+    </div>
+
+    <pre class="cb"><span class="c">// Trong CÙNG transaction với business data</span>
+<span class="k">using var</span> tx = <span class="k">await</span> _db.Database.BeginTransactionAsync(ct);
+
+_db.Orders.Add(order);
+_db.OutboxMessages.Add(<span class="k">new</span> <span class="t">OutboxMessage</span>
+{
+    Id = Guid.NewGuid(),
+    Type = <span class="k">nameof</span>(<span class="t">OrderPlaced</span>),
+    Payload = JsonSerializer.Serialize(<span class="k">new</span> <span class="t">OrderPlaced</span>(order.Id, order.Total)),
+    OccurredOn = DateTime.UtcNow,
+    ProcessedOn = <span class="k">null</span>
+});
+
+<span class="k">await</span> _db.SaveChangesAsync(ct);  <span class="c">// order + outbox commit cùng nhau — nguyên tử</span>
+<span class="k">await</span> tx.CommitAsync(ct);
+
+<span class="c">// Background relay (hoặc CDC như Debezium) đọc outbox chưa gửi:</span>
+<span class="k">var</span> pending = <span class="k">await</span> _db.OutboxMessages
+    .Where(m =&gt; m.ProcessedOn == <span class="k">null</span>)
+    .OrderBy(m =&gt; m.OccurredOn).Take(<span class="s">100</span>).ToListAsync(ct);
+
+<span class="k">foreach</span> (<span class="k">var</span> msg <span class="k">in</span> pending)
+{
+    <span class="k">await</span> _bus.Publish(Deserialize(msg), ct);  <span class="c">// at-least-once</span>
+    msg.ProcessedOn = DateTime.UtcNow;
+}
+<span class="k">await</span> _db.SaveChangesAsync(ct);</pre>
+    <div class="callout tip">
+        <strong>💡 MassTransit có Outbox tích hợp:</strong> <code>AddEntityFrameworkOutbox</code> tự lo bảng outbox/inbox + relay. Inbox đồng thời cho idempotency phía consumer. Khỏi tự viết relay.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">6. Saga &mdash; giao dịch phân tán dài hạn</h2>
+    <p class="ut-sub">Không có distributed transaction (2PC) cho microservice. Saga chia một giao dịch dài thành chuỗi bước cục bộ, mỗi bước có <strong>compensating action</strong> để hoàn tác khi lỗi.</p>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h4>🎭 Choreography</h4>
+            <p>Không có điều phối viên trung tâm. Mỗi service nghe event và phát event tiếp theo.</p>
+            <ul>
+                <li>Ưu: tách rời cao, không single point</li>
+                <li>Nhược: khó theo dõi luồng, "ai gọi ai" rối khi nhiều bước</li>
+                <li>Hợp: luồng đơn giản, ít bước</li>
+            </ul>
+            <div class="flow">
+                <div class="stack">
+                    <div class="node c">Order →OrderPlaced</div>
+                    <div class="node c">Payment →Paid</div>
+                    <div class="node c">Shipping →Shipped</div>
+                </div>
+            </div>
+        </div>
+        <div class="ut-card">
+            <h4>🎬 Orchestration</h4>
+            <p>Một orchestrator (state machine) ra lệnh từng bước và nhận kết quả.</p>
+            <ul>
+                <li>Ưu: luồng tập trung, dễ theo dõi/sửa, dễ compensate</li>
+                <li>Nhược: orchestrator là điểm phụ thuộc</li>
+                <li>Hợp: luồng phức tạp, nhiều nhánh lỗi</li>
+            </ul>
+            <div class="flow">
+                <div class="node b">Saga Orchestrator</div>
+                <span class="arrow">⇄</span>
+                <div class="stack">
+                    <div class="node c">Payment</div>
+                    <div class="node c">Inventory</div>
+                    <div class="node c">Shipping</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3 style="color:var(--ut-primary-2)">Saga state machine với MassTransit</h3>
+    <pre class="cb"><span class="k">public class</span> <span class="t">OrderState</span> : <span class="t">SagaStateMachineInstance</span>
+{
+    <span class="k">public</span> Guid CorrelationId { <span class="k">get</span>; <span class="k">set</span>; }
+    <span class="k">public string</span> CurrentState { <span class="k">get</span>; <span class="k">set</span>; } = <span class="k">null</span>!;
+    <span class="k">public</span> <span class="k">decimal</span> Total { <span class="k">get</span>; <span class="k">set</span>; }
+}
+
+<span class="k">public class</span> <span class="t">OrderSaga</span> : <span class="t">MassTransitStateMachine</span>&lt;<span class="t">OrderState</span>&gt;
+{
+    <span class="k">public</span> State AwaitingPayment { <span class="k">get</span>; } = <span class="k">null</span>!;
+    <span class="k">public</span> State AwaitingShipment { <span class="k">get</span>; } = <span class="k">null</span>!;
+    <span class="k">public</span> Event&lt;<span class="t">OrderPlaced</span>&gt; OrderPlaced { <span class="k">get</span>; } = <span class="k">null</span>!;
+    <span class="k">public</span> Event&lt;<span class="t">PaymentSucceeded</span>&gt; PaymentSucceeded { <span class="k">get</span>; } = <span class="k">null</span>!;
+    <span class="k">public</span> Event&lt;<span class="t">PaymentFailed</span>&gt; PaymentFailed { <span class="k">get</span>; } = <span class="k">null</span>!;
+
+    <span class="k">public</span> <span class="n">OrderSaga</span>()
+    {
+        InstanceState(x =&gt; x.CurrentState);
+
+        Initially(
+            When(OrderPlaced)
+                .Then(ctx =&gt; ctx.Saga.Total = ctx.Message.Total)
+                .Send(<span class="k">new</span> Uri(<span class="s">"queue:charge-payment"</span>),
+                      ctx =&gt; <span class="k">new</span> <span class="t">ChargePayment</span>(ctx.Saga.CorrelationId, ctx.Saga.Total))
+                .TransitionTo(AwaitingPayment));
+
+        During(AwaitingPayment,
+            When(PaymentSucceeded)
+                .Send(<span class="k">new</span> Uri(<span class="s">"queue:ship-order"</span>),
+                      ctx =&gt; <span class="k">new</span> <span class="t">ShipOrder</span>(ctx.Saga.CorrelationId))
+                .TransitionTo(AwaitingShipment),
+            When(PaymentFailed)
+                .Publish(ctx =&gt; <span class="k">new</span> <span class="t">OrderCancelled</span>(ctx.Saga.CorrelationId, <span class="s">"Thanh toán thất bại"</span>))
+                .Finalize());  <span class="c">// compensate: huỷ đơn</span>
+    }
+}</pre>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">7. MassTransit &mdash; setup &amp; consumer</h2>
+    <p class="ut-sub">MassTransit là abstraction phổ biến nhất trên .NET cho RabbitMQ/Azure Service Bus/Amazon SQS. Lưu ý: từ <strong>v9 (2026) MassTransit chuyển sang thương mại</strong>; v8 vẫn miễn phí. Cân nhắc license khi chọn.</p>
+    <ol class="steps">
+        <li><strong>Cài &amp; cấu hình</strong>
+            <pre class="cb">dotnet add package MassTransit
+dotnet add package MassTransit.RabbitMQ</pre>
+            <pre class="cb">builder.Services.AddMassTransit(x =&gt;
+{
+    x.AddConsumer&lt;<span class="t">PaymentConsumer</span>&gt;();
+
+    <span class="c">// Outbox + Inbox cho idempotency và reliability</span>
+    x.AddEntityFrameworkOutbox&lt;<span class="t">AppDbContext</span>&gt;(o =&gt;
+    {
+        o.UsePostgres();
+        o.UseBusOutbox();
+    });
+
+    x.UsingRabbitMq((ctx, cfg) =&gt;
+    {
+        cfg.Host(<span class="s">"localhost"</span>, <span class="s">"/"</span>, h =&gt; { h.Username(<span class="s">"guest"</span>); h.Password(<span class="s">"guest"</span>); });
+
+        cfg.ReceiveEndpoint(<span class="s">"payment-queue"</span>, e =&gt;
+        {
+            e.UseMessageRetry(r =&gt; r.Exponential(<span class="s">5</span>,
+                TimeSpan.FromSeconds(<span class="s">1</span>), TimeSpan.FromSeconds(<span class="s">30</span>), TimeSpan.FromSeconds(<span class="s">5</span>)));
+            e.ConfigureConsumer&lt;<span class="t">PaymentConsumer</span>&gt;(ctx);
+        });
+        cfg.ConfigureEndpoints(ctx);
+    });
+});</pre>
+        </li>
+        <li><strong>Publish event</strong>
+            <pre class="cb"><span class="k">await</span> _publishEndpoint.Publish(<span class="k">new</span> <span class="t">OrderPlaced</span>(order.Id, order.Total), ct);</pre>
+        </li>
+    </ol>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">8. Ordering &amp; Dead-Letter Queue</h2>
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h4>🔢 Message ordering</h4>
+            <p>Ordering toàn cục rất tốn kém. Chiến lược thực tế:</p>
+            <ul>
+                <li><strong>Partition theo key</strong> (Kafka): cùng orderId &rarr; cùng partition &rarr; có thứ tự</li>
+                <li><strong>Single consumer / không concurrency</strong> cho queue cần thứ tự</li>
+                <li><strong>Thiết kế để không cần ordering</strong>: dùng version/timestamp, bỏ qua event cũ</li>
+            </ul>
+        </div>
+        <div class="ut-card">
+            <h4>💀 Dead-Letter Queue (DLQ)</h4>
+            <p>Message lỗi mãi (poison message) sau khi hết retry &rarr; chuyển vào DLQ để không chặn queue chính.</p>
+            <ul>
+                <li>Retry có giới hạn (exponential backoff)</li>
+                <li>Hết retry &rarr; <code>_error</code> / <code>_skipped</code> queue (MassTransit tự tạo)</li>
+                <li>Có alert + công cụ replay DLQ sau khi fix bug</li>
+            </ul>
+        </div>
+    </div>
+    <div class="callout danger">
+        <strong>Poison message chặn cả hệ thống:</strong> Không có DLQ + retry vô hạn &rarr; một message lỗi loop mãi, chiếm consumer, message sau ùn tắc. Luôn giới hạn retry và có DLQ.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">🎯 Checklist Event-Driven</h2>
+    <div class="ut-card">
+        <ul>
+            <li>✅ Phân biệt đúng Command (1 consumer) vs Event (pub/sub)</li>
+            <li>✅ Chọn broker theo bài toán: RabbitMQ (task/routing) vs Kafka (stream/replay)</li>
+            <li>✅ Mọi consumer idempotent &mdash; an toàn khi nhận lại message</li>
+            <li>✅ Outbox pattern khi cần "save DB + publish" nguyên tử</li>
+            <li>✅ Saga cho giao dịch dài; chọn choreography (đơn giản) vs orchestration (phức tạp)</li>
+            <li>✅ Mỗi bước Saga có compensating action</li>
+            <li>✅ Retry có backoff + giới hạn lần</li>
+            <li>✅ Có DLQ + alert + khả năng replay message lỗi</li>
+            <li>✅ Thiết kế giảm phụ thuộc ordering; nếu cần thì partition theo key</li>
+            <li>✅ Cân nhắc license MassTransit v9 / dùng v8 hoặc client trực tiếp</li>
+        </ul>
+    </div>
+</section>
+
+</div>
+
+<footer style="text-align:center;padding:3rem 1.5rem;color:var(--ut-muted);border-top:1px solid var(--ut-border);margin-top:3rem;font-size:.9rem;">
+    <p>Messaging &amp; Event-Driven · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

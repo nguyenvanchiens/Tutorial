@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Microservices · Modular Monolith</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">Microservice<span class="accent">Mastery</span></div>
+    <div class="nav-links">
+      <a href="index.html">Roadmap</a>
+      <a href="modular-monolith.html" class="active">Modular Monolith</a>
+      <a href="basics.html">Cơ Bản</a>
+      <a href="ddd-tactical.html">DDD</a>
+      <a href="patterns.html">Patterns</a>
+      <a href="communication.html">Giao Tiếp</a>
+      <a href="testing.html">Testing</a>
+      <a href="production.html">Production</a>
+      <a href="architect.html">Architect</a>
+      <a href="interview.html">Phỏng Vấn</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-badge">L0 · NỀN TẢNG · PREREQUISITE</div>
+  <h1>Làm chủ <span class="gradient">Modular Monolith</span> trước</h1>
+  <p class="hero-desc">Trước khi tách 1 dòng code ra network, hãy xây ranh giới module sạch trong <strong>một deployable duy nhất</strong>. Đây là cách 90% hệ thống nên bắt đầu — và là bước chuẩn bị bắt buộc để sau này extract service không đau.</p>
+</header>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Vì sao "Monolith-first" gần như luôn đúng</h2>
+    <p class="section-sub">Martin Fowler &amp; Sam Newman đều khuyến nghị: <strong>đừng bắt đầu bằng microservices</strong>. Bạn chưa hiểu domain đủ rõ để vẽ ranh giới đúng — và ranh giới sai trong distributed system thì cực kỳ đắt để sửa.</p>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>❌ Bắt đầu bằng microservices</h3>
+        <ul>
+          <li>Ranh giới đoán sai → service "chatty", gọi nhau loạn xạ</li>
+          <li>Refactor cross-service = đổi API + deploy nhiều service + version</li>
+          <li>Distributed transaction, eventual consistency ngay từ ngày 1</li>
+          <li>Cần CI/CD, observability, service mesh trước khi có doanh thu</li>
+          <li>1 team 4 người gánh 12 repo, 12 pipeline</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>✅ Bắt đầu bằng Modular Monolith</h3>
+        <ul>
+          <li>Refactor ranh giới = di chuyển code trong cùng repo, compiler bắt lỗi</li>
+          <li>Transaction ACID thật, không cần Saga</li>
+          <li>1 deploy, 1 pipeline, debug bằng stack trace</li>
+          <li>Domain dần lộ ra → ranh giới module hội tụ về đúng</li>
+          <li>Khi module nào thực sự cần scale/độc lập → extract <em>module đó thôi</em></li>
+        </ul>
+      </div>
+    </div>
+    <div class="info-box">
+      <strong>📐 Nguyên tắc:</strong> Microservices giải bài toán <em>tổ chức &amp; scale</em>, không phải bài toán <em>code sạch</em>. Một modular monolith tốt cho 80-90% lợi ích kiến trúc với 10% chi phí vận hành.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Module boundary trong một deployable</h2>
+    <p class="section-sub">Modular monolith = nhiều module độc lập, mỗi module là 1 bounded context, giao tiếp qua <strong>public contract</strong> rõ ràng — nhưng tất cả chạy trong cùng process.</p>
+    <div class="arch-diagram">
+      <div class="arch-row">
+        <div class="arch-box gw">ASP.NET Host (1 process)</div>
+      </div>
+      <div class="arch-arrow">▼</div>
+      <div class="arch-row">
+        <div class="arch-box svc">Sales Module</div>
+        <div class="arch-box svc">Catalog Module</div>
+        <div class="arch-box svc">Billing Module</div>
+        <div class="arch-box svc">Shipping Module</div>
+      </div>
+      <div class="arch-arrow">▼ (mỗi module sở hữu schema riêng)</div>
+      <div class="arch-row">
+        <div class="arch-box db">sales schema</div>
+        <div class="arch-box db">catalog schema</div>
+        <div class="arch-box db">billing schema</div>
+        <div class="arch-box db">shipping schema</div>
+      </div>
+    </div>
+    <div class="grid grid-3">
+      <div class="dtype">
+        <h4>Public API mỏng</h4>
+        <p>Mỗi module phơi ra 1 interface contract (vd <code>ISalesModuleApi</code>). Module khác chỉ gọi qua đây, không chạm internal type.</p>
+      </div>
+      <div class="dtype">
+        <h4>Internal đóng kín</h4>
+        <p>Entity, repository, handler để <code>internal</code>. Không module nào reference được implementation.</p>
+      </div>
+      <div class="dtype">
+        <h4>Không chia sẻ DbContext</h4>
+        <p>Mỗi module có DbContext riêng, schema riêng. Không join chéo bảng của module khác.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Cấu trúc một .NET Modular Monolith cụ thể</h2>
+    <p class="section-sub">Bố cục project điển hình (.NET 9). Mỗi module là 1 thư mục/assembly với cấu trúc giống nhau.</p>
+    <pre class="code"><span class="t">ShopApp.sln</span>
+├── <span class="t">src/Bootstrapper/</span>
+│   └── ShopApp.Api            <span class="c">// host duy nhất: Program.cs, middleware, đăng ký module</span>
+│
+├── <span class="t">src/Modules/Sales/</span>
+│   ├── ShopApp.Sales.Public         <span class="c">// CONTRACT: interface + DTO + integration event</span>
+│   ├── ShopApp.Sales.Core           <span class="c">// internal: domain, handler, business logic</span>
+│   └── ShopApp.Sales.Infrastructure <span class="c">// internal: EF DbContext, repo (schema "sales")</span>
+│
+├── <span class="t">src/Modules/Catalog/</span>
+│   ├── ShopApp.Catalog.Public
+│   ├── ShopApp.Catalog.Core
+│   └── ShopApp.Catalog.Infrastructure
+│
+├── <span class="t">src/Modules/Billing/</span>  ...
+│
+└── <span class="t">src/Shared/</span>
+    ├── ShopApp.Shared.Abstractions  <span class="c">// IEventBus, IModule, marker — KHÔNG có business</span>
+    └── ShopApp.Shared.Infrastructure</pre>
+
+    <p style="margin-top:1rem;color:var(--muted)">Quy tắc reference vàng: <strong>module chỉ được phép reference assembly <code>.Public</code> của module khác</strong> — không bao giờ <code>.Core</code> hay <code>.Infrastructure</code>.</p>
+
+    <pre class="code"><span class="c">// ShopApp.Sales.Public/ISalesModule.cs — contract duy nhất Sales phơi ra</span>
+<span class="k">namespace</span> <span class="t">ShopApp.Sales.Public</span>;
+
+<span class="k">public interface</span> <span class="t">ISalesModule</span>
+{
+    <span class="t">Task</span>&lt;<span class="t">OrderSummaryDto</span>?&gt; <span class="n">GetOrderAsync</span>(<span class="t">Guid</span> orderId, <span class="t">CancellationToken</span> ct);
+    <span class="t">Task</span>&lt;<span class="t">Guid</span>&gt; <span class="n">PlaceOrderAsync</span>(<span class="t">PlaceOrderRequest</span> req, <span class="t">CancellationToken</span> ct);
+}
+
+<span class="k">public record</span> <span class="t">OrderSummaryDto</span>(<span class="t">Guid</span> Id, <span class="t">string</span> Status, <span class="t">decimal</span> Total);
+<span class="k">public record</span> <span class="t">PlaceOrderRequest</span>(<span class="t">Guid</span> CustomerId, <span class="t">IReadOnlyList</span>&lt;<span class="t">OrderLineDto</span>&gt; Lines);</pre>
+
+    <pre class="code"><span class="c">// ShopApp.Sales.Core/Orders/PlaceOrderHandler.cs — INTERNAL, không ai ngoài Sales thấy</span>
+<span class="k">internal sealed class</span> <span class="t">SalesModule</span>(<span class="t">SalesDbContext</span> db, <span class="t">IEventBus</span> bus) : <span class="t">ISalesModule</span>
+{
+    <span class="k">public async</span> <span class="t">Task</span>&lt;<span class="t">Guid</span>&gt; <span class="n">PlaceOrderAsync</span>(<span class="t">PlaceOrderRequest</span> req, <span class="t">CancellationToken</span> ct)
+    {
+        <span class="k">var</span> order = <span class="t">Order</span>.<span class="n">Place</span>(req.<span class="p">CustomerId</span>, req.<span class="p">Lines</span>);
+        db.<span class="p">Orders</span>.<span class="n">Add</span>(order);
+        <span class="k">await</span> db.<span class="n">SaveChangesAsync</span>(ct);  <span class="c">// transaction ACID thật — chưa cần Outbox</span>
+
+        <span class="c">// domain event in-process: module Billing/Shipping sẽ nghe</span>
+        <span class="k">await</span> bus.<span class="n">PublishAsync</span>(<span class="k">new</span> <span class="t">OrderPlaced</span>(order.<span class="p">Id</span>, order.<span class="p">Total</span>), ct);
+        <span class="k">return</span> order.<span class="p">Id</span>;
+    }
+}</pre>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Ép buộc ranh giới (đừng tin vào thiện chí)</h2>
+    <p class="section-sub">Convention sẽ bị phá sau 6 tháng dưới áp lực deadline. Phải để <strong>compiler / CI</strong> chặn vi phạm tự động.</p>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>1. internal + assembly tách rời</h3>
+        <p>Để type là <code>internal</code> trong <code>.Core</code>/<code>.Infrastructure</code>. Module khác không reference được → compiler error. Đây là hàng rào mạnh nhất, miễn phí.</p>
+      </div>
+      <div class="card">
+        <h3>2. Architecture test (NetArchTest / ArchUnitNET)</h3>
+        <pre class="code">[<span class="t">Fact</span>]
+<span class="k">public void</span> <span class="n">Sales_should_not_depend_on_Billing_internals</span>()
+{
+    <span class="k">var</span> result = <span class="t">Types</span>.<span class="n">InAssembly</span>(<span class="k">typeof</span>(<span class="t">SalesModule</span>).<span class="p">Assembly</span>)
+        .<span class="n">ShouldNot</span>()
+        .<span class="n">HaveDependencyOn</span>(<span class="s">"ShopApp.Billing.Core"</span>)
+        .<span class="n">GetResult</span>();
+    <span class="t">Assert</span>.<span class="n">True</span>(result.<span class="p">IsSuccessful</span>);
+}</pre>
+      </div>
+    </div>
+    <div class="tip"><strong>💡 Mẹo:</strong> Đặt 1 file <code>ArchitectureTests</code> chạy trong CI. Vi phạm ranh giới = build đỏ. Đây chính là thứ giữ monolith ở trạng thái "extract được" mãi mãi.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">In-process domain events</h2>
+    <p class="section-sub">Module giao tiếp lỏng lẻo qua event ngay trong process — y hệt mô hình bạn sẽ dùng sau này với message broker, nhưng giờ chỉ là method call. Sau này đổi implementation <code>IEventBus</code> từ in-memory sang RabbitMQ là xong.</p>
+    <pre class="code"><span class="c">// Shared.Abstractions — interface không đổi dù monolith hay microservice</span>
+<span class="k">public interface</span> <span class="t">IEventBus</span>
+{
+    <span class="t">Task</span> <span class="n">PublishAsync</span>&lt;<span class="t">T</span>&gt;(<span class="t">T</span> @event, <span class="t">CancellationToken</span> ct) <span class="k">where</span> <span class="t">T</span> : <span class="t">IIntegrationEvent</span>;
+}
+
+<span class="c">// Bootstrapper: giai đoạn monolith — bus chạy in-memory (MediatR/Wolverine)</span>
+<span class="c">// Billing module đăng ký handler:</span>
+<span class="k">internal sealed class</span> <span class="t">OnOrderPlaced</span>(<span class="t">BillingDbContext</span> db) : <span class="t">IIntegrationEventHandler</span>&lt;<span class="t">OrderPlaced</span>&gt;
+{
+    <span class="k">public async</span> <span class="t">Task</span> <span class="n">HandleAsync</span>(<span class="t">OrderPlaced</span> e, <span class="t">CancellationToken</span> ct)
+    {
+        db.<span class="p">Invoices</span>.<span class="n">Add</span>(<span class="t">Invoice</span>.<span class="n">For</span>(e.<span class="p">OrderId</span>, e.<span class="p">Total</span>));
+        <span class="k">await</span> db.<span class="n">SaveChangesAsync</span>(ct);
+    }
+}</pre>
+    <div class="warn-box"><strong>⚠️ Bẫy:</strong> In-process event mặc định chạy trong cùng transaction của caller. Quyết định sớm: handler chạy <em>đồng bộ trong transaction</em> (mạnh nhất quán) hay <em>sau commit</em> (giống async broker). Chọn "sau commit" nếu bạn dự tính extract — nó mô phỏng đúng eventual consistency tương lai.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Shared schema vs separate schema</h2>
+    <table class="cmp">
+      <thead><tr><th>Phương án</th><th>Mô tả</th><th>Khi nào dùng</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Shared schema, no boundary</strong></td><td>Tất cả bảng chung 1 schema, join tự do</td><td>❌ Không dùng — đây là "big ball of mud", không bao giờ extract được</td></tr>
+        <tr><td><strong>1 DB, schema/prefix riêng/module</strong></td><td>Cùng database nhưng <code>sales.*</code>, <code>billing.*</code>; cấm join chéo schema</td><td>✅ Mặc định nên dùng. Vận hành 1 DB nhưng ranh giới rõ, dễ tách sau</td></tr>
+        <tr><td><strong>DB riêng / module</strong></td><td>Mỗi module 1 database/connection string</td><td>Khi đã chắc sẽ extract, muốn mô phỏng "database per service" sớm</td></tr>
+      </tbody>
+    </table>
+    <div class="info-box"><strong>📦 Thực tế:</strong> Bắt đầu bằng <em>1 DB + schema riêng/module + cấm join chéo</em>. Đây là sweet spot: chi phí vận hành 1 DB, nhưng dữ liệu đã phân vùng sẵn theo ranh giới service tương lai.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Khi nào &amp; cách extract module thành service (Strangler Fig)</h2>
+    <p class="section-sub">Đừng tách vì "thấy ngầu". Tách khi có <strong>lý do cụ thể</strong>: module cần scale độc lập, deploy theo nhịp khác, team riêng sở hữu, hoặc cần stack công nghệ khác.</p>
+    <ol class="steps">
+      <li><strong>Tín hiệu cần tách:</strong> module bị deploy chặn vì module khác; nó là bottleneck scale; có team riêng muốn release độc lập; SLA/bảo mật khác biệt.</li>
+      <li><strong>Đảm bảo ranh giới đã sạch:</strong> module chỉ giao tiếp qua <code>.Public</code> contract + integration event. Nếu còn join chéo schema → sửa trước khi tách.</li>
+      <li><strong>Đổi transport, giữ contract:</strong> thay implementation <code>ISalesModule</code> từ in-process sang HTTP/gRPC client; đổi <code>IEventBus</code> in-memory → RabbitMQ/Kafka. Code gọi không đổi.</li>
+      <li><strong>Tách dữ liệu:</strong> di chuyển schema <code>sales.*</code> sang database riêng. Bỏ mọi FK chéo (đã không có nếu làm đúng).</li>
+      <li><strong>Đặt proxy/gateway trước:</strong> route các call của module Sales sang service mới; phần còn lại vẫn ở monolith. Roll out dần (canary).</li>
+      <li><strong>Thêm hạ tầng distributed:</strong> giờ mới cần Outbox (thay in-process event), Saga (thay ACID transaction), tracing xuyên service, retry/circuit breaker.</li>
+    </ol>
+    <div class="tip"><strong>💡 Insight then chốt:</strong> Nếu modular monolith làm đúng, "extract 1 service" chỉ là <em>đổi transport + tách DB</em> — không phải viết lại logic. Đó là toàn bộ lý do ta đầu tư vào ranh giới ngay từ đầu.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Checklist — Modular Monolith đạt chuẩn "extract-ready"</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>✅ Ranh giới &amp; code</h3>
+        <ul>
+          <li>Mỗi module có assembly <code>.Public</code> / <code>.Core</code> / <code>.Infrastructure</code></li>
+          <li>Domain/repo/handler đều <code>internal</code></li>
+          <li>Module chỉ reference <code>.Public</code> của module khác</li>
+          <li>Architecture test chạy trong CI, vi phạm = build đỏ</li>
+          <li>Giao tiếp chéo module qua interface contract + integration event</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>✅ Dữ liệu &amp; sự kiện</h3>
+        <ul>
+          <li>Mỗi module DbContext riêng, schema riêng</li>
+          <li>Không join chéo schema, không FK chéo module</li>
+          <li><code>IEventBus</code> abstraction sẵn (đổi transport không sửa caller)</li>
+          <li>Domain event publish "sau commit" để mô phỏng async tương lai</li>
+          <li>Có thể chỉ tên 1-2 module thật sự nên (và sẽ) tách trước</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>Tiếp theo: <a href="ddd-tactical.html" style="color:var(--primary)">DDD cho Microservices →</a></p>
+</footer>
+
+</body>
+</html>

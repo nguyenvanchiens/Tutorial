@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thiết kế REST API trong ASP.NET Core — A-Z</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --ut-primary: #512bd4;
+        --ut-primary-2: #8a2be2;
+        --ut-accent: #43e97b;
+        --ut-warn: #f39c12;
+        --ut-danger: #f5576c;
+        --ut-card: #1a1d2e;
+        --ut-card-2: #232640;
+        --ut-border: #2d3148;
+        --ut-text: #e2e8f0;
+        --ut-muted: #94a3b8;
+    }
+    .ut-hero { text-align: center; padding: 4rem 1.5rem 3rem; background: radial-gradient(ellipse at top, rgba(81,43,212,.18), transparent 60%); }
+    .ut-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 1rem; }
+    .ut-hero h1 .gradient { background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .ut-hero .hero-badge { display: inline-block; background: rgba(81,43,212,.15); color: var(--ut-primary-2); padding: .4rem 1rem; border-radius: 20px; font-size: .78rem; font-weight: 600; letter-spacing: 1px; margin-bottom: 1.25rem; }
+    .ut-hero p { color: var(--ut-muted); max-width: 820px; margin: 0 auto; }
+    .ut-section { padding: 2.5rem 0; }
+    .ut-title { font-size: 1.7rem; margin-bottom: 1.5rem; position: relative; padding-left: 1rem; color: var(--ut-text); }
+    .ut-title::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 4px; background: linear-gradient(180deg, var(--ut-primary), var(--ut-primary-2)); border-radius: 3px; }
+    .ut-sub { color: var(--ut-muted); margin-bottom: 1.25rem; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+    .ut-grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .ut-grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    .ut-grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .ut-card { background: var(--ut-card); border: 1px solid var(--ut-border); border-radius: 12px; padding: 1.4rem; }
+    .ut-card h3 { color: var(--ut-primary-2); margin-bottom: .6rem; font-size: 1.1rem; }
+    .ut-card h4 { color: var(--ut-accent); margin-bottom: .45rem; font-size: .98rem; }
+    .ut-card p, .ut-card li { color: var(--ut-muted); font-size: .95rem; }
+    .ut-card ul { padding-left: 1.2rem; }
+    .ut-card ul li { margin-bottom: .3rem; }
+    pre.cb { background: #0b1020; border: 1px solid var(--ut-border); border-left: 3px solid var(--ut-primary); border-radius: 8px; padding: 1rem 1.15rem; overflow-x: auto; font-family: 'JetBrains Mono', Consolas, monospace; font-size: .88rem; line-height: 1.6; margin: .75rem 0; color: #d6deeb; }
+    pre.cb .k { color: #c792ea; }
+    pre.cb .s { color: #ecc48d; }
+    pre.cb .c { color: #637777; font-style: italic; }
+    pre.cb .n { color: #82aaff; }
+    pre.cb .t { color: #ffcb8b; }
+    pre.cb .a { color: #7fdbca; }
+    code { background: #2d3148; padding: 2px 6px; border-radius: 4px; font-size: .88em; color: #f8d06b; font-family: 'JetBrains Mono', Consolas, monospace; }
+    .callout { border-radius: 10px; padding: .95rem 1.15rem; margin: 1rem 0; border: 1px solid; }
+    .callout.tip { background: rgba(67,233,123,.07); border-color: var(--ut-accent); }
+    .callout.tip strong { color: var(--ut-accent); }
+    .callout.warn { background: rgba(243,156,18,.07); border-color: var(--ut-warn); }
+    .callout.warn strong { color: var(--ut-warn); }
+    .callout.danger { background: rgba(245,87,108,.07); border-color: var(--ut-danger); }
+    .callout.danger strong { color: var(--ut-danger); }
+    .callout.info { background: rgba(81,43,212,.08); border-color: var(--ut-primary-2); }
+    .callout.info strong { color: var(--ut-primary-2); }
+    table.cmp { width: 100%; border-collapse: collapse; background: var(--ut-card); border-radius: 10px; overflow: hidden; margin: 1rem 0; font-size: .92rem; }
+    table.cmp th, table.cmp td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--ut-border); }
+    table.cmp th { background: var(--ut-card-2); color: var(--ut-primary-2); font-weight: 600; }
+    table.cmp td { color: var(--ut-muted); }
+    table.cmp tr:last-child td { border-bottom: none; }
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; position: relative; padding-left: 2.8rem; margin-bottom: 1rem; }
+    .steps li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 2rem; height: 2rem; background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .do-dont { border-left: 3px solid; padding: 1rem 1.15rem; border-radius: 8px; margin-bottom: 1rem; }
+    .do-dont.do { border-color: var(--ut-accent); background: rgba(67,233,123,.04); }
+    .do-dont.dont { border-color: var(--ut-danger); background: rgba(245,87,108,.04); }
+    .do-dont h4 { margin-bottom: .5rem; }
+    .do-dont.do h4 { color: var(--ut-accent); }
+    .do-dont.dont h4 { color: var(--ut-danger); }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo"><a href="index.html" style="color:inherit;-webkit-text-fill-color:inherit;">.NET<span class="accent">Mastery</span></a></div>
+        <div class="nav-links">
+            <a href="index.html">Roadmap</a>
+            <a href="async.html">Async</a>
+            <a href="rest-design.html" class="nav-active">REST API</a>
+            <a href="auth-jwt.html">Auth & JWT</a>
+            <a href="caching.html">Caching</a>
+            <a href="logging.html">Logging</a>
+            <a href="error-handling.html">Error & Resilience</a>
+            <a href="clean-architecture.html">Clean Arch</a>
+            <a href="design-patterns.html">SOLID & Patterns</a>
+        </div>
+        <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+</nav>
+
+<header class="ut-hero">
+    <div class="hero-badge">NÂNG CAO · INTERMEDIATE</div>
+    <h1>Thiết kế <span class="gradient">REST API</span></h1>
+    <p>Thiết kế REST API chuẩn mực cho ASP.NET Core .NET 8/9: mô hình hoá resource (danh từ, sub-resource), HTTP verb &amp; status code đúng ngữ nghĩa, idempotency &amp; Idempotency-Key, versioning với Asp.Versioning, phân trang offset vs keyset, ProblemDetails RFC 7807, HATEOAS và các best practice về hợp đồng API (camelCase, ISO 8601 UTC, OpenAPI). Tất cả code chính xác cho .NET 8/9.</p>
+</header>
+
+<div class="container">
+
+<section class="ut-section">
+    <h2 class="ut-title">1. Mô hình hoá Resource (Resource Modeling)</h2>
+    <p class="ut-sub">REST xoay quanh <strong>resource</strong> (tài nguyên) — là danh từ, không phải hành động. URL định danh resource; HTTP verb mới thể hiện hành động. Đừng nhét động từ vào URL (<code>/getOrder</code>, <code>/createUser</code> là sai).</p>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h4>✅ Danh từ số nhiều cho collection</h4>
+            <ul>
+                <li><code>GET /api/orders</code> — danh sách đơn hàng</li>
+                <li><code>GET /api/orders/42</code> — đơn hàng cụ thể</li>
+                <li><code>POST /api/orders</code> — tạo đơn mới</li>
+                <li><code>GET /api/orders/42/items</code> — sub-resource</li>
+            </ul>
+        </div>
+        <div class="ut-card">
+            <h4>🚫 Động từ trong URL (RPC trá hình)</h4>
+            <ul>
+                <li><code>POST /api/getOrder?id=42</code></li>
+                <li><code>POST /api/createOrder</code></li>
+                <li><code>GET /api/orders/deleteAll</code></li>
+                <li><code>POST /api/order/42/markAsPaid</code></li>
+            </ul>
+        </div>
+    </div>
+
+    <table class="cmp">
+        <tr><th>Loại resource</th><th>Mẫu URL</th><th>Ý nghĩa</th></tr>
+        <tr><td>Collection</td><td><code>/api/orders</code></td><td>Tập hợp nhiều resource</td></tr>
+        <tr><td>Phần tử (item)</td><td><code>/api/orders/{id}</code></td><td>Một resource trong collection</td></tr>
+        <tr><td>Sub-resource (lồng nhau)</td><td><code>/api/orders/{id}/items</code></td><td>Resource thuộc về resource cha</td></tr>
+        <tr><td>Sub-resource item</td><td><code>/api/orders/{id}/items/{itemId}</code></td><td>Một item trong đơn hàng</td></tr>
+        <tr><td>Singleton</td><td><code>/api/users/me/profile</code></td><td>Resource đơn nhất (không phải collection)</td></tr>
+    </table>
+
+    <pre class="cb"><span class="c">// Minimal API .NET 8/9 — nhóm route theo resource</span>
+<span class="k">var</span> orders = app.MapGroup(<span class="s">"/api/orders"</span>);
+
+orders.MapGet(<span class="s">"/"</span>, GetOrders);            <span class="c">// collection</span>
+orders.MapGet(<span class="s">"/{id:int}"</span>, GetOrderById);  <span class="c">// item</span>
+orders.MapPost(<span class="s">"/"</span>, CreateOrder);          <span class="c">// tạo trong collection</span>
+
+<span class="c">// Sub-resource: items thuộc về order</span>
+orders.MapGet(<span class="s">"/{id:int}/items"</span>, GetOrderItems);
+orders.MapPost(<span class="s">"/{id:int}/items"</span>, AddOrderItem);</pre>
+
+    <div class="callout warn">
+        <strong>⚠️ Đừng lồng quá sâu:</strong> tối đa nên dừng ở <code>/orders/{id}/items/{itemId}</code>. Lồng 3-4 cấp (<code>/users/1/orders/2/items/3/reviews/4</code>) làm URL khó hiểu và khó cache. Khi đã có ID duy nhất của item, hãy truy cập phẳng: <code>/api/order-items/{itemId}</code>.
+    </div>
+
+    <div class="callout tip">
+        <strong>💡 Hành động không-CRUD:</strong> với thao tác không map vào CRUD (vd "thanh toán đơn"), coi nó như tạo một sub-resource hành động: <code>POST /api/orders/42/payments</code> thay vì <code>POST /api/orders/42/pay</code>. Vẫn giữ danh từ.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">2. HTTP Verb &amp; Status Code</h2>
+    <p class="ut-sub">Verb thể hiện ý định; status code thể hiện kết quả. Dùng đúng cặp này là cốt lõi của REST.</p>
+
+    <table class="cmp">
+        <tr><th>Verb</th><th>Ngữ nghĩa</th><th>Idempotent?</th><th>Có body?</th><th>Success code</th></tr>
+        <tr><td><code>GET</code></td><td>Đọc resource, không có side-effect</td><td>Có</td><td>Không</td><td>200 OK</td></tr>
+        <tr><td><code>POST</code></td><td>Tạo mới / hành động không idempotent</td><td>Không</td><td>Có</td><td>201 Created</td></tr>
+        <tr><td><code>PUT</code></td><td>Thay thế toàn bộ resource</td><td>Có</td><td>Có</td><td>200 / 204</td></tr>
+        <tr><td><code>PATCH</code></td><td>Cập nhật một phần resource</td><td>Tuỳ (nên thiết kế idempotent)</td><td>Có</td><td>200 / 204</td></tr>
+        <tr><td><code>DELETE</code></td><td>Xoá resource</td><td>Có</td><td>Không</td><td>204 No Content</td></tr>
+    </table>
+
+    <h3 class="ut-title" style="font-size:1.2rem;">Status code thường gặp</h3>
+    <table class="cmp">
+        <tr><th>Code</th><th>Tên</th><th>Khi nào dùng</th></tr>
+        <tr><td><code>200</code></td><td>OK</td><td>GET/PUT/PATCH thành công, có body trả về</td></tr>
+        <tr><td><code>201</code></td><td>Created</td><td>POST tạo mới thành công — kèm header <code>Location</code></td></tr>
+        <tr><td><code>204</code></td><td>No Content</td><td>DELETE / PUT thành công nhưng không trả body</td></tr>
+        <tr><td><code>400</code></td><td>Bad Request</td><td>Request sai cú pháp / không parse được / thiếu field</td></tr>
+        <tr><td><code>401</code></td><td>Unauthorized</td><td>Chưa xác thực (chưa đăng nhập / token sai)</td></tr>
+        <tr><td><code>403</code></td><td>Forbidden</td><td>Đã xác thực nhưng không đủ quyền</td></tr>
+        <tr><td><code>404</code></td><td>Not Found</td><td>Resource không tồn tại</td></tr>
+        <tr><td><code>409</code></td><td>Conflict</td><td>Xung đột trạng thái (trùng key, optimistic concurrency)</td></tr>
+        <tr><td><code>422</code></td><td>Unprocessable Entity</td><td>Cú pháp đúng nhưng vi phạm business/validation rule</td></tr>
+        <tr><td><code>500</code></td><td>Internal Server Error</td><td>Lỗi không lường trước phía server</td></tr>
+    </table>
+
+    <pre class="cb"><span class="c">// POST trả 201 Created + Location trỏ tới resource vừa tạo</span>
+orders.MapPost(<span class="s">"/"</span>, <span class="k">async</span> (CreateOrderDto dto, IOrderService svc, CancellationToken ct) =&gt;
+{
+    <span class="k">var</span> created = <span class="k">await</span> svc.CreateAsync(dto, ct);
+    <span class="c">// Results.Created tự set header Location: /api/orders/{id}</span>
+    <span class="k">return</span> Results.Created($<span class="s">"/api/orders/{created.Id}"</span>, created);
+});
+
+<span class="c">// DELETE trả 204 No Content khi thành công, 404 khi không thấy</span>
+orders.MapDelete(<span class="s">"/{id:int}"</span>, <span class="k">async</span> (<span class="k">int</span> id, IOrderService svc, CancellationToken ct) =&gt;
+{
+    <span class="k">var</span> deleted = <span class="k">await</span> svc.DeleteAsync(id, ct);
+    <span class="k">return</span> deleted ? Results.NoContent() : Results.NotFound();
+});</pre>
+
+    <div class="callout info">
+        <strong>400 vs 422:</strong> dùng <code>400</code> khi request <em>không hợp lệ về cú pháp</em> (JSON hỏng, thiếu field bắt buộc, sai kiểu). Dùng <code>422</code> khi request <em>đọc được nhưng vi phạm luật nghiệp vụ</em> (vd email đúng format nhưng đã tồn tại, ngày kết thúc trước ngày bắt đầu). Nhiều team dùng 400 cho cả hai cũng chấp nhận được — quan trọng là nhất quán toàn API.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">3. Idempotency (Tính bất biến khi lặp)</h2>
+    <p class="ut-sub">Một thao tác <strong>idempotent</strong> nếu gọi 1 lần hay N lần đều cho cùng trạng thái cuối. Đây là tính chất sống còn cho retry an toàn (mạng lỗi, client gửi lại).</p>
+
+    <table class="cmp">
+        <tr><th>Verb</th><th>Idempotent?</th><th>Giải thích</th></tr>
+        <tr><td><code>GET</code></td><td>✅ Có</td><td>Đọc nhiều lần không thay đổi gì (an toàn + idempotent)</td></tr>
+        <tr><td><code>PUT</code></td><td>✅ Có</td><td>Thay thế toàn bộ — PUT 5 lần cùng body = 1 lần</td></tr>
+        <tr><td><code>DELETE</code></td><td>✅ Có</td><td>Xoá rồi xoá lại → vẫn "đã xoá" (lần sau trả 404)</td></tr>
+        <tr><td><code>POST</code></td><td>🚫 Không</td><td>Gọi 2 lần → tạo 2 resource. Retry nguy hiểm (double charge!)</td></tr>
+        <tr><td><code>PATCH</code></td><td>⚠️ Tuỳ</td><td><code>{"status":"paid"}</code> idempotent; <code>{"qty":"+1"}</code> thì không</td></tr>
+    </table>
+
+    <div class="callout danger">
+        <strong>⚠️ POST không idempotent:</strong> nếu client gửi <code>POST /payments</code>, mạng timeout rồi retry → có thể trừ tiền 2 lần. Giải pháp chuẩn công nghiệp (Stripe, PayPal) là <strong>Idempotency-Key</strong>: client gửi 1 key duy nhất; server lưu kết quả lần đầu và trả lại đúng kết quả đó cho các lần lặp.
+    </div>
+
+    <pre class="cb"><span class="c">// Pattern Idempotency-Key cho POST không-idempotent</span>
+<span class="c">// Client gửi header: Idempotency-Key: 7c2f...-unique-per-attempt</span>
+orders.MapPost(<span class="s">"/"</span>, <span class="k">async</span> (
+    CreateOrderDto dto,
+    [<span class="a">FromHeader</span>(Name = <span class="s">"Idempotency-Key"</span>)] <span class="k">string</span>? idempotencyKey,
+    IOrderService svc,
+    IIdempotencyStore store,
+    CancellationToken ct) =&gt;
+{
+    <span class="k">if</span> (<span class="k">string</span>.IsNullOrWhiteSpace(idempotencyKey))
+        <span class="k">return</span> Results.BadRequest(<span class="s">"Thiếu header Idempotency-Key."</span>);
+
+    <span class="c">// Đã xử lý key này trước đó? Trả lại kết quả cũ, KHÔNG tạo mới.</span>
+    <span class="k">var</span> cached = <span class="k">await</span> store.TryGetAsync(idempotencyKey, ct);
+    <span class="k">if</span> (cached <span class="k">is not null</span>)
+        <span class="k">return</span> Results.Created($<span class="s">"/api/orders/{cached.Id}"</span>, cached);
+
+    <span class="k">var</span> created = <span class="k">await</span> svc.CreateAsync(dto, ct);
+
+    <span class="c">// Lưu (key -&gt; kết quả) với TTL, lý tưởng trong cùng transaction</span>
+    <span class="k">await</span> store.SaveAsync(idempotencyKey, created, TimeSpan.FromHours(<span class="s">24</span>), ct);
+
+    <span class="k">return</span> Results.Created($<span class="s">"/api/orders/{created.Id}"</span>, created);
+});</pre>
+
+    <div class="callout tip">
+        <strong>💡 Lưu key ở đâu:</strong> Redis (TTL tự động) hoặc bảng DB với unique constraint trên key. Nên gắn key với cả hash của request body để tránh client tái dùng key cho payload khác. RFC draft "The Idempotency-Key HTTP Header Field" mô tả pattern này.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">4. Versioning (Quản lý phiên bản API)</h2>
+    <p class="ut-sub">Khi API đã public, bạn không được phá vỡ client cũ. Versioning cho phép tiến hoá API mà không "đập" người dùng hiện tại. Có 4 chiến lược chính.</p>
+
+    <table class="cmp">
+        <tr><th>Chiến lược</th><th>Ví dụ</th><th>Ưu</th><th>Nhược</th></tr>
+        <tr><td>URL path</td><td><code>/api/v1/orders</code></td><td>Rõ ràng, dễ cache, dễ test trên browser</td><td>Không "thuần REST" (URL nên định danh resource, không version)</td></tr>
+        <tr><td>Query string</td><td><code>/api/orders?api-version=1.0</code></td><td>Dễ dùng, không đổi path</td><td>Dễ bị bỏ quên, làm rối URL</td></tr>
+        <tr><td>Header</td><td><code>X-Api-Version: 1.0</code></td><td>URL sạch</td><td>Khó test bằng browser, ít rõ ràng</td></tr>
+        <tr><td>Media-type</td><td><code>Accept: application/json;v=1</code></td><td>"Thuần REST" nhất (content negotiation)</td><td>Phức tạp, client hay làm sai</td></tr>
+    </table>
+
+    <div class="callout info">
+        <strong>Thực tế phổ biến:</strong> <strong>URL path versioning</strong> (<code>/v1/</code>) thắng thế trong đa số API public vì rõ ràng và dễ debug. Dùng thư viện chính thức <code>Asp.Versioning.Http</code> / <code>Asp.Versioning.Mvc</code> (kế thừa từ Microsoft.AspNetCore.Mvc.Versioning).
+    </div>
+
+    <pre class="cb"><span class="c">// dotnet add package Asp.Versioning.Http        (Minimal API)</span>
+<span class="c">// dotnet add package Asp.Versioning.Mvc.ApiExplorer  (Swagger)</span>
+<span class="k">using</span> Asp.Versioning;
+
+builder.Services.AddApiVersioning(options =&gt;
+{
+    options.DefaultApiVersion = <span class="k">new</span> ApiVersion(<span class="s">1.0</span>);
+    options.AssumeDefaultVersionWhenUnspecified = <span class="k">true</span>;
+    options.ReportApiVersions = <span class="k">true</span>; <span class="c">// trả header api-supported-versions</span>
+    <span class="c">// Đọc version từ URL segment; có thể combine nhiều reader</span>
+    options.ApiVersionReader = ApiVersionReader.Combine(
+        <span class="k">new</span> UrlSegmentApiVersionReader(),
+        <span class="k">new</span> HeaderApiVersionReader(<span class="s">"X-Api-Version"</span>),
+        <span class="k">new</span> QueryStringApiVersionReader(<span class="s">"api-version"</span>));
+})
+.AddApiExplorer(o =&gt;
+{
+    o.GroupNameFormat = <span class="s">"'v'VVV"</span>;       <span class="c">// v1, v1.1, v2</span>
+    o.SubstituteApiVersionInUrl = <span class="k">true</span>;
+});</pre>
+
+    <pre class="cb"><span class="c">// Minimal API: khai báo version set rồi gắn cho từng endpoint</span>
+<span class="k">var</span> versions = app.NewApiVersionSet()
+    .HasApiVersion(<span class="k">new</span> ApiVersion(<span class="s">1.0</span>))
+    .HasApiVersion(<span class="k">new</span> ApiVersion(<span class="s">2.0</span>))
+    .Build();
+
+<span class="k">var</span> orders = app.MapGroup(<span class="s">"/api/v{version:apiVersion}/orders"</span>)
+    .WithApiVersionSet(versions);
+
+orders.MapGet(<span class="s">"/"</span>, GetOrdersV1).MapToApiVersion(<span class="s">1.0</span>);
+orders.MapGet(<span class="s">"/"</span>, GetOrdersV2).MapToApiVersion(<span class="s">2.0</span>); <span class="c">// shape mới</span></pre>
+
+    <pre class="cb"><span class="c">// Controller-based: attribute routing với version trong URL</span>
+[<span class="a">ApiController</span>]
+[<span class="a">ApiVersion</span>(<span class="s">1.0</span>)]
+[<span class="a">ApiVersion</span>(<span class="s">2.0</span>)]
+[<span class="a">Route</span>(<span class="s">"api/v{version:apiVersion}/orders"</span>)]
+<span class="k">public class</span> <span class="t">OrdersController</span> : ControllerBase
+{
+    [<span class="a">HttpGet</span>, <span class="a">MapToApiVersion</span>(<span class="s">1.0</span>)]
+    <span class="k">public</span> Task&lt;<span class="t">IActionResult</span>&gt; <span class="n">GetV1</span>() =&gt; ...;
+
+    [<span class="a">HttpGet</span>, <span class="a">MapToApiVersion</span>(<span class="s">2.0</span>)]
+    <span class="k">public</span> Task&lt;<span class="t">IActionResult</span>&gt; <span class="n">GetV2</span>() =&gt; ...;
+}</pre>
+
+    <div class="callout tip">
+        <strong>💡 Deprecation:</strong> dùng <code>[ApiVersion(1.0, Deprecated = true)]</code> để báo client một version sắp ngừng hỗ trợ — framework sẽ trả header <code>api-deprecated-versions</code>. Cho client thời gian di trú trước khi gỡ.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">5. Phân trang, Lọc &amp; Sắp xếp</h2>
+    <p class="ut-sub">Không bao giờ trả về toàn bộ collection không giới hạn. Luôn phân trang. Có 2 kiểu chính: <strong>offset</strong> (dễ) và <strong>keyset/cursor</strong> (chuẩn cho dữ liệu lớn / real-time).</p>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h3>Offset pagination</h3>
+            <p><code>?page=2&amp;pageSize=20</code> → <code>SKIP 20 TAKE 20</code>.</p>
+            <ul>
+                <li>✅ Đơn giản, nhảy tới trang bất kỳ</li>
+                <li>✅ Hiển thị tổng số trang dễ dàng</li>
+                <li>🚫 Chậm khi offset lớn (DB phải skip hàng triệu dòng)</li>
+                <li>🚫 Dữ liệu thay đổi giữa các trang → bị trùng/sót item</li>
+            </ul>
+        </div>
+        <div class="ut-card">
+            <h3>Keyset / Cursor pagination</h3>
+            <p><code>?after=eyJpZCI6MTIzfQ&amp;pageSize=20</code> → <code>WHERE id &gt; lastId</code>.</p>
+            <ul>
+                <li>✅ Nhanh ổn định dù dữ liệu lớn (dùng index)</li>
+                <li>✅ Không trùng/sót khi insert/delete đồng thời</li>
+                <li>🚫 Không nhảy tới trang N tuỳ ý</li>
+                <li>🚫 Phức tạp hơn khi sort nhiều cột</li>
+            </ul>
+        </div>
+    </div>
+
+    <pre class="cb"><span class="c">// Envelope phân trang chuẩn: data + metadata</span>
+<span class="k">public record</span> <span class="t">PagedResult</span>&lt;<span class="t">T</span>&gt;(
+    IReadOnlyList&lt;<span class="t">T</span>&gt; Items,
+    <span class="k">int</span> Page,
+    <span class="k">int</span> PageSize,
+    <span class="k">long</span> TotalCount)
+{
+    <span class="k">public int</span> TotalPages =&gt; (<span class="k">int</span>)Math.Ceiling(TotalCount / (<span class="k">double</span>)PageSize);
+    <span class="k">public bool</span> HasNext =&gt; Page * PageSize &lt; TotalCount;
+}</pre>
+
+    <pre class="cb"><span class="c">// OFFSET pagination với EF Core — lọc + sort + phân trang</span>
+<span class="k">public async</span> Task&lt;PagedResult&lt;<span class="t">OrderDto</span>&gt;&gt; <span class="n">GetOrdersAsync</span>(
+    <span class="k">string</span>? status, <span class="k">string</span>? sort,
+    <span class="k">int</span> page = <span class="s">1</span>, <span class="k">int</span> pageSize = <span class="s">20</span>,
+    CancellationToken ct = <span class="k">default</span>)
+{
+    page = Math.Max(<span class="s">1</span>, page);
+    pageSize = Math.Clamp(pageSize, <span class="s">1</span>, <span class="s">100</span>); <span class="c">// chặn pageSize quá lớn</span>
+
+    IQueryable&lt;<span class="t">Order</span>&gt; query = _db.Orders.AsNoTracking();
+
+    <span class="c">// Lọc (filter)</span>
+    <span class="k">if</span> (!<span class="k">string</span>.IsNullOrWhiteSpace(status))
+        query = query.Where(o =&gt; o.Status == status);
+
+    <span class="c">// Sắp xếp: ?sort=-createdAt nghĩa là createdAt giảm dần</span>
+    query = sort <span class="k">switch</span>
+    {
+        <span class="s">"-createdAt"</span> =&gt; query.OrderByDescending(o =&gt; o.CreatedAt),
+        <span class="s">"createdAt"</span>  =&gt; query.OrderBy(o =&gt; o.CreatedAt),
+        <span class="s">"total"</span>      =&gt; query.OrderBy(o =&gt; o.Total),
+        _            =&gt; query.OrderByDescending(o =&gt; o.Id) <span class="c">// mặc định ổn định</span>
+    };
+
+    <span class="k">var</span> total = <span class="k">await</span> query.LongCountAsync(ct);
+
+    <span class="k">var</span> items = <span class="k">await</span> query
+        .Skip((page - <span class="s">1</span>) * pageSize)
+        .Take(pageSize)
+        .Select(o =&gt; <span class="k">new</span> OrderDto(o.Id, o.Status, o.Total, o.CreatedAt))
+        .ToListAsync(ct);
+
+    <span class="k">return new</span> PagedResult&lt;<span class="t">OrderDto</span>&gt;(items, page, pageSize, total);
+}</pre>
+
+    <pre class="cb"><span class="c">// KEYSET pagination — nhanh &amp; ổn định cho dataset lớn</span>
+<span class="c">// Cursor là Id của phần tử cuối trang trước (mã hoá base64)</span>
+<span class="k">public async</span> Task&lt;(List&lt;<span class="t">OrderDto</span>&gt; Items, <span class="k">int</span>? NextCursor)&gt; <span class="n">GetOrdersKeysetAsync</span>(
+    <span class="k">int</span>? afterId, <span class="k">int</span> pageSize = <span class="s">20</span>, CancellationToken ct = <span class="k">default</span>)
+{
+    pageSize = Math.Clamp(pageSize, <span class="s">1</span>, <span class="s">100</span>);
+
+    IQueryable&lt;<span class="t">Order</span>&gt; query = _db.Orders.AsNoTracking().OrderBy(o =&gt; o.Id);
+
+    <span class="k">if</span> (afterId <span class="k">is not null</span>)
+        query = query.Where(o =&gt; o.Id &gt; afterId); <span class="c">// dùng index trên Id</span>
+
+    <span class="k">var</span> rows = <span class="k">await</span> query
+        .Take(pageSize + <span class="s">1</span>) <span class="c">// lấy dư 1 để biết còn trang sau không</span>
+        .ToListAsync(ct);
+
+    <span class="k">var</span> hasMore = rows.Count &gt; pageSize;
+    <span class="k">var</span> page = rows.Take(pageSize).Select(MapToDto).ToList();
+    <span class="k">int</span>? next = hasMore ? page[^<span class="s">1</span>].Id : <span class="k">null</span>;
+
+    <span class="k">return</span> (page, next);
+}</pre>
+
+    <div class="callout tip">
+        <strong>💡 Trả metadata phân trang ở đâu:</strong> đặt trong body (envelope như trên) là phổ biến và dễ dùng nhất. Cách "thuần HTTP" là dùng header <code>Link</code> (RFC 8288) với <code>rel="next"</code>/<code>rel="prev"</code> và header <code>X-Total-Count</code>. Chọn 1 kiểu và nhất quán toàn API.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">6. ProblemDetails — RFC 7807</h2>
+    <p class="ut-sub">Đừng trả lỗi với mỗi API mỗi kiểu (<code>{ "error": "..." }</code>, <code>{ "message": "..." }</code>). RFC 7807 (cập nhật bởi RFC 9457) định nghĩa định dạng lỗi chuẩn <code>application/problem+json</code> — ASP.NET Core hỗ trợ sẵn qua <code>ProblemDetails</code>.</p>
+
+    <pre class="cb"><span class="c">// Cấu trúc problem+json chuẩn</span>
+{
+  <span class="a">"type"</span>: <span class="s">"https://example.com/errors/insufficient-funds"</span>,
+  <span class="a">"title"</span>: <span class="s">"Số dư không đủ"</span>,
+  <span class="a">"status"</span>: <span class="s">422</span>,
+  <span class="a">"detail"</span>: <span class="s">"Tài khoản thiếu 50.000đ để hoàn tất giao dịch."</span>,
+  <span class="a">"instance"</span>: <span class="s">"/api/orders/42/payments"</span>,
+  <span class="a">"traceId"</span>: <span class="s">"00-8fa...-01"</span>
+}</pre>
+
+    <pre class="cb"><span class="c">// Program.cs — bật ProblemDetails toàn cục (.NET 8/9)</span>
+builder.Services.AddProblemDetails(options =&gt;
+{
+    <span class="c">// Bổ sung field tuỳ biến vào mọi problem response</span>
+    options.CustomizeProblemDetails = ctx =&gt;
+    {
+        ctx.ProblemDetails.Instance = ctx.HttpContext.Request.Path;
+        ctx.ProblemDetails.Extensions[<span class="s">"traceId"</span>] =
+            Activity.Current?.Id ?? ctx.HttpContext.TraceIdentifier;
+    };
+});
+
+<span class="k">var</span> app = builder.Build();
+app.UseExceptionHandler();   <span class="c">// kích hoạt IExceptionHandler</span>
+app.UseStatusCodePages();    <span class="c">// 404/405... cũng trả problem+json</span></pre>
+
+    <pre class="cb"><span class="c">// IExceptionHandler (.NET 8+) — biến exception thành ProblemDetails</span>
+<span class="k">public sealed class</span> <span class="t">GlobalExceptionHandler</span>(IProblemDetailsService problemDetails)
+    : IExceptionHandler
+{
+    <span class="k">public async</span> ValueTask&lt;<span class="k">bool</span>&gt; <span class="n">TryHandleAsync</span>(
+        HttpContext http, Exception ex, CancellationToken ct)
+    {
+        <span class="k">var</span> (status, title) = ex <span class="k">switch</span>
+        {
+            NotFoundException        =&gt; (StatusCodes.Status404NotFound, <span class="s">"Không tìm thấy"</span>),
+            ValidationException      =&gt; (StatusCodes.Status422UnprocessableEntity, <span class="s">"Dữ liệu không hợp lệ"</span>),
+            ConcurrencyException     =&gt; (StatusCodes.Status409Conflict, <span class="s">"Xung đột phiên bản"</span>),
+            UnauthorizedAccessException =&gt; (StatusCodes.Status403Forbidden, <span class="s">"Không có quyền"</span>),
+            _                        =&gt; (StatusCodes.Status500InternalServerError, <span class="s">"Lỗi hệ thống"</span>)
+        };
+
+        http.Response.StatusCode = status;
+
+        <span class="k">return await</span> problemDetails.TryWriteAsync(<span class="k">new</span> ProblemDetailsContext
+        {
+            HttpContext = http,
+            Exception = ex,
+            ProblemDetails = <span class="k">new</span> ProblemDetails
+            {
+                Status = status,
+                Title = title,
+                <span class="c">// KHÔNG lộ ex.Message thô ở 500 trong production</span>
+                Detail = status == <span class="s">500</span> ? <span class="s">"Đã xảy ra lỗi không mong muốn."</span> : ex.Message
+            }
+        });
+    }
+}
+
+<span class="c">// Đăng ký</span>
+builder.Services.AddExceptionHandler&lt;<span class="t">GlobalExceptionHandler</span>&gt;();</pre>
+
+    <pre class="cb"><span class="c">// ValidationProblemDetails: gom nhiều lỗi field theo RFC 7807</span>
+<span class="k">if</span> (errors.Count &gt; <span class="s">0</span>)
+{
+    <span class="k">return</span> Results.ValidationProblem(
+        errors,                       <span class="c">// IDictionary&lt;string, string[]&gt;</span>
+        statusCode: StatusCodes.Status422UnprocessableEntity,
+        title: <span class="s">"Một hoặc nhiều trường không hợp lệ"</span>);
+}
+<span class="c">// =&gt; { "title": "...", "status": 422, "errors": { "email": ["..."] } }</span></pre>
+
+    <div class="callout info">
+        <strong>Tự động cho [ApiController]:</strong> controller gắn <code>[ApiController]</code> tự trả <code>ValidationProblemDetails</code> (400) khi model state không hợp lệ — không cần tự check <code>ModelState.IsValid</code>. Đây cũng là <code>application/problem+json</code>.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">7. HATEOAS — Liên kết trong response</h2>
+    <p class="ut-sub">HATEOAS (Hypermedia As The Engine Of Application State) là cấp cao nhất của mô hình Richardson Maturity. Ý tưởng: response không chỉ chứa dữ liệu mà còn chứa <strong>các link hành động tiếp theo</strong> client có thể thực hiện, để client không phải hardcode URL.</p>
+
+    <pre class="cb"><span class="c">// Response có HATEOAS links</span>
+{
+  <span class="a">"id"</span>: <span class="s">42</span>,
+  <span class="a">"status"</span>: <span class="s">"pending"</span>,
+  <span class="a">"total"</span>: <span class="s">250000</span>,
+  <span class="a">"_links"</span>: {
+    <span class="a">"self"</span>:   { <span class="a">"href"</span>: <span class="s">"/api/orders/42"</span>, <span class="a">"method"</span>: <span class="s">"GET"</span> },
+    <span class="a">"pay"</span>:    { <span class="a">"href"</span>: <span class="s">"/api/orders/42/payments"</span>, <span class="a">"method"</span>: <span class="s">"POST"</span> },
+    <span class="a">"cancel"</span>: { <span class="a">"href"</span>: <span class="s">"/api/orders/42"</span>, <span class="a">"method"</span>: <span class="s">"DELETE"</span> },
+    <span class="a">"items"</span>:  { <span class="a">"href"</span>: <span class="s">"/api/orders/42/items"</span>, <span class="a">"method"</span>: <span class="s">"GET"</span> }
+  }
+}</pre>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h4>✅ Khi nào đáng dùng</h4>
+            <ul>
+                <li>API public dài hạn, nhiều client đa dạng</li>
+                <li>Workflow phức tạp với nhiều trạng thái (link phụ thuộc state)</li>
+                <li>Muốn client tách rời (decouple) khỏi cấu trúc URL</li>
+            </ul>
+        </div>
+        <div class="ut-card">
+            <h4>🚫 Khi nào thường thừa</h4>
+            <ul>
+                <li>API nội bộ, client do chính team viết</li>
+                <li>Frontend SPA đơn giản, biết trước route</li>
+                <li>Đa số CRUD API thông thường — chi phí cao, lợi ích thấp</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="callout warn">
+        <strong>⚠️ Thực tế:</strong> HATEOAS đẹp về lý thuyết nhưng phần lớn API sản xuất <em>không</em> dùng đầy đủ vì client hiếm khi tự "khám phá" link động — họ vẫn đọc tài liệu. Đừng over-engineer. Nếu cần định dạng chuẩn, tham khảo HAL (<code>application/hal+json</code>) hoặc JSON:API.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">8. Best Practice cho Hợp đồng API (Contract)</h2>
+    <p class="ut-sub">Hợp đồng (contract) là lời hứa với client. Một khi đã public, phá vỡ contract là phá vỡ ứng dụng người khác. Dưới đây là các quy ước cần nhất quán.</p>
+
+    <div class="ut-grid ut-grid-3">
+        <div class="ut-card">
+            <h4>camelCase cho JSON</h4>
+            <p>Property JSON dùng camelCase (<code>createdAt</code>, không <code>CreatedAt</code>). System.Text.Json mặc định đã camelCase trong ASP.NET Core.</p>
+        </div>
+        <div class="ut-card">
+            <h4>Ngày giờ: ISO 8601 UTC</h4>
+            <p>Luôn <code>2026-06-15T08:30:00Z</code> (UTC, hậu tố <code>Z</code>). Không gửi giờ local mơ hồ. Client tự đổi sang giờ địa phương.</p>
+        </div>
+        <div class="ut-card">
+            <h4>Nhất quán số nhiều/đặt tên</h4>
+            <p>Collection luôn số nhiều. Trường boolean dạng <code>isActive</code>, <code>hasItems</code>. Tránh viết tắt khó hiểu.</p>
+        </div>
+    </div>
+
+    <pre class="cb"><span class="c">// Cấu hình JSON nhất quán toàn ứng dụng</span>
+builder.Services.ConfigureHttpJsonOptions(o =&gt;        <span class="c">// Minimal API</span>
+{
+    o.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    o.SerializerOptions.DefaultIgnoreCondition =
+        JsonIgnoreCondition.WhenWritingNull;          <span class="c">// bỏ null cho gọn</span>
+});
+
+<span class="c">// DTO dùng DateTimeOffset/DateTime UTC -&gt; serialize ra ISO 8601 "...Z"</span>
+<span class="k">public record</span> <span class="t">OrderDto</span>(
+    <span class="k">int</span> Id,
+    <span class="k">string</span> Status,
+    <span class="k">decimal</span> Total,
+    DateTimeOffset CreatedAt); <span class="c">// "2026-06-15T08:30:00+00:00"</span></pre>
+
+    <div class="callout danger">
+        <strong>⚠️ Không bao giờ phá vỡ contract:</strong> <strong>được phép</strong> thêm field mới (optional), thêm endpoint mới. <strong>KHÔNG được</strong> đổi tên/xoá field, đổi kiểu dữ liệu, đổi ngữ nghĩa của field cũ, đổi status code đã hứa. Những thay đổi phá vỡ phải đi qua một <em>version mới</em>.
+    </div>
+
+    <pre class="cb"><span class="c">// OpenAPI/Swagger — .NET 9 có built-in Microsoft.AspNetCore.OpenApi</span>
+builder.Services.AddOpenApi(); <span class="c">// .NET 9</span>
+<span class="c">// ...</span>
+app.MapOpenApi();              <span class="c">// /openapi/v1.json</span>
+
+<span class="c">// Mô tả response để contract rõ ràng trong tài liệu</span>
+orders.MapGet(<span class="s">"/{id:int}"</span>, GetOrderById)
+    .Produces&lt;<span class="t">OrderDto</span>&gt;(StatusCodes.Status200OK)
+    .Produces&lt;<span class="t">ProblemDetails</span>&gt;(StatusCodes.Status404NotFound)
+    .WithName(<span class="s">"GetOrderById"</span>)
+    .WithSummary(<span class="s">"Lấy chi tiết một đơn hàng theo Id"</span>);</pre>
+
+    <div class="callout tip">
+        <strong>💡 Nullability rõ ràng:</strong> tận dụng nullable reference types (<code>string?</code> vs <code>string</code>) trong DTO để OpenAPI sinh schema chính xác field nào optional. Client codegen sẽ phản ánh đúng — giảm bug "thiếu null check".
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">9. Do / Don't</h2>
+
+    <div class="do-dont dont">
+        <h4>❌ Động từ trong URL</h4>
+        <pre class="cb">POST /api/orders/42/markAsShipped
+GET  /api/getOrdersByUser?userId=7</pre>
+        <p>URL nên là danh từ. Dùng verb HTTP + sub-resource: <code>POST /api/orders/42/shipments</code>, <code>GET /api/users/7/orders</code>.</p>
+    </div>
+
+    <div class="do-dont dont">
+        <h4>❌ Luôn trả 200 OK kể cả khi lỗi</h4>
+        <pre class="cb">HTTP/1.1 <span class="t">200</span> OK
+{ <span class="a">"success"</span>: <span class="k">false</span>, <span class="a">"error"</span>: <span class="s">"Not found"</span> }</pre>
+        <p>Client/proxy/cache dựa vào status code. Trả đúng <code>404</code>/<code>422</code>/<code>500</code> với <code>problem+json</code>.</p>
+    </div>
+
+    <div class="do-dont dont">
+        <h4>❌ Trả entity DB thẳng ra ngoài</h4>
+        <pre class="cb"><span class="k">return</span> Ok(_db.Users.Find(id)); <span class="c">// lộ PasswordHash, navigation...</span></pre>
+        <p>Lộ field nhạy cảm, lộ schema, dễ over-posting. Luôn map sang DTO/record riêng cho response.</p>
+    </div>
+
+    <div class="do-dont dont">
+        <h4>❌ Trả collection không phân trang</h4>
+        <pre class="cb">GET /api/orders =&gt; trả về cả 2 triệu dòng</pre>
+        <p>Sập memory + chậm. Luôn phân trang với <code>pageSize</code> có giới hạn (clamp tối đa 100).</p>
+    </div>
+
+    <div class="do-dont do">
+        <h4>✅ Resource danh từ + verb đúng + status đúng</h4>
+        <pre class="cb">POST /api/orders        =&gt; <span class="t">201</span> + Location
+DELETE /api/orders/42   =&gt; <span class="t">204</span></pre>
+        <p>Ngữ nghĩa rõ ràng, dễ cache, dễ test, tương thích chuẩn HTTP.</p>
+    </div>
+
+    <div class="do-dont do">
+        <h4>✅ Lỗi chuẩn ProblemDetails + version hoá thay đổi phá vỡ</h4>
+        <pre class="cb">Content-Type: application/problem+json
+GET /api/v2/orders   <span class="c">// shape mới ở v2, v1 vẫn sống</span></pre>
+        <p>Client xử lý lỗi nhất quán; thay đổi breaking đi qua version mới, không đập client cũ.</p>
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">🎯 Checklist Thiết kế REST API</h2>
+    <div class="ut-card">
+        <ul>
+            <li>✅ URL là danh từ số nhiều (<code>/api/orders</code>), không có động từ</li>
+            <li>✅ Sub-resource lồng tối đa 2 cấp (<code>/orders/{id}/items</code>)</li>
+            <li>✅ Verb đúng ngữ nghĩa: GET đọc, POST tạo, PUT thay thế, PATCH sửa phần, DELETE xoá</li>
+            <li>✅ Status code đúng: 201+Location khi tạo, 204 khi xoá, 4xx/5xx khi lỗi</li>
+            <li>✅ POST không-idempotent có <code>Idempotency-Key</code> để retry an toàn</li>
+            <li>✅ Versioning bằng <code>Asp.Versioning</code> (URL <code>/v1/</code>), deprecation rõ ràng</li>
+            <li>✅ Mọi collection đều phân trang, có clamp <code>pageSize</code>, hỗ trợ filter &amp; sort</li>
+            <li>✅ Dataset lớn dùng keyset/cursor pagination thay vì offset</li>
+            <li>✅ Lỗi trả <code>ProblemDetails</code> (RFC 7807) qua <code>AddProblemDetails</code> + <code>IExceptionHandler</code></li>
+            <li>✅ JSON camelCase, ngày giờ ISO 8601 UTC, không lộ entity DB (dùng DTO)</li>
+            <li>✅ Không phá vỡ contract — thay đổi breaking đi qua version mới</li>
+            <li>✅ Có OpenAPI/Swagger, mô tả <code>.Produces</code> response cho từng endpoint</li>
+            <li>✅ HATEOAS chỉ dùng khi thực sự cần — đừng over-engineer</li>
+        </ul>
+    </div>
+</section>
+
+</div>
+
+<footer style="text-align:center;padding:3rem 1.5rem;color:var(--ut-muted);border-top:1px solid var(--ut-border);margin-top:3rem;font-size:.9rem;">
+    <p>REST API Design · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dependency Injection trong .NET 8/9 — A-Z</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --ut-primary: #512bd4;
+        --ut-primary-2: #8a2be2;
+        --ut-accent: #43e97b;
+        --ut-warn: #f39c12;
+        --ut-danger: #f5576c;
+        --ut-card: #1a1d2e;
+        --ut-card-2: #232640;
+        --ut-border: #2d3148;
+        --ut-text: #e2e8f0;
+        --ut-muted: #94a3b8;
+    }
+
+    .ut-hero {
+        text-align: center;
+        padding: 4rem 1.5rem 3rem;
+        background: radial-gradient(ellipse at top, rgba(81,43,212,.18), transparent 60%);
+    }
+    .ut-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 1rem; }
+    .ut-hero h1 .gradient {
+        background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .ut-hero .hero-badge {
+        display: inline-block;
+        background: rgba(81,43,212,.15);
+        color: var(--ut-primary-2);
+        padding: .4rem 1rem;
+        border-radius: 20px;
+        font-size: .78rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        margin-bottom: 1.25rem;
+    }
+    .ut-hero p { color: var(--ut-muted); max-width: 820px; margin: 0 auto; }
+
+    .ut-section { padding: 2.5rem 0; }
+    .ut-title {
+        font-size: 1.7rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        padding-left: 1rem;
+        color: var(--ut-text);
+    }
+    .ut-title::before {
+        content: '';
+        position: absolute;
+        left: 0; top: 6px; bottom: 6px;
+        width: 4px;
+        background: linear-gradient(180deg, var(--ut-primary), var(--ut-primary-2));
+        border-radius: 3px;
+    }
+    .ut-sub { color: var(--ut-muted); margin-bottom: 1.25rem; }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+
+    .ut-grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .ut-grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    .ut-grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+
+    .ut-card {
+        background: var(--ut-card);
+        border: 1px solid var(--ut-border);
+        border-radius: 12px;
+        padding: 1.4rem;
+    }
+    .ut-card h3 { color: var(--ut-primary-2); margin-bottom: .6rem; font-size: 1.1rem; }
+    .ut-card h4 { color: var(--ut-accent); margin-bottom: .45rem; font-size: .98rem; }
+    .ut-card p, .ut-card li { color: var(--ut-muted); font-size: .95rem; }
+    .ut-card ul { padding-left: 1.2rem; }
+    .ut-card ul li { margin-bottom: .3rem; }
+
+    pre.cb {
+        background: #0b1020;
+        border: 1px solid var(--ut-border);
+        border-left: 3px solid var(--ut-primary);
+        border-radius: 8px;
+        padding: 1rem 1.15rem;
+        overflow-x: auto;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+        font-size: .88rem;
+        line-height: 1.6;
+        margin: .75rem 0;
+        color: #d6deeb;
+    }
+    pre.cb .k { color: #c792ea; }
+    pre.cb .s { color: #ecc48d; }
+    pre.cb .c { color: #637777; font-style: italic; }
+    pre.cb .n { color: #82aaff; }
+    pre.cb .t { color: #ffcb8b; }
+    pre.cb .a { color: #7fdbca; }
+    code {
+        background: #2d3148;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: .88em;
+        color: #f8d06b;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+    }
+
+    .callout {
+        border-radius: 10px;
+        padding: .95rem 1.15rem;
+        margin: 1rem 0;
+        border: 1px solid;
+    }
+    .callout.tip { background: rgba(67,233,123,.07); border-color: var(--ut-accent); }
+    .callout.tip strong { color: var(--ut-accent); }
+    .callout.warn { background: rgba(243,156,18,.07); border-color: var(--ut-warn); }
+    .callout.warn strong { color: var(--ut-warn); }
+    .callout.danger { background: rgba(245,87,108,.07); border-color: var(--ut-danger); }
+    .callout.danger strong { color: var(--ut-danger); }
+    .callout.info { background: rgba(81,43,212,.08); border-color: var(--ut-primary-2); }
+    .callout.info strong { color: var(--ut-primary-2); }
+
+    table.cmp { width: 100%; border-collapse: collapse; background: var(--ut-card); border-radius: 10px; overflow: hidden; margin: 1rem 0; font-size: .92rem; }
+    table.cmp th, table.cmp td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--ut-border); }
+    table.cmp th { background: var(--ut-card-2); color: var(--ut-primary-2); font-weight: 600; }
+    table.cmp td { color: var(--ut-muted); }
+    table.cmp tr:last-child td { border-bottom: none; }
+
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; position: relative; padding-left: 2.8rem; margin-bottom: 1rem; }
+    .steps li::before {
+        content: counter(step);
+        position: absolute; left: 0; top: 0;
+        width: 2rem; height: 2rem;
+        background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2));
+        color: #fff;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700;
+    }
+
+    .do-dont { border-left: 3px solid; padding: 1rem 1.15rem; border-radius: 8px; margin-bottom: 1rem; }
+    .do-dont.do { border-color: var(--ut-accent); background: rgba(67,233,123,.04); }
+    .do-dont.dont { border-color: var(--ut-danger); background: rgba(245,87,108,.04); }
+    .do-dont h4 { margin-bottom: .5rem; }
+    .do-dont.do h4 { color: var(--ut-accent); }
+    .do-dont.dont h4 { color: var(--ut-danger); }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo"><a href="index.html" style="color:inherit;-webkit-text-fill-color:inherit;">.NET<span class="accent">Mastery</span></a></div>
+        <div class="nav-links">
+            <a href="index.html">Roadmap</a>
+            <a href="csharp-basics.html">C# Basics</a>
+            <a href="oop.html">OOP</a>
+            <a href="linq.html">LINQ</a>
+            <a href="sql-basics.html">SQL</a>
+            <a href="webapi-first.html">Web API</a>
+            <a href="efcore.html">EF Core</a>
+            <a href="di.html" class="nav-active">DI</a>
+        </div>
+        <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+</nav>
+
+<header class="ut-hero">
+    <div class="hero-badge">CƠ BẢN · FOUNDATION</div>
+    <h1>Hiểu sâu <span class="gradient">Dependency Injection</span> trong .NET</h1>
+    <p>Dependency Injection (DI) là xương sống của mọi ứng dụng ASP.NET Core hiện đại. Bài này đi từ "tại sao cần DI", 3 lifetime (Singleton/Scoped/Transient), cách đăng ký service, thiết kế theo interface, đến cái bẫy captive dependency nguy hiểm nhất. Code mẫu chuẩn .NET 8/9 (2026).</p>
+</header>
+
+<div class="container">
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">1. Dependency Injection là gì &amp; tại sao cần?</h2>
+    <p class="ut-sub">DI là một dạng triển khai của nguyên tắc <strong>Inversion of Control (IoC)</strong>: thay vì class tự tạo dependency của mình bằng <code>new</code>, nó <em>nhận</em> dependency từ bên ngoài (thường qua constructor).</p>
+
+    <div class="ut-grid ut-grid-3">
+        <div class="ut-card">
+            <h4>🔄 Inversion of Control</h4>
+            <p>Quyền "quyết định dùng implementation nào" được đảo ngược — không nằm trong class mà nằm ở composition root (nơi đăng ký service).</p>
+        </div>
+        <div class="ut-card">
+            <h4>🔗 Loose Coupling</h4>
+            <p>Class chỉ phụ thuộc vào <em>abstraction</em> (interface), không phụ thuộc vào class cụ thể. Đổi implementation không cần sửa class dùng nó.</p>
+        </div>
+        <div class="ut-card">
+            <h4>🧪 Testability</h4>
+            <p>Vì dependency được inject vào, ta dễ dàng thay bằng mock/fake khi viết unit test — không phải đụng tới hạ tầng thật (DB, HTTP, email...).</p>
+        </div>
+    </div>
+
+    <div class="callout info">
+        <strong>Định nghĩa ngắn gọn:</strong> DI = "đừng tự đi tìm thứ bạn cần, hãy để nó được trao cho bạn". .NET có sẵn một <em>IoC Container</em> (gọi là <code>IServiceProvider</code>) lo việc tạo và trao dependency theo cấu hình bạn khai báo.
+    </div>
+
+    <h3 style="margin-top:1.5rem; color:var(--ut-primary-2)">So sánh: tự new vs được inject</h3>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont dont">
+            <h4>❌ Tight coupling — tự new dependency</h4>
+            <pre class="cb"><span class="k">public class</span> <span class="t">OrderService</span>
+{
+    <span class="k">private readonly</span> <span class="t">SmtpEmailSender</span> _email;
+    <span class="k">private readonly</span> <span class="t">SqlOrderRepository</span> _repo;
+
+    <span class="k">public</span> <span class="n">OrderService</span>()
+    {
+        <span class="c">// Tự tạo — phụ thuộc cứng vào class cụ thể</span>
+        _email = <span class="k">new</span> <span class="t">SmtpEmailSender</span>(<span class="s">"smtp.gmail.com"</span>, <span class="s">587</span>);
+        _repo  = <span class="k">new</span> <span class="t">SqlOrderRepository</span>(<span class="s">"Server=...;Db=prod"</span>);
+    }
+
+    <span class="k">public async</span> Task <span class="n">PlaceAsync</span>(<span class="t">Order</span> o)
+    {
+        <span class="k">await</span> _repo.SaveAsync(o);
+        <span class="k">await</span> _email.SendAsync(o.Email, <span class="s">"Đặt hàng OK"</span>);
+    }
+}</pre>
+            <p style="color:var(--ut-danger)">Không test được: muốn unit test phải gửi email thật + connect SQL thật. Đổi sang SendGrid? Phải sửa code <code>OrderService</code>.</p>
+        </div>
+
+        <div class="do-dont do">
+            <h4>✅ Loose coupling — inject abstraction</h4>
+            <pre class="cb"><span class="k">public class</span> <span class="t">OrderService</span>
+{
+    <span class="k">private readonly</span> <span class="t">IEmailSender</span> _email;
+    <span class="k">private readonly</span> <span class="t">IOrderRepository</span> _repo;
+
+    <span class="c">// Dependency được trao qua constructor</span>
+    <span class="k">public</span> <span class="n">OrderService</span>(<span class="t">IEmailSender</span> email, <span class="t">IOrderRepository</span> repo)
+    {
+        _email = email;
+        _repo  = repo;
+    }
+
+    <span class="k">public async</span> Task <span class="n">PlaceAsync</span>(<span class="t">Order</span> o)
+    {
+        <span class="k">await</span> _repo.SaveAsync(o);
+        <span class="k">await</span> _email.SendAsync(o.Email, <span class="s">"Đặt hàng OK"</span>);
+    }
+}</pre>
+            <p style="color:var(--ut-accent)">Test: inject <code>Mock&lt;IEmailSender&gt;</code> + <code>Mock&lt;IOrderRepository&gt;</code>. Đổi sang SendGrid? Chỉ đăng ký implementation khác — không đụng <code>OrderService</code>.</p>
+        </div>
+    </div>
+
+    <div class="callout tip">
+        <strong>💡 Dependency Inversion Principle (chữ "D" trong SOLID):</strong> module cấp cao không nên phụ thuộc module cấp thấp — cả hai nên phụ thuộc vào abstraction. DI là công cụ giúp bạn thực thi nguyên tắc này một cách tự nhiên.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">2. Container DI built-in của .NET</h2>
+    <p class="ut-sub">Từ .NET Core trở đi, framework có sẵn một IoC container nhẹ. Bạn cấu hình nó qua <code>builder.Services</code> (kiểu <code>IServiceCollection</code>) ở <code>Program.cs</code>.</p>
+
+    <pre class="cb"><span class="c">// Program.cs (.NET 8/9 — top-level statements)</span>
+<span class="k">var</span> builder = WebApplication.CreateBuilder(args);
+
+<span class="c">// 1. Đăng ký service vào container</span>
+builder.Services.AddScoped&lt;<span class="t">IOrderRepository</span>, <span class="t">SqlOrderRepository</span>&gt;();
+builder.Services.AddSingleton&lt;<span class="t">IEmailSender</span>, <span class="t">SmtpEmailSender</span>&gt;();
+builder.Services.AddTransient&lt;<span class="t">IOrderService</span>, <span class="t">OrderService</span>&gt;();
+
+builder.Services.AddControllers();
+
+<span class="k">var</span> app = builder.Build();   <span class="c">// container được "đóng băng" tại đây</span>
+
+app.MapControllers();
+app.Run();</pre>
+
+    <ol class="steps">
+        <li><strong>Đăng ký (register)</strong> — khai báo "khi ai cần <code>IFoo</code>, hãy đưa cho họ <code>Foo</code>", kèm lifetime.</li>
+        <li><strong>Resolve</strong> — framework tự tạo object và truyền dependency vào (qua constructor) khi cần. Bạn hiếm khi gọi tay.</li>
+        <li><strong>Dispose</strong> — container tự gọi <code>Dispose()</code> cho service <code>IDisposable</code> đúng thời điểm theo lifetime của nó.</li>
+    </ol>
+
+    <div class="callout warn">
+        <strong>⚠️ Composition Root:</strong> mọi đăng ký nên tập trung ở <code>Program.cs</code> (hoặc các extension method <code>AddXxx()</code>). Đừng rải <code>provider.GetService()</code> khắp nơi — đó là anti-pattern <em>Service Locator</em>, làm mất hết lợi ích của DI.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">3. Ba Lifetime: Singleton · Scoped · Transient</h2>
+    <p class="ut-sub">Khi đăng ký, bạn chọn <em>vòng đời</em> (lifetime) — quyết định container tái sử dụng instance hay tạo mới. Đây là phần dễ sai nhất, hiểu kỹ sẽ tránh được rất nhiều bug.</p>
+
+    <table class="cmp">
+        <thead>
+            <tr>
+                <th>Lifetime</th>
+                <th>Một instance cho mỗi...</th>
+                <th>Dùng khi</th>
+                <th>Nguy hiểm</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Singleton</strong></td>
+                <td>Toàn bộ vòng đời ứng dụng (1 instance duy nhất)</td>
+                <td>Service không state / state chia sẻ an toàn: cache, config, logger, <code>HttpClient</code> factory</td>
+                <td>Phải <strong>thread-safe</strong>. Không được giữ Scoped/Transient (captive dependency)</td>
+            </tr>
+            <tr>
+                <td><strong>Scoped</strong></td>
+                <td>Mỗi HTTP request (mỗi scope)</td>
+                <td>Phổ biến nhất cho web: <code>DbContext</code>, Unit of Work, repository, service per-request</td>
+                <td>Không inject vào Singleton. Không dùng ở <code>BackgroundService</code> nếu không tạo scope thủ công</td>
+            </tr>
+            <tr>
+                <td><strong>Transient</strong></td>
+                <td>Mỗi lần được resolve (luôn tạo mới)</td>
+                <td>Service nhẹ, stateless, không cần chia sẻ: validator, mapper, formatter</td>
+                <td>Nếu nắm tài nguyên nặng → tốn bộ nhớ. Vẫn bị "captured" nếu nhét vào Singleton</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="callout info">
+        <strong>Quy tắc vàng về cấp bậc lifetime:</strong> service được inject vào phải có lifetime <em>bằng hoặc dài hơn</em> service chứa nó. Singleton chỉ được giữ Singleton. Scoped được giữ Scoped + Singleton. Transient được giữ tất cả.
+    </div>
+
+    <h3 style="margin-top:1.5rem; color:var(--ut-primary-2)">Service demo — đếm số &amp; sinh GUID</h3>
+    <p class="ut-sub">Để "nhìn thấy" sự khác nhau giữa 3 lifetime, ta tạo một service lưu một <code>Guid</code> cố định lúc khởi tạo. Cùng một instance → cùng Guid.</p>
+
+    <pre class="cb"><span class="c">// IOperation: mỗi instance có 1 Guid sinh lúc constructor chạy</span>
+<span class="k">public interface</span> <span class="t">IOperation</span>
+{
+    Guid OperationId { <span class="k">get</span>; }
+}
+
+<span class="k">public class</span> <span class="t">Operation</span> : <span class="t">IOperation</span>
+{
+    <span class="k">public</span> <span class="n">Operation</span>() =&gt; OperationId = Guid.NewGuid();
+    <span class="k">public</span> Guid OperationId { <span class="k">get</span>; }
+}
+
+<span class="c">// 3 interface kế thừa để đăng ký 3 lifetime khác nhau cùng 1 class</span>
+<span class="k">public interface</span> <span class="t">ISingletonOp</span> : <span class="t">IOperation</span> { }
+<span class="k">public interface</span> <span class="t">IScopedOp</span>    : <span class="t">IOperation</span> { }
+<span class="k">public interface</span> <span class="t">ITransientOp</span> : <span class="t">IOperation</span> { }
+
+<span class="k">public class</span> <span class="t">Operation</span> : <span class="t">ISingletonOp</span>, <span class="t">IScopedOp</span>, <span class="t">ITransientOp</span>
+{
+    <span class="k">public</span> <span class="n">Operation</span>() =&gt; OperationId = Guid.NewGuid();
+    <span class="k">public</span> Guid OperationId { <span class="k">get</span>; }
+}</pre>
+
+    <pre class="cb"><span class="c">// Đăng ký mỗi interface một lifetime khác nhau</span>
+builder.Services.AddSingleton&lt;<span class="t">ISingletonOp</span>, <span class="t">Operation</span>&gt;();
+builder.Services.AddScoped&lt;<span class="t">IScopedOp</span>, <span class="t">Operation</span>&gt;();
+builder.Services.AddTransient&lt;<span class="t">ITransientOp</span>, <span class="t">Operation</span>&gt;();</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Endpoint in ra Guid để quan sát</h3>
+    <pre class="cb">app.MapGet(<span class="s">"/ops"</span>, (
+    <span class="t">ISingletonOp</span> s1, <span class="t">ISingletonOp</span> s2,
+    <span class="t">IScopedOp</span>    sc1, <span class="t">IScopedOp</span>    sc2,
+    <span class="t">ITransientOp</span> t1, <span class="t">ITransientOp</span> t2) =&gt; <span class="k">new</span>
+{
+    Singleton1 = s1.OperationId,
+    Singleton2 = s2.OperationId,   <span class="c">// == Singleton1 (mọi request)</span>
+    Scoped1    = sc1.OperationId,
+    Scoped2    = sc2.OperationId,  <span class="c">// == Scoped1 (trong 1 request)</span>
+    Transient1 = t1.OperationId,
+    Transient2 = t2.OperationId    <span class="c">// != Transient1 (luôn khác)</span>
+});</pre>
+
+    <h3 style="margin-top:1.5rem; color:var(--ut-primary-2)">Kết quả qua 2 request liên tiếp</h3>
+    <table class="cmp">
+        <thead>
+            <tr>
+                <th>Biến</th>
+                <th>Request #1</th>
+                <th>Request #2</th>
+                <th>Nhận xét</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Singleton1 / Singleton2</td>
+                <td><code>AAA</code> / <code>AAA</code></td>
+                <td><code>AAA</code> / <code>AAA</code></td>
+                <td>Giống nhau ở cả 2 request — 1 instance toàn app</td>
+            </tr>
+            <tr>
+                <td>Scoped1 / Scoped2</td>
+                <td><code>BBB</code> / <code>BBB</code></td>
+                <td><code>CCC</code> / <code>CCC</code></td>
+                <td>Giống nhau trong 1 request, đổi giữa các request</td>
+            </tr>
+            <tr>
+                <td>Transient1 / Transient2</td>
+                <td><code>DDD</code> / <code>EEE</code></td>
+                <td><code>FFF</code> / <code>GGG</code></td>
+                <td>Luôn khác nhau — mỗi lần resolve tạo mới</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3 style="margin-top:1.5rem; color:var(--ut-primary-2)">Ví dụ thực tế: counter Singleton dùng chung</h3>
+    <pre class="cb"><span class="c">// Đếm tổng số request — phải thread-safe vì Singleton chia sẻ giữa nhiều thread</span>
+<span class="k">public interface</span> <span class="t">IRequestCounter</span>
+{
+    <span class="k">long</span> Increment();
+}
+
+<span class="k">public class</span> <span class="t">RequestCounter</span> : <span class="t">IRequestCounter</span>
+{
+    <span class="k">private long</span> _count;
+    <span class="c">// Interlocked đảm bảo an toàn khi nhiều request chạy song song</span>
+    <span class="k">public long</span> <span class="n">Increment</span>() =&gt; Interlocked.Increment(<span class="k">ref</span> _count);
+}
+
+<span class="c">// Đăng ký Singleton vì cần đếm chung cho cả app</span>
+builder.Services.AddSingleton&lt;<span class="t">IRequestCounter</span>, <span class="t">RequestCounter</span>&gt;();
+
+app.MapGet(<span class="s">"/count"</span>, (<span class="t">IRequestCounter</span> c) =&gt; <span class="k">new</span> { Total = c.Increment() });
+<span class="c">// /count gọi 3 lần → 1, 2, 3 (state được giữ vì cùng 1 instance)</span></pre>
+
+    <div class="callout danger">
+        <strong>🚫 Singleton phải thread-safe:</strong> vì nhiều request (nhiều thread) cùng dùng chung 1 instance, mọi state mutable phải bảo vệ bằng <code>lock</code>, <code>Interlocked</code>, hoặc dùng cấu trúc <code>Concurrent*</code>. Một <code>List&lt;T&gt;</code> thường trong Singleton = bug khó tái hiện.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">4. Constructor Injection (và 2 dạng còn lại)</h2>
+    <p class="ut-sub">.NET DI container chỉ hỗ trợ <strong>constructor injection</strong> một cách native. Đây cũng là dạng được khuyên dùng tuyệt đại đa số trường hợp.</p>
+
+    <pre class="cb"><span class="k">public class</span> <span class="t">InvoiceService</span>
+{
+    <span class="k">private readonly</span> <span class="t">IOrderRepository</span> _repo;
+    <span class="k">private readonly</span> <span class="t">ILogger</span>&lt;<span class="t">InvoiceService</span>&gt; _logger;
+
+    <span class="c">// Container tự nhìn constructor và truyền đủ dependency vào</span>
+    <span class="k">public</span> <span class="n">InvoiceService</span>(<span class="t">IOrderRepository</span> repo, <span class="t">ILogger</span>&lt;<span class="t">InvoiceService</span>&gt; logger)
+    {
+        _repo = repo;
+        _logger = logger;
+    }
+}
+
+<span class="c">// .NET 8/9 — primary constructor gọn hơn</span>
+<span class="k">public class</span> <span class="t">InvoiceService</span>(<span class="t">IOrderRepository</span> repo, <span class="t">ILogger</span>&lt;<span class="t">InvoiceService</span>&gt; logger)
+{
+    <span class="k">public async</span> Task <span class="n">RunAsync</span>()
+    {
+        logger.LogInformation(<span class="s">"Bắt đầu tạo hoá đơn"</span>);
+        <span class="k">var</span> orders = <span class="k">await</span> repo.GetPendingAsync();
+        <span class="c">// ...</span>
+    }
+}</pre>
+
+    <table class="cmp">
+        <thead>
+            <tr>
+                <th>Dạng injection</th>
+                <th>Cách dùng</th>
+                <th>Nên dùng?</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Constructor</strong></td>
+                <td>Truyền dependency qua tham số constructor</td>
+                <td>✅ Mặc định. Dependency bắt buộc, immutable (<code>readonly</code>), rõ ràng</td>
+            </tr>
+            <tr>
+                <td><strong>Method</strong></td>
+                <td>Truyền vào tham số method (vd handler Minimal API, <code>[FromServices]</code>)</td>
+                <td>⚠️ Chỉ cho dependency dùng 1 chỗ, hoặc trong action/endpoint</td>
+            </tr>
+            <tr>
+                <td><strong>Property</strong></td>
+                <td>Gán qua public property (không native — cần thư viện bên thứ 3)</td>
+                <td>❌ Tránh. Dependency "ẩn", dễ <code>NullReferenceException</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <pre class="cb"><span class="c">// Method injection trong controller action bằng [FromServices]</span>
+[<span class="a">HttpGet</span>(<span class="s">"export"</span>)]
+<span class="k">public</span> <span class="t">IActionResult</span> <span class="n">Export</span>([<span class="a">FromServices</span>] <span class="t">IPdfExporter</span> exporter)
+{
+    <span class="c">// exporter chỉ cần ở action này → không nhét vào constructor</span>
+    <span class="k">return</span> File(exporter.Render(), <span class="s">"application/pdf"</span>);
+}</pre>
+
+    <div class="callout tip">
+        <strong>💡 Vì sao ưu tiên constructor injection?</strong> Dependency hiện rõ ngay ở chữ ký constructor (không "ẩn"), có thể đánh <code>readonly</code> nên không bị đổi sau khi tạo, và nếu thiếu đăng ký thì lỗi nổ ngay lúc resolve thay vì âm thầm null. Constructor "phình to" nhiều tham số là dấu hiệu class vi phạm Single Responsibility — nên tách nhỏ.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">5. Các cách đăng ký Service</h2>
+    <p class="ut-sub">Ngoài <code>Add{Lifetime}&lt;IFoo, Foo&gt;()</code> cơ bản, container .NET hỗ trợ nhiều kiểu đăng ký linh hoạt.</p>
+
+    <h3 style="color:var(--ut-primary-2)">5.1 Cú pháp cơ bản</h3>
+    <pre class="cb"><span class="c">// Map interface → implementation</span>
+builder.Services.AddSingleton&lt;<span class="t">IClock</span>, <span class="t">SystemClock</span>&gt;();
+builder.Services.AddScoped&lt;<span class="t">IOrderRepository</span>, <span class="t">SqlOrderRepository</span>&gt;();
+builder.Services.AddTransient&lt;<span class="t">IGuidFactory</span>, <span class="t">GuidFactory</span>&gt;();
+
+<span class="c">// Đăng ký concrete type không có interface</span>
+builder.Services.AddScoped&lt;<span class="t">PricingCalculator</span>&gt;();
+
+<span class="c">// Đăng ký một instance có sẵn (luôn là Singleton)</span>
+builder.Services.AddSingleton&lt;<span class="t">IAppConfig</span>&gt;(<span class="k">new</span> <span class="t">AppConfig</span> { Region = <span class="s">"vn"</span> });</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">5.2 Factory registration (lambda)</h3>
+    <p class="ut-sub">Khi việc tạo object cần logic, hoặc cần lấy service khác từ provider để build.</p>
+    <pre class="cb">builder.Services.AddScoped&lt;<span class="t">IPaymentGateway</span>&gt;(sp =&gt;
+{
+    <span class="c">// Lấy dependency khác từ IServiceProvider (sp)</span>
+    <span class="k">var</span> cfg = sp.GetRequiredService&lt;<span class="t">IOptions</span>&lt;<span class="t">PayConfig</span>&gt;&gt;().Value;
+    <span class="k">var</span> http = sp.GetRequiredService&lt;<span class="t">IHttpClientFactory</span>&gt;();
+
+    <span class="k">return</span> cfg.Provider <span class="k">switch</span>
+    {
+        <span class="s">"stripe"</span> =&gt; <span class="k">new</span> <span class="t">StripeGateway</span>(http, cfg.ApiKey),
+        <span class="s">"vnpay"</span>  =&gt; <span class="k">new</span> <span class="t">VnpayGateway</span>(http, cfg.ApiKey),
+        _        =&gt; <span class="k">throw new</span> <span class="t">InvalidOperationException</span>(<span class="s">"Unknown gateway"</span>)
+    };
+});</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">5.3 TryAdd — chỉ thêm nếu chưa có</h3>
+    <p class="ut-sub">Hữu ích khi viết thư viện: cho phép người dùng override implementation của bạn bằng cách đăng ký trước.</p>
+    <pre class="cb"><span class="k">using</span> Microsoft.Extensions.DependencyInjection.Extensions;
+
+<span class="c">// Chỉ đăng ký nếu IClock chưa được đăng ký trước đó</span>
+services.TryAddSingleton&lt;<span class="t">IClock</span>, <span class="t">SystemClock</span>&gt;();
+
+<span class="c">// AddX thường thì SẼ thêm bản trùng — resolve IFoo lấy bản CUỐI cùng</span>
+services.AddSingleton&lt;<span class="t">IClock</span>, <span class="t">SystemClock</span>&gt;();
+services.AddSingleton&lt;<span class="t">IClock</span>, <span class="t">FakeClock</span>&gt;();
+<span class="c">// GetRequiredService&lt;IClock&gt;() → trả về FakeClock</span></pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">5.4 Nhiều implementation + IEnumerable&lt;T&gt;</h3>
+    <p class="ut-sub">Đăng ký nhiều bản cho cùng interface → inject <code>IEnumerable&lt;T&gt;</code> để lấy tất cả. Pattern hữu ích cho validator chain, notification channels.</p>
+    <pre class="cb">builder.Services.AddScoped&lt;<span class="t">INotifier</span>, <span class="t">EmailNotifier</span>&gt;();
+builder.Services.AddScoped&lt;<span class="t">INotifier</span>, <span class="t">SmsNotifier</span>&gt;();
+builder.Services.AddScoped&lt;<span class="t">INotifier</span>, <span class="t">PushNotifier</span>&gt;();
+
+<span class="k">public class</span> <span class="t">NotificationService</span>(<span class="t">IEnumerable</span>&lt;<span class="t">INotifier</span>&gt; notifiers)
+{
+    <span class="k">public async</span> Task <span class="n">NotifyAllAsync</span>(<span class="k">string</span> msg)
+    {
+        <span class="c">// Lặp qua TẤT CẢ implementation đã đăng ký</span>
+        <span class="k">foreach</span> (<span class="k">var</span> n <span class="k">in</span> notifiers)
+            <span class="k">await</span> n.SendAsync(msg);
+    }
+}</pre>
+
+    <div class="callout warn">
+        <strong>⚠️ <code>TryAddEnumerable</code>:</strong> nếu dùng <code>TryAdd</code> với nhiều implementation, nó coi cùng service type là "đã có" và bỏ qua. Khi muốn thêm nhiều bản mà không trùng lặp chính xác, dùng <code>services.TryAddEnumerable(ServiceDescriptor.Scoped&lt;INotifier, SmsNotifier&gt;())</code>.
+    </div>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">5.5 Keyed Services (.NET 8+)</h3>
+    <p class="ut-sub">Từ .NET 8, có thể đăng ký nhiều implementation gắn <em>key</em> và chọn đúng bản theo key khi resolve.</p>
+    <pre class="cb"><span class="c">// Đăng ký theo key</span>
+builder.Services.AddKeyedScoped&lt;<span class="t">INotifier</span>, <span class="t">EmailNotifier</span>&gt;(<span class="s">"email"</span>);
+builder.Services.AddKeyedScoped&lt;<span class="t">INotifier</span>, <span class="t">SmsNotifier</span>&gt;(<span class="s">"sms"</span>);
+
+<span class="c">// Inject bằng [FromKeyedServices]</span>
+<span class="k">public class</span> <span class="t">AlertService</span>(
+    [<span class="a">FromKeyedServices</span>(<span class="s">"sms"</span>)] <span class="t">INotifier</span> sms,
+    [<span class="a">FromKeyedServices</span>(<span class="s">"email"</span>)] <span class="t">INotifier</span> email)
+{
+    <span class="k">public</span> <span class="t">INotifier</span> Sms { <span class="k">get</span>; } = sms;
+    <span class="k">public</span> <span class="t">INotifier</span> Email { <span class="k">get</span>; } = email;
+}
+
+<span class="c">// Hoặc lấy trực tiếp từ provider</span>
+<span class="k">var</span> sms = sp.GetRequiredKeyedService&lt;<span class="t">INotifier</span>&gt;(<span class="s">"sms"</span>);</pre>
+
+    <div class="callout info">
+        <strong>Keyed vs IEnumerable:</strong> dùng <code>IEnumerable&lt;T&gt;</code> khi cần chạy <em>tất cả</em> implementation; dùng <strong>keyed</strong> khi cần chọn <em>đúng một</em> implementation theo điều kiện (vd theo tenant, theo config).
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">6. Thiết kế hướng Interface (Program to Abstraction)</h2>
+    <p class="ut-sub">DI phát huy sức mạnh khi class phụ thuộc vào <em>interface</em> chứ không phải class cụ thể. Đây là nền tảng cho việc test và thay thế implementation.</p>
+
+    <pre class="cb"><span class="c">// Abstraction — định nghĩa "cần gì", không nói "làm thế nào"</span>
+<span class="k">public interface</span> <span class="t">IAppLogger</span>
+{
+    <span class="k">void</span> <span class="n">Info</span>(<span class="k">string</span> message);
+    <span class="k">void</span> <span class="n">Error</span>(<span class="k">string</span> message, <span class="t">Exception</span>? ex = <span class="k">null</span>);
+}
+
+<span class="c">// Implementation cho production — ghi ra console/file</span>
+<span class="k">public class</span> <span class="t">ConsoleAppLogger</span> : <span class="t">IAppLogger</span>
+{
+    <span class="k">public void</span> <span class="n">Info</span>(<span class="k">string</span> m)  =&gt; Console.WriteLine(<span class="s">$"[INFO]  {m}"</span>);
+    <span class="k">public void</span> <span class="n">Error</span>(<span class="k">string</span> m, <span class="t">Exception</span>? ex = <span class="k">null</span>)
+        =&gt; Console.Error.WriteLine(<span class="s">$"[ERROR] {m} {ex}"</span>);
+}
+
+<span class="c">// Implementation cho test — chỉ lưu vào list để assert</span>
+<span class="k">public class</span> <span class="t">FakeAppLogger</span> : <span class="t">IAppLogger</span>
+{
+    <span class="k">public</span> List&lt;<span class="k">string</span>&gt; Messages { <span class="k">get</span>; } = <span class="k">new</span>();
+    <span class="k">public void</span> <span class="n">Info</span>(<span class="k">string</span> m)  =&gt; Messages.Add(<span class="s">$"INFO:{m}"</span>);
+    <span class="k">public void</span> <span class="n">Error</span>(<span class="k">string</span> m, <span class="t">Exception</span>? ex = <span class="k">null</span>) =&gt; Messages.Add(<span class="s">$"ERROR:{m}"</span>);
+}</pre>
+
+    <pre class="cb"><span class="c">// Class chỉ phụ thuộc IAppLogger — không biết Console hay Fake</span>
+<span class="k">public class</span> <span class="t">CheckoutService</span>(<span class="t">IAppLogger</span> log)
+{
+    <span class="k">public</span> <span class="k">bool</span> <span class="n">Checkout</span>(<span class="t">Cart</span> cart)
+    {
+        <span class="k">if</span> (cart.IsEmpty)
+        {
+            log.Error(<span class="s">"Giỏ hàng rỗng"</span>);
+            <span class="k">return</span> <span class="k">false</span>;
+        }
+        log.Info(<span class="s">$"Checkout {cart.Items.Count} sản phẩm"</span>);
+        <span class="k">return</span> <span class="k">true</span>;
+    }
+}</pre>
+
+    <pre class="cb"><span class="c">// Unit test — inject FakeAppLogger để assert log đã được gọi</span>
+[<span class="a">Fact</span>]
+<span class="k">public void</span> <span class="n">Checkout_EmptyCart_LogsError</span>()
+{
+    <span class="k">var</span> fakeLog = <span class="k">new</span> <span class="t">FakeAppLogger</span>();
+    <span class="k">var</span> sut = <span class="k">new</span> <span class="t">CheckoutService</span>(fakeLog);
+
+    <span class="k">var</span> ok = sut.Checkout(<span class="k">new</span> <span class="t">Cart</span>());   <span class="c">// giỏ rỗng</span>
+
+    ok.Should().BeFalse();
+    fakeLog.Messages.Should().Contain(<span class="s">"ERROR:Giỏ hàng rỗng"</span>);
+}</pre>
+
+    <div class="callout tip">
+        <strong>💡 Lợi ích của interface:</strong> (1) <strong>Test</strong> — thay bằng fake/mock dễ dàng; (2) <strong>Swap</strong> — đổi SQL → Mongo, SMTP → SendGrid chỉ bằng đổi đăng ký; (3) <strong>Decorator</strong> — bọc thêm logging/caching/retry quanh implementation gốc mà không sửa nó.
+    </div>
+
+    <div class="callout warn">
+        <strong>⚠️ Đừng lạm dụng interface:</strong> không phải class nào cũng cần interface. Nếu chỉ có 1 implementation và không bao giờ mock (vd DTO, value object, model), tạo interface chỉ thêm rác. Tạo abstraction khi thực sự cần test/swap.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">7. ⚠️ Captive Dependency — cái bẫy chết người</h2>
+    <p class="ut-sub">Đây là lỗi DI phổ biến và nguy hiểm nhất: khi một service <strong>lifetime dài</strong> (Singleton) giữ tham chiếu tới service <strong>lifetime ngắn</strong> (Scoped/Transient). Service ngắn bị "bắt giữ" (captured) suốt vòng đời của service dài.</p>
+
+    <div class="callout danger">
+        <strong>🚫 Hậu quả:</strong> một <code>DbContext</code> (Scoped) bị Singleton giữ → nó sống mãi mãi → không bao giờ được dispose đúng cách, ôm connection, tích luỹ change tracker, và <strong>không thread-safe</strong> nên crash khi nhiều request dùng song song. Dữ liệu stale, lỗi "A second operation started on this context...".
+    </div>
+
+    <div class="do-dont dont">
+        <h4>❌ Singleton giữ Scoped (captive dependency)</h4>
+        <pre class="cb"><span class="c">// CacheWarmer được đăng ký SINGLETON</span>
+<span class="k">public class</span> <span class="t">CacheWarmer</span>
+{
+    <span class="k">private readonly</span> <span class="t">AppDbContext</span> _db;  <span class="c">// Scoped! bị bắt giữ</span>
+
+    <span class="c">// DbContext (Scoped) bị inject vào Singleton → captured</span>
+    <span class="k">public</span> <span class="n">CacheWarmer</span>(<span class="t">AppDbContext</span> db) =&gt; _db = db;
+
+    <span class="k">public async</span> Task <span class="n">WarmAsync</span>()
+    {
+        <span class="c">// _db này là instance từ request ĐẦU TIÊN, dùng mãi mãi</span>
+        <span class="k">var</span> products = <span class="k">await</span> _db.Products.ToListAsync();
+        <span class="c">// → stale data + crash khi nhiều thread dùng cùng _db</span>
+    }
+}
+
+builder.Services.AddSingleton&lt;<span class="t">CacheWarmer</span>&gt;();   <span class="c">// 💥</span>
+builder.Services.AddDbContext&lt;<span class="t">AppDbContext</span>&gt;();    <span class="c">// Scoped (mặc định)</span></pre>
+        <p style="color:var(--ut-danger)">DbContext sống suốt đời app → ôm connection, change tracker phình to, không thread-safe → lỗi ngẫu nhiên dưới tải.</p>
+    </div>
+
+    <div class="do-dont do">
+        <h4>✅ Fix 1: Inject IServiceScopeFactory, tự tạo scope</h4>
+        <pre class="cb"><span class="k">public class</span> <span class="t">CacheWarmer</span>(<span class="t">IServiceScopeFactory</span> scopeFactory)
+{
+    <span class="k">public async</span> Task <span class="n">WarmAsync</span>()
+    {
+        <span class="c">// Tạo scope NGẮN HẠN, lấy DbContext tươi, dispose sau khi xong</span>
+        <span class="k">using var</span> scope = scopeFactory.CreateScope();
+        <span class="k">var</span> db = scope.ServiceProvider
+                       .GetRequiredService&lt;<span class="t">AppDbContext</span>&gt;();
+
+        <span class="k">var</span> products = <span class="k">await</span> db.Products.ToListAsync();
+        <span class="c">// scope dispose ở cuối using → DbContext được dispose đúng</span>
+    }
+}</pre>
+        <p style="color:var(--ut-accent)">Mỗi lần warm tạo scope riêng → DbContext tươi, dùng xong dispose ngay. An toàn thread.</p>
+    </div>
+
+    <div class="do-dont do">
+        <h4>✅ Fix 2: Inject factory cho dependency Transient</h4>
+        <pre class="cb"><span class="c">// Cần Transient trong Singleton? Inject Func&lt;T&gt; hoặc factory</span>
+<span class="k">public class</span> <span class="t">ReportEngine</span>(<span class="t">Func</span>&lt;<span class="t">IPdfRenderer</span>&gt; rendererFactory)
+{
+    <span class="k">public</span> <span class="k">byte</span>[] <span class="n">Build</span>()
+    {
+        <span class="c">// Tạo renderer MỚI mỗi lần cần, không giữ tham chiếu lâu dài</span>
+        <span class="k">var</span> renderer = rendererFactory();
+        <span class="k">return</span> renderer.Render();
+    }
+}
+
+<span class="c">// Đăng ký factory</span>
+builder.Services.AddTransient&lt;<span class="t">IPdfRenderer</span>, <span class="t">PdfRenderer</span>&gt;();
+builder.Services.AddSingleton&lt;<span class="t">Func</span>&lt;<span class="t">IPdfRenderer</span>&gt;&gt;(sp =&gt;
+    () =&gt; sp.GetRequiredService&lt;<span class="t">IPdfRenderer</span>&gt;());
+builder.Services.AddSingleton&lt;<span class="t">ReportEngine</span>&gt;();</pre>
+        <p style="color:var(--ut-accent)">Singleton chỉ giữ một factory (delegate), không giữ instance Transient → tạo mới khi cần.</p>
+    </div>
+
+    <h3 style="margin-top:1.5rem; color:var(--ut-primary-2)">BackgroundService cũng là Singleton trá hình</h3>
+    <p class="ut-sub"><code>IHostedService</code> / <code>BackgroundService</code> được resolve một lần lúc startup → bản chất là Singleton. Inject thẳng Scoped vào nó = captive dependency.</p>
+    <pre class="cb"><span class="k">public class</span> <span class="t">CleanupWorker</span>(<span class="t">IServiceScopeFactory</span> scopeFactory) : <span class="t">BackgroundService</span>
+{
+    <span class="k">protected override async</span> Task <span class="n">ExecuteAsync</span>(CancellationToken ct)
+    {
+        <span class="k">while</span> (!ct.IsCancellationRequested)
+        {
+            <span class="c">// Tạo scope mới cho MỖI vòng lặp — DbContext tươi mỗi lần</span>
+            <span class="k">using</span> (<span class="k">var</span> scope = scopeFactory.CreateScope())
+            {
+                <span class="k">var</span> db = scope.ServiceProvider
+                               .GetRequiredService&lt;<span class="t">AppDbContext</span>&gt;();
+                <span class="k">await</span> db.Database.ExecuteSqlRawAsync(
+                    <span class="s">"DELETE FROM Sessions WHERE ExpiresAt &lt; NOW()"</span>, ct);
+            }
+            <span class="k">await</span> Task.Delay(TimeSpan.FromMinutes(<span class="s">10</span>), ct);
+        }
+    }
+}</pre>
+
+    <h3 style="margin-top:1.5rem; color:var(--ut-primary-2)">Bật Scope Validation để bắt lỗi sớm</h3>
+    <p class="ut-sub">.NET tự động bật scope validation ở môi trường <strong>Development</strong>. Nó sẽ <em>ném exception ngay lúc startup</em> nếu phát hiện Singleton giữ Scoped — bắt bug trước khi lên production.</p>
+    <pre class="cb"><span class="c">// Ép bật validation ở MỌI môi trường (khuyên cho test)</span>
+<span class="k">var</span> builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseDefaultServiceProvider((context, options) =&gt;
+{
+    options.ValidateScopes = <span class="k">true</span>;   <span class="c">// chặn captive dependency</span>
+    options.ValidateOnBuild = <span class="k">true</span>;  <span class="c">// kiểm tra toàn bộ lúc Build()</span>
+});</pre>
+
+    <div class="callout info">
+        <strong>Lỗi bạn sẽ thấy:</strong> <em>"Cannot consume scoped service 'AppDbContext' from singleton 'CacheWarmer'."</em> — đây là scope validation đang cứu bạn. Đừng tắt nó đi, hãy sửa thiết kế.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">8. Mẹo &amp; thực hành tốt</h2>
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont do">
+            <h4>✅ DbContext luôn là Scoped</h4>
+            <p><code>AddDbContext&lt;T&gt;()</code> mặc định đăng ký Scoped. Đừng đổi sang Singleton. Cần dùng ngoài request → tự tạo scope.</p>
+        </div>
+        <div class="do-dont do">
+            <h4>✅ Gom đăng ký vào extension method</h4>
+            <p>Tạo <code>AddApplicationServices()</code>, <code>AddInfrastructure()</code> để <code>Program.cs</code> gọn và module hoá theo layer.</p>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Dùng Service Locator</h4>
+            <p>Inject <code>IServiceProvider</code> rồi <code>GetService()</code> tứ tung làm dependency "ẩn", phá vỡ DI. Chỉ chấp nhận trong composition root/factory.</p>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Singleton chứa state mutable không khoá</h4>
+            <p>Một <code>List&lt;T&gt;</code> hay <code>Dictionary</code> thường trong Singleton = race condition. Dùng <code>Concurrent*</code> hoặc <code>lock</code>.</p>
+        </div>
+    </div>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Đăng ký gọn bằng extension method</h3>
+    <pre class="cb"><span class="c">// ServiceCollectionExtensions.cs</span>
+<span class="k">public static class</span> <span class="t">ServiceCollectionExtensions</span>
+{
+    <span class="k">public static</span> <span class="t">IServiceCollection</span> <span class="n">AddApplicationServices</span>(
+        <span class="k">this</span> <span class="t">IServiceCollection</span> services)
+    {
+        services.AddScoped&lt;<span class="t">IOrderService</span>, <span class="t">OrderService</span>&gt;();
+        services.AddScoped&lt;<span class="t">ICheckoutService</span>, <span class="t">CheckoutService</span>&gt;();
+        services.AddSingleton&lt;<span class="t">IClock</span>, <span class="t">SystemClock</span>&gt;();
+        <span class="k">return</span> services;
+    }
+}
+
+<span class="c">// Program.cs gọn gàng</span>
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructure(builder.Configuration);</pre>
+
+    <table class="cmp">
+        <thead>
+            <tr>
+                <th>Loại service</th>
+                <th>Lifetime khuyên dùng</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td><code>DbContext</code>, Repository, UnitOfWork</td><td>Scoped</td></tr>
+            <tr><td>Business service per-request</td><td>Scoped</td></tr>
+            <tr><td>Logger, cache, config, <code>IClock</code></td><td>Singleton</td></tr>
+            <tr><td><code>HttpClient</code> qua <code>IHttpClientFactory</code></td><td>Đăng ký bằng <code>AddHttpClient</code> (factory quản lý)</td></tr>
+            <tr><td>Validator, mapper, lightweight stateless</td><td>Transient (hoặc Scoped)</td></tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">🎯 Checklist Dependency Injection</h2>
+    <div class="ut-card">
+        <ul>
+            <li>✅ Class nhận dependency qua <strong>constructor injection</strong>, gán <code>readonly</code></li>
+            <li>✅ Phụ thuộc vào <strong>interface/abstraction</strong> khi cần test hoặc swap implementation</li>
+            <li>✅ Chọn đúng lifetime: <code>DbContext</code> + repository = <strong>Scoped</strong>; cache/logger/config = <strong>Singleton</strong></li>
+            <li>✅ Singleton là <strong>thread-safe</strong> — mọi state mutable được khoá hoặc dùng <code>Concurrent*</code> / <code>Interlocked</code></li>
+            <li>✅ KHÔNG inject Scoped/Transient trực tiếp vào Singleton (captive dependency)</li>
+            <li>✅ Trong <code>BackgroundService</code> / Singleton: dùng <code>IServiceScopeFactory.CreateScope()</code> để lấy Scoped service</li>
+            <li>✅ Bật <code>ValidateScopes</code> + <code>ValidateOnBuild</code> để bắt lỗi DI lúc startup</li>
+            <li>✅ Mọi đăng ký tập trung ở composition root (<code>Program.cs</code> / extension method) — KHÔNG Service Locator</li>
+            <li>✅ Nhiều implementation? Dùng <code>IEnumerable&lt;T&gt;</code> (chạy tất cả) hoặc <strong>keyed services</strong> (.NET 8) để chọn một</li>
+            <li>✅ Viết thư viện? Dùng <code>TryAdd</code> / <code>TryAddEnumerable</code> để cho phép người dùng override</li>
+        </ul>
+    </div>
+</section>
+
+</div>
+
+<footer style="text-align:center;padding:3rem 1.5rem;color:var(--ut-muted);border-top:1px solid var(--ut-border);margin-top:3rem;font-size:.9rem;">
+    <p>Dependency Injection · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

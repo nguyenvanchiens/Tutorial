@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Deep-Dive — OWASP, OAuth2/OIDC, Secrets, TLS cho .NET</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --ut-primary: #512bd4;
+        --ut-primary-2: #8a2be2;
+        --ut-accent: #43e97b;
+        --ut-warn: #f39c12;
+        --ut-danger: #f5576c;
+        --ut-card: #1a1d2e;
+        --ut-card-2: #232640;
+        --ut-border: #2d3148;
+        --ut-text: #e2e8f0;
+        --ut-muted: #94a3b8;
+    }
+    .ut-hero { text-align: center; padding: 4rem 1.5rem 3rem; background: radial-gradient(ellipse at top, rgba(81,43,212,.18), transparent 60%); }
+    .ut-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 1rem; }
+    .ut-hero h1 .gradient { background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .ut-hero .hero-badge { display: inline-block; background: rgba(81,43,212,.15); color: var(--ut-primary-2); padding: .4rem 1rem; border-radius: 20px; font-size: .78rem; font-weight: 600; letter-spacing: 1px; margin-bottom: 1.25rem; }
+    .ut-hero p { color: var(--ut-muted); max-width: 820px; margin: 0 auto; }
+    .ut-section { padding: 2.5rem 0; }
+    .ut-title { font-size: 1.7rem; margin-bottom: 1.5rem; position: relative; padding-left: 1rem; color: var(--ut-text); }
+    .ut-title::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 4px; background: linear-gradient(180deg, var(--ut-primary), var(--ut-primary-2)); border-radius: 3px; }
+    .ut-sub { color: var(--ut-muted); margin-bottom: 1.25rem; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+    .ut-grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .ut-grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    .ut-grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .ut-card { background: var(--ut-card); border: 1px solid var(--ut-border); border-radius: 12px; padding: 1.4rem; }
+    .ut-card h3 { color: var(--ut-primary-2); margin-bottom: .6rem; font-size: 1.1rem; }
+    .ut-card h4 { color: var(--ut-accent); margin-bottom: .45rem; font-size: .98rem; }
+    .ut-card p, .ut-card li { color: var(--ut-muted); font-size: .95rem; }
+    .ut-card ul { padding-left: 1.2rem; }
+    .ut-card ul li { margin-bottom: .3rem; }
+    pre.cb { background: #0b1020; border: 1px solid var(--ut-border); border-left: 3px solid var(--ut-primary); border-radius: 8px; padding: 1rem 1.15rem; overflow-x: auto; font-family: 'JetBrains Mono', Consolas, monospace; font-size: .88rem; line-height: 1.6; margin: .75rem 0; color: #d6deeb; }
+    pre.cb .k { color: #c792ea; }
+    pre.cb .s { color: #ecc48d; }
+    pre.cb .c { color: #637777; font-style: italic; }
+    pre.cb .n { color: #82aaff; }
+    pre.cb .t { color: #ffcb8b; }
+    pre.cb .a { color: #7fdbca; }
+    code { background: #2d3148; padding: 2px 6px; border-radius: 4px; font-size: .88em; color: #f8d06b; font-family: 'JetBrains Mono', Consolas, monospace; }
+    .callout { border-radius: 10px; padding: .95rem 1.15rem; margin: 1rem 0; border: 1px solid; }
+    .callout.tip { background: rgba(67,233,123,.07); border-color: var(--ut-accent); }
+    .callout.tip strong { color: var(--ut-accent); }
+    .callout.warn { background: rgba(243,156,18,.07); border-color: var(--ut-warn); }
+    .callout.warn strong { color: var(--ut-warn); }
+    .callout.danger { background: rgba(245,87,108,.07); border-color: var(--ut-danger); }
+    .callout.danger strong { color: var(--ut-danger); }
+    .callout.info { background: rgba(81,43,212,.08); border-color: var(--ut-primary-2); }
+    .callout.info strong { color: var(--ut-primary-2); }
+    table.cmp { width: 100%; border-collapse: collapse; background: var(--ut-card); border-radius: 10px; overflow: hidden; margin: 1rem 0; font-size: .92rem; }
+    table.cmp th, table.cmp td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--ut-border); }
+    table.cmp th { background: var(--ut-card-2); color: var(--ut-primary-2); font-weight: 600; }
+    table.cmp td { color: var(--ut-muted); }
+    table.cmp tr:last-child td { border-bottom: none; }
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; position: relative; padding-left: 2.8rem; margin-bottom: 1rem; }
+    .steps li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 2rem; height: 2rem; background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .do-dont { border-left: 3px solid; padding: 1rem 1.15rem; border-radius: 8px; margin-bottom: 1rem; }
+    .do-dont.do { border-color: var(--ut-accent); background: rgba(67,233,123,.04); }
+    .do-dont.dont { border-color: var(--ut-danger); background: rgba(245,87,108,.04); }
+    .do-dont h4 { margin-bottom: .5rem; }
+    .do-dont.do h4 { color: var(--ut-accent); }
+    .do-dont.dont h4 { color: var(--ut-danger); }
+    .owasp { display: flex; gap: 1rem; align-items: flex-start; border: 1px solid var(--ut-border); border-radius: 12px; padding: 1.1rem 1.2rem; margin-bottom: .85rem; background: var(--ut-card); }
+    .owasp .rank { flex-shrink: 0; width: 2.4rem; height: 2.4rem; border-radius: 8px; background: linear-gradient(135deg, var(--ut-danger), var(--ut-warn)); color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: .85rem; }
+    .owasp .body { flex: 1; }
+    .owasp h4 { color: var(--ut-text); margin-bottom: .25rem; font-size: 1rem; }
+    .owasp p { color: var(--ut-muted); font-size: .9rem; margin-bottom: .35rem; }
+    .owasp .fix { color: var(--ut-accent); font-size: .88rem; }
+    .flow { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; justify-content: center; margin: 1.25rem 0; }
+    .flow .node { background: var(--ut-card-2); border: 1px solid var(--ut-border); border-radius: 10px; padding: .6rem .9rem; font-size: .82rem; color: var(--ut-text); text-align: center; }
+    .flow .arrow { color: var(--ut-primary-2); font-weight: 700; font-size: 1.05rem; }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo"><a href="index.html" style="color:inherit;-webkit-text-fill-color:inherit;">.NET<span class="accent">Mastery</span></a></div>
+        <div class="nav-links">
+            <a href="index.html">Roadmap</a>
+            <a href="cqrs.html">CQRS</a>
+            <a href="ddd.html">DDD</a>
+            <a href="messaging.html">Messaging</a>
+            <a href="system-design.html">System Design</a>
+            <a href="security.html" class="nav-active">Security</a>
+            <a href="aspnet-testing.html">Unit Test</a>
+        </div>
+        <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+</nav>
+
+<header class="ut-hero">
+    <div class="hero-badge">MASTER · ADVANCED</div>
+    <h1>Security <span class="gradient">Deep-Dive</span> cho .NET</h1>
+    <p>OWASP Top 10 (2021) với mitigation cụ thể trên ASP.NET Core, các flow OAuth2/OIDC, hashing mật khẩu đúng cách, quản lý secret với Key Vault, HTTPS/TLS, CORS, security headers và input validation. Bảo mật là chiều sâu phòng thủ, không phải một checkbox.</p>
+</header>
+
+<div class="container">
+
+<section class="ut-section">
+    <h2 class="ut-title">1. OWASP Top 10 &mdash; mitigation trên .NET</h2>
+    <p class="ut-sub">Danh sách 2021 (bản chính thức hiện hành tại 2026). Mỗi mục kèm cách phòng cụ thể trong ASP.NET Core.</p>
+
+    <div class="owasp">
+        <div class="rank">A01</div>
+        <div class="body">
+            <h4>Broken Access Control</h4>
+            <p>User truy cập tài nguyên không thuộc quyền (IDOR: đổi <code>/orders/123</code> thành <code>/orders/124</code>).</p>
+            <p class="fix">Fix: authorize ở server theo <em>resource ownership</em>, không tin client. Dùng <code>[Authorize]</code> + policy/resource-based authorization. Deny-by-default.</p>
+        </div>
+    </div>
+    <div class="owasp">
+        <div class="rank">A02</div>
+        <div class="body">
+            <h4>Cryptographic Failures</h4>
+            <p>Truyền/lưu dữ liệu nhạy cảm không mã hoá, dùng thuật toán yếu (MD5, SHA1, DES).</p>
+            <p class="fix">Fix: HTTPS bắt buộc (HSTS), mã hoá at-rest, hash mật khẩu bằng PBKDF2/bcrypt/Argon2, dùng <code>System.Security.Cryptography</code> hiện đại (AES-GCM).</p>
+        </div>
+    </div>
+    <div class="owasp">
+        <div class="rank">A03</div>
+        <div class="body">
+            <h4>Injection (SQL, NoSQL, Command)</h4>
+            <p>Input chưa kiểm soát trộn vào query/command.</p>
+            <p class="fix">Fix: parameterized query / EF Core (LINQ tự tham số hoá). KHÔNG nối chuỗi SQL. Với raw SQL dùng <code>FromSqlInterpolated</code>.</p>
+        </div>
+    </div>
+    <div class="owasp">
+        <div class="rank">A04</div>
+        <div class="body">
+            <h4>Insecure Design</h4>
+            <p>Thiếu thiết kế an toàn từ đầu (không threat modeling, không rate limit, business logic flaw).</p>
+            <p class="fix">Fix: threat modeling sớm, rate limiting, validate business rule ở domain, secure-by-design.</p>
+        </div>
+    </div>
+    <div class="owasp">
+        <div class="rank">A05</div>
+        <div class="body">
+            <h4>Security Misconfiguration</h4>
+            <p>Default credential, để chế độ dev/verbose error ở prod, header lộ thông tin, CORS mở toang.</p>
+            <p class="fix">Fix: tắt <code>UseDeveloperExceptionPage</code> ở prod, ẩn <code>Server</code> header, CORS allowlist, cấu hình tối thiểu cần thiết.</p>
+        </div>
+    </div>
+    <div class="owasp">
+        <div class="rank">A06</div>
+        <div class="body">
+            <h4>Vulnerable &amp; Outdated Components</h4>
+            <p>Dùng package/runtime có CVE đã biết.</p>
+            <p class="fix">Fix: <code>dotnet list package --vulnerable</code>, Dependabot, cập nhật định kỳ, dùng .NET LTS được support.</p>
+        </div>
+    </div>
+    <div class="owasp">
+        <div class="rank">A07</div>
+        <div class="body">
+            <h4>Identification &amp; Authentication Failures</h4>
+            <p>Mật khẩu yếu, không khoá brute-force, session không hết hạn, không MFA.</p>
+            <p class="fix">Fix: ASP.NET Core Identity (lockout, password policy), MFA, JWT/cookie có expiry hợp lý, chống credential stuffing.</p>
+        </div>
+    </div>
+    <div class="owasp">
+        <div class="rank">A08</div>
+        <div class="body">
+            <h4>Software &amp; Data Integrity Failures</h4>
+            <p>Deserialize dữ liệu không tin cậy, CI/CD không ký, cập nhật không kiểm tra toàn vẹn.</p>
+            <p class="fix">Fix: không dùng <code>BinaryFormatter</code> (đã bỏ trong .NET 9+), ký artifact, kiểm tra checksum, deserialize an toàn với <code>System.Text.Json</code>.</p>
+        </div>
+    </div>
+    <div class="owasp">
+        <div class="rank">A09</div>
+        <div class="body">
+            <h4>Security Logging &amp; Monitoring Failures</h4>
+            <p>Không log sự kiện bảo mật, không alert, không phát hiện được tấn công.</p>
+            <p class="fix">Fix: log auth fail/access denied/thay đổi quyền (KHÔNG log secret/PII), structured logging + SIEM + alert.</p>
+        </div>
+    </div>
+    <div class="owasp">
+        <div class="rank">A10</div>
+        <div class="body">
+            <h4>Server-Side Request Forgery (SSRF)</h4>
+            <p>Server bị lừa gọi tới URL nội bộ (metadata cloud, localhost) do nhận URL từ user.</p>
+            <p class="fix">Fix: allowlist domain/IP đích, chặn IP nội bộ (169.254.x, 10.x, localhost), không follow redirect tuỳ tiện.</p>
+        </div>
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">2. Injection &amp; Input Validation &mdash; code</h2>
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont dont">
+            <h4>❌ SQL Injection</h4>
+            <pre class="cb"><span class="c">// NGUY HIỂM — nối chuỗi</span>
+<span class="k">var</span> sql = <span class="s">$"SELECT * FROM Users WHERE Name = '{name}'"</span>;
+_db.Users.FromSqlRaw(sql);  <span class="c">// name = "' OR '1'='1"</span></pre>
+        </div>
+        <div class="do-dont do">
+            <h4>✅ Parameterized</h4>
+            <pre class="cb"><span class="c">// LINQ — EF tự tham số hoá</span>
+_db.Users.Where(u =&gt; u.Name == name);
+
+<span class="c">// Raw SQL an toàn — interpolated thành tham số</span>
+_db.Users.FromSqlInterpolated(
+    <span class="s">$"SELECT * FROM Users WHERE Name = {name}"</span>);</pre>
+        </div>
+    </div>
+    <div class="callout tip">
+        <strong>💡 Validate input ở biên (model binding) + escape ở output:</strong> dùng FluentValidation/DataAnnotations cho input; Razor tự HTML-encode output (chống XSS). XSS reflected/stored xảy ra khi bạn render dữ liệu user mà bỏ encode &mdash; tránh <code>@Html.Raw</code> với data không tin cậy.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">3. Hashing mật khẩu</h2>
+    <p class="ut-sub">KHÔNG bao giờ lưu mật khẩu plaintext hay hash nhanh (MD5/SHA256). Dùng hàm <strong>chậm có salt</strong>: PBKDF2, bcrypt, hoặc Argon2id (khuyến nghị hiện đại).</p>
+    <pre class="cb"><span class="c">// Đơn giản nhất: dùng ASP.NET Core Identity PasswordHasher (PBKDF2, có salt + iteration)</span>
+<span class="k">var</span> hasher = <span class="k">new</span> PasswordHasher&lt;<span class="t">User</span>&gt;();
+
+<span class="c">// Đăng ký</span>
+user.PasswordHash = hasher.HashPassword(user, plainPassword);
+
+<span class="c">// Đăng nhập — so sánh constant-time, hỗ trợ rehash khi tăng iteration</span>
+<span class="k">var</span> result = hasher.VerifyHashedPassword(user, user.PasswordHash, plainPassword);
+<span class="k">if</span> (result == PasswordVerificationResult.Failed)
+    <span class="k">return</span> Unauthorized();
+<span class="k">if</span> (result == PasswordVerificationResult.SuccessRehashNeeded)
+    user.PasswordHash = hasher.HashPassword(user, plainPassword);  <span class="c">// nâng cấp ngầm</span></pre>
+    <div class="ut-grid ut-grid-3">
+        <div class="ut-card">
+            <h4>Salt</h4>
+            <p>Chuỗi ngẫu nhiên duy nhất mỗi user, chống rainbow table. PasswordHasher tự sinh và nhúng salt.</p>
+        </div>
+        <div class="ut-card">
+            <h4>Work factor</h4>
+            <p>Iteration cao &rarr; brute-force chậm. Tăng theo phần cứng theo thời gian (rehash).</p>
+        </div>
+        <div class="ut-card">
+            <h4>Argon2id</h4>
+            <p>Memory-hard, chống GPU/ASIC tốt nhất hiện nay. Dùng qua thư viện (Konscious.Security.Cryptography) cho hệ mới.</p>
+        </div>
+    </div>
+    <div class="callout danger">
+        <strong>Tuyệt đối tránh:</strong> MD5/SHA1/SHA256 trần cho mật khẩu (quá nhanh), salt cố định toàn hệ thống, "encrypt" mật khẩu (phải hash, không encrypt vì không cần giải ngược), so sánh hash bằng <code>==</code> không constant-time.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">4. OAuth2 &amp; OpenID Connect</h2>
+    <p class="ut-sub"><strong>OAuth2</strong> = ủy quyền (authorization &mdash; cấp quyền truy cập tài nguyên). <strong>OIDC</strong> = lớp xác thực (authentication &mdash; "bạn là ai") xây trên OAuth2, thêm ID Token (JWT).</p>
+
+    <h3 style="color:var(--ut-primary-2)">Authorization Code + PKCE (flow chuẩn 2026)</h3>
+    <p class="ut-sub">Flow khuyến nghị cho cả web app lẫn SPA/mobile. PKCE chống intercept code. Implicit flow đã <strong>bị loại bỏ</strong>.</p>
+    <div class="flow">
+        <div class="node">App</div>
+        <span class="arrow">&rarr;</span>
+        <div class="node">/authorize<br>(+ code_challenge)</div>
+        <span class="arrow">&rarr;</span>
+        <div class="node">User login &amp; consent</div>
+        <span class="arrow">&rarr;</span>
+        <div class="node">redirect + code</div>
+        <span class="arrow">&rarr;</span>
+        <div class="node">/token<br>(code + code_verifier)</div>
+        <span class="arrow">&rarr;</span>
+        <div class="node">access + id + refresh token</div>
+    </div>
+
+    <table class="cmp">
+        <tr><th>Flow</th><th>Dùng cho</th><th>Ghi chú</th></tr>
+        <tr><td>Authorization Code + PKCE</td><td>Web app, SPA, mobile</td><td>Mặc định nên dùng</td></tr>
+        <tr><td>Client Credentials</td><td>Machine-to-machine (service gọi service)</td><td>Không có user</td></tr>
+        <tr><td>Device Code</td><td>TV, CLI, thiết bị không bàn phím</td><td>User nhập code ở thiết bị khác</td></tr>
+        <tr><td>Implicit / Password (ROPC)</td><td>&mdash; (deprecated)</td><td>KHÔNG dùng nữa</td></tr>
+    </table>
+
+    <pre class="cb"><span class="c">// ASP.NET Core — xác thực qua OIDC provider (Entra ID/Auth0/Keycloak/IdentityServer)</span>
+builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+    .AddCookie()
+    .AddOpenIdConnect(o =&gt;
+    {
+        o.Authority = <span class="s">"https://login.example.com"</span>;
+        o.ClientId = builder.Configuration[<span class="s">"Oidc:ClientId"</span>];
+        o.ClientSecret = builder.Configuration[<span class="s">"Oidc:ClientSecret"</span>];  <span class="c">// từ Key Vault</span>
+        o.ResponseType = <span class="s">"code"</span>;                  <span class="c">// Authorization Code</span>
+        o.UsePkce = <span class="k">true</span>;                         <span class="c">// PKCE bật</span>
+        o.SaveTokens = <span class="k">true</span>;
+        o.Scope.Add(<span class="s">"openid"</span>);
+        o.Scope.Add(<span class="s">"profile"</span>);
+        o.GetClaimsFromUserInfoEndpoint = <span class="k">true</span>;
+    });</pre>
+
+    <pre class="cb"><span class="c">// Bảo vệ API bằng JWT Bearer — luôn validate issuer/audience/signature</span>
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(o =&gt;
+    {
+        o.Authority = <span class="s">"https://login.example.com"</span>;
+        o.TokenValidationParameters = <span class="k">new</span>()
+        {
+            ValidateIssuer = <span class="k">true</span>,
+            ValidateAudience = <span class="k">true</span>,
+            ValidAudience = <span class="s">"api://my-api"</span>,
+            ValidateLifetime = <span class="k">true</span>,
+            ValidateIssuerSigningKey = <span class="k">true</span>     <span class="c">// chống token giả</span>
+        };
+    });</pre>
+    <div class="callout warn">
+        <strong>⚠️ Token storage ở SPA:</strong> Đừng lưu access token trong <code>localStorage</code> (XSS đọc được). Pattern an toàn 2026 là <em>BFF (Backend-for-Frontend)</em>: token giữ ở server, browser chỉ có cookie <code>HttpOnly</code> + <code>SameSite</code>.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">5. Secrets Management</h2>
+    <p class="ut-sub">Secret KHÔNG bao giờ hardcode hay commit. Tách theo môi trường, dùng kho secret chuyên dụng ở prod.</p>
+    <ol class="steps">
+        <li><strong>Dev local</strong>: User Secrets (không vào git)
+            <pre class="cb">dotnet user-secrets init
+dotnet user-secrets set <span class="s">"Oidc:ClientSecret"</span> <span class="s">"dev-secret"</span></pre>
+        </li>
+        <li><strong>Production</strong>: Azure Key Vault (hoặc AWS Secrets Manager / HashiCorp Vault) + Managed Identity (không cần lưu credential để truy cập Key Vault)
+            <pre class="cb"><span class="c">// Program.cs — nạp config từ Key Vault qua Managed Identity</span>
+builder.Configuration.AddAzureKeyVault(
+    <span class="k">new</span> Uri(<span class="s">"https://my-vault.vault.azure.net/"</span>),
+    <span class="k">new</span> DefaultAzureCredential());  <span class="c">// dùng MI, không secret</span>
+
+<span class="c">// Đọc như config bình thường</span>
+<span class="k">var</span> conn = builder.Configuration[<span class="s">"Db:ConnectionString"</span>];</pre>
+        </li>
+    </ol>
+    <div class="callout danger">
+        <strong>Secret đã commit coi như đã lộ.</strong> Dù xoá commit sau, nó vẫn trong git history. Phải <em>revoke + rotate</em> ngay. Dùng <code>git-secrets</code>/GitHub secret scanning + pre-commit hook để chặn từ đầu.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">6. HTTPS / TLS, CORS &amp; Security Headers</h2>
+    <pre class="cb"><span class="c">// Program.cs — cấu hình bảo mật transport &amp; headers</span>
+<span class="k">var</span> app = builder.Build();
+
+<span class="k">if</span> (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();           <span class="c">// ép HTTPS ở browser (Strict-Transport-Security)</span>
+}
+app.UseHttpsRedirection();   <span class="c">// HTTP → HTTPS</span>
+
+<span class="c">// Security headers</span>
+app.Use(<span class="k">async</span> (ctx, next) =&gt;
+{
+    ctx.Response.Headers[<span class="s">"X-Content-Type-Options"</span>] = <span class="s">"nosniff"</span>;
+    ctx.Response.Headers[<span class="s">"X-Frame-Options"</span>] = <span class="s">"DENY"</span>;            <span class="c">// chống clickjacking</span>
+    ctx.Response.Headers[<span class="s">"Referrer-Policy"</span>] = <span class="s">"no-referrer"</span>;
+    ctx.Response.Headers[<span class="s">"Content-Security-Policy"</span>] =
+        <span class="s">"default-src 'self'; object-src 'none'; frame-ancestors 'none'"</span>;  <span class="c">// chống XSS</span>
+    <span class="k">await</span> next();
+});</pre>
+
+    <h3 style="color:var(--ut-primary-2)">CORS &mdash; allowlist, không wildcard</h3>
+    <pre class="cb">builder.Services.AddCors(o =&gt; o.AddPolicy(<span class="s">"app"</span>, p =&gt;
+    p.WithOrigins(<span class="s">"https://app.example.com"</span>)   <span class="c">// origin cụ thể, KHÔNG AllowAnyOrigin</span>
+     .WithMethods(<span class="s">"GET"</span>, <span class="s">"POST"</span>)
+     .AllowCredentials()));                     <span class="c">// credentials + wildcard là cấm</span>
+
+app.UseCors(<span class="s">"app"</span>);</pre>
+    <div class="callout danger">
+        <strong>❌ <code>AllowAnyOrigin().AllowCredentials()</code> bị runtime chặn</strong> &mdash; và đúng vậy: nó cho phép mọi site đọc response có cookie của user. Luôn allowlist origin tin cậy.
+    </div>
+    <div class="callout info">
+        <strong>TLS 2026:</strong> Dùng TLS 1.2/1.3, tắt TLS 1.0/1.1 và SSLv3. Cert tự động qua Let's Encrypt/ACME hoặc managed cert của cloud. Bật OCSP stapling. CORS <em>không</em> phải cơ chế bảo mật &mdash; nó chỉ là chính sách của browser; bảo vệ thật vẫn là authn/authz phía server.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">7. Defense in Depth</h2>
+    <p class="ut-sub">Không có lớp phòng thủ nào hoàn hảo. Xếp nhiều lớp để một lớp thủng không sập toàn bộ.</p>
+    <div class="ut-grid ut-grid-3">
+        <div class="ut-card">
+            <h4>Mạng</h4>
+            <ul><li>WAF, DDoS protection</li><li>Private subnet cho DB</li><li>Least-privilege network</li></ul>
+        </div>
+        <div class="ut-card">
+            <h4>Ứng dụng</h4>
+            <ul><li>Authn + authz mọi endpoint</li><li>Validate input, encode output</li><li>Rate limit, anti-CSRF</li></ul>
+        </div>
+        <div class="ut-card">
+            <h4>Dữ liệu</h4>
+            <ul><li>Mã hoá at-rest &amp; in-transit</li><li>Hash mật khẩu</li><li>Least-privilege DB account</li></ul>
+        </div>
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">🎯 Checklist Security</h2>
+    <div class="ut-card">
+        <ul>
+            <li>✅ Authorization theo resource ownership, deny-by-default (A01)</li>
+            <li>✅ HTTPS + HSTS; mã hoá dữ liệu nhạy cảm at-rest (A02)</li>
+            <li>✅ Parameterized query / EF Core; không nối chuỗi SQL (A03)</li>
+            <li>✅ Hash mật khẩu PBKDF2/bcrypt/Argon2id + salt; không lưu plaintext</li>
+            <li>✅ OAuth2 Authorization Code + PKCE; validate issuer/audience/signature JWT</li>
+            <li>✅ Token SPA qua BFF/cookie HttpOnly, không localStorage</li>
+            <li>✅ Secret ở User Secrets (dev) / Key Vault + Managed Identity (prod)</li>
+            <li>✅ Security headers: CSP, X-Content-Type-Options, X-Frame-Options, HSTS</li>
+            <li>✅ CORS allowlist origin cụ thể, không wildcard + credentials</li>
+            <li>✅ <code>dotnet list package --vulnerable</code> + cập nhật định kỳ (A06)</li>
+            <li>✅ Log sự kiện bảo mật (không log secret/PII) + alert (A09)</li>
+            <li>✅ Tắt verbose error ở prod; threat modeling từ thiết kế</li>
+        </ul>
+    </div>
+</section>
+
+</div>
+
+<footer style="text-align:center;padding:3rem 1.5rem;color:var(--ut-muted);border-top:1px solid var(--ut-border);margin-top:3rem;font-size:.9rem;">
+    <p>Security Deep-Dive · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Design — CAP, Scaling, Caching, Sharding, Resilience</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --ut-primary: #512bd4;
+        --ut-primary-2: #8a2be2;
+        --ut-accent: #43e97b;
+        --ut-warn: #f39c12;
+        --ut-danger: #f5576c;
+        --ut-card: #1a1d2e;
+        --ut-card-2: #232640;
+        --ut-border: #2d3148;
+        --ut-text: #e2e8f0;
+        --ut-muted: #94a3b8;
+    }
+    .ut-hero { text-align: center; padding: 4rem 1.5rem 3rem; background: radial-gradient(ellipse at top, rgba(81,43,212,.18), transparent 60%); }
+    .ut-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 1rem; }
+    .ut-hero h1 .gradient { background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .ut-hero .hero-badge { display: inline-block; background: rgba(81,43,212,.15); color: var(--ut-primary-2); padding: .4rem 1rem; border-radius: 20px; font-size: .78rem; font-weight: 600; letter-spacing: 1px; margin-bottom: 1.25rem; }
+    .ut-hero p { color: var(--ut-muted); max-width: 820px; margin: 0 auto; }
+    .ut-section { padding: 2.5rem 0; }
+    .ut-title { font-size: 1.7rem; margin-bottom: 1.5rem; position: relative; padding-left: 1rem; color: var(--ut-text); }
+    .ut-title::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 4px; background: linear-gradient(180deg, var(--ut-primary), var(--ut-primary-2)); border-radius: 3px; }
+    .ut-sub { color: var(--ut-muted); margin-bottom: 1.25rem; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+    .ut-grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .ut-grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    .ut-grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .ut-card { background: var(--ut-card); border: 1px solid var(--ut-border); border-radius: 12px; padding: 1.4rem; }
+    .ut-card h3 { color: var(--ut-primary-2); margin-bottom: .6rem; font-size: 1.1rem; }
+    .ut-card h4 { color: var(--ut-accent); margin-bottom: .45rem; font-size: .98rem; }
+    .ut-card p, .ut-card li { color: var(--ut-muted); font-size: .95rem; }
+    .ut-card ul { padding-left: 1.2rem; }
+    .ut-card ul li { margin-bottom: .3rem; }
+    pre.cb { background: #0b1020; border: 1px solid var(--ut-border); border-left: 3px solid var(--ut-primary); border-radius: 8px; padding: 1rem 1.15rem; overflow-x: auto; font-family: 'JetBrains Mono', Consolas, monospace; font-size: .88rem; line-height: 1.6; margin: .75rem 0; color: #d6deeb; }
+    pre.cb .k { color: #c792ea; }
+    pre.cb .s { color: #ecc48d; }
+    pre.cb .c { color: #637777; font-style: italic; }
+    pre.cb .n { color: #82aaff; }
+    pre.cb .t { color: #ffcb8b; }
+    pre.cb .a { color: #7fdbca; }
+    code { background: #2d3148; padding: 2px 6px; border-radius: 4px; font-size: .88em; color: #f8d06b; font-family: 'JetBrains Mono', Consolas, monospace; }
+    .callout { border-radius: 10px; padding: .95rem 1.15rem; margin: 1rem 0; border: 1px solid; }
+    .callout.tip { background: rgba(67,233,123,.07); border-color: var(--ut-accent); }
+    .callout.tip strong { color: var(--ut-accent); }
+    .callout.warn { background: rgba(243,156,18,.07); border-color: var(--ut-warn); }
+    .callout.warn strong { color: var(--ut-warn); }
+    .callout.danger { background: rgba(245,87,108,.07); border-color: var(--ut-danger); }
+    .callout.danger strong { color: var(--ut-danger); }
+    .callout.info { background: rgba(81,43,212,.08); border-color: var(--ut-primary-2); }
+    .callout.info strong { color: var(--ut-primary-2); }
+    table.cmp { width: 100%; border-collapse: collapse; background: var(--ut-card); border-radius: 10px; overflow: hidden; margin: 1rem 0; font-size: .92rem; }
+    table.cmp th, table.cmp td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--ut-border); }
+    table.cmp th { background: var(--ut-card-2); color: var(--ut-primary-2); font-weight: 600; }
+    table.cmp td { color: var(--ut-muted); }
+    table.cmp tr:last-child td { border-bottom: none; }
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; position: relative; padding-left: 2.8rem; margin-bottom: 1rem; }
+    .steps li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 2rem; height: 2rem; background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .do-dont { border-left: 3px solid; padding: 1rem 1.15rem; border-radius: 8px; margin-bottom: 1rem; }
+    .do-dont.do { border-color: var(--ut-accent); background: rgba(67,233,123,.04); }
+    .do-dont.dont { border-color: var(--ut-danger); background: rgba(245,87,108,.04); }
+    .do-dont h4 { margin-bottom: .5rem; }
+    .do-dont.do h4 { color: var(--ut-accent); }
+    .do-dont.dont h4 { color: var(--ut-danger); }
+    .flow { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; justify-content: center; margin: 1.25rem 0; }
+    .flow .node { background: var(--ut-card-2); border: 1px solid var(--ut-border); border-radius: 10px; padding: .7rem 1rem; font-size: .85rem; color: var(--ut-text); text-align: center; }
+    .flow .node.lb { border-color: var(--ut-warn); }
+    .flow .node.app { border-color: var(--ut-primary-2); }
+    .flow .node.db { border-color: var(--ut-accent); }
+    .flow .arrow { color: var(--ut-primary-2); font-weight: 700; font-size: 1.1rem; }
+    .flow .stack { display: flex; flex-direction: column; gap: .35rem; }
+    .cap-tri { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin: 1.25rem 0; }
+    .cap-tri .c { flex: 1; min-width: 200px; border: 2px solid var(--ut-primary-2); border-radius: 12px; padding: 1rem; text-align: center; background: rgba(138,43,226,.06); }
+    .cap-tri .c h4 { color: var(--ut-primary-2); }
+    .tiers { display: flex; flex-direction: column; gap: .4rem; margin: 1rem 0; }
+    .tiers .t { border: 1px solid var(--ut-border); border-left: 4px solid var(--ut-accent); border-radius: 8px; padding: .65rem 1rem; background: var(--ut-card-2); font-size: .88rem; }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo"><a href="index.html" style="color:inherit;-webkit-text-fill-color:inherit;">.NET<span class="accent">Mastery</span></a></div>
+        <div class="nav-links">
+            <a href="index.html">Roadmap</a>
+            <a href="cqrs.html">CQRS</a>
+            <a href="ddd.html">DDD</a>
+            <a href="messaging.html">Messaging</a>
+            <a href="system-design.html" class="nav-active">System Design</a>
+            <a href="security.html">Security</a>
+            <a href="aspnet-testing.html">Unit Test</a>
+        </div>
+        <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+</nav>
+
+<header class="ut-hero">
+    <div class="hero-badge">MASTER · ADVANCED</div>
+    <h1>System Design cho <span class="gradient">Scale</span></h1>
+    <p>Tư duy thiết kế hệ thống phân tán: CAP theorem, load balancing, horizontal scaling, caching nhiều tầng, DB sharding &amp; read replica, mô hình nhất quán, rate limiting, design for failure. Kết thúc bằng một bài thiết kế hoàn chỉnh: URL Shortener.</p>
+</header>
+
+<div class="container">
+
+<section class="ut-section">
+    <h2 class="ut-title">1. CAP Theorem</h2>
+    <p class="ut-sub">Trong hệ phân tán, khi có <strong>network partition (P)</strong>, bạn buộc phải chọn giữa <strong>Consistency (C)</strong> và <strong>Availability (A)</strong>. Không thể có cả ba cùng lúc khi mạng phân vùng.</p>
+    <div class="cap-tri">
+        <div class="c"><h4>Consistency</h4><p style="font-size:.85rem">Mọi node đọc thấy dữ liệu mới nhất, hoặc lỗi.</p></div>
+        <div class="c"><h4>Availability</h4><p style="font-size:.85rem">Mọi request đều có phản hồi (có thể là data cũ).</p></div>
+        <div class="c"><h4>Partition tolerance</h4><p style="font-size:.85rem">Hệ vẫn chạy khi message giữa node mất/trễ.</p></div>
+    </div>
+    <table class="cmp">
+        <tr><th>Lựa chọn</th><th>Khi partition</th><th>Ví dụ</th></tr>
+        <tr><td>CP</td><td>Hy sinh availability &mdash; từ chối request để giữ nhất quán</td><td>PostgreSQL (single primary), MongoDB (majority), ZooKeeper, etcd</td></tr>
+        <tr><td>AP</td><td>Hy sinh consistency &mdash; trả data có thể cũ, hội tụ sau</td><td>Cassandra, DynamoDB, Riak (eventual consistency)</td></tr>
+    </table>
+    <div class="callout info">
+        <strong>PACELC mở rộng CAP:</strong> Ngay cả khi <em>không</em> có partition (Else), vẫn có trade-off giữa <em>Latency</em> và <em>Consistency</em>. Đọc từ replica gần nhanh hơn nhưng có thể cũ. Thực tế thiết kế là chọn điểm trên một phổ, không phải nhị phân.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">2. Load Balancing</h2>
+    <p class="ut-sub">Phân phối request tới nhiều instance. LB là cửa ngõ cho horizontal scaling và high availability.</p>
+    <div class="flow">
+        <div class="node">Clients</div>
+        <span class="arrow">&rarr;</span>
+        <div class="node lb">Load Balancer<br>(L4/L7)</div>
+        <span class="arrow">&rarr;</span>
+        <div class="stack">
+            <div class="node app">App 1</div>
+            <div class="node app">App 2</div>
+            <div class="node app">App 3</div>
+        </div>
+    </div>
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h4>Thuật toán phân phối</h4>
+            <ul>
+                <li><strong>Round-robin</strong> &mdash; lần lượt từng server</li>
+                <li><strong>Least connections</strong> &mdash; server ít kết nối nhất</li>
+                <li><strong>Weighted</strong> &mdash; server mạnh nhận nhiều hơn</li>
+                <li><strong>Consistent hashing</strong> &mdash; cùng key &rarr; cùng server (cho cache/sticky)</li>
+            </ul>
+        </div>
+        <div class="ut-card">
+            <h4>L4 vs L7</h4>
+            <ul>
+                <li><strong>L4 (transport)</strong>: route theo IP/port, nhanh, không hiểu HTTP</li>
+                <li><strong>L7 (application)</strong>: route theo path/header/cookie, làm TLS termination, sticky session</li>
+                <li>Health check loại server chết khỏi pool</li>
+            </ul>
+        </div>
+    </div>
+    <div class="callout tip">
+        <strong>💡 Stateless app + LB:</strong> Để scale ngang dễ, giữ app <em>stateless</em> &mdash; session/state ra ngoài (Redis, DB). Khi đó bất kỳ instance nào cũng xử lý được request, không cần sticky session.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">3. Vertical vs Horizontal Scaling</h2>
+    <table class="cmp">
+        <tr><th></th><th>Vertical (scale up)</th><th>Horizontal (scale out)</th></tr>
+        <tr><td>Cách làm</td><td>Máy mạnh hơn (CPU/RAM)</td><td>Thêm nhiều máy</td></tr>
+        <tr><td>Giới hạn</td><td>Trần phần cứng, downtime khi nâng</td><td>Gần như vô hạn</td></tr>
+        <tr><td>Độ phức tạp</td><td>Thấp &mdash; code không đổi</td><td>Cao &mdash; cần stateless, LB, dữ liệu phân tán</td></tr>
+        <tr><td>Fault tolerance</td><td>Thấp &mdash; single point</td><td>Cao &mdash; mất 1 node vẫn chạy</td></tr>
+        <tr><td>Chi phí</td><td>Tăng phi tuyến (máy "khủng" rất đắt)</td><td>Tuyến tính, dùng máy thường</td></tr>
+    </table>
+    <div class="callout warn">
+        <strong>⚠️ Scale ngang trước hết phải giải bài toán state.</strong> Session in-memory, cache local, file upload lên disk local &mdash; tất cả phá vỡ khi nhiều instance. Đẩy state ra Redis/blob storage/DB trước khi scale out.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">4. Caching nhiều tầng</h2>
+    <p class="ut-sub">Cache giảm tải DB và độ trễ. Mỗi tầng đánh đổi tốc độ vs độ mới của dữ liệu.</p>
+    <div class="tiers">
+        <div class="t"><strong>1. Browser / Client cache</strong> &mdash; HTTP <code>Cache-Control</code>, ETag. Nhanh nhất, gần user nhất.</div>
+        <div class="t"><strong>2. CDN</strong> &mdash; static asset + edge cache. Giảm latency địa lý.</div>
+        <div class="t"><strong>3. Reverse proxy / API gateway</strong> &mdash; cache response (Varnish, Nginx).</div>
+        <div class="t"><strong>4. Application in-memory</strong> &mdash; <code>IMemoryCache</code>, rất nhanh nhưng riêng từng instance.</div>
+        <div class="t"><strong>5. Distributed cache</strong> &mdash; Redis, dùng chung cho mọi instance.</div>
+        <div class="t"><strong>6. Database cache</strong> &mdash; query cache, buffer pool của chính DB.</div>
+    </div>
+
+    <h3 style="color:var(--ut-primary-2)">Cache-Aside (lazy loading) &mdash; phổ biến nhất</h3>
+    <pre class="cb"><span class="k">public async</span> Task&lt;<span class="t">Product</span>?&gt; <span class="n">GetAsync</span>(<span class="k">int</span> id, CancellationToken ct)
+{
+    <span class="k">var</span> key = <span class="s">$"product:{id}"</span>;
+
+    <span class="c">// 1. Thử đọc cache</span>
+    <span class="k">var</span> cached = <span class="k">await</span> _cache.GetStringAsync(key, ct);
+    <span class="k">if</span> (cached <span class="k">is not null</span>)
+        <span class="k">return</span> JsonSerializer.Deserialize&lt;<span class="t">Product</span>&gt;(cached);
+
+    <span class="c">// 2. Miss → đọc DB</span>
+    <span class="k">var</span> product = <span class="k">await</span> _db.Products.FindAsync(<span class="k">new</span> <span class="k">object</span>[] { id }, ct);
+    <span class="k">if</span> (product <span class="k">is null</span>) <span class="k">return null</span>;
+
+    <span class="c">// 3. Ghi lại cache với TTL</span>
+    <span class="k">await</span> _cache.SetStringAsync(key, JsonSerializer.Serialize(product),
+        <span class="k">new</span> DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(<span class="s">10</span>)
+        }, ct);
+
+    <span class="k">return</span> product;
+}</pre>
+
+    <div class="ut-grid ut-grid-3">
+        <div class="do-dont dont">
+            <h4>❌ Cache stampede</h4>
+            <p>Key hết hạn &rarr; nghìn request cùng miss, cùng đập DB. Fix: lock/single-flight, jitter TTL, refresh-ahead.</p>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Stale data</h4>
+            <p>Quên invalidate khi update. Fix: xoá/ghi cache khi write (write-through hoặc xoá key).</p>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Cache mọi thứ</h4>
+            <p>Cache data đổi liên tục &rarr; hit rate thấp, phức tạp. Chỉ cache data đọc nhiều, đổi ít.</p>
+        </div>
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">5. Database: Read Replica &amp; Sharding</h2>
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h4>📖 Read Replica (scale read)</h4>
+            <p>Primary nhận write, replicate sang nhiều replica chỉ-đọc. Route query đọc sang replica.</p>
+            <div class="flow">
+                <div class="node app">Writes</div>
+                <span class="arrow">&rarr;</span>
+                <div class="node db">Primary</div>
+                <span class="arrow">&rarr;</span>
+                <div class="stack">
+                    <div class="node db">Replica 1 (read)</div>
+                    <div class="node db">Replica 2 (read)</div>
+                </div>
+            </div>
+            <p style="font-size:.85rem"><strong>Lưu ý:</strong> replication lag &rarr; replica có thể cũ vài ms-giây (eventual). Read-your-write phải đọc từ primary.</p>
+        </div>
+        <div class="ut-card">
+            <h4>🧩 Sharding (scale write + storage)</h4>
+            <p>Chia dữ liệu thành các shard theo shard key. Mỗi shard là một DB độc lập.</p>
+            <ul>
+                <li><strong>Range</strong>: theo khoảng (A-M, N-Z) &mdash; dễ hot-spot</li>
+                <li><strong>Hash</strong>: hash(key) % N &mdash; đều nhưng khó re-shard</li>
+                <li><strong>Consistent hashing</strong>: thêm/bớt shard ít di chuyển dữ liệu</li>
+                <li><strong>Directory</strong>: bảng tra cứu key &rarr; shard</li>
+            </ul>
+        </div>
+    </div>
+    <div class="callout danger">
+        <strong>Sharding rất đắt về độ phức tạp:</strong> mất JOIN cross-shard, transaction phân tán, query fan-out, re-balancing đau đớn. Chỉ shard khi đã hết cách (replica, partition, vertical). Chọn shard key cẩn thận &mdash; sai là phải migrate toàn bộ.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">6. Consistency Models</h2>
+    <table class="cmp">
+        <tr><th>Mô hình</th><th>Đảm bảo</th><th>Dùng khi</th></tr>
+        <tr><td>Strong consistency</td><td>Đọc luôn thấy write mới nhất</td><td>Tài khoản ngân hàng, tồn kho, đặt vé</td></tr>
+        <tr><td>Eventual consistency</td><td>Hội tụ sau một lúc, tạm thời có thể cũ</td><td>Lượt like, feed mạng xã hội, view count</td></tr>
+        <tr><td>Read-your-writes</td><td>User thấy ngay thay đổi của chính mình</td><td>Sửa profile, đăng bài</td></tr>
+        <tr><td>Monotonic reads</td><td>Không "lùi" về data cũ hơn đã thấy</td><td>Pagination, timeline</td></tr>
+        <tr><td>Causal consistency</td><td>Quan hệ nhân-quả được giữ thứ tự</td><td>Comment-reply, chat</td></tr>
+    </table>
+    <div class="callout tip">
+        <strong>💡 Chọn theo nghiệp vụ, không theo cảm tính:</strong> Số dư tài khoản cần strong; số lượt xem video chấp nhận eventual. Đừng áp strong consistency lên mọi thứ &mdash; nó giết hiệu năng và availability.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">7. Rate Limiting</h2>
+    <p class="ut-sub">Bảo vệ hệ thống khỏi quá tải/abuse. .NET 8+ có middleware <code>RateLimiter</code> built-in.</p>
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h4>Thuật toán</h4>
+            <ul>
+                <li><strong>Token bucket</strong>: bucket nạp token đều, request tiêu token &mdash; cho phép burst</li>
+                <li><strong>Fixed window</strong>: N request / khoảng &mdash; đơn giản, có "boundary spike"</li>
+                <li><strong>Sliding window</strong>: cửa sổ trượt, mượt hơn fixed</li>
+                <li><strong>Leaky bucket</strong>: xử lý đều theo nhịp cố định</li>
+            </ul>
+        </div>
+        <div class="ut-card">
+            <h4>Phân tán</h4>
+            <p>Nhiều instance &rarr; counter phải dùng chung (Redis) để giới hạn toàn cục, không phải per-instance. Trả <code>429 Too Many Requests</code> + header <code>Retry-After</code>.</p>
+        </div>
+    </div>
+    <pre class="cb"><span class="c">// Program.cs — ASP.NET Core built-in rate limiter</span>
+builder.Services.AddRateLimiter(o =&gt;
+{
+    o.AddTokenBucketLimiter(<span class="s">"api"</span>, opt =&gt;
+    {
+        opt.TokenLimit = <span class="s">100</span>;             <span class="c">// dung lượng bucket</span>
+        opt.TokensPerPeriod = <span class="s">20</span>;          <span class="c">// nạp 20 token mỗi kỳ</span>
+        opt.ReplenishmentPeriod = TimeSpan.FromSeconds(<span class="s">1</span>);
+        opt.QueueLimit = <span class="s">0</span>;
+    });
+    o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});
+
+app.UseRateLimiter();
+app.MapGet(<span class="s">"/api/data"</span>, () =&gt; Results.Ok()).RequireRateLimiting(<span class="s">"api"</span>);</pre>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">8. Design for Failure</h2>
+    <p class="ut-sub">Mọi thứ sẽ hỏng. Thiết kế để hỏng có kiểm soát, không sập dây chuyền. Trên .NET dùng <strong>Polly</strong> (tích hợp <code>Microsoft.Extensions.Http.Resilience</code> trong .NET 8+).</p>
+    <div class="ut-grid ut-grid-3">
+        <div class="ut-card">
+            <h4>🔁 Retry + backoff</h4>
+            <p>Thử lại lỗi tạm thời với exponential backoff + jitter. Đừng retry lỗi 4xx.</p>
+        </div>
+        <div class="ut-card">
+            <h4>⚡ Circuit breaker</h4>
+            <p>Service downstream lỗi liên tục &rarr; "mở mạch", fail nhanh, không đập service đang chết. Cho nó thời gian hồi phục.</p>
+        </div>
+        <div class="ut-card">
+            <h4>⏱️ Timeout</h4>
+            <p>Mọi call ra ngoài phải có timeout. Không có timeout &rarr; thread treo &rarr; cạn pool &rarr; sập.</p>
+        </div>
+        <div class="ut-card">
+            <h4>🚧 Bulkhead</h4>
+            <p>Cô lập tài nguyên (pool riêng) để một phần lỗi không nuốt hết thread của cả app.</p>
+        </div>
+        <div class="ut-card">
+            <h4>🪂 Graceful degradation</h4>
+            <p>Fallback khi dependency chết: trả cache cũ, giá trị mặc định, tính năng giảm thay vì lỗi trắng.</p>
+        </div>
+        <div class="ut-card">
+            <h4>🩺 Health check + idempotency</h4>
+            <p><code>/health</code> cho LB/k8s. Idempotency key để retry an toàn không tạo trùng.</p>
+        </div>
+    </div>
+    <pre class="cb"><span class="c">// .NET 8+ resilience pipeline (Polly v8) cho HttpClient</span>
+builder.Services.AddHttpClient&lt;<span class="t">PaymentClient</span>&gt;()
+    .AddResilienceHandler(<span class="s">"payment"</span>, b =&gt;
+    {
+        b.AddRetry(<span class="k">new</span> HttpRetryStrategyOptions
+        {
+            MaxRetryAttempts = <span class="s">3</span>,
+            BackoffType = DelayBackoffType.Exponential,
+            UseJitter = <span class="k">true</span>
+        });
+        b.AddCircuitBreaker(<span class="k">new</span> HttpCircuitBreakerStrategyOptions
+        {
+            FailureRatio = <span class="s">0.5</span>,                          <span class="c">// 50% lỗi</span>
+            SamplingDuration = TimeSpan.FromSeconds(<span class="s">10</span>),
+            BreakDuration = TimeSpan.FromSeconds(<span class="s">15</span>)
+        });
+        b.AddTimeout(TimeSpan.FromSeconds(<span class="s">5</span>));
+    });</pre>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">9. Worked Design &mdash; URL Shortener</h2>
+    <p class="ut-sub">Áp dụng tất cả: thiết kế hệ rút gọn URL (như bit.ly) ở quy mô lớn.</p>
+
+    <h3 style="color:var(--ut-primary-2)">Yêu cầu &amp; ước lượng</h3>
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h4>Functional</h4>
+            <ul>
+                <li>POST URL dài &rarr; trả short code</li>
+                <li>GET /{code} &rarr; redirect 301/302</li>
+                <li>Tuỳ chọn: custom alias, hết hạn, analytics</li>
+            </ul>
+        </div>
+        <div class="ut-card">
+            <h4>Ước lượng (back-of-envelope)</h4>
+            <ul>
+                <li>100M URL mới/tháng &asymp; 40 write/s</li>
+                <li>Đọc:ghi = 100:1 &rarr; ~4000 read/s (peak cao hơn)</li>
+                <li>&rArr; <strong>read-heavy</strong> &rarr; ưu tiên cache + replica</li>
+                <li>5 năm &asymp; 6 tỷ URL &rarr; cần code đủ dài</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3 style="color:var(--ut-primary-2)">Short code: Base62</h3>
+    <p class="ut-sub">62 ký tự (a-z A-Z 0-9). 7 ký tự = 62⁷ &asymp; 3.5 nghìn tỷ &mdash; dư cho 6 tỷ. Sinh từ ID tăng dần (encode counter) thay vì hash để tránh trùng.</p>
+    <pre class="cb"><span class="k">public static class</span> <span class="t">Base62</span>
+{
+    <span class="k">private const string</span> Alphabet =
+        <span class="s">"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"</span>;
+
+    <span class="k">public static string</span> <span class="n">Encode</span>(<span class="k">long</span> id)
+    {
+        <span class="k">if</span> (id == <span class="s">0</span>) <span class="k">return</span> <span class="s">"0"</span>;
+        <span class="k">var</span> sb = <span class="k">new</span> StringBuilder();
+        <span class="k">while</span> (id &gt; <span class="s">0</span>)
+        {
+            sb.Insert(<span class="s">0</span>, Alphabet[(<span class="k">int</span>)(id % <span class="s">62</span>)]);
+            id /= <span class="s">62</span>;
+        }
+        <span class="k">return</span> sb.ToString();
+    }
+}</pre>
+
+    <h3 style="color:var(--ut-primary-2)">Kiến trúc tổng thể</h3>
+    <div class="flow">
+        <div class="node">Client</div>
+        <span class="arrow">&rarr;</span>
+        <div class="node lb">CDN + LB</div>
+        <span class="arrow">&rarr;</span>
+        <div class="stack">
+            <div class="node app">API (stateless, N instance)</div>
+        </div>
+        <span class="arrow">&rarr;</span>
+        <div class="stack">
+            <div class="node db">Redis (code→URL)</div>
+            <div class="node db">DB (primary + replica)</div>
+        </div>
+    </div>
+    <ol class="steps">
+        <li><strong>Write</strong>: API lấy ID từ counter/snowflake &rarr; Base62 encode &rarr; lưu DB (primary) &rarr; trả short URL. Ghi cache.</li>
+        <li><strong>Read (redirect)</strong>: tra Redis trước (hit rate rất cao vì read-heavy). Miss &rarr; đọc replica &rarr; nạp lại Redis &rarr; redirect <strong>302</strong> (để đếm được click; 301 bị cache vĩnh viễn ở browser).</li>
+        <li><strong>Scale</strong>: API stateless scale ngang sau LB. DB shard theo code khi vượt một node. Redis cluster cho cache layer.</li>
+        <li><strong>Analytics</strong>: mỗi redirect bắn event async qua message queue (không chặn redirect) &rarr; consumer ghi vào kho analytics.</li>
+        <li><strong>Resilience</strong>: Redis chết &rarr; fallback DB replica (degradation). Counter dùng nhiều range để tránh single point.</li>
+    </ol>
+    <div class="callout info">
+        <strong>Trade-off đã chọn:</strong> Hệ này thiên về <strong>AP + eventual consistency</strong> cho phần đọc (replica lag chấp nhận được &mdash; URL mới tạo trễ vài giây mới redirect được là OK). Phần sinh code cần unique nên counter là CP. Đây là ví dụ thực tế của việc trộn nhiều mô hình theo từng phần.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">🎯 Checklist System Design</h2>
+    <div class="ut-card">
+        <ul>
+            <li>✅ Hiểu CAP/PACELC &mdash; chọn C hay A theo từng phần nghiệp vụ</li>
+            <li>✅ App stateless để scale ngang sau load balancer</li>
+            <li>✅ Caching nhiều tầng; có chiến lược invalidation + chống stampede</li>
+            <li>✅ Read replica trước, sharding chỉ khi bắt buộc</li>
+            <li>✅ Chọn consistency model đúng nhu cầu (strong vs eventual)</li>
+            <li>✅ Rate limiting (phân tán qua Redis), trả 429 + Retry-After</li>
+            <li>✅ Mọi external call có timeout + retry + circuit breaker (Polly)</li>
+            <li>✅ Graceful degradation + health check + idempotency</li>
+            <li>✅ Ước lượng QPS/storage trước khi chọn kiến trúc</li>
+            <li>✅ Ghi rõ trade-off đã chọn &mdash; không có thiết kế "đúng tuyệt đối"</li>
+        </ul>
+    </div>
+</section>
+
+</div>
+
+<footer style="text-align:center;padding:3rem 1.5rem;color:var(--ut-muted);border-top:1px solid var(--ut-border);margin-top:3rem;font-size:.9rem;">
+    <p>System Design · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

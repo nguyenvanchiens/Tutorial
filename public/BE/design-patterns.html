@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOLID & Design Patterns trong C# / .NET — A-Z</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --ut-primary: #512bd4;
+        --ut-primary-2: #8a2be2;
+        --ut-accent: #43e97b;
+        --ut-warn: #f39c12;
+        --ut-danger: #f5576c;
+        --ut-card: #1a1d2e;
+        --ut-card-2: #232640;
+        --ut-border: #2d3148;
+        --ut-text: #e2e8f0;
+        --ut-muted: #94a3b8;
+    }
+    .ut-hero { text-align: center; padding: 4rem 1.5rem 3rem; background: radial-gradient(ellipse at top, rgba(81,43,212,.18), transparent 60%); }
+    .ut-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 1rem; }
+    .ut-hero h1 .gradient { background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .ut-hero .hero-badge { display: inline-block; background: rgba(81,43,212,.15); color: var(--ut-primary-2); padding: .4rem 1rem; border-radius: 20px; font-size: .78rem; font-weight: 600; letter-spacing: 1px; margin-bottom: 1.25rem; }
+    .ut-hero p { color: var(--ut-muted); max-width: 820px; margin: 0 auto; }
+    .ut-section { padding: 2.5rem 0; }
+    .ut-title { font-size: 1.7rem; margin-bottom: 1.5rem; position: relative; padding-left: 1rem; color: var(--ut-text); }
+    .ut-title::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 4px; background: linear-gradient(180deg, var(--ut-primary), var(--ut-primary-2)); border-radius: 3px; }
+    .ut-sub { color: var(--ut-muted); margin-bottom: 1.25rem; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+    .ut-grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .ut-grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    .ut-grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .ut-card { background: var(--ut-card); border: 1px solid var(--ut-border); border-radius: 12px; padding: 1.4rem; }
+    .ut-card h3 { color: var(--ut-primary-2); margin-bottom: .6rem; font-size: 1.1rem; }
+    .ut-card h4 { color: var(--ut-accent); margin-bottom: .45rem; font-size: .98rem; }
+    .ut-card p, .ut-card li { color: var(--ut-muted); font-size: .95rem; }
+    .ut-card ul { padding-left: 1.2rem; }
+    .ut-card ul li { margin-bottom: .3rem; }
+    pre.cb { background: #0b1020; border: 1px solid var(--ut-border); border-left: 3px solid var(--ut-primary); border-radius: 8px; padding: 1rem 1.15rem; overflow-x: auto; font-family: 'JetBrains Mono', Consolas, monospace; font-size: .88rem; line-height: 1.6; margin: .75rem 0; color: #d6deeb; }
+    pre.cb .k { color: #c792ea; }
+    pre.cb .s { color: #ecc48d; }
+    pre.cb .c { color: #637777; font-style: italic; }
+    pre.cb .n { color: #82aaff; }
+    pre.cb .t { color: #ffcb8b; }
+    pre.cb .a { color: #7fdbca; }
+    code { background: #2d3148; padding: 2px 6px; border-radius: 4px; font-size: .88em; color: #f8d06b; font-family: 'JetBrains Mono', Consolas, monospace; }
+    .callout { border-radius: 10px; padding: .95rem 1.15rem; margin: 1rem 0; border: 1px solid; }
+    .callout.tip { background: rgba(67,233,123,.07); border-color: var(--ut-accent); }
+    .callout.tip strong { color: var(--ut-accent); }
+    .callout.warn { background: rgba(243,156,18,.07); border-color: var(--ut-warn); }
+    .callout.warn strong { color: var(--ut-warn); }
+    .callout.danger { background: rgba(245,87,108,.07); border-color: var(--ut-danger); }
+    .callout.danger strong { color: var(--ut-danger); }
+    .callout.info { background: rgba(81,43,212,.08); border-color: var(--ut-primary-2); }
+    .callout.info strong { color: var(--ut-primary-2); }
+    table.cmp { width: 100%; border-collapse: collapse; background: var(--ut-card); border-radius: 10px; overflow: hidden; margin: 1rem 0; font-size: .92rem; }
+    table.cmp th, table.cmp td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--ut-border); }
+    table.cmp th { background: var(--ut-card-2); color: var(--ut-primary-2); font-weight: 600; }
+    table.cmp td { color: var(--ut-muted); }
+    table.cmp tr:last-child td { border-bottom: none; }
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; position: relative; padding-left: 2.8rem; margin-bottom: 1rem; }
+    .steps li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 2rem; height: 2rem; background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .do-dont { border-left: 3px solid; padding: 1rem 1.15rem; border-radius: 8px; margin-bottom: 1rem; }
+    .do-dont.do { border-color: var(--ut-accent); background: rgba(67,233,123,.04); }
+    .do-dont.dont { border-color: var(--ut-danger); background: rgba(245,87,108,.04); }
+    .do-dont h4 { margin-bottom: .5rem; }
+    .do-dont.do h4 { color: var(--ut-accent); }
+    .do-dont.dont h4 { color: var(--ut-danger); }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo"><a href="index.html" style="color:inherit;-webkit-text-fill-color:inherit;">.NET<span class="accent">Mastery</span></a></div>
+        <div class="nav-links">
+            <a href="index.html">Roadmap</a>
+            <a href="async.html">Async</a>
+            <a href="rest-design.html">REST API</a>
+            <a href="auth-jwt.html">Auth & JWT</a>
+            <a href="caching.html">Caching</a>
+            <a href="logging.html">Logging</a>
+            <a href="error-handling.html">Error & Resilience</a>
+            <a href="clean-architecture.html">Clean Arch</a>
+            <a href="design-patterns.html" class="nav-active">SOLID & Patterns</a>
+        </div>
+        <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+</nav>
+
+<header class="ut-hero">
+    <div class="hero-badge">NÂNG CAO · INTERMEDIATE</div>
+    <h1>SOLID &amp; <span class="gradient">Design Patterns</span></h1>
+    <p>Năm nguyên lý SOLID và các mẫu thiết kế kinh điển (Repository, Strategy, Factory, Decorator, Mediator, Options) áp dụng đúng cách trong C# / .NET 8/9. Mỗi nguyên lý và pattern đều có ví dụ "xấu vs tốt", code thật chạy được, và lời khuyên "khi nào nên dùng — khi nào đừng". Pattern là công cụ, không phải mục tiêu.</p>
+</header>
+
+<div class="container">
+
+<section class="ut-section">
+    <h2 class="ut-title">Tổng quan</h2>
+    <p class="ut-sub">SOLID là 5 nguyên lý thiết kế hướng đối tượng (Robert C. Martin) giúp code dễ mở rộng, dễ test, dễ bảo trì. Design Patterns là những lời giải đã được kiểm chứng cho các vấn đề lặp đi lặp lại. Mục tiêu cuối cùng không phải "dùng nhiều pattern", mà là code <em>thay đổi rẻ</em> và <em>ít coupling</em>.</p>
+
+    <div class="ut-grid ut-grid-3">
+        <div class="ut-card">
+            <h3>SOLID</h3>
+            <p>SRP, OCP, LSP, ISP, DIP — nền tảng để viết class/interface tốt trước khi nghĩ tới pattern.</p>
+        </div>
+        <div class="ut-card">
+            <h3>Patterns</h3>
+            <p>Repository, Strategy, Factory, Decorator, Mediator — giải pháp tái sử dụng được cho coupling và mở rộng.</p>
+        </div>
+        <div class="ut-card">
+            <h3>.NET built-in</h3>
+            <p>Options pattern, DI container, keyed services — nhiều pattern đã có sẵn trong framework, đừng tự dựng lại.</p>
+        </div>
+    </div>
+
+    <div class="callout info">
+        <strong>Triết lý xuyên suốt:</strong> Áp dụng SOLID/pattern để <em>giải quyết một vấn đề cụ thể</em> (coupling cao, khó test, switch khổng lồ...). Đừng over-engineer. Code đơn giản giải đúng bài toán luôn thắng abstraction thừa.
+    </div>
+</section>
+
+<h2 class="ut-title" style="font-size:2rem;border:0;padding-left:0;margin:1rem 0 .5rem;">PHẦN 1 — SOLID</h2>
+
+<section class="ut-section">
+    <h2 class="ut-title">1. S — Single Responsibility Principle (SRP)</h2>
+    <p class="ut-sub">Một class chỉ nên có <strong>một lý do để thay đổi</strong>. Nói cách khác: một class phục vụ một "actor" / một mục đích. Khi logic nghiệp vụ và việc gửi email trộn vào nhau, mỗi lần đổi template email lại phải sửa class xử lý đơn hàng — sai.</p>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont dont">
+            <h4>❌ Vi phạm SRP</h4>
+            <pre class="cb"><span class="k">public class</span> <span class="t">OrderService</span>
+{
+    <span class="k">public void</span> <span class="n">PlaceOrder</span>(<span class="t">Order</span> order)
+    {
+        <span class="c">// 1. Logic nghiệp vụ</span>
+        _db.Orders.Add(order);
+        _db.SaveChanges();
+
+        <span class="c">// 2. Gửi email — trách nhiệm KHÁC</span>
+        <span class="k">var</span> smtp = <span class="k">new</span> <span class="t">SmtpClient</span>(<span class="s">"smtp.local"</span>);
+        smtp.Send(<span class="k">new</span> <span class="t">MailMessage</span>(
+            <span class="s">"shop@x.com"</span>, order.Email,
+            <span class="s">"Đặt hàng thành công"</span>, <span class="s">"..."</span>));
+    }
+}</pre>
+            <p>Đổi cách lưu DB <em>hoặc</em> đổi nhà cung cấp email đều phải sửa class này → 2 lý do thay đổi.</p>
+        </div>
+        <div class="do-dont do">
+            <h4>✅ Tách trách nhiệm</h4>
+            <pre class="cb"><span class="k">public interface</span> <span class="t">IEmailSender</span>
+{
+    Task <span class="n">SendAsync</span>(<span class="k">string</span> to, <span class="k">string</span> subject, <span class="k">string</span> body);
+}
+
+<span class="k">public class</span> <span class="t">OrderService</span>
+{
+    <span class="k">private readonly</span> <span class="t">AppDbContext</span> _db;
+    <span class="k">private readonly</span> <span class="t">IEmailSender</span> _email;
+
+    <span class="k">public</span> <span class="n">OrderService</span>(<span class="t">AppDbContext</span> db, <span class="t">IEmailSender</span> email)
+        =&gt; (_db, _email) = (db, email);
+
+    <span class="k">public async</span> Task <span class="n">PlaceOrderAsync</span>(<span class="t">Order</span> order, CancellationToken ct)
+    {
+        _db.Orders.Add(order);
+        <span class="k">await</span> _db.SaveChangesAsync(ct);
+        <span class="k">await</span> _email.SendAsync(order.Email,
+            <span class="s">"Đặt hàng thành công"</span>, <span class="s">"..."</span>);
+    }
+}</pre>
+            <p>Nghiệp vụ đơn hàng và việc gửi email tách rời. Đổi SMTP → SendGrid chỉ cần thay implement <code>IEmailSender</code>.</p>
+        </div>
+    </div>
+
+    <div class="callout tip">
+        <strong>💡 Mẹo nhận biết:</strong> nếu mô tả class phải dùng chữ "và" ("lưu đơn <em>và</em> gửi mail <em>và</em> xuất PDF"), nhiều khả năng đang vi phạm SRP. Nhưng đừng cực đoan chẻ nhỏ tới mức mỗi class 1 dòng — SRP là về "lý do thay đổi", không phải "số dòng code".
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">2. O — Open/Closed Principle (OCP)</h2>
+    <p class="ut-sub">Class nên <strong>mở để mở rộng, đóng để sửa đổi</strong>. Khi thêm loại mới mà phải đụng vào một <code>switch</code> khổng lồ ở khắp nơi → vi phạm OCP. Giải pháp: đa hình (polymorphism) / Strategy.</p>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont dont">
+            <h4>❌ Switch phình to mỗi khi thêm loại</h4>
+            <pre class="cb"><span class="k">public decimal</span> <span class="n">Calc</span>(<span class="t">Customer</span> c, <span class="k">decimal</span> total)
+{
+    <span class="k">switch</span> (c.Tier)
+    {
+        <span class="k">case</span> <span class="t">Tier</span>.Regular: <span class="k">return</span> total;
+        <span class="k">case</span> <span class="t">Tier</span>.Silver:  <span class="k">return</span> total * <span class="s">0.95m</span>;
+        <span class="k">case</span> <span class="t">Tier</span>.Gold:    <span class="k">return</span> total * <span class="s">0.90m</span>;
+        <span class="c">// Thêm Platinum =&gt; phải SỬA method này</span>
+        <span class="k">default</span>: <span class="k">return</span> total;
+    }
+}</pre>
+            <p>Mỗi tier mới buộc sửa lại method đã test xong → rủi ro hồi quy.</p>
+        </div>
+        <div class="do-dont do">
+            <h4>✅ Đa hình — thêm loại không sửa code cũ</h4>
+            <pre class="cb"><span class="k">public abstract class</span> <span class="t">CustomerTier</span>
+{
+    <span class="k">public abstract decimal</span> <span class="n">ApplyDiscount</span>(<span class="k">decimal</span> total);
+}
+
+<span class="k">public class</span> <span class="t">GoldTier</span> : <span class="t">CustomerTier</span>
+{
+    <span class="k">public override decimal</span> <span class="n">ApplyDiscount</span>(<span class="k">decimal</span> t)
+        =&gt; t * <span class="s">0.90m</span>;
+}
+<span class="c">// Thêm PlatinumTier = thêm class MỚI, không sửa cái cũ</span>
+<span class="k">public class</span> <span class="t">PlatinumTier</span> : <span class="t">CustomerTier</span>
+{
+    <span class="k">public override decimal</span> <span class="n">ApplyDiscount</span>(<span class="k">decimal</span> t)
+        =&gt; t * <span class="s">0.80m</span>;
+}</pre>
+            <p>Logic tính tiền chỉ gọi <code>tier.ApplyDiscount(total)</code>. Thêm hạng mới = thêm class, không động vào code đã ổn định.</p>
+        </div>
+    </div>
+
+    <div class="callout warn">
+        <strong>⚠️ Đừng cực đoan:</strong> không phải mọi <code>switch</code> đều xấu. Với enum cố định, ít thay đổi, một <code>switch</code> rõ ràng dễ đọc hơn 5 class. Chỉ trừu tượng hóa khi loại thực sự hay thêm/sửa.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">3. L — Liskov Substitution Principle (LSP)</h2>
+    <p class="ut-sub">Đối tượng của lớp con phải <strong>thay thế được</strong> cho lớp cha mà không phá vỡ tính đúng đắn của chương trình. Nếu subtype "ném exception" hoặc "đổi nghĩa" hành vi base → vi phạm LSP. Ví dụ kinh điển: Penguin là Bird nhưng không bay được.</p>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont dont">
+            <h4>❌ Vi phạm LSP (Penguin không bay)</h4>
+            <pre class="cb"><span class="k">public class</span> <span class="t">Bird</span>
+{
+    <span class="k">public virtual void</span> <span class="n">Fly</span>() { <span class="c">/* bay */</span> }
+}
+
+<span class="k">public class</span> <span class="t">Penguin</span> : <span class="t">Bird</span>
+{
+    <span class="k">public override void</span> <span class="n">Fly</span>()
+        =&gt; <span class="k">throw new</span> <span class="t">NotSupportedException</span>(); <span class="c">// 💥</span>
+}
+
+<span class="c">// Code dùng List&lt;Bird&gt; gọi .Fly() sẽ nổ với Penguin</span></pre>
+            <p>Penguin "là" Bird về mặt phân loại, nhưng phá hợp đồng <code>Fly()</code> của base → người dùng base bị bất ngờ.</p>
+        </div>
+        <div class="do-dont do">
+            <h4>✅ Tách khả năng bằng abstraction đúng</h4>
+            <pre class="cb"><span class="k">public abstract class</span> <span class="t">Bird</span>
+{
+    <span class="k">public abstract void</span> <span class="n">Eat</span>();
+}
+
+<span class="k">public interface</span> <span class="t">IFlying</span>
+{
+    <span class="k">void</span> <span class="n">Fly</span>();
+}
+
+<span class="k">public class</span> <span class="t">Sparrow</span> : <span class="t">Bird</span>, <span class="t">IFlying</span>
+{
+    <span class="k">public override void</span> <span class="n">Eat</span>() { }
+    <span class="k">public void</span> <span class="n">Fly</span>() { <span class="c">/* bay */</span> }
+}
+
+<span class="k">public class</span> <span class="t">Penguin</span> : <span class="t">Bird</span> <span class="c">// không implement IFlying</span>
+{
+    <span class="k">public override void</span> <span class="n">Eat</span>() { }
+}</pre>
+            <p>Chỉ con vật biết bay mới implement <code>IFlying</code>. Không có chỗ nào gọi <code>Fly()</code> trên Penguin được nữa.</p>
+        </div>
+    </div>
+
+    <div class="callout info">
+        <strong>Square/Rectangle:</strong> ví dụ khác — <code>Square</code> kế thừa <code>Rectangle</code> rồi override setter Width/Height để luôn bằng nhau, làm test <code>rect.Width=5; rect.Height=4; Assert(Area==20)</code> sai. Bài học: kế thừa phải giữ nguyên hợp đồng hành vi (precondition không mạnh hơn, postcondition không yếu hơn).
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">4. I — Interface Segregation Principle (ISP)</h2>
+    <p class="ut-sub">Client không nên bị buộc phụ thuộc vào method nó không dùng. Thay vì một interface "béo" <code>IMachine</code> ép mọi máy phải implement cả in, scan, fax → tách thành các interface nhỏ chuyên biệt.</p>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont dont">
+            <h4>❌ Interface béo (fat interface)</h4>
+            <pre class="cb"><span class="k">public interface</span> <span class="t">IMachine</span>
+{
+    <span class="k">void</span> <span class="n">Print</span>(<span class="t">Document</span> d);
+    <span class="k">void</span> <span class="n">Scan</span>(<span class="t">Document</span> d);
+    <span class="k">void</span> <span class="n">Fax</span>(<span class="t">Document</span> d);
+}
+
+<span class="c">// Máy in thường buộc phải implement Scan/Fax vô nghĩa</span>
+<span class="k">public class</span> <span class="t">SimplePrinter</span> : <span class="t">IMachine</span>
+{
+    <span class="k">public void</span> <span class="n">Print</span>(<span class="t">Document</span> d) { }
+    <span class="k">public void</span> <span class="n">Scan</span>(<span class="t">Document</span> d)
+        =&gt; <span class="k">throw new</span> <span class="t">NotSupportedException</span>(); <span class="c">// 💥</span>
+    <span class="k">public void</span> <span class="n">Fax</span>(<span class="t">Document</span> d)
+        =&gt; <span class="k">throw new</span> <span class="t">NotSupportedException</span>();
+}</pre>
+        </div>
+        <div class="do-dont do">
+            <h4>✅ Interface nhỏ, chuyên biệt</h4>
+            <pre class="cb"><span class="k">public interface</span> <span class="t">IPrinter</span> { <span class="k">void</span> <span class="n">Print</span>(<span class="t">Document</span> d); }
+<span class="k">public interface</span> <span class="t">IScanner</span> { <span class="k">void</span> <span class="n">Scan</span>(<span class="t">Document</span> d); }
+
+<span class="c">// Máy in chỉ cần IPrinter</span>
+<span class="k">public class</span> <span class="t">SimplePrinter</span> : <span class="t">IPrinter</span>
+{
+    <span class="k">public void</span> <span class="n">Print</span>(<span class="t">Document</span> d) { }
+}
+
+<span class="c">// Máy đa năng implement nhiều interface</span>
+<span class="k">public class</span> <span class="t">AllInOne</span> : <span class="t">IPrinter</span>, <span class="t">IScanner</span>
+{
+    <span class="k">public void</span> <span class="n">Print</span>(<span class="t">Document</span> d) { }
+    <span class="k">public void</span> <span class="n">Scan</span>(<span class="t">Document</span> d) { }
+}</pre>
+            <p>Client chỉ phụ thuộc đúng thứ nó cần. Không còn method "ném exception cho có".</p>
+        </div>
+    </div>
+
+    <div class="callout tip">
+        <strong>💡 ISP và DI:</strong> interface nhỏ giúp mock dễ hơn khi unit test, và đăng ký DI rõ ràng hơn. Nhưng đừng tạo interface 1 method cho <em>mọi</em> class — chỉ tách khi có nhiều implement hoặc cần ranh giới rõ ràng.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">5. D — Dependency Inversion Principle (DIP)</h2>
+    <p class="ut-sub">Module cấp cao không phụ thuộc module cấp thấp; cả hai phụ thuộc vào <strong>abstraction</strong>. Cụ thể: service không <code>new</code> trực tiếp <code>SqlRepository</code>, mà nhận <code>IRepository</code> qua constructor; DI container lo việc cung cấp implement.</p>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont dont">
+            <h4>❌ Phụ thuộc cụ thể (new trực tiếp)</h4>
+            <pre class="cb"><span class="k">public class</span> <span class="t">ReportService</span>
+{
+    <span class="k">private readonly</span> <span class="t">SqlUserRepository</span> _repo
+        = <span class="k">new</span> <span class="t">SqlUserRepository</span>(); <span class="c">// cứng nhắc</span>
+
+    <span class="k">public</span> <span class="t">Report</span> <span class="n">Build</span>()
+        =&gt; <span class="k">new</span>(_repo.GetAll());
+}</pre>
+            <p>Không thể test với fake repo, không đổi được sang Mongo/in-memory, coupling chặt với SQL.</p>
+        </div>
+        <div class="do-dont do">
+            <h4>✅ Inject abstraction qua constructor</h4>
+            <pre class="cb"><span class="k">public interface</span> <span class="t">IUserRepository</span>
+{
+    Task&lt;<span class="t">IReadOnlyList</span>&lt;<span class="t">User</span>&gt;&gt; <span class="n">GetAllAsync</span>(CancellationToken ct);
+}
+
+<span class="k">public class</span> <span class="t">ReportService</span>
+{
+    <span class="k">private readonly</span> <span class="t">IUserRepository</span> _repo;
+    <span class="k">public</span> <span class="n">ReportService</span>(<span class="t">IUserRepository</span> repo) =&gt; _repo = repo;
+
+    <span class="k">public async</span> Task&lt;<span class="t">Report</span>&gt; <span class="n">BuildAsync</span>(CancellationToken ct)
+        =&gt; <span class="k">new</span>(<span class="k">await</span> _repo.GetAllAsync(ct));
+}</pre>
+        </div>
+    </div>
+
+    <pre class="cb"><span class="c">// Program.cs (.NET 8/9) — đăng ký abstraction =&gt; implement</span>
+<span class="k">var</span> builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddScoped&lt;<span class="t">IUserRepository</span>, <span class="t">SqlUserRepository</span>&gt;();
+builder.Services.AddScoped&lt;<span class="t">ReportService</span>&gt;();
+
+<span class="c">// DI container tự "inject" SqlUserRepository vào ReportService.</span>
+<span class="c">// Khi test: đăng ký FakeUserRepository thay thế.</span></pre>
+
+    <div class="callout info">
+        <strong>DIP ≠ "luôn tạo interface":</strong> DIP nói về <em>chiều phụ thuộc</em>. DI container (<code>Microsoft.Extensions.DependencyInjection</code>) là cơ chế hiện thực DIP phổ biến nhất trong .NET. Lifetime đúng (Singleton / Scoped / Transient) cũng quan trọng như chính việc inject.
+    </div>
+</section>
+
+<h2 class="ut-title" style="font-size:2rem;border:0;padding-left:0;margin:1rem 0 .5rem;">PHẦN 2 — DESIGN PATTERNS</h2>
+
+<section class="ut-section">
+    <h2 class="ut-title">6. Repository Pattern</h2>
+    <p class="ut-sub"><strong>Mục đích:</strong> trừu tượng hóa lớp truy cập dữ liệu, để nghiệp vụ không phụ thuộc trực tiếp vào EF Core / SQL. Tách persistence khỏi domain, dễ test, dễ đổi nguồn dữ liệu.</p>
+
+    <pre class="cb"><span class="k">public interface</span> <span class="t">IRepository</span>&lt;<span class="t">T</span>&gt; <span class="k">where</span> <span class="t">T</span> : <span class="k">class</span>
+{
+    Task&lt;<span class="t">T</span>?&gt; <span class="n">GetByIdAsync</span>(<span class="k">int</span> id, CancellationToken ct);
+    Task&lt;<span class="t">IReadOnlyList</span>&lt;<span class="t">T</span>&gt;&gt; <span class="n">ListAsync</span>(CancellationToken ct);
+    Task <span class="n">AddAsync</span>(<span class="t">T</span> entity, CancellationToken ct);
+    <span class="k">void</span> <span class="n">Remove</span>(<span class="t">T</span> entity);
+}
+
+<span class="k">public class</span> <span class="t">EfRepository</span>&lt;<span class="t">T</span>&gt; : <span class="t">IRepository</span>&lt;<span class="t">T</span>&gt; <span class="k">where</span> <span class="t">T</span> : <span class="k">class</span>
+{
+    <span class="k">private readonly</span> <span class="t">AppDbContext</span> _db;
+    <span class="k">public</span> <span class="n">EfRepository</span>(<span class="t">AppDbContext</span> db) =&gt; _db = db;
+
+    <span class="k">public</span> Task&lt;<span class="t">T</span>?&gt; <span class="n">GetByIdAsync</span>(<span class="k">int</span> id, CancellationToken ct)
+        =&gt; _db.Set&lt;<span class="t">T</span>&gt;().FindAsync(<span class="k">new object</span>[] { id }, ct).AsTask();
+
+    <span class="k">public async</span> Task&lt;<span class="t">IReadOnlyList</span>&lt;<span class="t">T</span>&gt;&gt; <span class="n">ListAsync</span>(CancellationToken ct)
+        =&gt; <span class="k">await</span> _db.Set&lt;<span class="t">T</span>&gt;().ToListAsync(ct);
+
+    <span class="k">public async</span> Task <span class="n">AddAsync</span>(<span class="t">T</span> e, CancellationToken ct)
+        =&gt; <span class="k">await</span> _db.Set&lt;<span class="t">T</span>&gt;().AddAsync(e, ct);
+
+    <span class="k">public void</span> <span class="n">Remove</span>(<span class="t">T</span> e) =&gt; _db.Set&lt;<span class="t">T</span>&gt;().Remove(e);
+}</pre>
+
+    <div class="callout danger">
+        <strong>⚠️ Cảnh báo quan trọng:</strong> <code>DbContext</code> của EF Core <em>đã là</em> Unit of Work + Repository (mỗi <code>DbSet&lt;T&gt;</code> là một repository, <code>SaveChanges</code> là UoW). Bọc một lớp <code>IRepository&lt;T&gt;</code> mỏng dính chỉ chuyển tiếp gọi sang DbContext thường là <strong>abstraction vô nghĩa</strong>: bạn mất sức mạnh của LINQ/<code>IQueryable</code>, Include, projection... mà chẳng được gì. Chỉ dùng Repository khi thật sự cần ẩn EF khỏi domain hoặc gom query phức tạp lại một chỗ.
+    </div>
+
+    <div class="callout tip">
+        <strong>💡 Khi nào dùng:</strong> khi muốn domain layer không biết tới EF Core (Clean Architecture), khi cần tập trung query phức tạp/đặc tả (Specification pattern), hoặc khi có nhiều nguồn dữ liệu. Nếu app CRUD đơn giản → dùng thẳng <code>DbContext</code> trong service cũng hoàn toàn ổn.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">7. Strategy Pattern</h2>
+    <p class="ut-sub"><strong>Mục đích:</strong> đóng gói một họ thuật toán có thể hoán đổi cho nhau và chọn lúc runtime. Đây chính là cách hiện thực OCP. Ví dụ: chọn cách tính phí ship theo loại vận chuyển.</p>
+
+    <pre class="cb"><span class="k">public interface</span> <span class="t">IShippingCostStrategy</span>
+{
+    <span class="k">decimal</span> <span class="n">Calculate</span>(<span class="t">Order</span> order);
+}
+
+<span class="k">public class</span> <span class="t">StandardShipping</span> : <span class="t">IShippingCostStrategy</span>
+{
+    <span class="k">public decimal</span> <span class="n">Calculate</span>(<span class="t">Order</span> o) =&gt; o.Weight * <span class="s">1.0m</span>;
+}
+
+<span class="k">public class</span> <span class="t">ExpressShipping</span> : <span class="t">IShippingCostStrategy</span>
+{
+    <span class="k">public decimal</span> <span class="n">Calculate</span>(<span class="t">Order</span> o) =&gt; o.Weight * <span class="s">2.5m</span> + <span class="s">10m</span>;
+}
+
+<span class="c">// Context chọn strategy lúc runtime</span>
+<span class="k">public class</span> <span class="t">CheckoutService</span>
+{
+    <span class="k">public decimal</span> <span class="n">GetShipping</span>(<span class="t">Order</span> o, <span class="t">IShippingCostStrategy</span> strategy)
+        =&gt; strategy.Calculate(o);
+}</pre>
+
+    <div class="callout tip">
+        <strong>💡 Khi nào dùng:</strong> khi có nhiều cách làm cùng một việc và muốn chọn động (theo cấu hình, theo input người dùng), hoặc để thay <code>if/switch</code> phình to. Trong .NET, Strategy thường kết hợp với DI + keyed services (xem phần Factory) để resolve đúng implement theo key.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">8. Factory Pattern</h2>
+    <p class="ut-sub"><strong>Mục đích:</strong> tách việc <em>tạo</em> đối tượng ra khỏi nơi <em>dùng</em> nó. Factory Method để lớp con quyết định tạo gì; Abstract Factory tạo cả họ sản phẩm. Trong .NET 8/9, thường thay bằng <strong>keyed services</strong> rất gọn.</p>
+
+    <h3 class="ut-sub" style="color:var(--ut-primary-2);">Cách cổ điển: INotificationFactory</h3>
+    <pre class="cb"><span class="k">public interface</span> <span class="t">INotificationSender</span> { Task <span class="n">SendAsync</span>(<span class="k">string</span> msg); }
+<span class="k">public class</span> <span class="t">EmailSender</span> : <span class="t">INotificationSender</span> { <span class="k">public</span> Task <span class="n">SendAsync</span>(<span class="k">string</span> m) =&gt; Task.CompletedTask; }
+<span class="k">public class</span> <span class="t">SmsSender</span>   : <span class="t">INotificationSender</span> { <span class="k">public</span> Task <span class="n">SendAsync</span>(<span class="k">string</span> m) =&gt; Task.CompletedTask; }
+
+<span class="k">public interface</span> <span class="t">INotificationFactory</span>
+{
+    <span class="t">INotificationSender</span> <span class="n">Create</span>(<span class="t">NotificationChannel</span> channel);
+}
+
+<span class="k">public class</span> <span class="t">NotificationFactory</span> : <span class="t">INotificationFactory</span>
+{
+    <span class="k">private readonly</span> <span class="t">IServiceProvider</span> _sp;
+    <span class="k">public</span> <span class="n">NotificationFactory</span>(<span class="t">IServiceProvider</span> sp) =&gt; _sp = sp;
+
+    <span class="k">public</span> <span class="t">INotificationSender</span> <span class="n">Create</span>(<span class="t">NotificationChannel</span> c) =&gt; c <span class="k">switch</span>
+    {
+        <span class="t">NotificationChannel</span>.Email =&gt; _sp.GetRequiredService&lt;<span class="t">EmailSender</span>&gt;(),
+        <span class="t">NotificationChannel</span>.Sms   =&gt; _sp.GetRequiredService&lt;<span class="t">SmsSender</span>&gt;(),
+        _ =&gt; <span class="k">throw new</span> <span class="t">ArgumentOutOfRangeException</span>(<span class="k">nameof</span>(c))
+    };
+}</pre>
+
+    <h3 class="ut-sub" style="color:var(--ut-primary-2);">Cách .NET 8+: Keyed Services (gọn hơn)</h3>
+    <pre class="cb"><span class="c">// Program.cs — đăng ký theo key</span>
+builder.Services.AddKeyedScoped&lt;<span class="t">INotificationSender</span>, <span class="t">EmailSender</span>&gt;(<span class="s">"email"</span>);
+builder.Services.AddKeyedScoped&lt;<span class="t">INotificationSender</span>, <span class="t">SmsSender</span>&gt;(<span class="s">"sms"</span>);
+
+<span class="c">// Resolve theo key — không cần tự viết factory</span>
+<span class="k">public class</span> <span class="t">AlertService</span>
+{
+    <span class="k">private readonly</span> <span class="t">IServiceProvider</span> _sp;
+    <span class="k">public</span> <span class="n">AlertService</span>(<span class="t">IServiceProvider</span> sp) =&gt; _sp = sp;
+
+    <span class="k">public</span> Task <span class="n">NotifyAsync</span>(<span class="k">string</span> channel, <span class="k">string</span> msg)
+    {
+        <span class="k">var</span> sender = _sp.GetRequiredKeyedService&lt;<span class="t">INotificationSender</span>&gt;(channel);
+        <span class="k">return</span> sender.SendAsync(msg);
+    }
+}
+
+<span class="c">// Hoặc inject thẳng bằng attribute [FromKeyedServices]</span>
+<span class="k">public</span> <span class="n">SomeCtor</span>([<span class="a">FromKeyedServices</span>(<span class="s">"email"</span>)] <span class="t">INotificationSender</span> email) { }</pre>
+
+    <div class="callout tip">
+        <strong>💡 Khi nào dùng:</strong> khi loại đối tượng tạo ra phụ thuộc runtime (kênh gửi, loại file, nhà cung cấp thanh toán). Ưu tiên keyed services của .NET 8/9 thay vì tự viết factory thủ công — ít code, tận dụng DI lifetime.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">9. Decorator Pattern</h2>
+    <p class="ut-sub"><strong>Mục đích:</strong> bọc thêm hành vi (caching, logging, retry, validation) quanh một object <em>mà không sửa</em> object gốc, bằng cách implement cùng interface và "ôm" instance gốc bên trong. Tuân thủ OCP tuyệt đối.</p>
+
+    <pre class="cb"><span class="c">// Implement gốc</span>
+<span class="k">public class</span> <span class="t">ProductRepository</span> : <span class="t">IProductRepository</span>
+{
+    <span class="k">private readonly</span> <span class="t">AppDbContext</span> _db;
+    <span class="k">public</span> <span class="n">ProductRepository</span>(<span class="t">AppDbContext</span> db) =&gt; _db = db;
+    <span class="k">public</span> Task&lt;<span class="t">Product</span>?&gt; <span class="n">GetAsync</span>(<span class="k">int</span> id, CancellationToken ct)
+        =&gt; _db.Products.FindAsync(<span class="k">new object</span>[] { id }, ct).AsTask();
+}
+
+<span class="c">// Decorator: thêm cache mà KHÔNG sửa ProductRepository</span>
+<span class="k">public class</span> <span class="t">CachedProductRepository</span> : <span class="t">IProductRepository</span>
+{
+    <span class="k">private readonly</span> <span class="t">IProductRepository</span> _inner;   <span class="c">// object gốc</span>
+    <span class="k">private readonly</span> <span class="t">IMemoryCache</span> _cache;
+
+    <span class="k">public</span> <span class="n">CachedProductRepository</span>(<span class="t">IProductRepository</span> inner, <span class="t">IMemoryCache</span> cache)
+        =&gt; (_inner, _cache) = (inner, cache);
+
+    <span class="k">public async</span> Task&lt;<span class="t">Product</span>?&gt; <span class="n">GetAsync</span>(<span class="k">int</span> id, CancellationToken ct)
+    {
+        <span class="k">if</span> (_cache.TryGetValue(id, <span class="k">out</span> <span class="t">Product</span>? p)) <span class="k">return</span> p;
+        p = <span class="k">await</span> _inner.GetAsync(id, ct);   <span class="c">// gọi xuống gốc</span>
+        _cache.Set(id, p, TimeSpan.FromMinutes(<span class="s">5</span>));
+        <span class="k">return</span> p;
+    }
+}</pre>
+
+    <pre class="cb"><span class="c">// Đăng ký decorator bằng Scrutor (gói NuGet phổ biến)</span>
+builder.Services.AddScoped&lt;<span class="t">IProductRepository</span>, <span class="t">ProductRepository</span>&gt;();
+builder.Services.Decorate&lt;<span class="t">IProductRepository</span>, <span class="t">CachedProductRepository</span>&gt;();
+<span class="c">// Có thể chồng nhiều lớp: Decorate logging rồi Decorate cache...</span></pre>
+
+    <div class="callout info">
+        <strong>Scrutor:</strong> DI container mặc định của .NET không có <code>Decorate()</code> sẵn. Gói <code>Scrutor</code> bổ sung method này (và scan assembly tự đăng ký). Không có Scrutor thì phải tự đăng ký factory bọc tay. <strong>Khi nào dùng:</strong> thêm cross-cutting concern (cache, log, retry, đo thời gian) mà không làm bẩn class nghiệp vụ.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">10. Mediator Pattern (MediatR + CQRS)</h2>
+    <p class="ut-sub"><strong>Mục đích:</strong> giảm coupling giữa các thành phần — chúng không gọi trực tiếp nhau mà gửi message qua một "mediator". Trong .NET, thư viện <code>MediatR</code> hiện thực pattern này, rất hợp với CQRS: mỗi thao tác là một <code>IRequest</code> có một <code>IRequestHandler</code> riêng.</p>
+
+    <pre class="cb"><span class="c">// 1. Command (request) — là một thao tác có ý định rõ ràng</span>
+<span class="k">public record</span> <span class="t">CreateOrderCommand</span>(<span class="k">int</span> CustomerId, <span class="k">decimal</span> Total)
+    : <span class="t">IRequest</span>&lt;<span class="t">Guid</span>&gt;;   <span class="c">// trả về Guid (Id đơn mới)</span>
+
+<span class="c">// 2. Handler — chứa logic xử lý command đó</span>
+<span class="k">public class</span> <span class="t">CreateOrderHandler</span>
+    : <span class="t">IRequestHandler</span>&lt;<span class="t">CreateOrderCommand</span>, <span class="t">Guid</span>&gt;
+{
+    <span class="k">private readonly</span> <span class="t">AppDbContext</span> _db;
+    <span class="k">public</span> <span class="n">CreateOrderHandler</span>(<span class="t">AppDbContext</span> db) =&gt; _db = db;
+
+    <span class="k">public async</span> Task&lt;<span class="t">Guid</span>&gt; <span class="n">Handle</span>(
+        <span class="t">CreateOrderCommand</span> cmd, CancellationToken ct)
+    {
+        <span class="k">var</span> order = <span class="k">new</span> <span class="t">Order</span>(cmd.CustomerId, cmd.Total);
+        _db.Orders.Add(order);
+        <span class="k">await</span> _db.SaveChangesAsync(ct);
+        <span class="k">return</span> order.Id;
+    }
+}
+
+<span class="c">// 3. Controller chỉ gửi command, KHÔNG biết handler nào xử lý</span>
+[<span class="a">ApiController</span>, <span class="a">Route</span>(<span class="s">"orders"</span>)]
+<span class="k">public class</span> <span class="t">OrdersController</span> : <span class="t">ControllerBase</span>
+{
+    <span class="k">private readonly</span> <span class="t">IMediator</span> _mediator;
+    <span class="k">public</span> <span class="n">OrdersController</span>(<span class="t">IMediator</span> m) =&gt; _mediator = m;
+
+    [<span class="a">HttpPost</span>]
+    <span class="k">public async</span> Task&lt;<span class="t">IActionResult</span>&gt; <span class="n">Create</span>(
+        <span class="t">CreateOrderCommand</span> cmd, CancellationToken ct)
+    {
+        <span class="t">Guid</span> id = <span class="k">await</span> _mediator.Send(cmd, ct);
+        <span class="k">return</span> CreatedAtAction(<span class="k">nameof</span>(Create), <span class="k">new</span> { id }, id);
+    }
+}</pre>
+
+    <pre class="cb"><span class="c">// Program.cs — đăng ký MediatR (quét assembly tìm handler)</span>
+builder.Services.AddMediatR(cfg =&gt;
+    cfg.RegisterServicesFromAssembly(<span class="k">typeof</span>(<span class="t">CreateOrderHandler</span>).Assembly));</pre>
+
+    <div class="callout tip">
+        <strong>💡 Khi nào dùng:</strong> app có nhiều use-case rõ ràng, muốn tách handler nhỏ gọn, cần pipeline behavior (validation, logging, transaction) chung. <strong>Lưu ý:</strong> MediatR thêm một lớp gián tiếp — với CRUD nhỏ thì gọi service trực tiếp đơn giản hơn. Đừng dùng MediatR chỉ để "cho giống kiến trúc xịn".
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">11. Options Pattern (.NET native)</h2>
+    <p class="ut-sub"><strong>Mục đích:</strong> bind cấu hình (appsettings.json, env vars, secrets) vào class strongly-typed thay vì đọc <code>IConfiguration["key"]</code> rải rác. Là pattern <em>có sẵn</em> trong .NET — không cần thư viện ngoài.</p>
+
+    <pre class="cb"><span class="c">// appsettings.json</span>
+<span class="c">// "Email": { "From": "shop@x.com", "SmtpHost": "smtp.local", "Port": 587 }</span>
+
+<span class="c">// 1. Class options + validation bằng DataAnnotations</span>
+<span class="k">public class</span> <span class="t">EmailOptions</span>
+{
+    <span class="k">public const string</span> SectionName = <span class="s">"Email"</span>;
+
+    [<span class="a">Required</span>, <span class="a">EmailAddress</span>]
+    <span class="k">public string</span> From { <span class="k">get</span>; <span class="k">set</span>; } = <span class="s">""</span>;
+
+    [<span class="a">Required</span>]
+    <span class="k">public string</span> SmtpHost { <span class="k">get</span>; <span class="k">set</span>; } = <span class="s">""</span>;
+
+    [<span class="a">Range</span>(<span class="s">1</span>, <span class="s">65535</span>)]
+    <span class="k">public int</span> Port { <span class="k">get</span>; <span class="k">set</span>; }
+}</pre>
+
+    <pre class="cb"><span class="c">// 2. Program.cs — bind + validate khi khởi động</span>
+builder.Services
+    .AddOptions&lt;<span class="t">EmailOptions</span>&gt;()
+    .Bind(builder.Configuration.GetSection(<span class="t">EmailOptions</span>.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();   <span class="c">// app fail ngay lúc start nếu config sai</span>
+
+<span class="c">// Cách ngắn gọn tương đương (không ValidateOnStart):</span>
+<span class="c">// builder.Services.Configure&lt;EmailOptions&gt;(</span>
+<span class="c">//     builder.Configuration.GetSection(EmailOptions.SectionName));</span></pre>
+
+    <pre class="cb"><span class="c">// 3. Inject vào service</span>
+<span class="k">public class</span> <span class="t">SmtpEmailSender</span> : <span class="t">IEmailSender</span>
+{
+    <span class="k">private readonly</span> <span class="t">EmailOptions</span> _opt;
+
+    <span class="c">// IOptions&lt;T&gt;: giá trị cố định suốt vòng đời app (Singleton)</span>
+    <span class="k">public</span> <span class="n">SmtpEmailSender</span>(<span class="t">IOptions</span>&lt;<span class="t">EmailOptions</span>&gt; options)
+        =&gt; _opt = options.Value;
+
+    <span class="k">public</span> Task <span class="n">SendAsync</span>(<span class="k">string</span> to, <span class="k">string</span> subject, <span class="k">string</span> body)
+    {
+        <span class="c">// dùng _opt.SmtpHost, _opt.Port, _opt.From...</span>
+        <span class="k">return</span> Task.CompletedTask;
+    }
+}</pre>
+
+    <table class="cmp">
+        <tr><th>Kiểu inject</th><th>Hành vi</th><th>Khi dùng</th></tr>
+        <tr><td><code>IOptions&lt;T&gt;</code></td><td>Đọc 1 lần, cache mãi mãi (Singleton)</td><td>Config không đổi khi runtime; mọi lifetime</td></tr>
+        <tr><td><code>IOptionsSnapshot&lt;T&gt;</code></td><td>Tính lại mỗi request (Scoped)</td><td>Config reload theo request; chỉ Scoped/Transient</td></tr>
+        <tr><td><code>IOptionsMonitor&lt;T&gt;</code></td><td>Theo dõi thay đổi liên tục + <code>OnChange</code></td><td>Singleton cần config nóng (hot reload appsettings)</td></tr>
+    </table>
+
+    <div class="callout tip">
+        <strong>💡 <code>ValidateOnStart()</code>:</strong> luôn bật cho config quan trọng — bạn muốn app <em>không khởi động</em> nếu thiếu connection string hay SMTP host, thay vì chết giữa giờ cao điểm vì <code>NullReferenceException</code>.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">12. Do / Don't — dùng pattern đúng cách</h2>
+
+    <div class="do-dont do">
+        <h4>✅ Bắt đầu từ vấn đề, không từ pattern</h4>
+        <p>Nhận diện "đau" cụ thể (coupling chặt, switch khổng lồ, khó test) rồi mới chọn pattern giải đúng cái đau đó. Pattern là phương tiện, không phải đích đến.</p>
+    </div>
+
+    <div class="do-dont do">
+        <h4>✅ Ưu tiên cơ chế built-in của .NET</h4>
+        <p>DI container, keyed services, Options pattern, <code>IHttpClientFactory</code>, <code>BackgroundService</code>... đã giải nhiều bài toán pattern cổ điển. Dùng chúng trước khi tự dựng.</p>
+    </div>
+
+    <div class="do-dont do">
+        <h4>✅ Giữ abstraction "vừa đủ"</h4>
+        <p>Một interface có ít nhất 2 implement (hoặc một fake để test) thì xứng đáng tồn tại. Interface 1-1 chỉ để "cho có" thường là noise.</p>
+    </div>
+
+    <div class="do-dont dont">
+        <h4>❌ Áp pattern bừa khi không cần</h4>
+        <p>Repository bọc DbContext mỏng, Factory cho thứ chỉ có 1 loại, MediatR cho CRUD 3 endpoint... tạo gián tiếp vô ích, làm code khó đọc hơn.</p>
+    </div>
+
+    <div class="do-dont dont">
+        <h4>❌ Over-abstraction / kiến trúc vũ trụ</h4>
+        <p>Wrap mọi thứ sau interface, 7 lớp gián tiếp cho một lời gọi DB. "Generic repository + service + manager + facade" cho app nhỏ là phản tác dụng.</p>
+    </div>
+
+    <div class="do-dont dont">
+        <h4>❌ Dùng pattern để "trông pro"</h4>
+        <p>Chọn pattern vì nó nổi tiếng chứ không vì nó giải vấn đề của bạn. Đồng nghiệp sẽ trả giá khi bảo trì. YAGNI (You Aren't Gonna Need It) luôn đúng.</p>
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">🎯 Checklist SOLID &amp; Patterns</h2>
+    <div class="ut-card">
+        <ul>
+            <li>✅ Mỗi class có một lý do thay đổi rõ ràng (SRP)</li>
+            <li>✅ Thêm loại mới không phải sửa code đã ổn định (OCP) — dùng đa hình / Strategy</li>
+            <li>✅ Lớp con thay được lớp cha mà không phá hợp đồng (LSP) — không "ném NotSupported"</li>
+            <li>✅ Interface nhỏ, chuyên biệt, client không phụ thuộc method thừa (ISP)</li>
+            <li>✅ Phụ thuộc abstraction, inject qua constructor + DI container (DIP)</li>
+            <li>✅ Không bọc Repository mỏng dính lên DbContext nếu không cần ẩn EF</li>
+            <li>✅ Strategy + keyed services để chọn thuật toán/implement runtime</li>
+            <li>✅ Ưu tiên keyed services (<code>AddKeyedScoped</code>) thay vì factory thủ công</li>
+            <li>✅ Decorator (qua Scrutor) cho cross-cutting concern: cache, log, retry</li>
+            <li>✅ MediatR + CQRS chỉ khi app đủ lớn để hưởng lợi từ handler/pipeline</li>
+            <li>✅ Options pattern + <code>ValidateOnStart()</code> cho mọi config quan trọng</li>
+            <li>✅ Bắt đầu từ vấn đề, không over-engineer — pattern là công cụ, không phải mục tiêu</li>
+        </ul>
+    </div>
+</section>
+
+</div>
+
+<footer style="text-align:center;padding:3rem 1.5rem;color:var(--ut-muted);border-top:1px solid var(--ut-border);margin-top:3rem;font-size:.9rem;">
+    <p>SOLID & Design Patterns · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

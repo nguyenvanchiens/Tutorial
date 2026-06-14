@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C# Fundamentals — Nền tảng C# cho .NET 8/9</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --ut-primary: #512bd4;
+        --ut-primary-2: #8a2be2;
+        --ut-accent: #43e97b;
+        --ut-warn: #f39c12;
+        --ut-danger: #f5576c;
+        --ut-card: #1a1d2e;
+        --ut-card-2: #232640;
+        --ut-border: #2d3148;
+        --ut-text: #e2e8f0;
+        --ut-muted: #94a3b8;
+    }
+
+    .ut-hero {
+        text-align: center;
+        padding: 4rem 1.5rem 3rem;
+        background: radial-gradient(ellipse at top, rgba(81,43,212,.18), transparent 60%);
+    }
+    .ut-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 1rem; }
+    .ut-hero h1 .gradient {
+        background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .ut-hero .hero-badge {
+        display: inline-block;
+        background: rgba(81,43,212,.15);
+        color: var(--ut-primary-2);
+        padding: .4rem 1rem;
+        border-radius: 20px;
+        font-size: .78rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        margin-bottom: 1.25rem;
+    }
+    .ut-hero p { color: var(--ut-muted); max-width: 820px; margin: 0 auto; }
+
+    .ut-section { padding: 2.5rem 0; }
+    .ut-title {
+        font-size: 1.7rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        padding-left: 1rem;
+        color: var(--ut-text);
+    }
+    .ut-title::before {
+        content: '';
+        position: absolute;
+        left: 0; top: 6px; bottom: 6px;
+        width: 4px;
+        background: linear-gradient(180deg, var(--ut-primary), var(--ut-primary-2));
+        border-radius: 3px;
+    }
+    .ut-sub { color: var(--ut-muted); margin-bottom: 1.25rem; }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+
+    .ut-grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .ut-grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    .ut-grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+
+    .ut-card {
+        background: var(--ut-card);
+        border: 1px solid var(--ut-border);
+        border-radius: 12px;
+        padding: 1.4rem;
+    }
+    .ut-card h3 { color: var(--ut-primary-2); margin-bottom: .6rem; font-size: 1.1rem; }
+    .ut-card h4 { color: var(--ut-accent); margin-bottom: .45rem; font-size: .98rem; }
+    .ut-card p, .ut-card li { color: var(--ut-muted); font-size: .95rem; }
+    .ut-card ul { padding-left: 1.2rem; }
+    .ut-card ul li { margin-bottom: .3rem; }
+
+    pre.cb {
+        background: #0b1020;
+        border: 1px solid var(--ut-border);
+        border-left: 3px solid var(--ut-primary);
+        border-radius: 8px;
+        padding: 1rem 1.15rem;
+        overflow-x: auto;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+        font-size: .88rem;
+        line-height: 1.6;
+        margin: .75rem 0;
+        color: #d6deeb;
+    }
+    pre.cb .k { color: #c792ea; }
+    pre.cb .s { color: #ecc48d; }
+    pre.cb .c { color: #637777; font-style: italic; }
+    pre.cb .n { color: #82aaff; }
+    pre.cb .t { color: #ffcb8b; }
+    pre.cb .a { color: #7fdbca; }
+    code {
+        background: #2d3148;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: .88em;
+        color: #f8d06b;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+    }
+
+    .callout {
+        border-radius: 10px;
+        padding: .95rem 1.15rem;
+        margin: 1rem 0;
+        border: 1px solid;
+    }
+    .callout.tip { background: rgba(67,233,123,.07); border-color: var(--ut-accent); }
+    .callout.tip strong { color: var(--ut-accent); }
+    .callout.warn { background: rgba(243,156,18,.07); border-color: var(--ut-warn); }
+    .callout.warn strong { color: var(--ut-warn); }
+    .callout.danger { background: rgba(245,87,108,.07); border-color: var(--ut-danger); }
+    .callout.danger strong { color: var(--ut-danger); }
+    .callout.info { background: rgba(81,43,212,.08); border-color: var(--ut-primary-2); }
+    .callout.info strong { color: var(--ut-primary-2); }
+
+    table.cmp { width: 100%; border-collapse: collapse; background: var(--ut-card); border-radius: 10px; overflow: hidden; margin: 1rem 0; font-size: .92rem; }
+    table.cmp th, table.cmp td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--ut-border); }
+    table.cmp th { background: var(--ut-card-2); color: var(--ut-primary-2); font-weight: 600; }
+    table.cmp td { color: var(--ut-muted); }
+    table.cmp tr:last-child td { border-bottom: none; }
+
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; position: relative; padding-left: 2.8rem; margin-bottom: 1rem; }
+    .steps li::before {
+        content: counter(step);
+        position: absolute; left: 0; top: 0;
+        width: 2rem; height: 2rem;
+        background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2));
+        color: #fff;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700;
+    }
+
+    .do-dont { border-left: 3px solid; padding: 1rem 1.15rem; border-radius: 8px; margin-bottom: 1rem; }
+    .do-dont.do { border-color: var(--ut-accent); background: rgba(67,233,123,.04); }
+    .do-dont.dont { border-color: var(--ut-danger); background: rgba(245,87,108,.04); }
+    .do-dont h4 { margin-bottom: .5rem; }
+    .do-dont.do h4 { color: var(--ut-accent); }
+    .do-dont.dont h4 { color: var(--ut-danger); }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo"><a href="index.html" style="color:inherit;-webkit-text-fill-color:inherit;">.NET<span class="accent">Mastery</span></a></div>
+        <div class="nav-links">
+            <a href="index.html">Roadmap</a>
+            <a href="csharp-basics.html" class="nav-active">C# Basics</a>
+            <a href="oop.html">OOP</a>
+            <a href="linq.html">LINQ</a>
+            <a href="sql-basics.html">SQL</a>
+            <a href="webapi-first.html">Web API</a>
+            <a href="efcore.html">EF Core</a>
+            <a href="di.html">DI</a>
+        </div>
+        <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+</nav>
+
+<header class="ut-hero">
+    <div class="hero-badge">CƠ BẢN · FOUNDATION</div>
+    <h1>Nền tảng <span class="gradient">C#</span> cho .NET 8/9</h1>
+    <p>Tất cả những gì một backend developer cần nắm vững trước khi viết Web API: kiểu dữ liệu &amp; memory model, biến/hằng, control flow hiện đại, collections, exceptions, nullability, records, pattern matching và string handling. Cập nhật cho C# 12/13 và .NET 8/9 năm 2026.</p>
+</header>
+
+<div class="container">
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">1. Kiểu dữ liệu — Value Types vs Reference Types</h2>
+    <p class="ut-sub">Đây là khái niệm nền tảng quan trọng nhất. Hiểu sai chỗ này sẽ dẫn tới bug copy/tham chiếu khó debug. Mọi kiểu trong C# đều thuộc một trong hai nhóm.</p>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h4>📦 Value Type (kiểu giá trị)</h4>
+            <p>Lưu trực tiếp <strong>giá trị</strong>. Khi gán/truyền tham số → <strong>copy toàn bộ dữ liệu</strong>.</p>
+            <ul>
+                <li>Các kiểu số: <code>int</code>, <code>long</code>, <code>double</code>, <code>decimal</code></li>
+                <li><code>bool</code>, <code>char</code></li>
+                <li><code>struct</code> (vd <code>DateTime</code>, <code>Guid</code>)</li>
+                <li><code>enum</code></li>
+                <li>Thường nằm trên <strong>stack</strong> (hoặc inline trong object)</li>
+            </ul>
+        </div>
+        <div class="ut-card">
+            <h4>🔗 Reference Type (kiểu tham chiếu)</h4>
+            <p>Biến chỉ lưu <strong>địa chỉ (reference)</strong> trỏ tới object trên heap. Khi gán → copy địa chỉ, <strong>cùng trỏ 1 object</strong>.</p>
+            <ul>
+                <li><code>class</code>, <code>record</code> (mặc định)</li>
+                <li><code>string</code>, <code>object</code></li>
+                <li>Array, <code>List&lt;T&gt;</code>, delegate</li>
+                <li>Object luôn nằm trên <strong>heap</strong>, do GC quản lý</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3 style="margin-top:1.5rem; color:var(--ut-primary-2)">Copy semantics — minh hoạ rõ ràng</h3>
+    <pre class="cb"><span class="c">// VALUE TYPE — copy giá trị, độc lập hoàn toàn</span>
+<span class="k">int</span> a = <span class="s">10</span>;
+<span class="k">int</span> b = a;        <span class="c">// b nhận BẢN SAO của giá trị 10</span>
+b = <span class="s">20</span>;
+Console.WriteLine(a); <span class="c">// 10  — a KHÔNG đổi</span>
+
+<span class="c">// REFERENCE TYPE — copy địa chỉ, cùng trỏ 1 object</span>
+<span class="k">var</span> list1 = <span class="k">new</span> List&lt;<span class="k">int</span>&gt; { <span class="s">1</span>, <span class="s">2</span>, <span class="s">3</span> };
+<span class="k">var</span> list2 = list1;    <span class="c">// list2 trỏ CÙNG object với list1</span>
+list2.Add(<span class="s">4</span>);
+Console.WriteLine(list1.Count); <span class="c">// 4  — list1 BỊ ảnh hưởng!</span></pre>
+
+    <div class="callout danger">
+        <strong>⚠️ Bug kinh điển:</strong> gán một <code>List&lt;T&gt;</code> / object cho biến khác rồi sửa, tưởng là 2 bản riêng nhưng thực chất là cùng 1 object. Muốn copy thật sự phải tạo collection/object mới: <code>new List&lt;int&gt;(list1)</code>.
+    </div>
+
+    <h3 style="margin-top:1.5rem; color:var(--ut-primary-2)">Built-in types thường dùng</h3>
+    <table class="cmp">
+        <thead>
+            <tr><th>Kiểu C#</th><th>.NET type</th><th>Khoảng / mô tả</th><th>Dùng khi</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>int</code></td><td>Int32</td><td>-2.1 tỷ → 2.1 tỷ (32-bit)</td><td>Số nguyên mặc định</td></tr>
+            <tr><td><code>long</code></td><td>Int64</td><td>64-bit, rất lớn</td><td>ID, timestamp, đếm lớn</td></tr>
+            <tr><td><code>double</code></td><td>Double</td><td>Dấu phẩy động ~15-17 chữ số</td><td>Khoa học, đồ hoạ</td></tr>
+            <tr><td><code>decimal</code></td><td>Decimal</td><td>128-bit, chính xác thập phân</td><td><strong>Tiền tệ, tài chính</strong></td></tr>
+            <tr><td><code>bool</code></td><td>Boolean</td><td><code>true</code> / <code>false</code></td><td>Điều kiện, cờ</td></tr>
+            <tr><td><code>char</code></td><td>Char</td><td>1 ký tự Unicode (UTF-16)</td><td>Xử lý ký tự đơn</td></tr>
+            <tr><td><code>string</code></td><td>String</td><td>Reference type, immutable</td><td>Chuỗi văn bản</td></tr>
+        </tbody>
+    </table>
+
+    <div class="callout warn">
+        <strong>⚠️ Tiền tệ luôn dùng <code>decimal</code>, KHÔNG dùng <code>double</code>:</strong> <code>0.1 + 0.2</code> với <code>double</code> ra <code>0.30000000000000004</code> do sai số nhị phân. <code>decimal</code> lưu chính xác cơ số 10 — an toàn cho giá tiền, kế toán.
+    </div>
+
+    <h3 style="margin-top:1.5rem; color:var(--ut-primary-2)">struct vs class — memory model</h3>
+    <pre class="cb"><span class="c">// STRUCT — value type, copy khi truyền, không null (trừ Nullable)</span>
+<span class="k">public struct</span> <span class="t">Point</span>
+{
+    <span class="k">public</span> <span class="k">int</span> X { <span class="k">get</span>; <span class="k">init</span>; }
+    <span class="k">public</span> <span class="k">int</span> Y { <span class="k">get</span>; <span class="k">init</span>; }
+}
+
+<span class="c">// CLASS — reference type, share qua địa chỉ, có thể null</span>
+<span class="k">public class</span> <span class="t">Customer</span>
+{
+    <span class="k">public</span> <span class="k">int</span> Id { <span class="k">get</span>; <span class="k">set</span>; }
+    <span class="k">public</span> <span class="k">string</span> Name { <span class="k">get</span>; <span class="k">set</span>; } = <span class="s">""</span>;
+}
+
+<span class="k">var</span> p1 = <span class="k">new</span> <span class="t">Point</span> { X = <span class="s">1</span>, Y = <span class="s">2</span> };
+<span class="k">var</span> p2 = p1;   <span class="c">// COPY toàn bộ — p2 độc lập</span>
+
+<span class="k">var</span> c1 = <span class="k">new</span> <span class="t">Customer</span> { Name = <span class="s">"An"</span> };
+<span class="k">var</span> c2 = c1;   <span class="c">// COPY địa chỉ — c1 và c2 cùng 1 object</span>
+c2.Name = <span class="s">"Bình"</span>;
+Console.WriteLine(c1.Name); <span class="c">// "Bình" — c1 thay đổi theo</span></pre>
+
+    <div class="callout tip">
+        <strong>💡 Khi nào dùng struct?</strong> Khi kiểu nhỏ (≤16 byte), immutable, biểu diễn 1 giá trị đơn (toạ độ, tiền, khoảng thời gian) và được tạo nhiều — tránh áp lực GC. Còn lại, mặc định dùng <code>class</code>.
+    </div>
+
+    <h3 style="margin-top:1.5rem; color:var(--ut-primary-2)">Boxing &amp; Unboxing</h3>
+    <p class="ut-sub">Boxing = gói một value type vào một object trên heap. Unboxing = lấy lại ra. Cả hai đều tốn allocation + ép kiểu → tránh trong hot path.</p>
+    <pre class="cb"><span class="k">int</span> n = <span class="s">42</span>;
+<span class="k">object</span> boxed = n;          <span class="c">// BOXING: n được copy lên heap</span>
+<span class="k">int</span> back = (<span class="k">int</span>)boxed;     <span class="c">// UNBOXING: phải ép đúng kiểu, sai → InvalidCastException</span>
+
+<span class="c">// Tránh boxing ngầm — dùng generic thay vì object</span>
+List&lt;<span class="k">int</span>&gt; good = [<span class="s">1</span>, <span class="s">2</span>, <span class="s">3</span>];   <span class="c">// không boxing</span>
+ArrayList bad = [<span class="s">1</span>, <span class="s">2</span>, <span class="s">3</span>];     <span class="c">// boxing mỗi phần tử (legacy)</span></pre>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">2. Biến &amp; Hằng — var, const, readonly</h2>
+    <p class="ut-sub">C# là ngôn ngữ static-typed: mọi biến có kiểu xác định lúc compile. Có nhiều cách khai báo, mỗi cách phục vụ mục đích khác nhau.</p>
+
+    <pre class="cb"><span class="c">// Khai báo tường minh (explicit)</span>
+<span class="k">int</span> count = <span class="s">0</span>;
+<span class="t">List</span>&lt;<span class="k">string</span>&gt; names = <span class="k">new</span> <span class="t">List</span>&lt;<span class="k">string</span>&gt;();
+
+<span class="c">// Implicit typing với var — compiler suy ra kiểu, vẫn static-typed</span>
+<span class="k">var</span> total = <span class="s">100</span>;             <span class="c">// int</span>
+<span class="k">var</span> message = <span class="s">"Xin chào"</span>;     <span class="c">// string</span>
+<span class="k">var</span> items = <span class="k">new</span> List&lt;<span class="k">int</span>&gt;();  <span class="c">// List&lt;int&gt;</span>
+
+<span class="c">// Target-typed new (C# 9+) — gọn khi kiểu đã rõ ở vế trái</span>
+List&lt;<span class="k">string</span>&gt; cities = <span class="k">new</span>();        <span class="c">// suy ra List&lt;string&gt;</span>
+Dictionary&lt;<span class="k">int</span>, <span class="k">string</span>&gt; map = <span class="k">new</span>(); <span class="c">// gọn hơn lặp lại tên kiểu</span></pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">const vs readonly</h3>
+    <table class="cmp">
+        <thead>
+            <tr><th>Đặc điểm</th><th><code>const</code></th><th><code>readonly</code></th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Gán giá trị</td><td>Lúc khai báo (compile-time)</td><td>Lúc khai báo hoặc trong constructor (runtime)</td></tr>
+            <tr><td>Kiểu cho phép</td><td>Chỉ literal hằng (số, chuỗi, bool)</td><td>Bất kỳ kiểu nào kể cả object</td></tr>
+            <tr><td>Phạm vi</td><td>Ngầm <code>static</code></td><td>Có thể instance hoặc static</td></tr>
+            <tr><td>Giá trị mỗi instance</td><td>Như nhau toàn bộ</td><td>Có thể khác nhau theo instance</td></tr>
+        </tbody>
+    </table>
+
+    <pre class="cb"><span class="k">public class</span> <span class="t">Circle</span>
+{
+    <span class="k">public const</span> <span class="k">double</span> Pi = <span class="s">3.14159</span>;          <span class="c">// hằng compile-time</span>
+    <span class="k">public readonly</span> <span class="k">int</span> Radius;                   <span class="c">// chỉ gán trong ctor</span>
+    <span class="k">public static readonly</span> <span class="t">DateTime</span> Created = DateTime.UtcNow; <span class="c">// runtime</span>
+
+    <span class="k">public</span> <span class="n">Circle</span>(<span class="k">int</span> radius) =&gt; Radius = radius; <span class="c">// OK: gán readonly trong ctor</span>
+}</pre>
+
+    <div class="callout warn">
+        <strong>⚠️ Cẩn thận với <code>const</code> public:</strong> giá trị <code>const</code> được "nhúng" (inline) vào assembly gọi nó lúc compile. Nếu thay đổi <code>const</code> trong thư viện mà không build lại bên gọi, giá trị cũ vẫn còn. Với hằng public chia sẻ giữa nhiều project → ưu tiên <code>static readonly</code>.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">3. Control Flow — Điều khiển luồng hiện đại</h2>
+    <p class="ut-sub">C# hiện đại khuyến khích biểu thức (expression) gọn gàng thay cho câu lệnh dài dòng. Nắm cả phong cách cũ và mới.</p>
+
+    <h3 style="color:var(--ut-primary-2)">if / else &amp; toán tử ba ngôi (ternary)</h3>
+    <pre class="cb"><span class="k">int</span> score = <span class="s">85</span>;
+
+<span class="k">if</span> (score &gt;= <span class="s">90</span>)
+    Console.WriteLine(<span class="s">"Xuất sắc"</span>);
+<span class="k">else if</span> (score &gt;= <span class="s">70</span>)
+    Console.WriteLine(<span class="s">"Khá"</span>);
+<span class="k">else</span>
+    Console.WriteLine(<span class="s">"Cần cố gắng"</span>);
+
+<span class="c">// Ternary — gọn cho gán điều kiện đơn giản</span>
+<span class="k">string</span> label = score &gt;= <span class="s">50</span> ? <span class="s">"Đậu"</span> : <span class="s">"Rớt"</span>;</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">switch expression (C# 8+) — thay cho switch statement</h3>
+    <pre class="cb"><span class="c">// CÁCH CŨ — switch statement dài dòng</span>
+<span class="k">string</span> GetName(<span class="k">int</span> day)
+{
+    <span class="k">switch</span> (day)
+    {
+        <span class="k">case</span> <span class="s">1</span>: <span class="k">return</span> <span class="s">"Thứ Hai"</span>;
+        <span class="k">case</span> <span class="s">2</span>: <span class="k">return</span> <span class="s">"Thứ Ba"</span>;
+        <span class="k">default</span>: <span class="k">return</span> <span class="s">"Không rõ"</span>;
+    }
+}
+
+<span class="c">// CÁCH MỚI — switch expression, gọn và rõ ràng</span>
+<span class="k">string</span> <span class="n">GetDayName</span>(<span class="k">int</span> day) =&gt; day <span class="k">switch</span>
+{
+    <span class="s">1</span> =&gt; <span class="s">"Thứ Hai"</span>,
+    <span class="s">2</span> =&gt; <span class="s">"Thứ Ba"</span>,
+    <span class="s">3</span> =&gt; <span class="s">"Thứ Tư"</span>,
+    &gt;= <span class="s">4</span> <span class="k">and</span> &lt;= <span class="s">6</span> =&gt; <span class="s">"Cuối tuần sắp tới"</span>, <span class="c">// relational + logical pattern</span>
+    _ =&gt; <span class="s">"Không rõ"</span>                              <span class="c">// _ = default</span>
+};</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Vòng lặp: for / foreach / while / do-while</h3>
+    <pre class="cb"><span class="c">// for — biết trước số lần lặp, cần index</span>
+<span class="k">for</span> (<span class="k">int</span> i = <span class="s">0</span>; i &lt; <span class="s">5</span>; i++)
+    Console.WriteLine(i);
+
+<span class="c">// foreach — duyệt collection, KHÔNG sửa collection khi đang duyệt</span>
+<span class="k">var</span> fruits = <span class="k">new</span>[] { <span class="s">"Táo"</span>, <span class="s">"Cam"</span>, <span class="s">"Xoài"</span> };
+<span class="k">foreach</span> (<span class="k">var</span> fruit <span class="k">in</span> fruits)
+    Console.WriteLine(fruit);
+
+<span class="c">// while — lặp khi điều kiện đúng (kiểm tra trước)</span>
+<span class="k">int</span> n = <span class="s">0</span>;
+<span class="k">while</span> (n &lt; <span class="s">3</span>) { Console.WriteLine(n); n++; }
+
+<span class="c">// do-while — chạy ít nhất 1 lần (kiểm tra sau)</span>
+<span class="k">do</span> { Console.WriteLine(<span class="s">"Chạy ít nhất 1 lần"</span>); } <span class="k">while</span> (<span class="k">false</span>);</pre>
+
+    <div class="callout danger">
+        <strong>⚠️ Không sửa collection trong foreach:</strong> thêm/xoá phần tử khi đang <code>foreach</code> sẽ ném <code>InvalidOperationException</code> ("Collection was modified"). Muốn xoá → dùng <code>for</code> ngược từ cuối, hoặc lọc bằng LINQ tạo list mới: <code>list.Where(x =&gt; ...).ToList()</code>.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">4. Collections — Chọn đúng cấu trúc dữ liệu</h2>
+    <p class="ut-sub">Chọn sai collection làm code chậm và rối. Mỗi loại tối ưu cho một kiểu truy cập khác nhau.</p>
+
+    <table class="cmp">
+        <thead>
+            <tr><th>Collection</th><th>Truy cập</th><th>Thêm/Xoá</th><th>Đặc điểm</th><th>Dùng khi</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>T[]</code> (array)</td><td>O(1) theo index</td><td>Kích thước cố định</td><td>Nhanh, ít overhead</td><td>Số phần tử cố định, hiệu năng cao</td></tr>
+            <tr><td><code>List&lt;T&gt;</code></td><td>O(1) theo index</td><td>O(1) cuối, O(n) giữa</td><td>Mảng động</td><td>Danh sách thông thường (mặc định)</td></tr>
+            <tr><td><code>Dictionary&lt;K,V&gt;</code></td><td>O(1) theo key</td><td>O(1)</td><td>Cặp key-value, key duy nhất</td><td>Tra cứu nhanh theo khoá</td></tr>
+            <tr><td><code>HashSet&lt;T&gt;</code></td><td>O(1) kiểm tra tồn tại</td><td>O(1)</td><td>Tập hợp, không trùng lặp</td><td>Loại trùng, kiểm tra "đã có chưa"</td></tr>
+            <tr><td><code>Queue&lt;T&gt;</code></td><td>FIFO</td><td>O(1)</td><td>Vào trước ra trước</td><td>Hàng đợi xử lý</td></tr>
+            <tr><td><code>Stack&lt;T&gt;</code></td><td>LIFO</td><td>O(1)</td><td>Vào sau ra trước</td><td>Undo, đệ quy, duyệt</td></tr>
+        </tbody>
+    </table>
+
+    <pre class="cb"><span class="c">// Array — kích thước cố định</span>
+<span class="k">int</span>[] numbers = [<span class="s">1</span>, <span class="s">2</span>, <span class="s">3</span>, <span class="s">4</span>, <span class="s">5</span>];   <span class="c">// collection expression (C# 12)</span>
+Console.WriteLine(numbers[<span class="s">0</span>]);          <span class="c">// 1</span>
+Console.WriteLine(numbers[^<span class="s">1</span>]);         <span class="c">// 5 — index từ cuối</span>
+<span class="k">var</span> middle = numbers[<span class="s">1</span>..<span class="s">4</span>];           <span class="c">// [2,3,4] — range</span>
+
+<span class="c">// List&lt;T&gt; — mảng động, thêm/xoá tự do</span>
+<span class="k">var</span> tasks = <span class="k">new</span> List&lt;<span class="k">string</span>&gt;();
+tasks.Add(<span class="s">"Code"</span>);
+tasks.AddRange([<span class="s">"Test"</span>, <span class="s">"Deploy"</span>]);
+tasks.Remove(<span class="s">"Test"</span>);
+Console.WriteLine(tasks.Count);            <span class="c">// 2</span>
+
+<span class="c">// Dictionary&lt;K,V&gt; — tra cứu theo khoá</span>
+<span class="k">var</span> ages = <span class="k">new</span> Dictionary&lt;<span class="k">string</span>, <span class="k">int</span>&gt;
+{
+    [<span class="s">"An"</span>] = <span class="s">25</span>,
+    [<span class="s">"Bình"</span>] = <span class="s">30</span>
+};
+<span class="k">if</span> (ages.TryGetValue(<span class="s">"An"</span>, <span class="k">out var</span> age))   <span class="c">// an toàn, không ném exception</span>
+    Console.WriteLine(age);                <span class="c">// 25</span>
+
+<span class="c">// HashSet&lt;T&gt; — không trùng lặp, kiểm tra tồn tại O(1)</span>
+<span class="k">var</span> seen = <span class="k">new</span> HashSet&lt;<span class="k">int</span>&gt; { <span class="s">1</span>, <span class="s">2</span>, <span class="s">2</span>, <span class="s">3</span> };
+Console.WriteLine(seen.Count);             <span class="c">// 3 — bỏ trùng tự động</span>
+Console.WriteLine(seen.Contains(<span class="s">2</span>));      <span class="c">// True</span></pre>
+
+    <div class="callout tip">
+        <strong>💡 TryGetValue vs indexer:</strong> truy cập <code>dict["key"]</code> với key không tồn tại sẽ ném <code>KeyNotFoundException</code>. Dùng <code>TryGetValue</code> hoặc <code>ContainsKey</code> khi không chắc key có sẵn. Tránh kiểm tra <code>ContainsKey</code> rồi lại lấy <code>dict[key]</code> (tra cứu 2 lần) — chỉ cần một <code>TryGetValue</code>.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">5. Exceptions — Xử lý lỗi đúng cách</h2>
+    <p class="ut-sub">Exception biểu diễn lỗi không lường trước được. Xử lý sai (nuốt lỗi, bắt quá rộng) là nguồn bug âm thầm nguy hiểm nhất.</p>
+
+    <pre class="cb"><span class="k">try</span>
+{
+    <span class="k">var</span> content = File.ReadAllText(<span class="s">"data.json"</span>);
+    <span class="k">var</span> order = JsonSerializer.Deserialize&lt;<span class="t">Order</span>&gt;(content);
+    Process(order);
+}
+<span class="k">catch</span> (<span class="t">FileNotFoundException</span> ex)        <span class="c">// bắt loại cụ thể trước</span>
+{
+    logger.LogWarning(ex, <span class="s">"Không tìm thấy file"</span>);
+    <span class="k">throw</span>;                              <span class="c">// throw; — giữ nguyên stack trace</span>
+}
+<span class="k">catch</span> (<span class="t">JsonException</span> ex)
+{
+    logger.LogError(ex, <span class="s">"JSON sai định dạng"</span>);
+    <span class="k">throw new</span> <span class="t">InvalidDataException</span>(<span class="s">"File dữ liệu hỏng"</span>, ex); <span class="c">// wrap, giữ inner</span>
+}
+<span class="k">finally</span>
+{
+    <span class="c">// LUÔN chạy dù có lỗi hay không — dọn dẹp tài nguyên</span>
+    Console.WriteLine(<span class="s">"Hoàn tất xử lý"</span>);
+}</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Custom exception &amp; exception filter (when)</h3>
+    <pre class="cb"><span class="c">// Custom exception — kế thừa Exception, thêm dữ liệu ngữ cảnh</span>
+<span class="k">public class</span> <span class="t">OrderNotFoundException</span> : <span class="t">Exception</span>
+{
+    <span class="k">public</span> <span class="k">int</span> OrderId { <span class="k">get</span>; }
+    <span class="k">public</span> <span class="n">OrderNotFoundException</span>(<span class="k">int</span> orderId)
+        : <span class="k">base</span>($<span class="s">"Không tìm thấy đơn hàng {orderId}"</span>)
+        =&gt; OrderId = orderId;
+}
+
+<span class="c">// Exception filter — chỉ bắt khi điều kiện 'when' đúng</span>
+<span class="k">try</span>
+{
+    <span class="k">await</span> CallApiAsync();
+}
+<span class="k">catch</span> (<span class="t">HttpRequestException</span> ex) <span class="k">when</span> (ex.StatusCode == HttpStatusCode.TooManyRequests)
+{
+    <span class="k">await</span> Task.Delay(<span class="s">1000</span>);  <span class="c">// chỉ retry khi bị rate-limit (429)</span>
+    <span class="k">await</span> CallApiAsync();
+}</pre>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont do">
+            <h4>✅ NÊN làm</h4>
+            <ul>
+                <li>Bắt loại exception cụ thể (<code>FileNotFoundException</code>)</li>
+                <li>Dùng <code>throw;</code> để giữ stack trace gốc</li>
+                <li>Log đầy đủ context trước khi throw lại</li>
+                <li>Dùng <code>finally</code> hoặc <code>using</code> để dọn tài nguyên</li>
+                <li>Wrap exception thấp tầng thành lỗi nghiệp vụ rõ nghĩa</li>
+            </ul>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ KHÔNG nên</h4>
+            <ul>
+                <li>Nuốt lỗi: <code>catch { }</code> rỗng — bug biến mất âm thầm</li>
+                <li><code>throw ex;</code> — reset stack trace, mất nơi lỗi gốc</li>
+                <li>Bắt <code>catch (Exception)</code> chung cho mọi thứ</li>
+                <li>Dùng exception cho luồng điều khiển bình thường</li>
+                <li>Ném exception trong vòng lặp nóng (rất chậm)</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="callout danger">
+        <strong>⚠️ <code>throw;</code> vs <code>throw ex;</code>:</strong> <code>throw;</code> ném lại exception giữ nguyên stack trace gốc. <code>throw ex;</code> đặt lại stack trace về dòng hiện tại → mất dấu vết nơi lỗi thực sự xảy ra. Luôn dùng <code>throw;</code> khi re-throw.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">6. Nullability — Xử lý null an toàn</h2>
+    <p class="ut-sub"><code>NullReferenceException</code> là lỗi runtime phổ biến nhất lịch sử. C# hiện đại cung cấp công cụ để chặn nó ngay lúc compile.</p>
+
+    <h3 style="color:var(--ut-primary-2)">Nullable value types — int?</h3>
+    <pre class="cb"><span class="k">int</span> a = <span class="k">null</span>;     <span class="c">// LỖI compile — int không thể null</span>
+<span class="k">int</span>? b = <span class="k">null</span>;    <span class="c">// OK — Nullable&lt;int&gt;, có thể null</span>
+
+<span class="k">if</span> (b.HasValue)
+    Console.WriteLine(b.Value);
+<span class="k">int</span> c = b ?? <span class="s">0</span>;   <span class="c">// ?? null-coalescing: nếu null thì lấy 0</span></pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Nullable Reference Types (NRT) — #nullable enable</h3>
+    <pre class="cb"><span class="c">// Bật trong .csproj: &lt;Nullable&gt;enable&lt;/Nullable&gt;  (mặc định trong template .NET 6+)</span>
+<span class="c">// hoặc đầu file:</span>
+<span class="c">#nullable enable</span>
+
+<span class="k">string</span> name = <span class="k">null</span>;      <span class="c">// CẢNH BÁO — string không khai báo nullable</span>
+<span class="k">string</span>? nickname = <span class="k">null</span>;  <span class="c">// OK — chủ đích cho phép null</span>
+
+<span class="k">void</span> <span class="n">Greet</span>(<span class="k">string</span>? n)
+{
+    <span class="c">// Phải kiểm tra null trước khi dùng, nếu không compiler cảnh báo</span>
+    <span class="k">if</span> (n <span class="k">is not null</span>)
+        Console.WriteLine($<span class="s">"Chào {n.ToUpper()}"</span>);
+}</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Các toán tử null tiện lợi</h3>
+    <pre class="cb"><span class="c">// ?. — null-conditional: chỉ gọi nếu không null, ngược lại trả null</span>
+<span class="k">int</span>? len = customer?.Name?.Length;   <span class="c">// null nếu customer hoặc Name null</span>
+
+<span class="c">// ?? — null-coalescing: giá trị mặc định khi null</span>
+<span class="k">string</span> display = customer?.Name ?? <span class="s">"Khách lạ"</span>;
+
+<span class="c">// ??= — gán nếu đang null</span>
+<span class="k">string</span>? cache = <span class="k">null</span>;
+cache ??= LoadFromDb();              <span class="c">// chỉ gọi LoadFromDb khi cache null</span>
+
+<span class="c">// ! — null-forgiving: "tôi chắc chắn không null" (dùng dè dặt!)</span>
+<span class="k">string</span> sure = GetValue()!;           <span class="c">// tắt cảnh báo, tự chịu trách nhiệm</span></pre>
+
+    <div class="callout warn">
+        <strong>⚠️ Toán tử <code>!</code> (null-forgiving) chỉ tắt CẢNH BÁO, không kiểm tra runtime.</strong> Nếu giá trị thực sự null, bạn vẫn dính <code>NullReferenceException</code>. Chỉ dùng khi bạn chắc chắn 100% (vd sau khi đã validate). Lạm dụng <code>!</code> làm vô hiệu hoá toàn bộ lợi ích của NRT.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">7. Records — Kiểu dữ liệu bất biến</h2>
+    <p class="ut-sub"><code>record</code> (C# 9+) là class/struct được sinh sẵn value-equality, <code>ToString()</code>, và <code>with</code>-expression. Lý tưởng cho DTO, value object, message.</p>
+
+    <pre class="cb"><span class="c">// Positional record — gọn nhất, sinh tự động constructor + properties (init)</span>
+<span class="k">public record</span> <span class="t">Person</span>(<span class="k">string</span> FirstName, <span class="k">string</span> LastName);
+
+<span class="c">// Tương đương record với thân class — khi cần thêm logic</span>
+<span class="k">public record</span> <span class="t">Money</span>
+{
+    <span class="k">public</span> <span class="k">decimal</span> Amount { <span class="k">get</span>; <span class="k">init</span>; }   <span class="c">// init = chỉ gán lúc khởi tạo</span>
+    <span class="k">public</span> <span class="k">string</span> Currency { <span class="k">get</span>; <span class="k">init</span>; } = <span class="s">"VND"</span>;
+}</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Value equality &amp; with-expression</h3>
+    <pre class="cb"><span class="k">var</span> p1 = <span class="k">new</span> <span class="t">Person</span>(<span class="s">"An"</span>, <span class="s">"Nguyễn"</span>);
+<span class="k">var</span> p2 = <span class="k">new</span> <span class="t">Person</span>(<span class="s">"An"</span>, <span class="s">"Nguyễn"</span>);
+
+Console.WriteLine(p1 == p2);   <span class="c">// True — record so sánh theo GIÁ TRỊ</span>
+<span class="c">// (class thường sẽ là False vì so sánh theo tham chiếu)</span>
+
+<span class="c">// with-expression — tạo bản sao và thay đổi vài thuộc tính (immutable update)</span>
+<span class="k">var</span> p3 = p1 <span class="k">with</span> { LastName = <span class="s">"Trần"</span> };
+Console.WriteLine(p3);  <span class="c">// Person { FirstName = An, LastName = Trần }</span>
+Console.WriteLine(p1.LastName); <span class="c">// "Nguyễn" — p1 KHÔNG đổi (bất biến)</span></pre>
+
+    <table class="cmp">
+        <thead>
+            <tr><th>Tiêu chí</th><th><code>record</code></th><th><code>class</code></th></tr>
+        </thead>
+        <tbody>
+            <tr><td>So sánh bằng</td><td>Value equality (theo property)</td><td>Reference equality</td></tr>
+            <tr><td>Bất biến (immutable)</td><td>Khuyến khích (<code>init</code>)</td><td>Mặc định mutable</td></tr>
+            <tr><td><code>with</code>-expression</td><td>Có</td><td>Không</td></tr>
+            <tr><td><code>ToString()</code> đẹp</td><td>Sinh sẵn</td><td>Phải tự viết</td></tr>
+            <tr><td>Dùng tốt cho</td><td>DTO, value object, message, config</td><td>Entity có hành vi, service, state mutable</td></tr>
+        </tbody>
+    </table>
+
+    <div class="callout tip">
+        <strong>💡 Khi nào dùng record?</strong> Khi đối tượng được định nghĩa bởi <em>dữ liệu</em> chứ không phải <em>danh tính</em> — hai địa chỉ giống hệt nhau thì coi là bằng nhau. DTO API, event, value object (Money, DateRange) là ứng viên hoàn hảo. Entity EF Core có Id định danh thì nên giữ <code>class</code>.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">8. Pattern Matching — Đối sánh mẫu</h2>
+    <p class="ut-sub">Pattern matching biến <code>switch</code> và <code>is</code> thành công cụ cực mạnh: kiểm tra kiểu, bóc thuộc tính, so sánh điều kiện — tất cả trong một biểu thức gọn.</p>
+
+    <h3 style="color:var(--ut-primary-2)">Type pattern &amp; property pattern</h3>
+    <pre class="cb"><span class="c">// Type pattern — kiểm tra kiểu + gán biến cùng lúc</span>
+<span class="k">object</span> obj = <span class="s">"Xin chào"</span>;
+<span class="k">if</span> (obj <span class="k">is</span> <span class="k">string</span> s &amp;&amp; s.Length &gt; <span class="s">3</span>)
+    Console.WriteLine(s.ToUpper());
+
+<span class="c">// Property pattern — đối sánh theo thuộc tính của object</span>
+<span class="k">decimal</span> <span class="n">CalcShipping</span>(<span class="t">Order</span> order) =&gt; order <span class="k">switch</span>
+{
+    { Total: &gt; <span class="s">1_000_000</span> }            =&gt; <span class="s">0</span>,        <span class="c">// freeship đơn lớn</span>
+    { Total: &gt; <span class="s">500_000</span>, IsVip: <span class="k">true</span> } =&gt; <span class="s">0</span>,        <span class="c">// VIP đơn vừa</span>
+    { Country: <span class="s">"VN"</span> }               =&gt; <span class="s">30_000</span>,
+    _                                =&gt; <span class="s">100_000</span>    <span class="c">// còn lại</span>
+};</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Relational &amp; logical patterns (and / or / not)</h3>
+    <pre class="cb"><span class="k">string</span> <span class="n">Classify</span>(<span class="k">int</span> temp) =&gt; temp <span class="k">switch</span>
+{
+    &lt; <span class="s">0</span>             =&gt; <span class="s">"Đóng băng"</span>,
+    &gt;= <span class="s">0</span> <span class="k">and</span> &lt; <span class="s">20</span>  =&gt; <span class="s">"Lạnh"</span>,         <span class="c">// kết hợp 'and'</span>
+    &gt;= <span class="s">20</span> <span class="k">and</span> &lt; <span class="s">30</span> =&gt; <span class="s">"Dễ chịu"</span>,
+    &gt;= <span class="s">35</span>           =&gt; <span class="s">"Nóng"</span>,
+    _              =&gt; <span class="s">"Ấm"</span>
+};
+
+<span class="c">// 'or' và 'not'</span>
+<span class="k">bool</span> isWeekend = day <span class="k">is</span> DayOfWeek.Saturday <span class="k">or</span> DayOfWeek.Sunday;
+<span class="k">bool</span> hasValue = obj <span class="k">is not null</span>;</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">List patterns (C# 11+)</h3>
+    <pre class="cb"><span class="k">int</span>[] data = [<span class="s">1</span>, <span class="s">2</span>, <span class="s">3</span>, <span class="s">4</span>, <span class="s">5</span>];
+
+<span class="k">var</span> desc = data <span class="k">switch</span>
+{
+    []                  =&gt; <span class="s">"Rỗng"</span>,
+    [<span class="k">var</span> only]          =&gt; $<span class="s">"Một phần tử: {only}"</span>,
+    [<span class="k">var</span> first, .., <span class="k">var</span> last] =&gt; $<span class="s">"Đầu {first}, cuối {last}"</span>, <span class="c">// .. = bỏ qua giữa</span>
+    _                   =&gt; <span class="s">"Khác"</span>
+};
+Console.WriteLine(desc);  <span class="c">// "Đầu 1, cuối 5"</span></pre>
+
+    <div class="callout info">
+        <strong>Switch on patterns giúp loại bỏ chuỗi if-else dài.</strong> Compiler còn cảnh báo nếu bạn quên xử lý trường hợp (non-exhaustive). Kết hợp với <code>record</code> + property pattern là cách viết business rule rất sạch và dễ test.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">9. String Handling — Xử lý chuỗi hiệu quả</h2>
+    <p class="ut-sub"><code>string</code> trong C# là <strong>immutable</strong> — mỗi thao tác "sửa" thực ra tạo chuỗi mới. Hiểu điều này để tránh bug hiệu năng khi nối chuỗi.</p>
+
+    <h3 style="color:var(--ut-primary-2)">Interpolation &amp; raw string literals</h3>
+    <pre class="cb"><span class="k">string</span> name = <span class="s">"An"</span>;
+<span class="k">int</span> age = <span class="s">25</span>;
+
+<span class="c">// String interpolation — $ — rõ ràng, ưu tiên dùng</span>
+<span class="k">string</span> msg = $<span class="s">"Tên: {name}, Tuổi: {age}, Năm sau: {age + 1}"</span>;
+
+<span class="c">// Định dạng trong interpolation</span>
+<span class="k">decimal</span> price = <span class="s">1234567.5m</span>;
+<span class="k">string</span> formatted = $<span class="s">"Giá: {price:N0} ₫"</span>;   <span class="c">// "Giá: 1,234,568 ₫"</span>
+
+<span class="c">// Raw string literal (C# 11) — không cần escape, giữ nguyên xuống dòng</span>
+<span class="k">string</span> json = <span class="s">"""</span>
+<span class="s">    {</span>
+<span class="s">        "name": "An",</span>
+<span class="s">        "active": true</span>
+<span class="s">    }</span>
+<span class="s">    """</span>;   <span class="c">// dấu " không cần escape, lề trái tự cắt theo """ đóng</span></pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">StringBuilder vs nối chuỗi trong vòng lặp</h3>
+    <pre class="cb"><span class="c">// ❌ SAI — mỗi += tạo 1 chuỗi mới → O(n²), tốn bộ nhớ khủng khiếp</span>
+<span class="k">string</span> result = <span class="s">""</span>;
+<span class="k">for</span> (<span class="k">int</span> i = <span class="s">0</span>; i &lt; <span class="s">10_000</span>; i++)
+    result += i + <span class="s">", "</span>;    <span class="c">// tạo 10.000 chuỗi trung gian!</span>
+
+<span class="c">// ✅ ĐÚNG — StringBuilder dùng buffer nội bộ, O(n)</span>
+<span class="k">var</span> sb = <span class="k">new</span> StringBuilder();
+<span class="k">for</span> (<span class="k">int</span> i = <span class="s">0</span>; i &lt; <span class="s">10_000</span>; i++)
+    sb.Append(i).Append(<span class="s">", "</span>);
+<span class="k">string</span> output = sb.ToString();
+
+<span class="c">// Nối ÍT chuỗi cố định thì interpolation/+ vẫn ổn — không cần StringBuilder</span>
+<span class="k">string</span> full = firstName + <span class="s">" "</span> + lastName;</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Span&lt;char&gt; — xử lý chuỗi không cấp phát</h3>
+    <pre class="cb"><span class="c">// Span&lt;char&gt;/ReadOnlySpan&lt;char&gt; — "lát cắt" chuỗi KHÔNG tạo bản sao</span>
+<span class="k">string</span> path = <span class="s">"/api/v1/users/42"</span>;
+ReadOnlySpan&lt;<span class="k">char</span>&gt; span = path;
+ReadOnlySpan&lt;<span class="k">char</span>&gt; lastSegment = span[(span.LastIndexOf(<span class="s">'/'</span>) + <span class="s">1</span>)..];
+Console.WriteLine(lastSegment.ToString());  <span class="c">// "42" — không allocate chuỗi con</span>
+
+<span class="c">// Span đặc biệt mạnh trong parsing/hot-path để giảm áp lực GC</span>
+<span class="k">if</span> (<span class="k">int</span>.TryParse(lastSegment, <span class="k">out var</span> id))
+    Console.WriteLine(id);  <span class="c">// 42 — parse trực tiếp từ span</span></pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Các method &amp; cách dùng phổ biến</h3>
+    <pre class="cb"><span class="k">string</span> raw = <span class="s">"  Hello, World  "</span>;
+
+raw.Trim();                       <span class="c">// "Hello, World"</span>
+raw.Trim().ToUpper();             <span class="c">// "HELLO, WORLD"</span>
+raw.Contains(<span class="s">"World"</span>);          <span class="c">// True</span>
+raw.Replace(<span class="s">"World"</span>, <span class="s">"C#"</span>);     <span class="c">// "  Hello, C#  "</span>
+<span class="s">"a,b,c"</span>.Split(<span class="s">','</span>);            <span class="c">// ["a", "b", "c"]</span>
+<span class="k">string</span>.Join(<span class="s">"-"</span>, [<span class="s">"a"</span>, <span class="s">"b"</span>, <span class="s">"c"</span>]); <span class="c">// "a-b-c"</span>
+<span class="k">string</span>.IsNullOrWhiteSpace(raw);  <span class="c">// False — kiểm tra null/rỗng/toàn space</span>
+
+<span class="c">// string.Format — kiểu cũ, vẫn dùng cho template/localization</span>
+<span class="k">string</span>.Format(<span class="s">"Xin chào {0}, bạn có {1} tin nhắn"</span>, name, <span class="s">5</span>);</pre>
+
+    <div class="callout tip">
+        <strong>💡 So sánh chuỗi:</strong> dùng <code>string.Equals(a, b, StringComparison.OrdinalIgnoreCase)</code> để so sánh không phân biệt hoa thường một cách rõ ràng và nhanh. Tránh <code>a.ToLower() == b.ToLower()</code> (tạo 2 chuỗi mới mỗi lần so sánh).
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">🎯 Checklist — Bạn đã nắm vững C# Fundamentals?</h2>
+    <div class="ut-card">
+        <ul>
+            <li>✅ Phân biệt value type (copy giá trị, stack) và reference type (copy địa chỉ, heap)</li>
+            <li>✅ Dùng <code>decimal</code> cho tiền tệ, không dùng <code>double</code></li>
+            <li>✅ Hiểu boxing/unboxing và biết cách tránh nhờ generic</li>
+            <li>✅ Phân biệt <code>const</code> (compile-time) và <code>readonly</code> (runtime), biết dùng <code>var</code> &amp; target-typed <code>new</code></li>
+            <li>✅ Viết được <code>switch expression</code> với relational/logical pattern thay cho if-else dài</li>
+            <li>✅ Không sửa collection trong khi <code>foreach</code></li>
+            <li>✅ Chọn đúng collection: <code>List</code>, <code>Dictionary</code>, <code>HashSet</code>, array theo nhu cầu truy cập</li>
+            <li>✅ Dùng <code>TryGetValue</code> thay vì indexer khi key có thể không tồn tại</li>
+            <li>✅ Xử lý exception đúng: bắt cụ thể, <code>throw;</code> giữ stack trace, không nuốt lỗi</li>
+            <li>✅ Bật Nullable Reference Types và dùng <code>?.</code> <code>??</code> <code>??=</code>, hạn chế <code>!</code></li>
+            <li>✅ Dùng <code>record</code> cho DTO/value object — value equality &amp; <code>with</code>-expression</li>
+            <li>✅ Áp dụng pattern matching: type, property, list pattern</li>
+            <li>✅ Dùng <code>StringBuilder</code> khi nối nhiều chuỗi, raw string literal &amp; interpolation cho chuỗi tĩnh</li>
+            <li>✅ Biết <code>Span&lt;char&gt;</code> giúp xử lý chuỗi không cấp phát trong hot-path</li>
+        </ul>
+    </div>
+</section>
+
+</div>
+
+<footer style="text-align:center;padding:3rem 1.5rem;color:var(--ut-muted);border-top:1px solid var(--ut-border);margin-top:3rem;font-size:.9rem;">
+    <p>C# Fundamentals · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

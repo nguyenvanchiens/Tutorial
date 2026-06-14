@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LINQ trong C# — Toàn tập từ A-Z</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --ut-primary: #512bd4;
+        --ut-primary-2: #8a2be2;
+        --ut-accent: #43e97b;
+        --ut-warn: #f39c12;
+        --ut-danger: #f5576c;
+        --ut-card: #1a1d2e;
+        --ut-card-2: #232640;
+        --ut-border: #2d3148;
+        --ut-text: #e2e8f0;
+        --ut-muted: #94a3b8;
+    }
+
+    .ut-hero {
+        text-align: center;
+        padding: 4rem 1.5rem 3rem;
+        background: radial-gradient(ellipse at top, rgba(81,43,212,.18), transparent 60%);
+    }
+    .ut-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 1rem; }
+    .ut-hero h1 .gradient {
+        background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .ut-hero .hero-badge {
+        display: inline-block;
+        background: rgba(81,43,212,.15);
+        color: var(--ut-primary-2);
+        padding: .4rem 1rem;
+        border-radius: 20px;
+        font-size: .78rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        margin-bottom: 1.25rem;
+    }
+    .ut-hero p { color: var(--ut-muted); max-width: 820px; margin: 0 auto; }
+
+    .ut-section { padding: 2.5rem 0; }
+    .ut-title {
+        font-size: 1.7rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        padding-left: 1rem;
+        color: var(--ut-text);
+    }
+    .ut-title::before {
+        content: '';
+        position: absolute;
+        left: 0; top: 6px; bottom: 6px;
+        width: 4px;
+        background: linear-gradient(180deg, var(--ut-primary), var(--ut-primary-2));
+        border-radius: 3px;
+    }
+    .ut-sub { color: var(--ut-muted); margin-bottom: 1.25rem; }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+
+    .ut-grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .ut-grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    .ut-grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+
+    .ut-card {
+        background: var(--ut-card);
+        border: 1px solid var(--ut-border);
+        border-radius: 12px;
+        padding: 1.4rem;
+    }
+    .ut-card h3 { color: var(--ut-primary-2); margin-bottom: .6rem; font-size: 1.1rem; }
+    .ut-card h4 { color: var(--ut-accent); margin-bottom: .45rem; font-size: .98rem; }
+    .ut-card p, .ut-card li { color: var(--ut-muted); font-size: .95rem; }
+    .ut-card ul { padding-left: 1.2rem; }
+    .ut-card ul li { margin-bottom: .3rem; }
+
+    pre.cb {
+        background: #0b1020;
+        border: 1px solid var(--ut-border);
+        border-left: 3px solid var(--ut-primary);
+        border-radius: 8px;
+        padding: 1rem 1.15rem;
+        overflow-x: auto;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+        font-size: .88rem;
+        line-height: 1.6;
+        margin: .75rem 0;
+        color: #d6deeb;
+    }
+    pre.cb .k { color: #c792ea; }
+    pre.cb .s { color: #ecc48d; }
+    pre.cb .c { color: #637777; font-style: italic; }
+    pre.cb .n { color: #82aaff; }
+    pre.cb .t { color: #ffcb8b; }
+    pre.cb .a { color: #7fdbca; }
+    code {
+        background: #2d3148;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: .88em;
+        color: #f8d06b;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+    }
+
+    .callout {
+        border-radius: 10px;
+        padding: .95rem 1.15rem;
+        margin: 1rem 0;
+        border: 1px solid;
+    }
+    .callout.tip { background: rgba(67,233,123,.07); border-color: var(--ut-accent); }
+    .callout.tip strong { color: var(--ut-accent); }
+    .callout.warn { background: rgba(243,156,18,.07); border-color: var(--ut-warn); }
+    .callout.warn strong { color: var(--ut-warn); }
+    .callout.danger { background: rgba(245,87,108,.07); border-color: var(--ut-danger); }
+    .callout.danger strong { color: var(--ut-danger); }
+    .callout.info { background: rgba(81,43,212,.08); border-color: var(--ut-primary-2); }
+    .callout.info strong { color: var(--ut-primary-2); }
+
+    table.cmp { width: 100%; border-collapse: collapse; background: var(--ut-card); border-radius: 10px; overflow: hidden; margin: 1rem 0; font-size: .92rem; }
+    table.cmp th, table.cmp td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--ut-border); }
+    table.cmp th { background: var(--ut-card-2); color: var(--ut-primary-2); font-weight: 600; }
+    table.cmp td { color: var(--ut-muted); }
+    table.cmp tr:last-child td { border-bottom: none; }
+
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; position: relative; padding-left: 2.8rem; margin-bottom: 1rem; }
+    .steps li::before {
+        content: counter(step);
+        position: absolute; left: 0; top: 0;
+        width: 2rem; height: 2rem;
+        background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2));
+        color: #fff;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700;
+    }
+
+    .do-dont { border-left: 3px solid; padding: 1rem 1.15rem; border-radius: 8px; margin-bottom: 1rem; }
+    .do-dont.do { border-color: var(--ut-accent); background: rgba(67,233,123,.04); }
+    .do-dont.dont { border-color: var(--ut-danger); background: rgba(245,87,108,.04); }
+    .do-dont h4 { margin-bottom: .5rem; }
+    .do-dont.do h4 { color: var(--ut-accent); }
+    .do-dont.dont h4 { color: var(--ut-danger); }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo"><a href="index.html" style="color:inherit;-webkit-text-fill-color:inherit;">.NET<span class="accent">Mastery</span></a></div>
+        <div class="nav-links">
+            <a href="index.html">Roadmap</a>
+            <a href="csharp-basics.html">C# Basics</a>
+            <a href="oop.html">OOP</a>
+            <a href="linq.html" class="nav-active">LINQ</a>
+            <a href="sql-basics.html">SQL</a>
+            <a href="webapi-first.html">Web API</a>
+            <a href="efcore.html">EF Core</a>
+            <a href="di.html">DI</a>
+        </div>
+        <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+</nav>
+
+<header class="ut-hero">
+    <div class="hero-badge">CƠ BẢN · FOUNDATION</div>
+    <h1>Truy vấn dữ liệu trong C# với <span class="gradient">LINQ</span></h1>
+    <p>Language Integrated Query — viết truy vấn dữ liệu thẳng trong C# với cú pháp gọn, type-safe và IntelliSense đầy đủ. Từ <code>List</code> trong bộ nhớ đến bảng SQL trong database, cùng một ngôn ngữ truy vấn. Bài này đi sâu vào bản chất lazy, IEnumerable vs IQueryable, toàn bộ toán tử cốt lõi và các bẫy hay gặp trong production.</p>
+</header>
+
+<div class="container">
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">1. LINQ là gì?</h2>
+    <p class="ut-sub">LINQ (Language Integrated Query) là tập hợp các tính năng ngôn ngữ + thư viện cho phép truy vấn dữ liệu một cách thống nhất, bất kể nguồn dữ liệu là gì.</p>
+
+    <div class="ut-grid ut-grid-3">
+        <div class="ut-card">
+            <h4>📋 LINQ to Objects</h4>
+            <p>Truy vấn trên collection trong bộ nhớ.</p>
+            <ul>
+                <li><code>List&lt;T&gt;</code>, <code>T[]</code></li>
+                <li><code>Dictionary</code>, <code>HashSet</code></li>
+                <li>Bất kỳ <code>IEnumerable&lt;T&gt;</code></li>
+            </ul>
+        </div>
+        <div class="ut-card">
+            <h4>🗄️ LINQ to Entities</h4>
+            <p>Truy vấn EF Core → dịch sang SQL chạy trên DB.</p>
+            <ul>
+                <li><code>DbSet&lt;T&gt;</code></li>
+                <li><code>IQueryable&lt;T&gt;</code></li>
+                <li>Expression tree → SQL</li>
+            </ul>
+        </div>
+        <div class="ut-card">
+            <h4>📄 LINQ to XML / khác</h4>
+            <p>Truy vấn XML, JSON provider, nguồn tuỳ biến.</p>
+            <ul>
+                <li><code>XDocument</code></li>
+                <li>Provider của bên thứ ba</li>
+                <li>Tự viết provider</li>
+            </ul>
+        </div>
+    </div>
+
+    <p class="ut-sub" style="margin-top:1rem">Ý tưởng cốt lõi: thay vì viết vòng <code>for</code> + <code>if</code> thủ công, ta mô tả <strong>"muốn gì"</strong> (declarative) thay vì <strong>"làm thế nào"</strong> (imperative).</p>
+
+    <pre class="cb"><span class="c">// Cách cũ — imperative: mô tả từng bước</span>
+<span class="k">var</span> result = <span class="k">new</span> List&lt;<span class="t">string</span>&gt;();
+<span class="k">foreach</span> (<span class="k">var</span> u <span class="k">in</span> users)
+{
+    <span class="k">if</span> (u.Age &gt;= <span class="s">18</span> &amp;&amp; u.IsActive)
+        result.Add(u.Name);
+}
+result.Sort();
+
+<span class="c">// Cách LINQ — declarative: mô tả kết quả mong muốn</span>
+<span class="k">var</span> result = users
+    .Where(u =&gt; u.Age &gt;= <span class="s">18</span> &amp;&amp; u.IsActive)
+    .OrderBy(u =&gt; u.Name)
+    .Select(u =&gt; u.Name)
+    .ToList();</pre>
+
+    <div class="callout info">
+        <strong>IEnumerable&lt;T&gt; là nền tảng:</strong> Hầu hết toán tử LINQ to Objects là <em>extension method</em> trên <code>IEnumerable&lt;T&gt;</code> (namespace <code>System.Linq</code>). Chỉ cần <code>using System.Linq;</code> là mọi <code>IEnumerable</code> đều có <code>.Where()</code>, <code>.Select()</code>, ...
+    </div>
+
+    <h3 style="margin-top:1.5rem; color:var(--ut-primary-2)">🦥 Bản chất "lazy" (trì hoãn)</h3>
+    <p class="ut-sub">Đa số toán tử LINQ <strong>không chạy ngay</strong> khi gọi. Chúng chỉ dựng nên một "dây chuyền" mô tả truy vấn. Truy vấn chỉ thực sự chạy khi bạn <em>enumerate</em> (duyệt) kết quả — ví dụ qua <code>foreach</code>, <code>.ToList()</code>, <code>.Count()</code>.</p>
+
+    <pre class="cb"><span class="k">var</span> numbers = <span class="k">new</span>[] { <span class="s">1</span>, <span class="s">2</span>, <span class="s">3</span>, <span class="s">4</span>, <span class="s">5</span> };
+
+<span class="c">// Dòng này KHÔNG lọc gì cả — chỉ tạo "công thức"</span>
+<span class="k">var</span> query = numbers.Where(n =&gt;
+{
+    Console.WriteLine(<span class="s">$"Đang kiểm tra {n}"</span>);
+    <span class="k">return</span> n % <span class="s">2</span> == <span class="s">0</span>;
+});
+
+Console.WriteLine(<span class="s">"--- Trước foreach ---"</span>);
+
+<span class="c">// CHỈ đến đây predicate mới chạy</span>
+<span class="k">foreach</span> (<span class="k">var</span> n <span class="k">in</span> query)
+    Console.WriteLine(<span class="s">$"Lấy được {n}"</span>);</pre>
+
+    <div class="callout tip">
+        <strong>💡 Vì sao lazy lại tốt?</strong> Cho phép ghép nhiều toán tử mà chỉ duyệt collection <em>một lần</em>, hỗ trợ chuỗi dữ liệu vô hạn, và với <code>IQueryable</code> thì cho phép gom toàn bộ truy vấn rồi dịch sang <em>một</em> câu SQL duy nhất.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">2. Method syntax vs Query syntax</h2>
+    <p class="ut-sub">LINQ có hai cách viết tương đương nhau. Trình biên dịch dịch query syntax thành method syntax phía sau hậu trường.</p>
+
+    <h3 style="color:var(--ut-primary-2)">Cùng một truy vấn — viết hai kiểu</h3>
+    <pre class="cb"><span class="c">// Dữ liệu mẫu</span>
+<span class="k">record</span> <span class="t">Product</span>(<span class="k">int</span> Id, <span class="k">string</span> Name, <span class="k">string</span> Category, <span class="k">decimal</span> Price);
+
+List&lt;<span class="t">Product</span>&gt; products = [
+    <span class="k">new</span>(<span class="s">1</span>, <span class="s">"Bàn phím"</span>, <span class="s">"Phụ kiện"</span>, <span class="s">450_000</span>),
+    <span class="k">new</span>(<span class="s">2</span>, <span class="s">"Màn hình"</span>, <span class="s">"Thiết bị"</span>, <span class="s">3_200_000</span>),
+    <span class="k">new</span>(<span class="s">3</span>, <span class="s">"Chuột"</span>,    <span class="s">"Phụ kiện"</span>, <span class="s">280_000</span>),
+];</pre>
+
+    <pre class="cb"><span class="c">// ① QUERY SYNTAX — giống SQL, dễ đọc khi có join/group</span>
+<span class="k">var</span> q1 =
+    <span class="k">from</span> p <span class="k">in</span> products
+    <span class="k">where</span> p.Category == <span class="s">"Phụ kiện"</span>
+    <span class="k">orderby</span> p.Price <span class="k">descending</span>
+    <span class="k">select</span> p.Name;
+
+<span class="c">// ② METHOD SYNTAX — dùng lambda, linh hoạt hơn</span>
+<span class="k">var</span> q2 = products
+    .Where(p =&gt; p.Category == <span class="s">"Phụ kiện"</span>)
+    .OrderByDescending(p =&gt; p.Price)
+    .Select(p =&gt; p.Name);
+
+<span class="c">// q1 và q2 cho kết quả y hệt: ["Bàn phím", "Chuột"]</span></pre>
+
+    <table class="cmp">
+        <thead>
+            <tr><th>Tiêu chí</th><th>Query syntax</th><th>Method syntax</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Hình thức</td><td><code>from ... where ... select</code></td><td>Chuỗi method <code>.Where().Select()</code></td></tr>
+            <tr><td>Dễ đọc khi join/group</td><td>✅ Rất rõ ràng</td><td>⚠️ Dài, lồng nhau</td></tr>
+            <tr><td>Số toán tử hỗ trợ</td><td>Một phần (where, select, join, group, orderby, let)</td><td>✅ Toàn bộ (Skip, Take, Count, Any, ...)</td></tr>
+            <tr><td>Lambda phức tạp</td><td>⚠️ Hạn chế</td><td>✅ Linh hoạt</td></tr>
+            <tr><td>Phổ biến trong codebase 2026</td><td>Ít hơn</td><td>✅ Đa số dùng cái này</td></tr>
+        </tbody>
+    </table>
+
+    <div class="callout tip">
+        <strong>Khuyên dùng:</strong> Mặc định dùng <strong>method syntax</strong> vì nó hỗ trợ đầy đủ toán tử và ghép chuỗi tự nhiên. Chuyển sang <strong>query syntax</strong> khi truy vấn có nhiều <code>join</code> / <code>group ... by</code> / <code>let</code> — lúc đó nó dễ đọc hơn hẳn.
+    </div>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Có thể trộn lẫn</h3>
+    <pre class="cb"><span class="c">// Query syntax bọc trong (), rồi gọi method syntax tiếp</span>
+<span class="k">var</span> count = (
+    <span class="k">from</span> p <span class="k">in</span> products
+    <span class="k">where</span> p.Price &gt; <span class="s">300_000</span>
+    <span class="k">select</span> p
+).Count();   <span class="c">// Count() chỉ có ở method syntax</span></pre>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">3. Toán tử lọc &amp; chiếu — Where, Select, SelectMany</h2>
+    <p class="ut-sub">Đây là bộ ba dùng nhiều nhất: lọc phần tử, biến đổi phần tử, và làm phẳng collection lồng nhau.</p>
+
+    <h3 style="color:var(--ut-primary-2)">Where — lọc theo điều kiện</h3>
+    <pre class="cb"><span class="c">// Lọc đơn giản</span>
+<span class="k">var</span> cheap = products.Where(p =&gt; p.Price &lt; <span class="s">500_000</span>);
+
+<span class="c">// Where có overload nhận index</span>
+<span class="k">var</span> oddIndexed = products.Where((p, index) =&gt; index % <span class="s">2</span> == <span class="s">1</span>);
+
+<span class="c">// Ghép nhiều Where = AND (nhưng nên gộp 1 Where cho gọn)</span>
+<span class="k">var</span> filtered = products
+    .Where(p =&gt; p.Price &gt; <span class="s">200_000</span>)
+    .Where(p =&gt; p.Category == <span class="s">"Phụ kiện"</span>);</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Select — chiếu / biến đổi</h3>
+    <pre class="cb"><span class="c">// Chiếu sang kiểu khác (projection)</span>
+<span class="k">var</span> names = products.Select(p =&gt; p.Name);
+
+<span class="c">// Chiếu sang anonymous type</span>
+<span class="k">var</span> summary = products.Select(p =&gt; <span class="k">new</span> { p.Name, GiaVND = p.Price });
+
+<span class="c">// Chiếu sang DTO (record)</span>
+<span class="k">var</span> dtos = products.Select(p =&gt; <span class="k">new</span> <span class="t">ProductDto</span>(p.Id, p.Name));
+
+<span class="c">// Select có overload index</span>
+<span class="k">var</span> numbered = products.Select((p, i) =&gt; <span class="s">$"{i + 1}. {p.Name}"</span>);</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">SelectMany — làm phẳng (flatten)</h3>
+    <p class="ut-sub">Khi mỗi phần tử chứa một collection con, <code>SelectMany</code> gộp tất cả thành một chuỗi phẳng.</p>
+    <pre class="cb"><span class="k">record</span> <span class="t">Order</span>(<span class="k">int</span> Id, List&lt;<span class="t">string</span>&gt; Items);
+
+List&lt;<span class="t">Order</span>&gt; orders = [
+    <span class="k">new</span>(<span class="s">1</span>, [<span class="s">"Bàn phím"</span>, <span class="s">"Chuột"</span>]),
+    <span class="k">new</span>(<span class="s">2</span>, [<span class="s">"Màn hình"</span>]),
+];
+
+<span class="c">// Select → IEnumerable&lt;List&lt;string&gt;&gt; (lồng nhau, KHÔNG mong muốn)</span>
+<span class="k">var</span> nested = orders.Select(o =&gt; o.Items);
+
+<span class="c">// SelectMany → IEnumerable&lt;string&gt; phẳng: [Bàn phím, Chuột, Màn hình]</span>
+<span class="k">var</span> allItems = orders.SelectMany(o =&gt; o.Items);
+
+<span class="c">// SelectMany với projection kết hợp cả phần tử cha</span>
+<span class="k">var</span> pairs = orders.SelectMany(
+    o =&gt; o.Items,
+    (o, item) =&gt; <span class="k">new</span> { o.Id, Item = item });</pre>
+
+    <div class="callout info">
+        <strong>Mẹo nhớ:</strong> <code>Select</code> = 1 phần tử vào → 1 phần tử ra. <code>SelectMany</code> = 1 phần tử vào → nhiều phần tử ra rồi nối lại. Trong query syntax, <code>SelectMany</code> chính là dùng nhiều mệnh đề <code>from</code> liên tiếp.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">4. Sắp xếp — OrderBy, ThenBy, Reverse</h2>
+    <p class="ut-sub">Sắp xếp theo một hay nhiều khoá. Lưu ý: <code>OrderBy</code> trả về <code>IOrderedEnumerable</code> để có thể nối tiếp <code>ThenBy</code>.</p>
+
+    <pre class="cb"><span class="c">// Sắp xếp tăng dần theo Category, rồi giảm dần theo Price</span>
+<span class="k">var</span> sorted = products
+    .OrderBy(p =&gt; p.Category)
+    .ThenByDescending(p =&gt; p.Price);
+
+<span class="c">// SAI: gọi OrderBy hai lần = lần sau ghi đè lần trước!</span>
+<span class="k">var</span> wrong = products
+    .OrderBy(p =&gt; p.Category)
+    .OrderBy(p =&gt; p.Price);   <span class="c">// chỉ còn sắp theo Price</span>
+
+<span class="c">// Đảo ngược thứ tự hiện tại</span>
+<span class="k">var</span> reversed = products.Reverse();
+
+<span class="c">// Sắp theo nhiều cấp với comparer tuỳ biến</span>
+<span class="k">var</span> byLen = words.OrderBy(w =&gt; w.Length).ThenBy(w =&gt; w, StringComparer.Ordinal);</pre>
+
+    <div class="callout warn">
+        <strong>⚠️ Bẫy phổ biến:</strong> Muốn sắp theo nhiều khoá thì PHẢI dùng <code>OrderBy(...).ThenBy(...)</code>. Gọi <code>OrderBy</code> hai lần sẽ khiến lần gọi sau <em>thay thế hoàn toàn</em> thứ tự của lần trước.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">5. Nhóm — GroupBy</h2>
+    <p class="ut-sub"><code>GroupBy</code> gom các phần tử có chung khoá lại thành các nhóm <code>IGrouping&lt;TKey, TElement&gt;</code>.</p>
+
+    <pre class="cb"><span class="c">// Nhóm sản phẩm theo Category</span>
+<span class="k">var</span> groups = products.GroupBy(p =&gt; p.Category);
+
+<span class="k">foreach</span> (<span class="k">var</span> g <span class="k">in</span> groups)
+{
+    Console.WriteLine(<span class="s">$"Nhóm {g.Key}: {g.Count()} sản phẩm"</span>);
+    <span class="k">foreach</span> (<span class="k">var</span> p <span class="k">in</span> g)
+        Console.WriteLine(<span class="s">$"  - {p.Name}"</span>);
+}</pre>
+
+    <pre class="cb"><span class="c">// GroupBy + chiếu kết quả tổng hợp trong một bước</span>
+<span class="k">var</span> stats = products
+    .GroupBy(p =&gt; p.Category)
+    .Select(g =&gt; <span class="k">new</span>
+    {
+        Category   = g.Key,
+        SoLuong    = g.Count(),
+        TongGia    = g.Sum(p =&gt; p.Price),
+        GiaTrungBinh = g.Average(p =&gt; p.Price),
+    })
+    .OrderByDescending(x =&gt; x.TongGia);</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Query syntax cho group</h3>
+    <pre class="cb"><span class="k">var</span> stats =
+    <span class="k">from</span> p <span class="k">in</span> products
+    <span class="k">group</span> p <span class="k">by</span> p.Category <span class="k">into</span> g
+    <span class="k">orderby</span> g.Count() <span class="k">descending</span>
+    <span class="k">select</span> <span class="k">new</span> { Category = g.Key, SoLuong = g.Count() };</pre>
+
+    <div class="callout warn">
+        <strong>⚠️ GroupBy trên EF Core:</strong> Một số dạng <code>GroupBy</code> không dịch được sang SQL và EF sẽ throw hoặc đánh giá phía client. Kiểm tra log SQL sinh ra; nếu cần, chỉ <code>GroupBy</code> kèm các hàm tổng hợp đơn giản (Count/Sum/Avg) để EF dịch được thành <code>GROUP BY</code>.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">6. Kết hợp dữ liệu — Join &amp; GroupJoin</h2>
+    <p class="ut-sub">Ghép hai chuỗi dữ liệu theo khoá chung, giống <code>JOIN</code> trong SQL.</p>
+
+    <pre class="cb"><span class="k">record</span> <span class="t">Customer</span>(<span class="k">int</span> Id, <span class="k">string</span> Name);
+<span class="k">record</span> <span class="t">Invoice</span>(<span class="k">int</span> Id, <span class="k">int</span> CustomerId, <span class="k">decimal</span> Amount);
+
+<span class="c">// INNER JOIN — chỉ giữ phần tử khớp ở cả hai phía</span>
+<span class="k">var</span> joined = customers.Join(
+    invoices,
+    c =&gt; c.Id,                <span class="c">// khoá phía ngoài</span>
+    inv =&gt; inv.CustomerId,     <span class="c">// khoá phía trong</span>
+    (c, inv) =&gt; <span class="k">new</span>            <span class="c">// kết quả</span>
+    {
+        c.Name,
+        inv.Amount
+    });</pre>
+
+    <pre class="cb"><span class="c">// Query syntax — rõ ràng hơn với join</span>
+<span class="k">var</span> joined =
+    <span class="k">from</span> c <span class="k">in</span> customers
+    <span class="k">join</span> inv <span class="k">in</span> invoices <span class="k">on</span> c.Id <span class="k">equals</span> inv.CustomerId
+    <span class="k">select</span> <span class="k">new</span> { c.Name, inv.Amount };</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">GroupJoin — gom các bản ghi con theo cha (LEFT JOIN)</h3>
+    <pre class="cb"><span class="c">// Mỗi customer + danh sách invoice của họ (kể cả rỗng)</span>
+<span class="k">var</span> grouped = customers.GroupJoin(
+    invoices,
+    c =&gt; c.Id,
+    inv =&gt; inv.CustomerId,
+    (c, invs) =&gt; <span class="k">new</span>
+    {
+        c.Name,
+        Total = invs.Sum(i =&gt; i.Amount),
+        Count = invs.Count()
+    });
+
+<span class="c">// Mô phỏng LEFT JOIN: GroupJoin + SelectMany + DefaultIfEmpty</span>
+<span class="k">var</span> leftJoin =
+    <span class="k">from</span> c <span class="k">in</span> customers
+    <span class="k">join</span> inv <span class="k">in</span> invoices <span class="k">on</span> c.Id <span class="k">equals</span> inv.CustomerId <span class="k">into</span> gj
+    <span class="k">from</span> inv <span class="k">in</span> gj.DefaultIfEmpty()
+    <span class="k">select</span> <span class="k">new</span> { c.Name, Amount = inv?.Amount ?? <span class="s">0</span> };</pre>
+
+    <div class="callout tip">
+        <strong>💡 Với EF Core,</strong> thường ta KHÔNG viết <code>Join</code> thủ công mà dùng <em>navigation property</em> (<code>customer.Invoices</code>) — EF tự sinh JOIN. Chỉ dùng <code>Join</code> tường minh khi không có quan hệ navigation.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">7. Tổng hợp — Aggregate, Sum, Count, Average, Min, Max</h2>
+    <p class="ut-sub">Các toán tử này <strong>thực thi ngay</strong> (immediate) vì phải duyệt hết để trả về một giá trị đơn.</p>
+
+    <pre class="cb"><span class="k">var</span> total   = products.Sum(p =&gt; p.Price);
+<span class="k">var</span> count   = products.Count();
+<span class="k">var</span> active  = products.Count(p =&gt; p.Price &gt; <span class="s">300_000</span>);  <span class="c">// Count có predicate</span>
+<span class="k">var</span> avg     = products.Average(p =&gt; p.Price);
+<span class="k">var</span> min     = products.Min(p =&gt; p.Price);
+<span class="k">var</span> max     = products.Max(p =&gt; p.Price);
+
+<span class="c">// MaxBy / MinBy (.NET 6+): trả về PHẦN TỬ có giá trị lớn/nhỏ nhất</span>
+<span class="t">Product</span>? dearest = products.MaxBy(p =&gt; p.Price);   <span class="c">// cả object, không chỉ giá</span>
+<span class="t">Product</span>? cheapest = products.MinBy(p =&gt; p.Price);</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Aggregate — gấp (fold) tuỳ biến</h3>
+    <pre class="cb"><span class="c">// Tự định nghĩa cách tích luỹ</span>
+<span class="k">var</span> sum = numbers.Aggregate((acc, n) =&gt; acc + n);
+
+<span class="c">// Có seed (giá trị khởi tạo) — an toàn với chuỗi rỗng</span>
+<span class="k">var</span> product = numbers.Aggregate(<span class="s">1</span>, (acc, n) =&gt; acc * n);
+
+<span class="c">// Seed + bộ chọn kết quả cuối</span>
+<span class="k">var</span> csv = names.Aggregate(
+    <span class="k">new</span> StringBuilder(),
+    (sb, name) =&gt; sb.Append(name).Append(<span class="s">", "</span>),
+    sb =&gt; sb.ToString().TrimEnd(<span class="s">','</span>, <span class="s">' '</span>));</pre>
+
+    <div class="callout warn">
+        <strong>⚠️ <code>Average</code> / <code>Max</code> / <code>Min</code> trên chuỗi rỗng</strong> sẽ throw <code>InvalidOperationException</code> với kiểu giá trị (non-nullable). Dùng overload nullable (vd <code>Average(p =&gt; (decimal?)p.Price)</code>) hoặc kiểm tra <code>.Any()</code> trước.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">8. Lấy phần tử — First, Single, ElementAt</h2>
+    <p class="ut-sub">Phân biệt rõ các biến thể để tránh exception ngoài ý muốn.</p>
+
+    <table class="cmp">
+        <thead>
+            <tr><th>Toán tử</th><th>Khi không có phần tử</th><th>Khi nhiều phần tử</th><th>Dùng khi</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>First()</code></td><td>❌ Throw</td><td>Trả phần tử đầu</td><td>Chắc chắn có ≥1</td></tr>
+            <tr><td><code>FirstOrDefault()</code></td><td>Trả <code>default</code> (null/0)</td><td>Trả phần tử đầu</td><td>Có thể rỗng</td></tr>
+            <tr><td><code>Single()</code></td><td>❌ Throw</td><td>❌ Throw</td><td>Phải đúng 1 (vd theo Id)</td></tr>
+            <tr><td><code>SingleOrDefault()</code></td><td>Trả <code>default</code></td><td>❌ Throw</td><td>0 hoặc 1</td></tr>
+            <tr><td><code>Last()</code> / <code>LastOrDefault()</code></td><td>Throw / default</td><td>Trả phần tử cuối</td><td>Cần phần tử cuối</td></tr>
+            <tr><td><code>ElementAt(i)</code></td><td>❌ Throw (ngoài range)</td><td>—</td><td>Lấy theo chỉ số</td></tr>
+        </tbody>
+    </table>
+
+    <pre class="cb"><span class="c">// First/Single có thể nhận predicate luôn</span>
+<span class="k">var</span> admin = users.First(u =&gt; u.Role == <span class="s">"Admin"</span>);          <span class="c">// throw nếu không có</span>
+<span class="k">var</span> maybe = users.FirstOrDefault(u =&gt; u.Role == <span class="s">"Admin"</span>); <span class="c">// null nếu không có</span>
+
+<span class="c">// Single dùng khi nghiệp vụ yêu cầu đúng 1 — bắt lỗi dữ liệu trùng</span>
+<span class="k">var</span> user = users.Single(u =&gt; u.Id == <span class="s">5</span>);  <span class="c">// throw nếu có 2 user trùng Id</span>
+
+<span class="c">// FirstOrDefault với giá trị mặc định tuỳ chọn (.NET 6+)</span>
+<span class="k">var</span> name = names.FirstOrDefault(n =&gt; n.StartsWith(<span class="s">"A"</span>), <span class="s">"(không có)"</span>);</pre>
+
+    <div class="callout danger">
+        <strong>Đừng lạm dụng <code>First()</code> không predicate sau <code>Where()</code> rồi quên null-check.</strong> Nếu collection rỗng, <code>First()</code> ném exception làm sập request. Dùng <code>FirstOrDefault()</code> + kiểm tra null nếu kết quả có thể rỗng.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">9. Kiểm tra &amp; tập hợp — Any, All, Contains, Distinct</h2>
+
+    <pre class="cb"><span class="c">// Any — có ÍT NHẤT một phần tử thoả? (dừng ngay khi gặp match)</span>
+<span class="k">bool</span> hasExpensive = products.Any(p =&gt; p.Price &gt; <span class="s">1_000_000</span>);
+<span class="k">bool</span> hasAny       = products.Any();   <span class="c">// có phần tử nào không</span>
+
+<span class="c">// All — TẤT CẢ đều thoả? (dừng ngay khi gặp phần tử KHÔNG thoả)</span>
+<span class="k">bool</span> allActive = products.All(p =&gt; p.Price &gt; <span class="s">0</span>);
+
+<span class="c">// Contains — có chứa giá trị cụ thể</span>
+<span class="k">bool</span> has = ids.Contains(<span class="s">42</span>);
+
+<span class="c">// Distinct — loại trùng</span>
+<span class="k">var</span> uniqueCats = products.Select(p =&gt; p.Category).Distinct();
+
+<span class="c">// DistinctBy (.NET 6+) — loại trùng theo khoá</span>
+<span class="k">var</span> onePerCat = products.DistinctBy(p =&gt; p.Category);</pre>
+
+    <div class="callout tip">
+        <strong>💡 Dùng <code>Any()</code> thay vì <code>Count() &gt; 0</code>:</strong> <code>Any()</code> dừng ngay khi thấy phần tử đầu tiên, còn <code>Count()</code> phải duyệt hết. Trên EF Core, <code>Any()</code> dịch thành <code>EXISTS</code> (nhanh), <code>Count()&gt;0</code> dịch thành đếm toàn bảng.
+    </div>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Toán tử tập hợp</h3>
+    <pre class="cb"><span class="k">var</span> union     = listA.Union(listB);        <span class="c">// hợp (loại trùng)</span>
+<span class="k">var</span> intersect = listA.Intersect(listB);    <span class="c">// giao</span>
+<span class="k">var</span> except    = listA.Except(listB);       <span class="c">// hiệu (A trừ B)</span>
+<span class="k">var</span> concat    = listA.Concat(listB);       <span class="c">// nối (GIỮ trùng)</span>
+
+<span class="c">// *By variants (.NET 6+): UnionBy, IntersectBy, ExceptBy</span>
+<span class="k">var</span> merged = usersA.UnionBy(usersB, u =&gt; u.Email);</pre>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">10. Phân trang — Take, Skip, Chunk</h2>
+    <pre class="cb"><span class="c">// Phân trang cơ bản: trang thứ `page` (1-based), mỗi trang `size`</span>
+<span class="k">int</span> page = <span class="s">2</span>, size = <span class="s">10</span>;
+<span class="k">var</span> pageItems = query
+    .Skip((page - <span class="s">1</span>) * size)
+    .Take(size);
+
+<span class="c">// TakeWhile / SkipWhile — theo điều kiện (dừng khi điều kiện sai)</span>
+<span class="k">var</span> head = numbers.TakeWhile(n =&gt; n &lt; <span class="s">5</span>);
+<span class="k">var</span> tail = numbers.SkipWhile(n =&gt; n &lt; <span class="s">5</span>);
+
+<span class="c">// Take với Range (.NET 6+)</span>
+<span class="k">var</span> middle = items.Take(<span class="s">2</span>..<span class="s">5</span>);   <span class="c">// phần tử index 2,3,4</span>
+<span class="k">var</span> lastThree = items.Take(^<span class="s">3</span>..);
+
+<span class="c">// Chunk (.NET 6+) — chia thành các lô size phần tử</span>
+<span class="k">foreach</span> (<span class="k">var</span> batch <span class="k">in</span> items.Chunk(<span class="s">100</span>))
+    ProcessBatch(batch);   <span class="c">// xử lý theo lô 100</span></pre>
+
+    <div class="callout warn">
+        <strong>⚠️ Phân trang trên EF Core PHẢI có <code>OrderBy</code> trước <code>Skip</code>/<code>Take</code></strong> — nếu không thứ tự bản ghi không xác định và kết quả phân trang sẽ không ổn định giữa các lần gọi.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">11. Vật chất hoá — ToList, ToArray, ToDictionary, ToHashSet</h2>
+    <p class="ut-sub">Các toán tử <code>To...</code> <strong>thực thi ngay</strong> truy vấn và sao chép kết quả vào một collection mới trong bộ nhớ.</p>
+
+    <pre class="cb"><span class="k">var</span> list  = query.ToList();        <span class="c">// List&lt;T&gt;</span>
+<span class="k">var</span> arr   = query.ToArray();       <span class="c">// T[]</span>
+<span class="k">var</span> set   = query.ToHashSet();     <span class="c">// HashSet&lt;T&gt; (loại trùng)</span>
+
+<span class="c">// ToDictionary — key + value selector</span>
+<span class="k">var</span> byId = products.ToDictionary(
+    p =&gt; p.Id,         <span class="c">// key</span>
+    p =&gt; p.Name);      <span class="c">// value</span>
+
+<span class="c">// ToLookup — giống Dictionary nhưng mỗi key map tới NHIỀU value</span>
+<span class="k">var</span> byCategory = products.ToLookup(p =&gt; p.Category);
+<span class="k">var</span> accessories = byCategory[<span class="s">"Phụ kiện"</span>];   <span class="c">// IEnumerable</span></pre>
+
+    <div class="callout danger">
+        <strong>⚠️ <code>ToDictionary</code> ném exception nếu khoá trùng.</strong> Nếu dữ liệu có thể có key trùng, dùng <code>ToLookup</code> (1 key → nhiều value) hoặc <code>GroupBy</code> rồi tự xử lý. Tương tự, value selector trả null không sao nhưng key null thì throw.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">12. Deferred vs Immediate execution — cái bẫy kinh điển</h2>
+    <p class="ut-sub">Hiểu sai điểm này là nguồn gốc của vô số bug "kết quả lúc đúng lúc sai" và "DB bị query nhiều lần".</p>
+
+    <table class="cmp">
+        <thead>
+            <tr><th>Loại</th><th>Toán tử tiêu biểu</th><th>Khi nào chạy</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>Deferred (lazy)</strong></td><td>Where, Select, OrderBy, Take, Skip, GroupBy, Join, Distinct</td><td>Khi enumerate (foreach / To...)</td></tr>
+            <tr><td><strong>Immediate</strong></td><td>ToList, ToArray, Count, Sum, First, Any, Average, Max</td><td>Ngay lập tức, duyệt collection liền</td></tr>
+        </tbody>
+    </table>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Bẫy: query được đánh giá LẠI mỗi lần enumerate</h3>
+    <pre class="cb"><span class="k">var</span> source = <span class="k">new</span> List&lt;<span class="t">int</span>&gt; { <span class="s">1</span>, <span class="s">2</span>, <span class="s">3</span> };
+
+<span class="c">// query là "công thức", KHÔNG phải kết quả</span>
+<span class="k">var</span> query = source.Where(n =&gt; n &gt; <span class="s">1</span>);
+
+Console.WriteLine(query.Count());   <span class="c">// 2  (lần enumerate #1)</span>
+
+source.Add(<span class="s">4</span>);                       <span class="c">// thêm dữ liệu vào NGUỒN</span>
+
+Console.WriteLine(query.Count());   <span class="c">// 3  (!) lần enumerate #2 thấy data mới</span>
+
+<span class="c">// Vì query bám vào `source`, nó chạy LẠI mỗi lần gọi Count()/foreach.</span>
+<span class="c">// Muốn "đóng băng" kết quả tại thời điểm này → .ToList()</span>
+<span class="k">var</span> snapshot = source.Where(n =&gt; n &gt; <span class="s">1</span>).ToList();  <span class="c">// chụp ảnh ngay</span></pre>
+
+    <div class="callout danger">
+        <strong>🔥 Hệ quả nghiêm trọng với EF Core:</strong> Nếu <code>query</code> là <code>IQueryable</code> bám vào DB, mỗi lần bạn enumerate nó (foreach, Count, ToList) là một lần <strong>gọi database</strong>. Lặp lại 3 lần = 3 round-trip SQL. Vật chất hoá <em>một lần</em> bằng <code>.ToList()</code> rồi tái sử dụng kết quả trong bộ nhớ.
+    </div>
+
+    <pre class="cb"><span class="c">// ❌ Query chạy 2 lần xuống DB</span>
+<span class="k">var</span> q = db.Orders.Where(o =&gt; o.Total &gt; <span class="s">100</span>);
+<span class="k">var</span> count = q.Count();          <span class="c">// SQL #1: SELECT COUNT(*)</span>
+<span class="k">var</span> list  = q.ToList();         <span class="c">// SQL #2: SELECT *</span>
+
+<span class="c">// ✅ Một lần xuống DB rồi tính trong bộ nhớ</span>
+<span class="k">var</span> list  = db.Orders.Where(o =&gt; o.Total &gt; <span class="s">100</span>).ToList();  <span class="c">// SQL #1</span>
+<span class="k">var</span> count = list.Count;          <span class="c">// chỉ đọc property, 0 query</span></pre>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">13. IEnumerable vs IQueryable</h2>
+    <p class="ut-sub">Hai interface trông giống nhau nhưng hành xử hoàn toàn khác. Nhầm lẫn chúng là nguyên nhân số 1 của các vấn đề hiệu năng trong EF Core.</p>
+
+    <table class="cmp">
+        <thead>
+            <tr><th>Tiêu chí</th><th>IEnumerable&lt;T&gt;</th><th>IQueryable&lt;T&gt;</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Namespace</td><td>System.Collections.Generic</td><td>System.Linq</td></tr>
+            <tr><td>Lambda được lưu dưới dạng</td><td><code>Func&lt;T,bool&gt;</code> (delegate đã biên dịch)</td><td><code>Expression&lt;Func&lt;T,bool&gt;&gt;</code> (cây biểu thức)</td></tr>
+            <tr><td>Nơi xử lý</td><td>Trong bộ nhớ ứng dụng (client)</td><td>Provider dịch ra ngôn ngữ đích (SQL) — chạy ở DB (server)</td></tr>
+            <tr><td>Dữ liệu tải về</td><td>Toàn bộ rồi mới lọc trong RAM</td><td>Chỉ tải về kết quả đã lọc</td></tr>
+            <tr><td>Dùng cho</td><td>LINQ to Objects (List, mảng...)</td><td>LINQ to Entities (DbSet), provider remote</td></tr>
+            <tr><td>Hiệu năng với DB lớn</td><td>❌ Tải hết → tốn RAM/băng thông</td><td>✅ Lọc tại nguồn → tối ưu</td></tr>
+        </tbody>
+    </table>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Expression tree — vì sao IQueryable dịch được sang SQL</h3>
+    <p class="ut-sub">Với <code>IQueryable</code>, lambda KHÔNG được biên dịch thành code thực thi mà được lưu thành một <em>cây biểu thức</em> — một mô tả dữ liệu của logic. EF Core đọc cây này và dịch nó thành câu SQL tương ứng.</p>
+
+    <pre class="cb"><span class="c">// IQueryable: lambda là Expression — EF "đọc" được và dịch sang SQL</span>
+IQueryable&lt;<span class="t">Order</span>&gt; q = db.Orders.Where(o =&gt; o.Total &gt; <span class="s">100</span>);
+<span class="c">// → SELECT * FROM Orders WHERE Total &gt; 100   (lọc ở DB)</span>
+
+<span class="c">// IEnumerable: lambda là Func đã compile — chạy trong RAM</span>
+IEnumerable&lt;<span class="t">Order</span>&gt; e = db.Orders.AsEnumerable().Where(o =&gt; o.Total &gt; <span class="s">100</span>);
+<span class="c">// → SELECT * FROM Orders   (TẢI HẾT về rồi mới lọc trong app!)</span></pre>
+
+    <div class="callout danger">
+        <strong>🔥 Vì sao việc "trộn" chúng quan trọng:</strong> Khi bạn gọi <code>.AsEnumerable()</code>, <code>.ToList()</code>, hoặc dùng một method C# mà EF không dịch được, query "chuyển" từ <code>IQueryable</code> sang <code>IEnumerable</code>. Mọi toán tử <em>sau</em> điểm chuyển sẽ chạy <strong>trong bộ nhớ</strong> trên toàn bộ dữ liệu đã tải về — đây gọi là <em>client evaluation</em> và thường âm thầm phá huỷ hiệu năng.
+    </div>
+
+    <pre class="cb"><span class="c">// ❌ Where THỨ HAI chạy client-side vì đứng sau AsEnumerable()</span>
+<span class="k">var</span> bad = db.Orders
+    .Where(o =&gt; o.Total &gt; <span class="s">100</span>)   <span class="c">// dịch SQL ✅</span>
+    .AsEnumerable()                  <span class="c">// 🚪 cửa chuyển sang RAM</span>
+    .Where(o =&gt; IsSpecial(o));        <span class="c">// chạy trong app trên TẤT CẢ order &gt;100</span>
+
+<span class="c">// ✅ Giữ mọi thứ trong IQueryable để dịch hết sang SQL</span>
+<span class="k">var</span> good = db.Orders
+    .Where(o =&gt; o.Total &gt; <span class="s">100</span> &amp;&amp; o.IsSpecialFlag)   <span class="c">// 1 câu SQL</span>
+    .ToList();</pre>
+
+    <div class="callout warn">
+        <strong>⚠️ EF Core 3.0+:</strong> Mặc định nếu một <code>Where</code>/biểu thức không dịch được sang SQL, EF sẽ <strong>throw exception</strong> thay vì âm thầm chạy client-side (như EF Core 2.x từng làm). Muốn cố tình đánh giá client phải gọi <code>AsEnumerable()</code> tường minh.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">14. Các bẫy thường gặp (Common Pitfalls)</h2>
+
+    <h3 style="color:var(--ut-primary-2)">14.1 Multiple enumeration — duyệt nhiều lần</h3>
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont dont">
+            <h4>❌ Enumerate cùng một query nhiều lần</h4>
+            <p>Mỗi lần duyệt <code>IEnumerable</code> lazy là một lần chạy lại toàn bộ logic — với EF là một lần xuống DB.</p>
+            <pre class="cb"><span class="k">var</span> q = db.Users.Where(u =&gt; u.Active);
+
+<span class="k">if</span> (q.Any())                  <span class="c">// SQL #1</span>
+{
+    <span class="k">foreach</span> (<span class="k">var</span> u <span class="k">in</span> q)     <span class="c">// SQL #2</span>
+        Send(u);
+    <span class="k">var</span> n = q.Count();        <span class="c">// SQL #3</span>
+}</pre>
+        </div>
+        <div class="do-dont do">
+            <h4>✅ Vật chất hoá một lần</h4>
+            <p>Gọi <code>.ToList()</code> một lần, rồi tái sử dụng list trong bộ nhớ cho mọi thao tác sau.</p>
+            <pre class="cb"><span class="k">var</span> users = db.Users
+    .Where(u =&gt; u.Active)
+    .ToList();                <span class="c">// 1 SQL duy nhất</span>
+
+<span class="k">if</span> (users.Count &gt; <span class="s">0</span>)
+{
+    <span class="k">foreach</span> (<span class="k">var</span> u <span class="k">in</span> users)
+        Send(u);
+    <span class="k">var</span> n = users.Count;
+}</pre>
+        </div>
+    </div>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">14.2 N+1 query trong EF Core</h3>
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont dont">
+            <h4>❌ Lazy load trong vòng lặp → N+1</h4>
+            <p>1 query lấy danh sách cha + N query lấy con cho từng phần tử = N+1 round-trip xuống DB.</p>
+            <pre class="cb"><span class="k">var</span> orders = db.Orders.ToList();   <span class="c">// 1 query</span>
+
+<span class="k">foreach</span> (<span class="k">var</span> o <span class="k">in</span> orders)
+{
+    <span class="c">// mỗi lần truy cập navigation = 1 query!</span>
+    Console.WriteLine(o.Customer.Name);
+    <span class="c">// → N query phụ cho N order</span>
+}</pre>
+        </div>
+        <div class="do-dont do">
+            <h4>✅ Eager load với Include / projection</h4>
+            <p>Dùng <code>Include</code> để JOIN sẵn, hoặc <code>Select</code> chỉ lấy field cần — tất cả trong 1 query.</p>
+            <pre class="cb"><span class="c">// Eager load: 1 query có JOIN</span>
+<span class="k">var</span> orders = db.Orders
+    .Include(o =&gt; o.Customer)
+    .ToList();
+
+<span class="c">// Hoặc projection — chỉ lấy đúng dữ liệu cần</span>
+<span class="k">var</span> data = db.Orders
+    .Select(o =&gt; <span class="k">new</span> { o.Id, Cust = o.Customer.Name })
+    .ToList();</pre>
+        </div>
+    </div>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">14.3 Gọi <code>.ToList()</code> quá sớm</h3>
+    <pre class="cb"><span class="c">// ❌ ToList() quá SỚM: tải HẾT bảng về RAM rồi mới lọc/phân trang</span>
+<span class="k">var</span> page = db.Products
+    .ToList()                          <span class="c">// 🔥 SELECT * toàn bảng (có thể triệu dòng)</span>
+    .Where(p =&gt; p.Price &gt; <span class="s">100</span>)
+    .Skip(<span class="s">20</span>).Take(<span class="s">10</span>)
+    .ToList();
+
+<span class="c">// ✅ ToList() đúng lúc: lọc + phân trang ở DB, chỉ tải 10 dòng về</span>
+<span class="k">var</span> page = db.Products
+    .Where(p =&gt; p.Price &gt; <span class="s">100</span>)
+    .OrderBy(p =&gt; p.Id)
+    .Skip(<span class="s">20</span>).Take(<span class="s">10</span>)
+    .ToList();                         <span class="c">// SELECT ... WHERE ... LIMIT 10 OFFSET 20</span></pre>
+
+    <div class="callout warn">
+        <strong>⚠️ Quy tắc vàng:</strong> Với EF Core, giữ truy vấn ở dạng <code>IQueryable</code> càng lâu càng tốt (lọc, sort, phân trang, chiếu), CHỈ gọi <code>.ToList()</code>/<code>.ToArrayAsync()</code> ở <em>bước cuối cùng</em> khi đã thu hẹp dữ liệu xuống đúng những gì cần.
+    </div>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">14.4 Client vs Server evaluation</h3>
+    <pre class="cb"><span class="c">// ❌ Hàm C# tự định nghĩa — EF không dịch sang SQL được</span>
+<span class="k">var</span> r = db.Users
+    .Where(u =&gt; MyHelper.Normalize(u.Email) == <span class="s">"a@b.com"</span>)  <span class="c">// throw hoặc client-eval</span>
+    .ToList();
+
+<span class="c">// ✅ Dùng biểu thức EF dịch được, hoặc chuẩn hoá trước khi query</span>
+<span class="k">string</span> target = <span class="s">"a@b.com"</span>.ToLower();
+<span class="k">var</span> r = db.Users
+    .Where(u =&gt; u.Email.ToLower() == target)   <span class="c">// dịch thành LOWER() trong SQL</span>
+    .ToList();</pre>
+
+    <div class="callout info">
+        <strong>Cách kiểm tra:</strong> Bật log SQL của EF Core (<code>LogTo(Console.WriteLine)</code> hoặc cấu hình <code>Microsoft.EntityFrameworkCore.Database.Command</code> ở mức Information) và đọc câu SQL sinh ra. Nếu thấy <code>SELECT *</code> không có <code>WHERE</code> bạn mong đợi → logic đang chạy client-side.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">15. Async LINQ với EF Core</h2>
+    <p class="ut-sub">Với database, luôn dùng các biến thể async để không block thread. Chúng nằm trong namespace <code>Microsoft.EntityFrameworkCore</code>, KHÔNG phải <code>System.Linq</code>.</p>
+
+    <pre class="cb"><span class="k">using</span> Microsoft.EntityFrameworkCore;
+
+<span class="k">var</span> list  = <span class="k">await</span> db.Orders.Where(o =&gt; o.Active).ToListAsync();
+<span class="k">var</span> first = <span class="k">await</span> db.Orders.FirstOrDefaultAsync(o =&gt; o.Id == id);
+<span class="k">var</span> count = <span class="k">await</span> db.Orders.CountAsync(o =&gt; o.Active);
+<span class="k">var</span> exist = <span class="k">await</span> db.Orders.AnyAsync(o =&gt; o.Total &gt; <span class="s">100</span>);
+<span class="k">var</span> sum   = <span class="k">await</span> db.Orders.SumAsync(o =&gt; o.Total);
+
+<span class="c">// Stream từng bản ghi (không tải hết vào RAM) với IAsyncEnumerable</span>
+<span class="k">await foreach</span> (<span class="k">var</span> o <span class="k">in</span> db.Orders.Where(o =&gt; o.Active).AsAsyncEnumerable())
+    Process(o);</pre>
+
+    <div class="callout tip">
+        <strong>💡 <code>AsNoTracking()</code></strong> cho các truy vấn chỉ-đọc: EF không theo dõi entity → nhanh hơn, ít tốn RAM. Dùng cho mọi query trả dữ liệu ra ngoài (API GET) mà không định cập nhật lại DB.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">16. Mẹo viết LINQ sạch</h2>
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont do">
+            <h4>✅ Lọc trước, chiếu sau</h4>
+            <p>Đặt <code>Where</code> sớm nhất để giảm số phần tử trước khi <code>Select</code>/<code>OrderBy</code> phải xử lý.</p>
+            <pre class="cb">items
+    .Where(x =&gt; x.Active)   <span class="c">// giảm tập trước</span>
+    .OrderBy(x =&gt; x.Name)
+    .Select(x =&gt; x.Name);</pre>
+        </div>
+        <div class="do-dont do">
+            <h4>✅ Đặt tên biến trung gian rõ ràng</h4>
+            <p>Tách chuỗi dài thành các bước có tên, dễ debug và đọc hơn lambda lồng nhau.</p>
+            <pre class="cb"><span class="k">var</span> active  = users.Where(u =&gt; u.Active);
+<span class="k">var</span> emails  = active.Select(u =&gt; u.Email);
+<span class="k">var</span> result  = emails.Distinct().ToList();</pre>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Lambda quá dài nhồi trong một dòng</h4>
+            <p>Logic phức tạp nhét hết vào một lambda khiến khó đọc, khó test.</p>
+            <pre class="cb">data.Select(x =&gt; x.A &gt; <span class="s">0</span> ? Calc(x) + Fix(x) - Adj(x) : <span class="s">0</span>);</pre>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Quên <code>OrderBy</code> khi phân trang</h4>
+            <p><code>Skip</code>/<code>Take</code> không có <code>OrderBy</code> → thứ tự bản ghi không xác định.</p>
+            <pre class="cb">db.Items.Skip(<span class="s">20</span>).Take(<span class="s">10</span>);  <span class="c">// không ổn định!</span></pre>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">🎯 Checklist nắm vững LINQ</h2>
+    <div class="ut-card">
+        <ul>
+            <li>✅ Hiểu LINQ là extension method trên <code>IEnumerable&lt;T&gt;</code>, chỉ cần <code>using System.Linq</code></li>
+            <li>✅ Viết được cùng truy vấn theo cả method syntax và query syntax</li>
+            <li>✅ Phân biệt deferred (Where/Select/OrderBy) vs immediate (ToList/Count/First)</li>
+            <li>✅ Biết <code>Select</code> vs <code>SelectMany</code>, dùng đúng khi flatten collection lồng nhau</li>
+            <li>✅ Dùng <code>OrderBy().ThenBy()</code> cho nhiều khoá — KHÔNG gọi <code>OrderBy</code> hai lần</li>
+            <li>✅ Chọn đúng <code>First</code> / <code>FirstOrDefault</code> / <code>Single</code> theo ngữ cảnh null</li>
+            <li>✅ Dùng <code>Any()</code> thay cho <code>Count() &gt; 0</code></li>
+            <li>✅ Hiểu rõ <code>IEnumerable</code> (client, Func) vs <code>IQueryable</code> (server, Expression tree → SQL)</li>
+            <li>✅ Tránh multiple enumeration — vật chất hoá <code>.ToList()</code> một lần rồi tái dùng</li>
+            <li>✅ Tránh N+1 bằng <code>Include</code> hoặc projection <code>Select</code></li>
+            <li>✅ Gọi <code>.ToList()</code> ở bước CUỐI, giữ <code>IQueryable</code> càng lâu càng tốt</li>
+            <li>✅ Đọc log SQL để phát hiện client evaluation ngoài ý muốn</li>
+            <li>✅ Phân trang luôn kèm <code>OrderBy</code> trước <code>Skip</code>/<code>Take</code></li>
+            <li>✅ Dùng các biến thể async (<code>ToListAsync</code>, <code>AnyAsync</code>...) + <code>AsNoTracking()</code> với EF Core</li>
+        </ul>
+    </div>
+</section>
+
+</div>
+
+<footer style="text-align:center;padding:3rem 1.5rem;color:var(--ut-muted);border-top:1px solid var(--ut-border);margin-top:3rem;font-size:.9rem;">
+    <p>LINQ · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

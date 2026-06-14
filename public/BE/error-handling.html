@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Handling & Resilience trong ASP.NET Core — A-Z</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --ut-primary: #512bd4;
+        --ut-primary-2: #8a2be2;
+        --ut-accent: #43e97b;
+        --ut-warn: #f39c12;
+        --ut-danger: #f5576c;
+        --ut-card: #1a1d2e;
+        --ut-card-2: #232640;
+        --ut-border: #2d3148;
+        --ut-text: #e2e8f0;
+        --ut-muted: #94a3b8;
+    }
+    .ut-hero { text-align: center; padding: 4rem 1.5rem 3rem; background: radial-gradient(ellipse at top, rgba(81,43,212,.18), transparent 60%); }
+    .ut-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 1rem; }
+    .ut-hero h1 .gradient { background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .ut-hero .hero-badge { display: inline-block; background: rgba(81,43,212,.15); color: var(--ut-primary-2); padding: .4rem 1rem; border-radius: 20px; font-size: .78rem; font-weight: 600; letter-spacing: 1px; margin-bottom: 1.25rem; }
+    .ut-hero p { color: var(--ut-muted); max-width: 820px; margin: 0 auto; }
+    .ut-section { padding: 2.5rem 0; }
+    .ut-title { font-size: 1.7rem; margin-bottom: 1.5rem; position: relative; padding-left: 1rem; color: var(--ut-text); }
+    .ut-title::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 4px; background: linear-gradient(180deg, var(--ut-primary), var(--ut-primary-2)); border-radius: 3px; }
+    .ut-sub { color: var(--ut-muted); margin-bottom: 1.25rem; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+    .ut-grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .ut-grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    .ut-grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .ut-card { background: var(--ut-card); border: 1px solid var(--ut-border); border-radius: 12px; padding: 1.4rem; }
+    .ut-card h3 { color: var(--ut-primary-2); margin-bottom: .6rem; font-size: 1.1rem; }
+    .ut-card h4 { color: var(--ut-accent); margin-bottom: .45rem; font-size: .98rem; }
+    .ut-card p, .ut-card li { color: var(--ut-muted); font-size: .95rem; }
+    .ut-card ul { padding-left: 1.2rem; }
+    .ut-card ul li { margin-bottom: .3rem; }
+    pre.cb { background: #0b1020; border: 1px solid var(--ut-border); border-left: 3px solid var(--ut-primary); border-radius: 8px; padding: 1rem 1.15rem; overflow-x: auto; font-family: 'JetBrains Mono', Consolas, monospace; font-size: .88rem; line-height: 1.6; margin: .75rem 0; color: #d6deeb; }
+    pre.cb .k { color: #c792ea; }
+    pre.cb .s { color: #ecc48d; }
+    pre.cb .c { color: #637777; font-style: italic; }
+    pre.cb .n { color: #82aaff; }
+    pre.cb .t { color: #ffcb8b; }
+    pre.cb .a { color: #7fdbca; }
+    code { background: #2d3148; padding: 2px 6px; border-radius: 4px; font-size: .88em; color: #f8d06b; font-family: 'JetBrains Mono', Consolas, monospace; }
+    .callout { border-radius: 10px; padding: .95rem 1.15rem; margin: 1rem 0; border: 1px solid; }
+    .callout.tip { background: rgba(67,233,123,.07); border-color: var(--ut-accent); }
+    .callout.tip strong { color: var(--ut-accent); }
+    .callout.warn { background: rgba(243,156,18,.07); border-color: var(--ut-warn); }
+    .callout.warn strong { color: var(--ut-warn); }
+    .callout.danger { background: rgba(245,87,108,.07); border-color: var(--ut-danger); }
+    .callout.danger strong { color: var(--ut-danger); }
+    .callout.info { background: rgba(81,43,212,.08); border-color: var(--ut-primary-2); }
+    .callout.info strong { color: var(--ut-primary-2); }
+    table.cmp { width: 100%; border-collapse: collapse; background: var(--ut-card); border-radius: 10px; overflow: hidden; margin: 1rem 0; font-size: .92rem; }
+    table.cmp th, table.cmp td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--ut-border); }
+    table.cmp th { background: var(--ut-card-2); color: var(--ut-primary-2); font-weight: 600; }
+    table.cmp td { color: var(--ut-muted); }
+    table.cmp tr:last-child td { border-bottom: none; }
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; position: relative; padding-left: 2.8rem; margin-bottom: 1rem; }
+    .steps li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 2rem; height: 2rem; background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .do-dont { border-left: 3px solid; padding: 1rem 1.15rem; border-radius: 8px; margin-bottom: 1rem; }
+    .do-dont.do { border-color: var(--ut-accent); background: rgba(67,233,123,.04); }
+    .do-dont.dont { border-color: var(--ut-danger); background: rgba(245,87,108,.04); }
+    .do-dont h4 { margin-bottom: .5rem; }
+    .do-dont.do h4 { color: var(--ut-accent); }
+    .do-dont.dont h4 { color: var(--ut-danger); }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo"><a href="index.html" style="color:inherit;-webkit-text-fill-color:inherit;">.NET<span class="accent">Mastery</span></a></div>
+        <div class="nav-links">
+            <a href="index.html">Roadmap</a>
+            <a href="async.html">Async</a>
+            <a href="rest-design.html">REST API</a>
+            <a href="auth-jwt.html">Auth & JWT</a>
+            <a href="caching.html">Caching</a>
+            <a href="logging.html">Logging</a>
+            <a href="error-handling.html" class="nav-active">Error & Resilience</a>
+            <a href="clean-architecture.html">Clean Arch</a>
+            <a href="design-patterns.html">SOLID & Patterns</a>
+        </div>
+        <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+</nav>
+
+<header class="ut-hero">
+    <div class="hero-badge">NÂNG CAO · INTERMEDIATE</div>
+    <h1>Error Handling &amp; <span class="gradient">Resilience</span></h1>
+    <p>Xây dựng hệ thống ASP.NET Core "không gãy": chiến lược exception đúng đắn, global exception handler với ProblemDetails (RFC 7807), Result pattern cho lỗi nghiệp vụ, và bộ công cụ resilience Polly v8 — retry với backoff + jitter, circuit breaker, timeout, fallback, graceful degradation. Chính xác cho .NET 8/9.</p>
+</header>
+
+<div class="container">
+
+<section class="ut-section">
+    <h2 class="ut-title">1. Chiến lược Exception — dùng đúng chỗ</h2>
+    <p class="ut-sub">Exception là cơ chế cho <strong>những tình huống ngoại lệ thật sự</strong> — điều bất thường, không lường trước, không thể xử lý tại chỗ. Đừng dùng exception cho control flow (luồng điều khiển bình thường): nó đắt (capture stack trace, unwind stack), khó đọc và che giấu ý định.</p>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h4>✅ Expected / Business (lỗi nghiệp vụ)</h4>
+            <p>Đoán trước được: email đã tồn tại, số dư không đủ, mã giảm giá hết hạn. Đây là <em>kết quả</em> hợp lệ của nghiệp vụ → nên biểu diễn bằng <strong>Result&lt;T&gt;</strong>, không throw.</p>
+        </div>
+        <div class="ut-card">
+            <h4>🚫 Unexpected / System (lỗi hệ thống)</h4>
+            <p>Mất kết nối DB, null không lường trước, hết bộ nhớ, config sai. Đây là bug/sự cố hạ tầng → <strong>throw</strong> để fail fast và để global handler bắt &amp; log.</p>
+        </div>
+    </div>
+
+    <pre class="cb"><span class="c">// ❌ Dùng exception cho control flow — sai</span>
+<span class="k">try</span> { <span class="k">var</span> u = ParseUser(input); }
+<span class="k">catch</span> (FormatException) { <span class="c">// "kiểm tra input" bằng exception — đắt &amp; khó hiểu</span> }
+
+<span class="c">// ✅ Kiểm tra trước, throw chỉ khi thật sự ngoại lệ</span>
+<span class="k">if</span> (!<span class="t">Guid</span>.TryParse(input, <span class="k">out var</span> id))
+    <span class="k">return</span> <span class="t">Result</span>.Fail(<span class="s">"Id không hợp lệ"</span>);   <span class="c">// lỗi dự đoán được</span>
+
+<span class="k">var</span> conn = _factory.Create()
+    ?? <span class="k">throw new</span> <span class="t">InvalidOperationException</span>(<span class="s">"Không tạo được connection"</span>); <span class="c">// thật sự bất thường → fail fast</span></pre>
+
+    <div class="callout info">
+        <strong>Fail fast:</strong> với lỗi hệ thống/lập trình (config thiếu, invariant bị vi phạm), hãy throw ngay tại điểm phát hiện thay vì cố "đoán" và chạy tiếp với trạng thái hỏng. Phát hiện sớm → debug dễ, tránh corrupt dữ liệu.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">2. Global Exception Handling (.NET 8/9)</h2>
+    <p class="ut-sub">.NET 8 giới thiệu <code>IExceptionHandler</code> — cách chính thống, có DI, thay cho việc tự viết middleware. Đăng ký bằng <code>AddExceptionHandler</code> + <code>UseExceptionHandler</code>, trả lỗi chuẩn <strong>ProblemDetails (RFC 7807)</strong> để client máy đọc được.</p>
+
+    <pre class="cb"><span class="c">// Program.cs — đăng ký handler + ProblemDetails</span>
+<span class="k">var</span> builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddProblemDetails(); <span class="c">// chuẩn hoá body lỗi RFC 7807</span>
+builder.Services.AddExceptionHandler&lt;<span class="t">GlobalExceptionHandler</span>&gt;();
+
+<span class="k">var</span> app = builder.Build();
+
+app.UseExceptionHandler(); <span class="c">// kích hoạt pipeline bắt exception</span>
+app.MapControllers();
+app.Run();</pre>
+
+    <pre class="cb"><span class="c">// GlobalExceptionHandler.cs — map từng loại exception sang status code</span>
+<span class="k">public sealed class</span> <span class="t">GlobalExceptionHandler</span>(
+    <span class="t">IProblemDetailsService</span> problemDetailsService,
+    <span class="t">ILogger</span>&lt;<span class="t">GlobalExceptionHandler</span>&gt; logger) : <span class="t">IExceptionHandler</span>
+{
+    <span class="k">public async</span> ValueTask&lt;<span class="k">bool</span>&gt; <span class="n">TryHandleAsync</span>(
+        <span class="t">HttpContext</span> httpContext,
+        <span class="t">Exception</span> exception,
+        CancellationToken cancellationToken)
+    {
+        <span class="c">// Log đầy đủ context (kèm TraceId để truy vết)</span>
+        logger.LogError(exception,
+            <span class="s">"Unhandled exception. TraceId={TraceId}"</span>,
+            httpContext.TraceIdentifier);
+
+        (<span class="k">int</span> status, <span class="k">string</span> title) = exception <span class="k">switch</span>
+        {
+            <span class="t">ValidationException</span>      =&gt; (StatusCodes.Status400BadRequest, <span class="s">"Dữ liệu không hợp lệ"</span>),
+            <span class="t">NotFoundException</span>        =&gt; (StatusCodes.Status404NotFound, <span class="s">"Không tìm thấy tài nguyên"</span>),
+            <span class="t">UnauthorizedAccessException</span> =&gt; (StatusCodes.Status401Unauthorized, <span class="s">"Chưa xác thực"</span>),
+            <span class="t">ConflictException</span>        =&gt; (StatusCodes.Status409Conflict, <span class="s">"Xung đột dữ liệu"</span>),
+            _                          =&gt; (StatusCodes.Status500InternalServerError, <span class="s">"Lỗi hệ thống"</span>)
+        };
+
+        httpContext.Response.StatusCode = status;
+
+        <span class="c">// Trả ProblemDetails — KHÔNG lộ stack trace ra client ở prod</span>
+        <span class="k">return await</span> problemDetailsService.TryWriteAsync(<span class="k">new</span> <span class="t">ProblemDetailsContext</span>
+        {
+            HttpContext = httpContext,
+            Exception   = exception,
+            ProblemDetails = <span class="k">new</span> <span class="t">ProblemDetails</span>
+            {
+                Status = status,
+                Title  = title,
+                Type   = <span class="s">$"https://httpstatuses.io/{status}"</span>,
+                Detail = status == <span class="s">500</span> ? <span class="s">"Đã xảy ra lỗi không mong muốn."</span> : exception.Message,
+                Extensions = { [<span class="s">"traceId"</span>] = httpContext.TraceIdentifier }
+            }
+        });
+    }
+}</pre>
+
+    <div class="callout warn">
+        <strong>So với middleware cũ:</strong> trước .NET 8 ta thường tự viết <code>ExceptionMiddleware</code> với <code>RequestDelegate</code> + <code>try/catch</code> bao quanh <code>await _next(context)</code>. Cách đó vẫn chạy nhưng phải tự lo serialize JSON, content negotiation, ghi ProblemDetails. <code>IExceptionHandler</code> tích hợp DI sạch hơn, có thể đăng ký nhiều handler theo thứ tự (handler nào trả <code>true</code> thì dừng).
+    </div>
+
+    <div class="callout danger">
+        <strong>⚠️ Tuyệt đối không trả stack trace cho client ở production.</strong> Nó lộ cấu trúc nội bộ, đường dẫn file, phiên bản thư viện → hỗ trợ kẻ tấn công. Chỉ bật chi tiết khi <code>app.Environment.IsDevelopment()</code>. Client nhận message chung chung + <code>traceId</code> để báo support tra log.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">3. Result Pattern vs Exceptions</h2>
+    <p class="ut-sub">Với <strong>lỗi nghiệp vụ dự đoán được</strong> (validation, vi phạm rule), ném exception là lạm dụng: tốn hiệu năng, ẩn ý định, biến luồng bình thường thành "ngoại lệ". Dùng <strong>Result&lt;T&gt;</strong> (kiểu Either) để biểu diễn rõ "thành công HOẶC lỗi" ngay trong chữ ký method.</p>
+
+    <pre class="cb"><span class="c">// Result record — biểu diễn thành công/thất bại tường minh</span>
+<span class="k">public readonly record struct</span> <span class="t">Error</span>(<span class="k">string</span> Code, <span class="k">string</span> Message);
+
+<span class="k">public class</span> <span class="t">Result</span>&lt;<span class="t">T</span>&gt;
+{
+    <span class="k">public bool</span> IsSuccess { <span class="k">get</span>; }
+    <span class="k">public</span> <span class="t">T</span>? Value { <span class="k">get</span>; }
+    <span class="k">public</span> <span class="t">Error</span>? Error { <span class="k">get</span>; }
+
+    <span class="k">private</span> <span class="n">Result</span>(<span class="k">bool</span> ok, <span class="t">T</span>? value, <span class="t">Error</span>? error)
+        =&gt; (IsSuccess, Value, Error) = (ok, value, error);
+
+    <span class="k">public static</span> <span class="t">Result</span>&lt;<span class="t">T</span>&gt; <span class="n">Success</span>(<span class="t">T</span> value) =&gt; <span class="k">new</span>(<span class="k">true</span>, value, <span class="k">null</span>);
+    <span class="k">public static</span> <span class="t">Result</span>&lt;<span class="t">T</span>&gt; <span class="n">Fail</span>(<span class="t">Error</span> error)  =&gt; <span class="k">new</span>(<span class="k">false</span>, <span class="k">default</span>, error);
+}</pre>
+
+    <pre class="cb"><span class="c">// Service trả Result thay vì throw cho lỗi nghiệp vụ</span>
+<span class="k">public async</span> Task&lt;<span class="t">Result</span>&lt;<span class="t">User</span>&gt;&gt; <span class="n">RegisterAsync</span>(<span class="t">RegisterDto</span> dto, CancellationToken ct)
+{
+    <span class="k">if</span> (<span class="k">await</span> _db.Users.AnyAsync(u =&gt; u.Email == dto.Email, ct))
+        <span class="k">return</span> <span class="t">Result</span>&lt;<span class="t">User</span>&gt;.Fail(<span class="k">new</span>(<span class="s">"USER_EXISTS"</span>, <span class="s">"Email đã được đăng ký"</span>));
+
+    <span class="k">var</span> user = <span class="k">new</span> <span class="t">User</span>(dto.Email);
+    _db.Users.Add(user);
+    <span class="k">await</span> _db.SaveChangesAsync(ct);
+    <span class="k">return</span> <span class="t">Result</span>&lt;<span class="t">User</span>&gt;.Success(user);
+}
+
+<span class="c">// Controller map Result -&gt; HTTP response, không cần try/catch nghiệp vụ</span>
+[<span class="a">HttpPost</span>]
+<span class="k">public async</span> Task&lt;<span class="t">IActionResult</span>&gt; <span class="n">Register</span>(<span class="t">RegisterDto</span> dto, CancellationToken ct)
+{
+    <span class="k">var</span> result = <span class="k">await</span> _service.RegisterAsync(dto, ct);
+    <span class="k">return</span> result.IsSuccess
+        ? Ok(result.Value)
+        : Conflict(<span class="k">new</span> <span class="t">ProblemDetails</span> { Title = result.Error!.Value.Message });
+}</pre>
+
+    <table class="cmp">
+        <tr><th>Tình huống</th><th>Dùng gì</th><th>Vì sao</th></tr>
+        <tr><td>Validation input, vi phạm business rule</td><td><strong>Result&lt;T&gt;</strong></td><td>Dự đoán được, là kết quả bình thường của nghiệp vụ</td></tr>
+        <tr><td>Không tìm thấy entity (thường xảy ra)</td><td><strong>Result&lt;T&gt;</strong> / Option</td><td>"Không có" không phải sự cố</td></tr>
+        <tr><td>Mất kết nối DB, timeout hạ tầng</td><td><strong>Exception</strong></td><td>Bất thường, cần fail fast + log + retry</td></tr>
+        <tr><td>Vi phạm invariant / bug lập trình</td><td><strong>Exception</strong></td><td>Không thể xử lý tại chỗ, cần crash sớm để lộ bug</td></tr>
+        <tr><td>Constructor không thể tạo object hợp lệ</td><td><strong>Exception</strong></td><td>Constructor không trả Result được</td></tr>
+    </table>
+
+    <div class="callout tip">
+        <strong>💡 Nguyên tắc:</strong> exception cho điều <em>bất thường</em>, Result cho điều <em>dự đoán được</em>. Result làm lỗi nghiệp vụ trở thành phần explicit của API (caller buộc phải xử lý), tránh "exception ngầm" mà người gọi không biết. Cân nhắc thư viện như <code>FluentResults</code> hoặc <code>ErrorOr</code> nếu không muốn tự viết.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">4. Polly v8 &amp; Resilience cho HttpClient</h2>
+    <p class="ut-sub">Khi gọi service ngoài (HTTP, gRPC), mạng sẽ <em>chắc chắn</em> hỏng đôi lúc: timeout, 503, reset connection. <strong>Resilience</strong> là khả năng hệ thống chịu lỗi mà không sụp. .NET 8 cung cấp gói <code>Microsoft.Extensions.Http.Resilience</code> (xây trên Polly v8) với <code>AddStandardResilienceHandler</code> — gói sẵn retry + circuit breaker + timeout + rate limiter.</p>
+
+    <pre class="cb"><span class="c">// Program.cs — bật resilience chuẩn chỉ với 1 dòng (đề xuất cho đa số case)</span>
+<span class="c">// dotnet add package Microsoft.Extensions.Http.Resilience</span>
+builder.Services.AddHttpClient&lt;<span class="t">PaymentApiClient</span>&gt;(c =&gt;
+{
+    c.BaseAddress = <span class="k">new</span> <span class="t">Uri</span>(<span class="s">"https://api.payment.com"</span>);
+})
+.AddStandardResilienceHandler(); <span class="c">// retry + circuit breaker + timeout + rate limiter</span></pre>
+
+    <pre class="cb"><span class="c">// Tuỳ biến từng chính sách của standard handler</span>
+builder.Services.AddHttpClient&lt;<span class="t">PaymentApiClient</span>&gt;()
+    .AddStandardResilienceHandler(o =&gt;
+    {
+        o.Retry.MaxRetryAttempts = <span class="s">3</span>;
+        o.Retry.BackoffType = <span class="t">DelayBackoffType</span>.Exponential;
+        o.Retry.UseJitter   = <span class="k">true</span>;
+        o.AttemptTimeout.Timeout    = TimeSpan.FromSeconds(<span class="s">10</span>); <span class="c">// timeout mỗi lần thử</span>
+        o.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(<span class="s">30</span>); <span class="c">// timeout toàn bộ</span>
+        o.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(<span class="s">30</span>);
+        o.CircuitBreaker.FailureRatio     = <span class="s">0.2</span>;
+    });</pre>
+
+    <div class="callout info">
+        <strong>Polly v8 ResiliencePipeline:</strong> Polly v8 thay <code>Policy.Handle&lt;&gt;...</code> (v7) bằng <code>ResiliencePipelineBuilder</code> — API mới, allocation thấp, hỗ trợ <code>ValueTask</code>. <code>AddStandardResilienceHandler</code> bên trong chính là một pipeline được cấu hình sẵn theo best practice của Microsoft.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">5. Retry — thử lại thông minh (backoff + jitter)</h2>
+    <p class="ut-sub">Nhiều lỗi mạng là <strong>transient</strong> (tạm thời): 503, timeout, connection reset — thử lại sau chốc lát thường thành công. Nhưng retry sai cách (ngay lập tức, không giới hạn) làm tình hình tệ hơn.</p>
+
+    <pre class="cb"><span class="c">// Polly v8: pipeline retry với exponential backoff + jitter</span>
+<span class="k">var</span> pipeline = <span class="k">new</span> <span class="t">ResiliencePipelineBuilder</span>&lt;<span class="t">HttpResponseMessage</span>&gt;()
+    .AddRetry(<span class="k">new</span> <span class="t">RetryStrategyOptions</span>&lt;<span class="t">HttpResponseMessage</span>&gt;
+    {
+        MaxRetryAttempts = <span class="s">3</span>,
+        Delay        = TimeSpan.FromSeconds(<span class="s">1</span>),
+        BackoffType  = <span class="t">DelayBackoffType</span>.Exponential, <span class="c">// 1s, 2s, 4s...</span>
+        UseJitter    = <span class="k">true</span>,                          <span class="c">// thêm nhiễu tránh "thundering herd"</span>
+        <span class="c">// CHỈ retry lỗi transient — KHÔNG retry 400/401/404</span>
+        ShouldHandle = <span class="k">new</span> <span class="t">PredicateBuilder</span>&lt;<span class="t">HttpResponseMessage</span>&gt;()
+            .Handle&lt;<span class="t">HttpRequestException</span>&gt;()
+            .HandleResult(r =&gt; r.StatusCode == <span class="t">HttpStatusCode</span>.ServiceUnavailable
+                            || r.StatusCode == <span class="t">HttpStatusCode</span>.TooManyRequests),
+        OnRetry = args =&gt;
+        {
+            Console.WriteLine(<span class="s">$"Retry {args.AttemptNumber} sau {args.RetryDelay}"</span>);
+            <span class="k">return</span> ValueTask.CompletedTask;
+        }
+    })
+    .Build();
+
+<span class="k">var</span> response = <span class="k">await</span> pipeline.ExecuteAsync(
+    <span class="k">async</span> token =&gt; <span class="k">await</span> _http.GetAsync(<span class="s">"/orders"</span>, token), ct);</pre>
+
+    <div class="callout danger">
+        <strong>⚠️ Idempotency — cảnh báo sống còn:</strong> chỉ retry tự động các thao tác <strong>idempotent</strong> (GET, PUT, DELETE). Retry một <code>POST /payment</code> không idempotent có thể <em>trừ tiền 2 lần</em>! Với thao tác có hiệu ứng phụ, dùng <strong>idempotency key</strong> (client gửi key duy nhất, server dedupe) trước khi cho phép retry.
+    </div>
+
+    <div class="callout warn">
+        <strong>Vì sao cần jitter?</strong> Nếu 1000 client cùng retry sau đúng 2s, chúng đập service cùng lúc ("thundering herd") khiến nó tiếp tục sập. Jitter rải ngẫu nhiên thời điểm retry để giãn tải. Luôn dùng <code>UseJitter = true</code>.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">6. Circuit Breaker — ngắt mạch bảo vệ</h2>
+    <p class="ut-sub">Khi một service phụ thuộc đang "chết", việc cứ gửi request (và retry) chỉ làm nó tệ hơn và khiến caller cũng treo theo. Circuit breaker "ngắt mạch": phát hiện tỉ lệ lỗi cao thì <strong>mở</strong> mạch, fail nhanh tức thì (không gọi nữa) trong một khoảng, cho service kia thời gian hồi phục.</p>
+
+    <div class="ut-grid ut-grid-3">
+        <div class="ut-card">
+            <h4>🟢 Closed (đóng)</h4>
+            <p>Trạng thái bình thường, request đi qua. Đếm tỉ lệ lỗi trong cửa sổ thời gian.</p>
+        </div>
+        <div class="ut-card">
+            <h4>🔴 Open (mở)</h4>
+            <p>Tỉ lệ lỗi vượt ngưỡng → mạch mở. Mọi request <em>fail ngay lập tức</em> (BrokenCircuitException), không gọi service đang chết.</p>
+        </div>
+        <div class="ut-card">
+            <h4>🟡 Half-Open (nửa mở)</h4>
+            <p>Sau thời gian chờ, cho <em>vài</em> request thử. Thành công → đóng lại; thất bại → mở tiếp.</p>
+        </div>
+    </div>
+
+    <pre class="cb"><span class="c">// Polly v8: circuit breaker</span>
+<span class="k">var</span> pipeline = <span class="k">new</span> <span class="t">ResiliencePipelineBuilder</span>&lt;<span class="t">HttpResponseMessage</span>&gt;()
+    .AddCircuitBreaker(<span class="k">new</span> <span class="t">CircuitBreakerStrategyOptions</span>&lt;<span class="t">HttpResponseMessage</span>&gt;
+    {
+        FailureRatio     = <span class="s">0.5</span>,                       <span class="c">// 50% request lỗi...</span>
+        MinimumThroughput = <span class="s">10</span>,                       <span class="c">// ...trong tối thiểu 10 request</span>
+        SamplingDuration  = TimeSpan.FromSeconds(<span class="s">30</span>),  <span class="c">// cửa sổ quan sát</span>
+        BreakDuration     = TimeSpan.FromSeconds(<span class="s">15</span>),  <span class="c">// thời gian mạch mở</span>
+        ShouldHandle = <span class="k">new</span> <span class="t">PredicateBuilder</span>&lt;<span class="t">HttpResponseMessage</span>&gt;()
+            .Handle&lt;<span class="t">HttpRequestException</span>&gt;()
+            .HandleResult(r =&gt; (<span class="k">int</span>)r.StatusCode &gt;= <span class="s">500</span>),
+        OnOpened    = _ =&gt; { Console.WriteLine(<span class="s">"🔴 Circuit MỞ"</span>); <span class="k">return</span> ValueTask.CompletedTask; },
+        OnClosed    = _ =&gt; { Console.WriteLine(<span class="s">"🟢 Circuit ĐÓNG"</span>); <span class="k">return</span> ValueTask.CompletedTask; }
+    })
+    .Build();</pre>
+
+    <div class="callout tip">
+        <strong>💡 Thứ tự quan trọng:</strong> trong pipeline, đặt <strong>retry BÊN NGOÀI circuit breaker</strong> (retry &rarr; circuit breaker &rarr; timeout). Như vậy circuit breaker đếm cả các lần retry thất bại, và khi mạch mở thì retry cũng fail nhanh thay vì chờ vô ích.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">7. Timeout — đừng chờ vô tận</h2>
+    <p class="ut-sub">Một request treo mãi sẽ giữ thread/connection và lan sự chậm chạp ngược lên caller. Phải đặt timeout. Phân biệt rõ hai cấp:</p>
+
+    <table class="cmp">
+        <tr><th>Loại timeout</th><th>Ý nghĩa</th></tr>
+        <tr><td><strong>Per-attempt (mỗi lần thử)</strong></td><td>Giới hạn thời gian cho 1 lần gọi. Hết giờ → hủy lần đó, để retry thử lại.</td></tr>
+        <tr><td><strong>Total (tổng)</strong></td><td>Giới hạn cho toàn bộ thao tác (gồm tất cả lần retry). Bảo vệ caller không chờ quá lâu.</td></tr>
+    </table>
+
+    <pre class="cb"><span class="c">// Polly v8: kết hợp total timeout (ngoài) + per-attempt (trong) + retry</span>
+<span class="k">var</span> pipeline = <span class="k">new</span> <span class="t">ResiliencePipelineBuilder</span>&lt;<span class="t">HttpResponseMessage</span>&gt;()
+    <span class="c">// 1) Tổng: cả thao tác (kèm retry) không quá 30s</span>
+    .AddTimeout(TimeSpan.FromSeconds(<span class="s">30</span>))
+    .AddRetry(<span class="k">new</span>() { MaxRetryAttempts = <span class="s">3</span>, BackoffType = <span class="t">DelayBackoffType</span>.Exponential, UseJitter = <span class="k">true</span> })
+    <span class="c">// 2) Mỗi lần thử: tối đa 10s, hết giờ thì hủy lần đó cho retry tiếp</span>
+    .AddTimeout(TimeSpan.FromSeconds(<span class="s">10</span>))
+    .Build();
+
+<span class="c">// Timeout của Polly tự tạo CancellationToken &amp; ném TimeoutRejectedException</span>
+<span class="k">var</span> res = <span class="k">await</span> pipeline.ExecuteAsync(<span class="k">async</span> token =&gt; <span class="k">await</span> _http.GetAsync(url, token), ct);</pre>
+
+    <div class="callout warn">
+        <strong>⚠️ Lưu ý:</strong> đừng dựa duy nhất vào <code>HttpClient.Timeout</code> (nó là total và ném <code>TaskCanceledException</code> khó phân biệt). Polly timeout strategy ném <code>TimeoutRejectedException</code> rõ ràng và phối hợp đúng với retry/per-attempt. Luôn truyền <code>CancellationToken</code> để timeout thực sự hủy được công việc bên dưới.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">8. Fallback — giá trị dự phòng</h2>
+    <p class="ut-sub">Khi mọi nỗ lực (retry, circuit) đều thất bại, đôi khi tốt hơn là trả một <strong>giá trị dự phòng</strong> / response suy giảm thay vì ném lỗi cho người dùng. Ví dụ: API gợi ý sản phẩm chết → trả danh sách "phổ biến" tĩnh.</p>
+
+    <pre class="cb"><span class="c">// Polly v8: fallback trả giá trị dự phòng khi pipeline thất bại</span>
+<span class="k">var</span> pipeline = <span class="k">new</span> <span class="t">ResiliencePipelineBuilder</span>&lt;<span class="t">List</span>&lt;<span class="t">Product</span>&gt;&gt;()
+    .AddFallback(<span class="k">new</span> <span class="t">FallbackStrategyOptions</span>&lt;<span class="t">List</span>&lt;<span class="t">Product</span>&gt;&gt;
+    {
+        ShouldHandle = <span class="k">new</span> <span class="t">PredicateBuilder</span>&lt;<span class="t">List</span>&lt;<span class="t">Product</span>&gt;&gt;()
+            .Handle&lt;<span class="t">HttpRequestException</span>&gt;()
+            .Handle&lt;<span class="t">BrokenCircuitException</span>&gt;()    <span class="c">// mạch đang mở</span>
+            .Handle&lt;<span class="t">TimeoutRejectedException</span>&gt;(),
+        FallbackAction = _ =&gt; Outcome.FromResultAsValueTask(_popularProductsCache),
+        OnFallback = _ =&gt;
+        {
+            _logger.LogWarning(<span class="s">"Recommendation service down — trả danh sách phổ biến (degraded)"</span>);
+            <span class="k">return</span> ValueTask.CompletedTask;
+        }
+    })
+    .AddRetry(<span class="k">new</span>())
+    .Build();
+
+<span class="k">var</span> products = <span class="k">await</span> pipeline.ExecuteAsync(<span class="k">async</span> ct =&gt; <span class="k">await</span> _recoApi.GetAsync(userId, ct), ct);</pre>
+
+    <div class="callout tip">
+        <strong>💡 Fallback chỉ hợp lý khi có giá trị thay thế chấp nhận được.</strong> Đừng fallback bừa cho thao tác ghi quan trọng (vd: thanh toán) — ở đó nên fail rõ ràng. Fallback hợp với dữ liệu đọc / tính năng phụ (gợi ý, banner, thống kê).
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">9. Graceful Degradation — suy giảm có kiểm soát</h2>
+    <p class="ut-sub">Mục tiêu: khi một phần hệ thống hỏng, phần còn lại vẫn phục vụ được — "degraded" còn hơn "down hoàn toàn". Tập hợp kỹ thuật:</p>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h3>🗃️ Serve stale cache</h3>
+            <p>Khi nguồn dữ liệu chết, trả bản cache cũ (stale) kèm header cảnh báo, thay vì lỗi. Người dùng thấy dữ liệu hơi cũ còn hơn trang trắng.</p>
+        </div>
+        <div class="ut-card">
+            <h3>🧩 Partial response</h3>
+            <p>Trang gồm nhiều widget: widget nào lỗi thì ẩn/hiện placeholder, các widget khác vẫn render. Không để 1 service kéo sập cả trang.</p>
+        </div>
+        <div class="ut-card">
+            <h3>🚩 Feature flag</h3>
+            <p>Tắt nhanh tính năng nặng/không ổn định (qua flag) khi hệ thống quá tải, giữ chức năng cốt lõi sống.</p>
+        </div>
+        <div class="ut-card">
+            <h3>🧱 Bulkhead isolation</h3>
+            <p>Cô lập tài nguyên (giới hạn concurrency) cho từng phụ thuộc — như vách ngăn khoang tàu. Một service chậm không nuốt hết thread pool làm chết toàn app.</p>
+        </div>
+    </div>
+
+    <pre class="cb"><span class="c">// Bulkhead bằng RateLimiter (Polly v8) — giới hạn concurrency tới 1 dependency</span>
+<span class="k">var</span> pipeline = <span class="k">new</span> <span class="t">ResiliencePipelineBuilder</span>()
+    .AddConcurrencyLimiter(permitLimit: <span class="s">20</span>, queueLimit: <span class="s">5</span>) <span class="c">// tối đa 20 đồng thời, xếp hàng 5</span>
+    .Build();
+
+<span class="c">// Serve stale: thử lấy mới, lỗi thì dùng bản cũ trong cache</span>
+<span class="k">try</span>
+{
+    <span class="k">var</span> fresh = <span class="k">await</span> _api.GetRatesAsync(ct);
+    _cache.Set(<span class="s">"rates"</span>, fresh, TimeSpan.FromMinutes(<span class="s">5</span>));
+    <span class="k">return</span> fresh;
+}
+<span class="k">catch</span> (<span class="t">Exception</span> ex) <span class="k">when</span> (_cache.TryGetValue(<span class="s">"rates"</span>, <span class="k">out var</span> stale))
+{
+    _logger.LogWarning(ex, <span class="s">"Dùng tỉ giá cache cũ (degraded)"</span>);
+    <span class="k">return</span> (<span class="t">Rates</span>)stale!; <span class="c">// suy giảm có kiểm soát thay vì lỗi</span>
+}</pre>
+
+    <div class="callout info">
+        <strong>Kết hợp tất cả:</strong> một HttpClient sản xuất thường có pipeline: <code>Timeout(total)</code> &rarr; <code>Retry</code> &rarr; <code>CircuitBreaker</code> &rarr; <code>Timeout(per-attempt)</code>, kèm <code>Fallback</code>/serve-stale ở tầng ứng dụng và <code>ConcurrencyLimiter</code> để cô lập. Đó chính là tinh thần của <code>AddStandardResilienceHandler</code>.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">10. Do / Don't</h2>
+
+    <div class="do-dont dont">
+        <h4>❌ Catch-all rồi nuốt exception</h4>
+        <pre class="cb"><span class="k">try</span> { <span class="k">await</span> DoWork(); } <span class="k">catch</span> { } <span class="c">// nuốt sạch — lỗi biến mất, debug địa ngục</span></pre>
+        <p>Bắt <code>Exception</code> chung rồi không làm gì che giấu bug. Chỉ catch loại bạn xử lý được, và luôn log (hoặc re-throw). Để global handler lo phần còn lại.</p>
+    </div>
+
+    <div class="do-dont dont">
+        <h4>❌ Retry mù thao tác non-idempotent</h4>
+        <pre class="cb">.AddRetry(...) <span class="c">// áp lên POST /transfer-money → có thể chuyển tiền nhiều lần!</span></pre>
+        <p>Retry tự động chỉ an toàn với thao tác idempotent. Với ghi có hiệu ứng phụ, bắt buộc dùng idempotency key hoặc không retry.</p>
+    </div>
+
+    <div class="do-dont dont">
+        <h4>❌ Lộ stack trace cho client ở production</h4>
+        <pre class="cb"><span class="k">return</span> StatusCode(<span class="s">500</span>, ex.ToString()); <span class="c">// lộ nội bộ, hỗ trợ attacker</span></pre>
+        <p>Client chỉ nên nhận message chung + <code>traceId</code>. Chi tiết exception chỉ bật ở Development.</p>
+    </div>
+
+    <div class="do-dont dont">
+        <h4>❌ Retry ngay lập tức, không backoff/jitter</h4>
+        <pre class="cb">.AddRetry(<span class="k">new</span>() { Delay = TimeSpan.Zero }) <span class="c">// đập service đang chết → thundering herd</span></pre>
+        <p>Luôn exponential backoff + jitter, và giới hạn số lần. Retry vô hạn = tự gây DDoS.</p>
+    </div>
+
+    <div class="do-dont do">
+        <h4>✅ Log có ngữ cảnh</h4>
+        <pre class="cb">logger.LogError(ex, <span class="s">"Đặt hàng thất bại. OrderId={OrderId}, UserId={UserId}"</span>, orderId, userId);</pre>
+        <p>Log structured kèm TraceId, ID nghiệp vụ, input liên quan (không log dữ liệu nhạy cảm). Giúp truy vết &amp; correlate.</p>
+    </div>
+
+    <div class="do-dont do">
+        <h4>✅ Phân biệt expected vs unexpected</h4>
+        <pre class="cb"><span class="k">return</span> <span class="t">Result</span>.Fail(...);     <span class="c">// lỗi nghiệp vụ</span>
+<span class="k">throw new</span> <span class="t">DbException</span>(...);  <span class="c">// sự cố hạ tầng → handler + resilience lo</span></pre>
+        <p>Result cho lỗi đoán trước, exception cho ngoại lệ thật. Đặt resilience ở ranh giới gọi service ngoài.</p>
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">🎯 Checklist Error Handling &amp; Resilience</h2>
+    <div class="ut-card">
+        <ul>
+            <li>✅ Có <code>GlobalExceptionHandler</code> (<code>IExceptionHandler</code>) + <code>AddProblemDetails</code>, trả ProblemDetails (RFC 7807)</li>
+            <li>✅ Map từng loại exception sang status code đúng (400/401/404/409/500)</li>
+            <li>✅ Không bao giờ lộ stack trace cho client ở production; có <code>traceId</code> để truy vết</li>
+            <li>✅ Lỗi nghiệp vụ dự đoán được dùng <code>Result&lt;T&gt;</code>, không throw để control flow</li>
+            <li>✅ HttpClient gọi service ngoài bật <code>AddStandardResilienceHandler</code> (hoặc pipeline Polly v8)</li>
+            <li>✅ Retry chỉ cho lỗi transient, có exponential backoff + jitter, giới hạn số lần</li>
+            <li>✅ Không retry thao tác non-idempotent nếu chưa có idempotency key</li>
+            <li>✅ Có circuit breaker để fail fast khi service phụ thuộc chết</li>
+            <li>✅ Đặt cả per-attempt timeout và total timeout; truyền CancellationToken xuyên suốt</li>
+            <li>✅ Có fallback / serve-stale cho dữ liệu đọc &amp; tính năng phụ (degraded còn hơn down)</li>
+            <li>✅ Cô lập tài nguyên bằng concurrency limiter (bulkhead) để tránh thread starvation</li>
+            <li>✅ Log structured có ngữ cảnh; không catch-all rồi nuốt exception</li>
+        </ul>
+    </div>
+</section>
+
+</div>
+
+<footer style="text-align:center;padding:3rem 1.5rem;color:var(--ut-muted);border-top:1px solid var(--ut-border);margin-top:3rem;font-size:.9rem;">
+    <p>Error Handling &amp; Resilience · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

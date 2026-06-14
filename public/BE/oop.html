@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OOP trong C# — Lập trình hướng đối tượng A-Z</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --ut-primary: #512bd4;
+        --ut-primary-2: #8a2be2;
+        --ut-accent: #43e97b;
+        --ut-warn: #f39c12;
+        --ut-danger: #f5576c;
+        --ut-card: #1a1d2e;
+        --ut-card-2: #232640;
+        --ut-border: #2d3148;
+        --ut-text: #e2e8f0;
+        --ut-muted: #94a3b8;
+    }
+
+    .ut-hero {
+        text-align: center;
+        padding: 4rem 1.5rem 3rem;
+        background: radial-gradient(ellipse at top, rgba(81,43,212,.18), transparent 60%);
+    }
+    .ut-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 1rem; }
+    .ut-hero h1 .gradient {
+        background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .ut-hero .hero-badge {
+        display: inline-block;
+        background: rgba(81,43,212,.15);
+        color: var(--ut-primary-2);
+        padding: .4rem 1rem;
+        border-radius: 20px;
+        font-size: .78rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        margin-bottom: 1.25rem;
+    }
+    .ut-hero p { color: var(--ut-muted); max-width: 820px; margin: 0 auto; }
+
+    .ut-section { padding: 2.5rem 0; }
+    .ut-title {
+        font-size: 1.7rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        padding-left: 1rem;
+        color: var(--ut-text);
+    }
+    .ut-title::before {
+        content: '';
+        position: absolute;
+        left: 0; top: 6px; bottom: 6px;
+        width: 4px;
+        background: linear-gradient(180deg, var(--ut-primary), var(--ut-primary-2));
+        border-radius: 3px;
+    }
+    .ut-sub { color: var(--ut-muted); margin-bottom: 1.25rem; }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+
+    .ut-grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .ut-grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    .ut-grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+
+    .ut-card {
+        background: var(--ut-card);
+        border: 1px solid var(--ut-border);
+        border-radius: 12px;
+        padding: 1.4rem;
+    }
+    .ut-card h3 { color: var(--ut-primary-2); margin-bottom: .6rem; font-size: 1.1rem; }
+    .ut-card h4 { color: var(--ut-accent); margin-bottom: .45rem; font-size: .98rem; }
+    .ut-card p, .ut-card li { color: var(--ut-muted); font-size: .95rem; }
+    .ut-card ul { padding-left: 1.2rem; }
+    .ut-card ul li { margin-bottom: .3rem; }
+
+    pre.cb {
+        background: #0b1020;
+        border: 1px solid var(--ut-border);
+        border-left: 3px solid var(--ut-primary);
+        border-radius: 8px;
+        padding: 1rem 1.15rem;
+        overflow-x: auto;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+        font-size: .88rem;
+        line-height: 1.6;
+        margin: .75rem 0;
+        color: #d6deeb;
+    }
+    pre.cb .k { color: #c792ea; }
+    pre.cb .s { color: #ecc48d; }
+    pre.cb .c { color: #637777; font-style: italic; }
+    pre.cb .n { color: #82aaff; }
+    pre.cb .t { color: #ffcb8b; }
+    pre.cb .a { color: #7fdbca; }
+    code {
+        background: #2d3148;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: .88em;
+        color: #f8d06b;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+    }
+
+    .callout {
+        border-radius: 10px;
+        padding: .95rem 1.15rem;
+        margin: 1rem 0;
+        border: 1px solid;
+    }
+    .callout.tip { background: rgba(67,233,123,.07); border-color: var(--ut-accent); }
+    .callout.tip strong { color: var(--ut-accent); }
+    .callout.warn { background: rgba(243,156,18,.07); border-color: var(--ut-warn); }
+    .callout.warn strong { color: var(--ut-warn); }
+    .callout.danger { background: rgba(245,87,108,.07); border-color: var(--ut-danger); }
+    .callout.danger strong { color: var(--ut-danger); }
+    .callout.info { background: rgba(81,43,212,.08); border-color: var(--ut-primary-2); }
+    .callout.info strong { color: var(--ut-primary-2); }
+
+    table.cmp { width: 100%; border-collapse: collapse; background: var(--ut-card); border-radius: 10px; overflow: hidden; margin: 1rem 0; font-size: .92rem; }
+    table.cmp th, table.cmp td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--ut-border); }
+    table.cmp th { background: var(--ut-card-2); color: var(--ut-primary-2); font-weight: 600; }
+    table.cmp td { color: var(--ut-muted); }
+    table.cmp tr:last-child td { border-bottom: none; }
+
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; position: relative; padding-left: 2.8rem; margin-bottom: 1rem; }
+    .steps li::before {
+        content: counter(step);
+        position: absolute; left: 0; top: 0;
+        width: 2rem; height: 2rem;
+        background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2));
+        color: #fff;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700;
+    }
+
+    .do-dont { border-left: 3px solid; padding: 1rem 1.15rem; border-radius: 8px; margin-bottom: 1rem; }
+    .do-dont.do { border-color: var(--ut-accent); background: rgba(67,233,123,.04); }
+    .do-dont.dont { border-color: var(--ut-danger); background: rgba(245,87,108,.04); }
+    .do-dont h4 { margin-bottom: .5rem; }
+    .do-dont.do h4 { color: var(--ut-accent); }
+    .do-dont.dont h4 { color: var(--ut-danger); }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo"><a href="index.html" style="color:inherit;-webkit-text-fill-color:inherit;">.NET<span class="accent">Mastery</span></a></div>
+        <div class="nav-links">
+            <a href="index.html">Roadmap</a>
+            <a href="csharp-basics.html">C# Basics</a>
+            <a href="oop.html" class="nav-active">OOP</a>
+            <a href="linq.html">LINQ</a>
+            <a href="sql-basics.html">SQL</a>
+            <a href="webapi-first.html">Web API</a>
+            <a href="efcore.html">EF Core</a>
+            <a href="di.html">DI</a>
+        </div>
+        <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+</nav>
+
+<header class="ut-hero">
+    <div class="hero-badge">CƠ BẢN · FOUNDATION</div>
+    <h1>OOP trong <span class="gradient">C#</span> — Lập trình hướng đối tượng</h1>
+    <p>Nắm vững 4 trụ cột OOP, sự khác biệt class vs struct, interface vs abstract class, access modifiers, properties hiện đại, đa hình và nguyên tắc "composition over inheritance" — chuẩn .NET 8/9 (2026). Đây là nền tảng cốt lõi để viết code C# sạch, dễ bảo trì và mở rộng.</p>
+</header>
+
+<div class="container">
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">1. OOP là gì &amp; tại sao quan trọng</h2>
+    <p class="ut-sub">OOP (Object-Oriented Programming) tổ chức chương trình quanh các <strong>đối tượng</strong> — đơn vị gói chung <em>dữ liệu</em> (state) và <em>hành vi</em> (behavior). C# là ngôn ngữ OOP từ gốc rễ: mọi thứ kế thừa từ <code>System.Object</code>.</p>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h4>🎯 Mục tiêu của OOP</h4>
+            <ul>
+                <li>Mô hình hoá thế giới thực thành code</li>
+                <li>Giảm trùng lặp (reuse qua kế thừa/composition)</li>
+                <li>Cô lập thay đổi — sửa 1 chỗ không vỡ chỗ khác</li>
+                <li>Dễ test, dễ mở rộng, dễ đọc</li>
+            </ul>
+        </div>
+        <div class="ut-card">
+            <h4>🏛️ 4 trụ cột (4 Pillars)</h4>
+            <ul>
+                <li><strong>Encapsulation</strong> — đóng gói</li>
+                <li><strong>Inheritance</strong> — kế thừa</li>
+                <li><strong>Polymorphism</strong> — đa hình</li>
+                <li><strong>Abstraction</strong> — trừu tượng hoá</li>
+            </ul>
+        </div>
+    </div>
+
+    <pre class="cb"><span class="c">// Một class C# điển hình: gói state (fields/properties) + behavior (methods)</span>
+<span class="k">public class</span> <span class="t">BankAccount</span>
+{
+    <span class="k">private decimal</span> _balance;                  <span class="c">// state — được bảo vệ</span>
+    <span class="k">public string</span> Owner { <span class="k">get</span>; }            <span class="c">// dữ liệu chỉ đọc</span>
+
+    <span class="k">public</span> <span class="n">BankAccount</span>(<span class="k">string</span> owner, <span class="k">decimal</span> opening)
+        =&gt; (Owner, _balance) = (owner, opening);
+
+    <span class="k">public void</span> <span class="n">Deposit</span>(<span class="k">decimal</span> amount)    <span class="c">// behavior</span>
+    {
+        <span class="k">if</span> (amount &lt;= <span class="s">0</span>) <span class="k">throw new</span> <span class="t">ArgumentException</span>(<span class="s">"Số tiền phải &gt; 0"</span>);
+        _balance += amount;
+    }
+
+    <span class="k">public decimal</span> <span class="n">GetBalance</span>() =&gt; _balance;
+}</pre>
+
+    <div class="callout info">
+        <strong>Nền tảng .NET:</strong> mọi type trong C# (kể cả <code>int</code>, <code>struct</code>) đều bắt nguồn từ <code>object</code>. Hiểu OOP đúng giúp bạn dùng tốt toàn bộ BCL (Base Class Library), EF Core, ASP.NET Core — vì chúng đều thiết kế theo OOP.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">2. Trụ cột 1 — Encapsulation (Đóng gói)</h2>
+    <p class="ut-sub">Encapsulation = che giấu chi tiết bên trong, chỉ public ra một <em>contract</em> an toàn. State không bị thay đổi tuỳ tiện từ bên ngoài; mọi thay đổi đi qua method/property có kiểm soát (invariant).</p>
+
+    <pre class="cb"><span class="c">// ❌ KHÔNG encapsulation — field public, ai cũng sửa được state vô lý</span>
+<span class="k">public class</span> <span class="t">BadAccount</span>
+{
+    <span class="k">public decimal</span> Balance;   <span class="c">// account.Balance = -9999; vẫn hợp lệ!</span>
+}
+
+<span class="c">// ✅ Encapsulation đúng — bảo vệ invariant "balance không bao giờ âm"</span>
+<span class="k">public class</span> <span class="t">Account</span>
+{
+    <span class="k">private decimal</span> _balance;                  <span class="c">// backing field, ẩn</span>
+
+    <span class="k">public decimal</span> Balance =&gt; _balance;        <span class="c">// đọc được, không ghi trực tiếp</span>
+
+    <span class="k">public void</span> <span class="n">Withdraw</span>(<span class="k">decimal</span> amount)
+    {
+        <span class="k">if</span> (amount &lt;= <span class="s">0</span>)
+            <span class="k">throw new</span> <span class="t">ArgumentOutOfRangeException</span>(<span class="k">nameof</span>(amount));
+        <span class="k">if</span> (amount &gt; _balance)
+            <span class="k">throw new</span> <span class="t">InvalidOperationException</span>(<span class="s">"Số dư không đủ"</span>);
+        _balance -= amount;                       <span class="c">// invariant luôn được giữ</span>
+    }
+}</pre>
+
+    <div class="callout tip">
+        <strong>💡 Quy tắc vàng:</strong> field nên là <code>private</code>. Public ra ngoài bằng <strong>property</strong> (có thể thêm validate, log, raise event). Đừng public field — bạn sẽ mất khả năng kiểm soát và không break được binary compatibility khi đổi sang property sau này.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">3. Trụ cột 2 — Inheritance (Kế thừa)</h2>
+    <p class="ut-sub">Inheritance cho phép một class (derived/con) tái sử dụng và mở rộng class khác (base/cha). Quan hệ "is-a": <code>Manager</code> <em>là một</em> <code>Employee</code>. C# chỉ cho <strong>kế thừa đơn</strong> (single inheritance) đối với class.</p>
+
+    <pre class="cb"><span class="c">// Base class</span>
+<span class="k">public class</span> <span class="t">Employee</span>
+{
+    <span class="k">public string</span> Name { <span class="k">get</span>; <span class="k">set</span>; } = <span class="s">""</span>;
+    <span class="k">public decimal</span> BaseSalary { <span class="k">get</span>; <span class="k">set</span>; }
+
+    <span class="k">public virtual decimal</span> <span class="n">CalculatePay</span>() =&gt; BaseSalary;
+
+    <span class="k">protected void</span> <span class="n">Log</span>(<span class="k">string</span> msg)         <span class="c">// chỉ derived gọi được</span>
+        =&gt; Console.WriteLine(<span class="s">$"[{Name}] {msg}"</span>);
+}
+
+<span class="c">// Derived class — kế thừa + mở rộng</span>
+<span class="k">public class</span> <span class="t">Manager</span> : <span class="t">Employee</span>
+{
+    <span class="k">public decimal</span> Bonus { <span class="k">get</span>; <span class="k">set</span>; }
+
+    <span class="k">public override decimal</span> <span class="n">CalculatePay</span>()
+    {
+        Log(<span class="s">"Tính lương có bonus"</span>);
+        <span class="k">return base</span>.CalculatePay() + Bonus;     <span class="c">// gọi logic của cha</span>
+    }
+}</pre>
+
+    <div class="callout warn">
+        <strong>⚠️ Đừng lạm dụng kế thừa:</strong> kế thừa tạo ràng buộc chặt (tight coupling) giữa cha-con. Cây kế thừa sâu (&gt;2-3 tầng) rất khó bảo trì. Nhiều trường hợp nên dùng <strong>composition</strong> (xem mục 10). Quy tắc: chỉ kế thừa khi quan hệ "is-a" thực sự đúng và ổn định.
+    </div>
+
+    <h3 style="margin-top:1.5rem; color:var(--ut-primary-2)">sealed — chặn kế thừa tiếp</h3>
+    <pre class="cb"><span class="c">// sealed class: không thể kế thừa nữa (vd: type bất biến, type tối ưu hiệu năng)</span>
+<span class="k">public sealed class</span> <span class="t">AuditLog</span> { <span class="c">/* ... */</span> }
+
+<span class="c">// sealed override: cho phép override 1 lần rồi khoá lại ở tầng dưới</span>
+<span class="k">public class</span> <span class="t">SalesManager</span> : <span class="t">Manager</span>
+{
+    <span class="k">public sealed override decimal</span> <span class="n">CalculatePay</span>() =&gt; <span class="k">base</span>.CalculatePay() * <span class="s">1.1m</span>;
+}</pre>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">4. Trụ cột 3 — Polymorphism (Đa hình)</h2>
+    <p class="ut-sub">Polymorphism = "nhiều hình thái". Cùng một lời gọi method, hành vi khác nhau tuỳ runtime type của object. Đây là cơ chế giúp viết code dựa trên abstraction thay vì concrete type.</p>
+
+    <pre class="cb"><span class="k">public abstract class</span> <span class="t">Shape</span>
+{
+    <span class="k">public abstract double</span> <span class="n">Area</span>();        <span class="c">// abstract: BẮT BUỘC override</span>
+    <span class="k">public virtual string</span> <span class="n">Describe</span>()       <span class="c">// virtual: CÓ THỂ override</span>
+        =&gt; <span class="s">$"Hình có diện tích {Area():F2}"</span>;
+}
+
+<span class="k">public class</span> <span class="t">Circle</span> : <span class="t">Shape</span>
+{
+    <span class="k">public double</span> Radius { <span class="k">get</span>; <span class="k">init</span>; }
+    <span class="k">public override double</span> <span class="n">Area</span>() =&gt; Math.PI * Radius * Radius;
+}
+
+<span class="k">public class</span> <span class="t">Rectangle</span> : <span class="t">Shape</span>
+{
+    <span class="k">public double</span> Width { <span class="k">get</span>; <span class="k">init</span>; }
+    <span class="k">public double</span> Height { <span class="k">get</span>; <span class="k">init</span>; }
+    <span class="k">public override double</span> <span class="n">Area</span>() =&gt; Width * Height;
+    <span class="k">public override string</span> <span class="n">Describe</span>() =&gt; <span class="s">$"Chữ nhật {Width}x{Height}"</span>;
+}
+
+<span class="c">// Đa hình ở chỗ này: vòng lặp không quan tâm concrete type</span>
+<span class="t">Shape</span>[] shapes = [<span class="k">new</span> <span class="t">Circle</span> { Radius = <span class="s">2</span> }, <span class="k">new</span> <span class="t">Rectangle</span> { Width = <span class="s">3</span>, Height = <span class="s">4</span> }];
+<span class="k">foreach</span> (<span class="k">var</span> s <span class="k">in</span> shapes)
+    Console.WriteLine(s.Describe());           <span class="c">// gọi đúng override của từng type</span></pre>
+
+    <h3 style="margin-top:1.5rem; color:var(--ut-primary-2)">virtual / override / new — phân biệt rõ</h3>
+    <table class="cmp">
+        <tr><th>Từ khoá</th><th>Ý nghĩa</th><th>Dùng khi</th></tr>
+        <tr><td><code>virtual</code></td><td>Khai báo ở base, cho phép derived override. Vẫn có implementation mặc định.</td><td>Có default behavior nhưng muốn cho override</td></tr>
+        <tr><td><code>abstract</code></td><td>Khai báo ở base, KHÔNG có body, BẮT BUỘC derived override.</td><td>Base không có cách mặc định hợp lý</td></tr>
+        <tr><td><code>override</code></td><td>Thay thế hẳn method virtual/abstract của base. Late-binding (runtime).</td><td>Cung cấp logic riêng cho derived</td></tr>
+        <tr><td><code>new</code> (method hiding)</td><td>Che (hide) member của base, KHÔNG phải override. Early-binding (compile-time).</td><td>Hiếm dùng — thường là dấu hiệu thiết kế sai</td></tr>
+        <tr><td><code>sealed override</code></td><td>Override rồi khoá, derived sâu hơn không override tiếp được.</td><td>Khoá behavior, tối ưu hiệu năng</td></tr>
+    </table>
+
+    <pre class="cb"><span class="k">public class</span> <span class="t">Base</span> { <span class="k">public virtual string</span> <span class="n">Who</span>() =&gt; <span class="s">"Base"</span>; }
+
+<span class="c">// override: theo runtime type</span>
+<span class="k">public class</span> <span class="t">A</span> : <span class="t">Base</span> { <span class="k">public override string</span> <span class="n">Who</span>() =&gt; <span class="s">"A"</span>; }
+
+<span class="c">// new: che, theo compile-time type — DỄ GÂY BUG</span>
+<span class="k">public class</span> <span class="t">B</span> : <span class="t">Base</span> { <span class="k">public new string</span> <span class="n">Who</span>() =&gt; <span class="s">"B"</span>; }
+
+<span class="t">Base</span> a = <span class="k">new</span> <span class="t">A</span>();  Console.WriteLine(a.Who()); <span class="c">// "A"  — đa hình hoạt động</span>
+<span class="t">Base</span> b = <span class="k">new</span> <span class="t">B</span>();  Console.WriteLine(b.Who()); <span class="c">// "Base" — new KHÔNG đa hình!</span></pre>
+
+    <div class="callout danger">
+        <strong>🚫 Tránh <code>new</code> (method hiding):</strong> nó phá vỡ tính đa hình — kết quả phụ thuộc kiểu biến khai báo, không phải object thật. Trình biên dịch cảnh báo nếu bạn quên <code>new</code>; đó là tín hiệu nên dùng <code>override</code> hoặc thiết kế lại.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">5. Trụ cột 4 — Abstraction (Trừu tượng hoá)</h2>
+    <p class="ut-sub">Abstraction = chỉ phơi bày <em>cái gì</em> (what) cần làm, ẩn đi <em>làm thế nào</em> (how). Code phụ thuộc vào abstraction (interface / abstract class) chứ không phụ thuộc chi tiết cụ thể → dễ thay thế, dễ test (Dependency Inversion).</p>
+
+    <pre class="cb"><span class="c">// Abstraction: contract — KHÔNG nói gì về cách lưu trữ</span>
+<span class="k">public interface</span> <span class="t">INotificationSender</span>
+{
+    Task <span class="n">SendAsync</span>(<span class="k">string</span> to, <span class="k">string</span> message);
+}
+
+<span class="c">// Các implementation cụ thể — ẩn sau abstraction</span>
+<span class="k">public class</span> <span class="t">EmailSender</span> : <span class="t">INotificationSender</span>
+{
+    <span class="k">public</span> Task <span class="n">SendAsync</span>(<span class="k">string</span> to, <span class="k">string</span> msg)
+        =&gt; SmtpClientWrapper.SendAsync(to, msg);   <span class="c">// chi tiết SMTP ẩn ở đây</span>
+}
+
+<span class="k">public class</span> <span class="t">SmsSender</span> : <span class="t">INotificationSender</span>
+{
+    <span class="k">public</span> Task <span class="n">SendAsync</span>(<span class="k">string</span> to, <span class="k">string</span> msg)
+        =&gt; TwilioApi.SendAsync(to, msg);
+}
+
+<span class="c">// Service chỉ biết abstraction — không quan tâm Email hay Sms</span>
+<span class="k">public class</span> <span class="t">OrderService</span>(<span class="t">INotificationSender</span> sender)
+{
+    <span class="k">public async</span> Task <span class="n">PlaceOrderAsync</span>(<span class="t">Order</span> o)
+    {
+        <span class="c">// ... xử lý đơn hàng ...</span>
+        <span class="k">await</span> sender.SendAsync(o.CustomerPhone, <span class="s">"Đơn hàng đã được đặt"</span>);
+    }
+}</pre>
+
+    <div class="callout tip">
+        <strong>💡 Abstraction vs Encapsulation:</strong> Encapsulation ẩn <em>dữ liệu</em> (state, ở mức object). Abstraction ẩn <em>độ phức tạp của implementation</em> (ở mức thiết kế). Hai khái niệm bổ trợ nhau chứ không trùng nhau.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">6. Class vs Struct — reference type vs value type</h2>
+    <p class="ut-sub">Lựa chọn sai giữa <code>class</code> và <code>struct</code> gây bug khó tìm (copy ngầm) hoặc tốn hiệu năng (boxing, GC pressure). Hiểu rõ cơ chế bộ nhớ là bắt buộc.</p>
+
+    <table class="cmp">
+        <tr><th>Tiêu chí</th><th>class (reference type)</th><th>struct (value type)</th></tr>
+        <tr><td>Lưu ở</td><td>Heap (biến giữ tham chiếu)</td><td>Stack hoặc inline trong object chứa nó</td></tr>
+        <tr><td>Gán / truyền tham số</td><td>Copy <em>tham chiếu</em> — cùng trỏ 1 object</td><td>Copy <em>toàn bộ giá trị</em> — bản sao độc lập</td></tr>
+        <tr><td>So sánh <code>==</code> mặc định</td><td>So sánh reference (cùng object?)</td><td>So sánh từng field (value equality)</td></tr>
+        <tr><td>Giá trị mặc định</td><td><code>null</code></td><td>Tất cả field = 0/null (không bao giờ null trừ <code>?</code>)</td></tr>
+        <tr><td>Kế thừa</td><td>Có (single inheritance)</td><td>KHÔNG (chỉ implement interface)</td></tr>
+        <tr><td>GC</td><td>Bị thu gom bởi GC</td><td>Không tạo gánh nặng GC (nếu trên stack)</td></tr>
+    </table>
+
+    <pre class="cb"><span class="c">// class — gán = copy tham chiếu</span>
+<span class="k">var</span> p1 = <span class="k">new</span> <span class="t">PointClass</span> { X = <span class="s">1</span> };
+<span class="k">var</span> p2 = p1;          <span class="c">// p2 và p1 cùng trỏ 1 object</span>
+p2.X = <span class="s">99</span>;
+Console.WriteLine(p1.X);   <span class="c">// 99  — bị ảnh hưởng!</span>
+
+<span class="c">// struct — gán = copy giá trị</span>
+<span class="k">var</span> s1 = <span class="k">new</span> <span class="t">PointStruct</span> { X = <span class="s">1</span> };
+<span class="k">var</span> s2 = s1;          <span class="c">// s2 là BẢN SAO độc lập</span>
+s2.X = <span class="s">99</span>;
+Console.WriteLine(s1.X);   <span class="c">// 1   — không bị ảnh hưởng</span></pre>
+
+    <h3 style="margin-top:1.5rem; color:var(--ut-primary-2)">Khi nào dùng struct?</h3>
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont do">
+            <h4>✅ Dùng struct khi</h4>
+            <ul>
+                <li>Đại diện 1 <strong>giá trị nhỏ</strong>, bất biến (vd: <code>Point</code>, <code>Money</code>, <code>DateTime</code>, <code>Color</code>)</li>
+                <li>Kích thước nhỏ (≤ ~16-24 bytes thường khuyến nghị)</li>
+                <li>Logic value-equality tự nhiên (2 điểm bằng nhau khi X,Y bằng)</li>
+                <li>Sống ngắn, tạo nhiều — tránh áp lực GC</li>
+            </ul>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Tránh struct khi</h4>
+            <ul>
+                <li>Type lớn (copy tốn kém mỗi lần truyền)</li>
+                <li>Cần kế thừa hoặc identity (cùng object)</li>
+                <li>Có nhiều mutable state — dễ gây bug copy ngầm</li>
+                <li>Boxing thường xuyên (gán vào <code>object</code>/interface non-generic)</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">readonly struct &amp; record struct (hiện đại)</h3>
+    <pre class="cb"><span class="c">// readonly struct — bất biến hoàn toàn, compiler tối ưu copy (không defensive copy)</span>
+<span class="k">public readonly struct</span> <span class="t">Money</span>
+{
+    <span class="k">public decimal</span> Amount { <span class="k">get</span>; }
+    <span class="k">public string</span> Currency { <span class="k">get</span>; }
+    <span class="k">public</span> <span class="n">Money</span>(<span class="k">decimal</span> amount, <span class="k">string</span> currency)
+        =&gt; (Amount, Currency) = (amount, currency);
+
+    <span class="k">public</span> <span class="t">Money</span> <span class="n">Add</span>(<span class="t">Money</span> other) =&gt; <span class="k">new</span>(Amount + other.Amount, Currency);
+}
+
+<span class="c">// record struct (C# 10+) — value type + value equality + ToString tự sinh + with-expression</span>
+<span class="k">public readonly record struct</span> <span class="t">Point</span>(<span class="k">double</span> X, <span class="k">double</span> Y);
+
+<span class="k">var</span> a = <span class="k">new</span> <span class="t">Point</span>(<span class="s">1</span>, <span class="s">2</span>);
+<span class="k">var</span> b = a <span class="k">with</span> { Y = <span class="s">5</span> };       <span class="c">// tạo bản sao đổi Y → (1, 5)</span>
+Console.WriteLine(a == <span class="k">new</span> <span class="t">Point</span>(<span class="s">1</span>, <span class="s">2</span>)); <span class="c">// True — value equality tự động</span></pre>
+
+    <div class="callout warn">
+        <strong>⚠️ Mutable struct là cái bẫy:</strong> struct có field thay đổi được dễ gây bug vì mỗi lần copy là một bản riêng — sửa bản sao không ảnh hưởng bản gốc, ngược với kỳ vọng. Hãy luôn dùng <code>readonly struct</code> trừ khi có lý do hiệu năng rất cụ thể.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">7. Interface vs Abstract Class</h2>
+    <p class="ut-sub">Cả hai đều là abstraction, nhưng dùng cho mục đích khác nhau. Chọn sai dẫn đến thiết kế cứng nhắc. Đây là câu hỏi phỏng vấn kinh điển — cần nắm chắc.</p>
+
+    <table class="cmp">
+        <tr><th>Tiêu chí</th><th>interface</th><th>abstract class</th></tr>
+        <tr><td>Quan hệ mô hình</td><td>"can-do" / khả năng (<code>IDisposable</code>, <code>IComparable</code>)</td><td>"is-a" / quan hệ phân loại</td></tr>
+        <tr><td>Đa kế thừa</td><td>✅ implement nhiều interface</td><td>❌ chỉ kế thừa 1 class</td></tr>
+        <tr><td>State (field)</td><td>❌ không có instance field</td><td>✅ có field, constructor</td></tr>
+        <tr><td>Constructor</td><td>❌ không</td><td>✅ có (gọi từ derived)</td></tr>
+        <tr><td>Access modifier cho member</td><td>public mặc định (từ C# 8 có thể private/protected)</td><td>mọi modifier (public/protected/private...)</td></tr>
+        <tr><td>Implementation mặc định</td><td>✅ default interface method (C# 8+)</td><td>✅ method thường + virtual</td></tr>
+        <tr><td>Phiên bản hoá (versioning)</td><td>Thêm method = breaking trừ khi có default impl</td><td>Thêm method không break derived</td></tr>
+    </table>
+
+    <pre class="cb"><span class="c">// interface: định nghĩa khả năng, một class có thể có nhiều khả năng</span>
+<span class="k">public interface</span> <span class="t">IExportable</span> { <span class="k">byte</span>[] <span class="n">Export</span>(); }
+<span class="k">public interface</span> <span class="t">IPrintable</span>  { <span class="k">void</span> <span class="n">Print</span>(); }
+
+<span class="k">public class</span> <span class="t">Invoice</span> : <span class="t">IExportable</span>, <span class="t">IPrintable</span>  <span class="c">// nhiều interface — OK</span>
+{
+    <span class="k">public byte</span>[] <span class="n">Export</span>() =&gt; Encoding.UTF8.GetBytes(ToString()!);
+    <span class="k">public void</span> <span class="n">Print</span>() =&gt; Console.WriteLine(<span class="s">"Đang in hoá đơn..."</span>);
+}
+
+<span class="c">// abstract class: chia sẻ state + behavior chung cho 1 họ type "is-a"</span>
+<span class="k">public abstract class</span> <span class="t">Document</span>
+{
+    <span class="k">protected</span> <span class="t">DateTime</span> Created { <span class="k">get</span>; } = DateTime.UtcNow;  <span class="c">// state chung</span>
+    <span class="k">public abstract string</span> <span class="n">Render</span>();                       <span class="c">// con phải định nghĩa</span>
+    <span class="k">public string</span> <span class="n">Header</span>() =&gt; <span class="s">$"Tạo lúc {Created:u}"</span>;          <span class="c">// dùng chung</span>
+}</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Default interface methods (C# 8+)</h3>
+    <pre class="cb"><span class="k">public interface</span> <span class="t">ILogger</span>
+{
+    <span class="k">void</span> <span class="n">Log</span>(<span class="t">LogLevel</span> level, <span class="k">string</span> message);
+
+    <span class="c">// default method: thêm API mới mà KHÔNG break các implementation cũ</span>
+    <span class="k">void</span> <span class="n">LogError</span>(<span class="k">string</span> message) =&gt; Log(LogLevel.Error, message);
+    <span class="k">void</span> <span class="n">LogInfo</span>(<span class="k">string</span> message)  =&gt; Log(LogLevel.Info, message);
+}
+
+<span class="c">// Implementer chỉ cần định nghĩa Log; LogError/LogInfo dùng default</span>
+<span class="k">public class</span> <span class="t">ConsoleLogger</span> : <span class="t">ILogger</span>
+{
+    <span class="k">public void</span> <span class="n">Log</span>(<span class="t">LogLevel</span> level, <span class="k">string</span> msg)
+        =&gt; Console.WriteLine(<span class="s">$"[{level}] {msg}"</span>);
+}</pre>
+
+    <div class="callout info">
+        <strong>Chọn cái nào?</strong> Mặc định ưu tiên <strong>interface</strong> (linh hoạt, hỗ trợ DI, dễ mock khi test, cho phép đa "khả năng"). Dùng <strong>abstract class</strong> khi cần chia sẻ <em>state</em> + <em>code chung</em> và quan hệ "is-a" rõ ràng. Default interface methods là để versioning, KHÔNG phải để thay thế abstract class.
+    </div>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont do">
+            <h4>✅ Dùng interface khi</h4>
+            <ul>
+                <li>Định nghĩa contract cho DI / mocking</li>
+                <li>Nhiều type không liên quan cùng có 1 khả năng</li>
+                <li>Cần "đa kế thừa" hành vi</li>
+            </ul>
+        </div>
+        <div class="do-dont do">
+            <h4>✅ Dùng abstract class khi</h4>
+            <ul>
+                <li>Có state/field chung cần chia sẻ</li>
+                <li>Có logic mặc định + bắt buộc override một phần</li>
+                <li>Quan hệ phân loại "is-a" chặt chẽ, ổn định</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">8. Access Modifiers — phạm vi truy cập</h2>
+    <p class="ut-sub">Encapsulation thực thi qua access modifier. C# có đầy đủ các mức từ rộng đến hẹp. Nguyên tắc: <strong>luôn dùng mức hẹp nhất có thể</strong> (least privilege).</p>
+
+    <table class="cmp">
+        <tr><th>Modifier</th><th>Truy cập được từ</th><th>Dùng khi</th></tr>
+        <tr><td><code>public</code></td><td>Mọi nơi, mọi assembly</td><td>API công khai của thư viện/module</td></tr>
+        <tr><td><code>private</code></td><td>Chỉ trong chính class/struct đó</td><td>Mặc định cho field, helper nội bộ</td></tr>
+        <tr><td><code>protected</code></td><td>Trong class đó + class kế thừa (kể cả khác assembly)</td><td>Member cho derived dùng lại</td></tr>
+        <tr><td><code>internal</code></td><td>Trong cùng assembly</td><td>API nội bộ của project, ẩn với bên ngoài</td></tr>
+        <tr><td><code>protected internal</code></td><td>Cùng assembly <em>HOẶC</em> derived ở assembly khác</td><td>Mở cho derived bên ngoài + nội bộ</td></tr>
+        <tr><td><code>private protected</code> (C# 7.2+)</td><td>Derived <em>VÀ</em> phải cùng assembly</td><td>Member nội bộ chỉ cho derived trong cùng lib</td></tr>
+        <tr><td><code>file</code> (C# 11+)</td><td>Chỉ trong cùng 1 file source</td><td>Type sinh bởi source generator, helper riêng file</td></tr>
+    </table>
+
+    <pre class="cb"><span class="k">public class</span> <span class="t">Repository</span>
+{
+    <span class="k">private</span> <span class="t">DbConnection</span> _conn;             <span class="c">// chỉ class này</span>
+    <span class="k">protected internal</span> <span class="t">ILogger</span> Logger;       <span class="c">// derived ngoài + nội bộ</span>
+    <span class="k">private protected void</span> <span class="n">Trace</span>() { }     <span class="c">// derived TRONG assembly này</span>
+    <span class="k">internal int</span> <span class="n">CacheSize</span>() =&gt; <span class="s">100</span>;       <span class="c">// chỉ assembly này thấy</span>
+    <span class="k">public</span> Task <span class="n">SaveAsync</span>() =&gt; Task.CompletedTask; <span class="c">// API công khai</span>
+}
+
+<span class="c">// file-scoped type — không lộ ra ngoài file, dù trùng tên cũng không xung đột</span>
+<span class="k">file class</span> <span class="t">InternalParser</span> { <span class="c">/* chỉ file này dùng */</span> }</pre>
+
+    <div class="callout tip">
+        <strong>💡 Nguyên tắc:</strong> bắt đầu bằng <code>private</code>, chỉ mở rộng khi thực sự cần. Mức truy cập càng hẹp, "bề mặt" có thể bị lạm dụng càng nhỏ, refactor càng an toàn. Đối với class top-level: mặc định là <code>internal</code> nếu không ghi modifier.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">9. Properties — đầy đủ các kiểu</h2>
+    <p class="ut-sub">Property là "mặt tiền" của encapsulation trong C#: trông như field nhưng thực chất là cặp method <code>get</code>/<code>set</code>. C# hiện đại có nhiều cú pháp ngắn gọn cho từng tình huống.</p>
+
+    <pre class="cb"><span class="k">public class</span> <span class="t">Product</span>
+{
+    <span class="c">// 1. Auto-property — compiler tự tạo backing field ẩn</span>
+    <span class="k">public string</span> Name { <span class="k">get</span>; <span class="k">set</span>; } = <span class="s">""</span>;
+
+    <span class="c">// 2. Get/set với backing field thủ công (validate / raise event)</span>
+    <span class="k">private decimal</span> _price;
+    <span class="k">public decimal</span> Price
+    {
+        <span class="k">get</span> =&gt; _price;
+        <span class="k">set</span>
+        {
+            <span class="k">if</span> (value &lt; <span class="s">0</span>) <span class="k">throw new</span> <span class="t">ArgumentOutOfRangeException</span>(<span class="k">nameof</span>(value));
+            _price = value;
+        }
+    }
+
+    <span class="c">// 3. Init-only (C# 9) — chỉ gán lúc khởi tạo, sau đó bất biến</span>
+    <span class="k">public string</span> Sku { <span class="k">get</span>; <span class="k">init</span>; } = <span class="s">""</span>;
+
+    <span class="c">// 4. Required member (C# 11) — BẮT BUỘC set khi tạo object</span>
+    <span class="k">public required string</span> Category { <span class="k">get</span>; <span class="k">init</span>; }
+
+    <span class="c">// 5. Computed / read-only — tính toán, không lưu</span>
+    <span class="k">public bool</span> IsExpensive =&gt; Price &gt; <span class="s">1_000_000</span>m;
+
+    <span class="c">// 6. Expression-bodied get/set</span>
+    <span class="k">private string</span> _slug = <span class="s">""</span>;
+    <span class="k">public string</span> Slug
+    {
+        <span class="k">get</span> =&gt; _slug;
+        <span class="k">set</span> =&gt; _slug = value.Trim().ToLowerInvariant();
+    }
+
+    <span class="c">// 7. Private setter — đọc public, chỉ class này ghi được</span>
+    <span class="k">public int</span> StockCount { <span class="k">get</span>; <span class="k">private set</span>; }
+    <span class="k">public void</span> <span class="n">Restock</span>(<span class="k">int</span> qty) =&gt; StockCount += qty;
+}
+
+<span class="c">// required ép buộc khởi tạo đầy đủ:</span>
+<span class="k">var</span> p = <span class="k">new</span> <span class="t">Product</span> { Category = <span class="s">"Sách"</span> }; <span class="c">// OK</span>
+<span class="c">// var bad = new Product();  // ❌ COMPILE ERROR: thiếu 'Category'</span></pre>
+
+    <div class="callout info">
+        <strong>init vs set:</strong> <code>init</code> cho phép gán trong object initializer rồi "đóng băng" — kết hợp tốt với immutability mà vẫn dùng được cú pháp <code>{ }</code>. Kết hợp <code>required</code> + <code>init</code> là pattern phổ biến cho DTO/model bất biến trong .NET hiện đại.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">10. Composition over Inheritance</h2>
+    <p class="ut-sub">Nguyên tắc thiết kế quan trọng nhất của OOP hiện đại: <strong>ưu tiên kết hợp (has-a) hơn kế thừa (is-a)</strong>. Kế thừa tạo coupling chặt và cây phân cấp cứng nhắc; composition linh hoạt, dễ thay đổi runtime, dễ test.</p>
+
+    <h3 style="color:var(--ut-danger)">❌ Vấn đề với kế thừa sâu</h3>
+    <pre class="cb"><span class="c">// Cây kế thừa cứng — "bùng nổ tổ hợp" (class explosion)</span>
+<span class="k">public class</span> <span class="t">Vehicle</span> { <span class="k">public virtual void</span> <span class="n">Move</span>() { } }
+<span class="k">public class</span> <span class="t">Car</span> : <span class="t">Vehicle</span> { }
+<span class="k">public class</span> <span class="t">FlyingCar</span> : <span class="t">Car</span> { <span class="k">public void</span> <span class="n">Fly</span>() { } }
+<span class="c">// Cần AmphibiousFlyingCar? ElectricFlyingCar? → nổ class, không tái dùng được hành vi</span>
+<span class="c">// Mỗi khả năng mới (bay, lội nước, chạy điện) lại phải tạo nhánh kế thừa mới</span></pre>
+
+    <h3 style="color:var(--ut-accent)">✅ Refactor sang composition</h3>
+    <pre class="cb"><span class="c">// Mỗi khả năng là 1 thành phần độc lập, "cắm" vào khi cần</span>
+<span class="k">public interface</span> <span class="t">IMover</span>  { <span class="k">void</span> <span class="n">Move</span>(); }
+<span class="k">public interface</span> <span class="t">IFlyer</span>  { <span class="k">void</span> <span class="n">Fly</span>(); }
+<span class="k">public interface</span> <span class="t">ISwimmer</span> { <span class="k">void</span> <span class="n">Swim</span>(); }
+
+<span class="k">public class</span> <span class="t">RoadMover</span> : <span class="t">IMover</span>  { <span class="k">public void</span> <span class="n">Move</span>() =&gt; Console.WriteLine(<span class="s">"Chạy đường bộ"</span>); }
+<span class="k">public class</span> <span class="t">JetEngine</span> : <span class="t">IFlyer</span>  { <span class="k">public void</span> <span class="n">Fly</span>()  =&gt; Console.WriteLine(<span class="s">"Bay bằng động cơ phản lực"</span>); }
+
+<span class="c">// Vehicle KẾT HỢP các khả năng (has-a) thay vì kế thừa (is-a)</span>
+<span class="k">public class</span> <span class="t">Vehicle</span>
+{
+    <span class="k">private readonly</span> <span class="t">IMover</span> _mover;
+    <span class="k">private readonly</span> <span class="t">IFlyer</span>? _flyer;
+
+    <span class="k">public</span> <span class="n">Vehicle</span>(<span class="t">IMover</span> mover, <span class="t">IFlyer</span>? flyer = <span class="k">null</span>)
+        =&gt; (_mover, _flyer) = (mover, flyer);
+
+    <span class="k">public void</span> <span class="n">Travel</span>()
+    {
+        _mover.Move();
+        _flyer?.Fly();              <span class="c">// chỉ bay nếu có khả năng bay</span>
+    }
+}
+
+<span class="c">// Lắp ráp linh hoạt — không cần class mới cho từng tổ hợp</span>
+<span class="k">var</span> car      = <span class="k">new</span> <span class="t">Vehicle</span>(<span class="k">new</span> <span class="t">RoadMover</span>());
+<span class="k">var</span> flyingCar = <span class="k">new</span> <span class="t">Vehicle</span>(<span class="k">new</span> <span class="t">RoadMover</span>(), <span class="k">new</span> <span class="t">JetEngine</span>());</pre>
+
+    <div class="callout tip">
+        <strong>💡 Tại sao composition tốt hơn?</strong> (1) Linh hoạt — đổi hành vi lúc runtime bằng cách truyền component khác. (2) Tái dùng — <code>JetEngine</code> dùng được cho mọi vehicle. (3) Dễ test — mock từng component. (4) Tránh "fragile base class" — sửa base không làm vỡ hàng loạt derived. Đây cũng là tinh thần của Strategy Pattern và Dependency Injection.
+    </div>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont dont">
+            <h4>❌ Kế thừa để tái dùng code</h4>
+            <p>Kế thừa chỉ vì muốn dùng lại vài method của base → coupling chặt, dễ vi phạm LSP (Liskov), cây phân cấp phình to khó kiểm soát.</p>
+            <p style="color:var(--ut-accent)">Khi nào kế thừa OK: quan hệ "is-a" thật sự + base ổn định + cần đa hình.</p>
+        </div>
+        <div class="do-dont do">
+            <h4>✅ Composition cho khả năng</h4>
+            <p>Tách mỗi hành vi thành interface + implementation, inject vào. Lắp ghép tự do, thay thế runtime, test độc lập.</p>
+            <p style="color:var(--ut-accent)">"Favor object composition over class inheritance" — Gang of Four.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">11. record class — tham chiếu nhưng value equality</h2>
+    <p class="ut-sub">Bổ sung quan trọng cho OOP hiện đại: <code>record</code> (C# 9) là reference type nhưng có value equality, immutability tiện lợi và <code>with</code>-expression — lý tưởng cho DTO, model bất biến, message.</p>
+
+    <pre class="cb"><span class="c">// record class — compiler tự sinh: Equals, GetHashCode, ToString, Deconstruct, with</span>
+<span class="k">public record</span> <span class="t">Customer</span>(<span class="k">int</span> Id, <span class="k">string</span> Name, <span class="k">string</span> Email);
+
+<span class="k">var</span> c1 = <span class="k">new</span> <span class="t">Customer</span>(<span class="s">1</span>, <span class="s">"Chien"</span>, <span class="s">"chien@a.com"</span>);
+<span class="k">var</span> c2 = c1 <span class="k">with</span> { Email = <span class="s">"new@a.com"</span> };   <span class="c">// bản sao đổi 1 field</span>
+
+Console.WriteLine(c1 == <span class="k">new</span> <span class="t">Customer</span>(<span class="s">1</span>, <span class="s">"Chien"</span>, <span class="s">"chien@a.com"</span>)); <span class="c">// True (value eq)</span>
+Console.WriteLine(c1);   <span class="c">// Customer { Id = 1, Name = Chien, Email = chien@a.com }</span></pre>
+
+    <table class="cmp">
+        <tr><th></th><th>class</th><th>record (class)</th><th>struct</th></tr>
+        <tr><td>Loại</td><td>Reference</td><td>Reference</td><td>Value</td></tr>
+        <tr><td>Equality mặc định</td><td>Reference</td><td>Value (theo field)</td><td>Value (theo field)</td></tr>
+        <tr><td>with-expression</td><td>❌</td><td>✅</td><td>✅ (record struct)</td></tr>
+        <tr><td>Dùng cho</td><td>Entity có identity, có hành vi</td><td>DTO, message, value bất biến</td><td>Giá trị nhỏ, hiệu năng cao</td></tr>
+    </table>
+
+    <div class="callout warn">
+        <strong>⚠️ Đừng lạm dụng record cho entity có identity:</strong> entity (vd <code>User</code> trong EF Core) nên so sánh bằng <em>Id</em>, không phải bằng tất cả field. Record value-equality phù hợp với value object/DTO, không phù hợp entity mutable có vòng đời dài.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">12. Một ví dụ tổng hợp 4 trụ cột</h2>
+    <p class="ut-sub">Ghép tất cả lại trong một mini-domain: hệ thống thanh toán có nhiều phương thức.</p>
+
+    <pre class="cb"><span class="c">// ABSTRACTION — contract cho mọi phương thức thanh toán</span>
+<span class="k">public interface</span> <span class="t">IPaymentMethod</span>
+{
+    Task&lt;<span class="t">PaymentResult</span>&gt; <span class="n">ChargeAsync</span>(<span class="k">decimal</span> amount);
+}
+
+<span class="c">// ENCAPSULATION — base giữ state chung, ẩn chi tiết</span>
+<span class="k">public abstract class</span> <span class="t">PaymentBase</span> : <span class="t">IPaymentMethod</span>
+{
+    <span class="k">private int</span> _attempts;                      <span class="c">// state ẩn</span>
+    <span class="k">protected</span> <span class="t">ILogger</span> Logger { <span class="k">get</span>; }
+
+    <span class="k">protected</span> <span class="n">PaymentBase</span>(<span class="t">ILogger</span> logger) =&gt; Logger = logger;
+
+    <span class="c">// POLYMORPHISM — template method gọi bước trừu tượng</span>
+    <span class="k">public async</span> Task&lt;<span class="t">PaymentResult</span>&gt; <span class="n">ChargeAsync</span>(<span class="k">decimal</span> amount)
+    {
+        _attempts++;
+        Logger.LogInformation(<span class="s">"Lần thử #{N}"</span>, _attempts);
+        <span class="k">if</span> (amount &lt;= <span class="s">0</span>) <span class="k">return</span> PaymentResult.Invalid;
+        <span class="k">return await</span> <span class="n">ExecuteAsync</span>(amount);       <span class="c">// con quyết định cách thực thi</span>
+    }
+
+    <span class="k">protected abstract</span> Task&lt;<span class="t">PaymentResult</span>&gt; <span class="n">ExecuteAsync</span>(<span class="k">decimal</span> amount);
+}
+
+<span class="c">// INHERITANCE + POLYMORPHISM — mỗi phương thức override cách thực thi</span>
+<span class="k">public class</span> <span class="t">CreditCardPayment</span> : <span class="t">PaymentBase</span>
+{
+    <span class="k">public</span> <span class="n">CreditCardPayment</span>(<span class="t">ILogger</span> l) : <span class="k">base</span>(l) { }
+    <span class="k">protected override async</span> Task&lt;<span class="t">PaymentResult</span>&gt; <span class="n">ExecuteAsync</span>(<span class="k">decimal</span> a)
+        =&gt; <span class="k">await</span> CardGateway.ChargeAsync(a);
+}
+
+<span class="k">public class</span> <span class="t">WalletPayment</span> : <span class="t">PaymentBase</span>
+{
+    <span class="k">public</span> <span class="n">WalletPayment</span>(<span class="t">ILogger</span> l) : <span class="k">base</span>(l) { }
+    <span class="k">protected override</span> Task&lt;<span class="t">PaymentResult</span>&gt; <span class="n">ExecuteAsync</span>(<span class="k">decimal</span> a)
+        =&gt; Task.FromResult(Wallet.Deduct(a));
+}
+
+<span class="c">// Caller chỉ phụ thuộc abstraction — đa hình hoàn toàn</span>
+<span class="k">public class</span> <span class="t">Checkout</span>(<span class="t">IPaymentMethod</span> payment)
+{
+    <span class="k">public</span> Task&lt;<span class="t">PaymentResult</span>&gt; <span class="n">PayAsync</span>(<span class="k">decimal</span> total) =&gt; payment.ChargeAsync(total);
+}</pre>
+
+    <div class="callout info">
+        <strong>Quan sát:</strong> <code>Checkout</code> không biết và không quan tâm đang dùng thẻ hay ví — nó chỉ làm việc với <code>IPaymentMethod</code> (abstraction). Thêm phương thức mới (vd <code>CryptoPayment</code>) chỉ cần tạo class mới, không sửa <code>Checkout</code>. Đây là Open/Closed Principle nhờ đa hình.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">13. Pitfalls thường gặp về OOP</h2>
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont dont">
+            <h4>❌ Anemic model — class chỉ toàn property</h4>
+            <p>Class chỉ có get/set, mọi logic nằm ở "service" bên ngoài → mất encapsulation, dữ liệu không tự bảo vệ invariant.</p>
+            <p style="color:var(--ut-accent)">Fix: đặt hành vi cạnh dữ liệu (rich domain model).</p>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ God class — một class làm mọi thứ</h4>
+            <p>Class hàng nghìn dòng, vi phạm Single Responsibility, không test nổi.</p>
+            <p style="color:var(--ut-accent)">Fix: tách thành nhiều class nhỏ, mỗi class 1 trách nhiệm.</p>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Public field thay vì property</h4>
+            <p>Mất khả năng validate, không break binary compat khi đổi sang property sau này.</p>
+            <p style="color:var(--ut-accent)">Fix: luôn dùng property cho dữ liệu public.</p>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Kế thừa vi phạm LSP</h4>
+            <p>Derived không thay thế được base (vd <code>Square : Rectangle</code> với set Width đổi cả Height).</p>
+            <p style="color:var(--ut-accent)">Fix: kiểm tra "derived dùng được ở mọi nơi base dùng được" hay không.</p>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Mutable struct</h4>
+            <p>struct có field set được → bug copy ngầm, sửa bản sao không ảnh hưởng gốc.</p>
+            <p style="color:var(--ut-accent)">Fix: dùng <code>readonly struct</code> / <code>record struct</code>.</p>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Dùng <code>new</code> để hide method</h4>
+            <p>Phá vỡ đa hình, kết quả phụ thuộc kiểu biến khai báo.</p>
+            <p style="color:var(--ut-accent)">Fix: dùng <code>virtual</code>/<code>override</code> hoặc thiết kế lại.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">🎯 Checklist nắm vững OOP trong C#</h2>
+    <div class="ut-card">
+        <ul>
+            <li>✅ Giải thích được 4 trụ cột + cho ví dụ C# cho từng cái</li>
+            <li>✅ Field luôn <code>private</code>, expose qua property có kiểm soát</li>
+            <li>✅ Phân biệt class (reference) vs struct (value) và chọn đúng theo ngữ cảnh</li>
+            <li>✅ Dùng <code>readonly struct</code> / <code>record struct</code> cho value type bất biến</li>
+            <li>✅ Chọn đúng interface vs abstract class theo "can-do" vs "is-a"</li>
+            <li>✅ Hiểu default interface methods dùng để versioning, không thay abstract class</li>
+            <li>✅ Dùng access modifier hẹp nhất có thể (least privilege)</li>
+            <li>✅ Thành thạo init-only, <code>required</code>, computed, expression-bodied property</li>
+            <li>✅ Phân biệt <code>virtual</code>/<code>override</code>/<code>abstract</code>/<code>new</code>/<code>sealed</code></li>
+            <li>✅ Luôn cân nhắc composition trước khi kế thừa (favor composition)</li>
+            <li>✅ Dùng <code>record</code> cho DTO/value object, không cho entity có identity</li>
+            <li>✅ Tránh anemic model, god class và kế thừa vi phạm LSP</li>
+        </ul>
+    </div>
+</section>
+
+</div>
+
+<footer style="text-align:center;padding:3rem 1.5rem;color:var(--ut-muted);border-top:1px solid var(--ut-border);margin-top:3rem;font-size:.9rem;">
+    <p>OOP trong C# · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

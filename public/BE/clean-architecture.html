@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clean / Onion Architecture trong .NET — A-Z</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --ut-primary: #512bd4;
+        --ut-primary-2: #8a2be2;
+        --ut-accent: #43e97b;
+        --ut-warn: #f39c12;
+        --ut-danger: #f5576c;
+        --ut-card: #1a1d2e;
+        --ut-card-2: #232640;
+        --ut-border: #2d3148;
+        --ut-text: #e2e8f0;
+        --ut-muted: #94a3b8;
+    }
+    .ut-hero { text-align: center; padding: 4rem 1.5rem 3rem; background: radial-gradient(ellipse at top, rgba(81,43,212,.18), transparent 60%); }
+    .ut-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 1rem; }
+    .ut-hero h1 .gradient { background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .ut-hero .hero-badge { display: inline-block; background: rgba(81,43,212,.15); color: var(--ut-primary-2); padding: .4rem 1rem; border-radius: 20px; font-size: .78rem; font-weight: 600; letter-spacing: 1px; margin-bottom: 1.25rem; }
+    .ut-hero p { color: var(--ut-muted); max-width: 820px; margin: 0 auto; }
+    .ut-section { padding: 2.5rem 0; }
+    .ut-title { font-size: 1.7rem; margin-bottom: 1.5rem; position: relative; padding-left: 1rem; color: var(--ut-text); }
+    .ut-title::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 4px; background: linear-gradient(180deg, var(--ut-primary), var(--ut-primary-2)); border-radius: 3px; }
+    .ut-sub { color: var(--ut-muted); margin-bottom: 1.25rem; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+    .ut-grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .ut-grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    .ut-grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .ut-card { background: var(--ut-card); border: 1px solid var(--ut-border); border-radius: 12px; padding: 1.4rem; }
+    .ut-card h3 { color: var(--ut-primary-2); margin-bottom: .6rem; font-size: 1.1rem; }
+    .ut-card h4 { color: var(--ut-accent); margin-bottom: .45rem; font-size: .98rem; }
+    .ut-card p, .ut-card li { color: var(--ut-muted); font-size: .95rem; }
+    .ut-card ul { padding-left: 1.2rem; }
+    .ut-card ul li { margin-bottom: .3rem; }
+    pre.cb { background: #0b1020; border: 1px solid var(--ut-border); border-left: 3px solid var(--ut-primary); border-radius: 8px; padding: 1rem 1.15rem; overflow-x: auto; font-family: 'JetBrains Mono', Consolas, monospace; font-size: .88rem; line-height: 1.6; margin: .75rem 0; color: #d6deeb; }
+    pre.cb .k { color: #c792ea; }
+    pre.cb .s { color: #ecc48d; }
+    pre.cb .c { color: #637777; font-style: italic; }
+    pre.cb .n { color: #82aaff; }
+    pre.cb .t { color: #ffcb8b; }
+    pre.cb .a { color: #7fdbca; }
+    code { background: #2d3148; padding: 2px 6px; border-radius: 4px; font-size: .88em; color: #f8d06b; font-family: 'JetBrains Mono', Consolas, monospace; }
+    .callout { border-radius: 10px; padding: .95rem 1.15rem; margin: 1rem 0; border: 1px solid; }
+    .callout.tip { background: rgba(67,233,123,.07); border-color: var(--ut-accent); }
+    .callout.tip strong { color: var(--ut-accent); }
+    .callout.warn { background: rgba(243,156,18,.07); border-color: var(--ut-warn); }
+    .callout.warn strong { color: var(--ut-warn); }
+    .callout.danger { background: rgba(245,87,108,.07); border-color: var(--ut-danger); }
+    .callout.danger strong { color: var(--ut-danger); }
+    .callout.info { background: rgba(81,43,212,.08); border-color: var(--ut-primary-2); }
+    .callout.info strong { color: var(--ut-primary-2); }
+    table.cmp { width: 100%; border-collapse: collapse; background: var(--ut-card); border-radius: 10px; overflow: hidden; margin: 1rem 0; font-size: .92rem; }
+    table.cmp th, table.cmp td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--ut-border); }
+    table.cmp th { background: var(--ut-card-2); color: var(--ut-primary-2); font-weight: 600; }
+    table.cmp td { color: var(--ut-muted); }
+    table.cmp tr:last-child td { border-bottom: none; }
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; position: relative; padding-left: 2.8rem; margin-bottom: 1rem; }
+    .steps li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 2rem; height: 2rem; background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .do-dont { border-left: 3px solid; padding: 1rem 1.15rem; border-radius: 8px; margin-bottom: 1rem; }
+    .do-dont.do { border-color: var(--ut-accent); background: rgba(67,233,123,.04); }
+    .do-dont.dont { border-color: var(--ut-danger); background: rgba(245,87,108,.04); }
+    .do-dont h4 { margin-bottom: .5rem; }
+    .do-dont.do h4 { color: var(--ut-accent); }
+    .do-dont.dont h4 { color: var(--ut-danger); }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo"><a href="index.html" style="color:inherit;-webkit-text-fill-color:inherit;">.NET<span class="accent">Mastery</span></a></div>
+        <div class="nav-links">
+            <a href="index.html">Roadmap</a>
+            <a href="async.html">Async</a>
+            <a href="rest-design.html">REST API</a>
+            <a href="auth-jwt.html">Auth & JWT</a>
+            <a href="caching.html">Caching</a>
+            <a href="logging.html">Logging</a>
+            <a href="error-handling.html">Error & Resilience</a>
+            <a href="clean-architecture.html" class="nav-active">Clean Arch</a>
+            <a href="design-patterns.html">SOLID & Patterns</a>
+        </div>
+        <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+</nav>
+
+<header class="ut-hero">
+    <div class="hero-badge">NÂNG CAO · INTERMEDIATE</div>
+    <h1>Clean / <span class="gradient">Onion</span> Architecture</h1>
+    <p>Hiểu sâu kiến trúc Clean/Onion trong .NET 8/9: vì sao kiến trúc tầng truyền thống thất bại, The Dependency Rule (dependency luôn hướng vào trong), bốn layer Domain / Application / Infrastructure / API, Ports &amp; Adapters (Hexagonal), Dependency Inversion, mapping DTO ở boundary, và quan trọng nhất — khi nào đừng dùng nó vì over-engineer.</p>
+</header>
+
+<div class="container">
+
+<section class="ut-section">
+    <h2 class="ut-title">1. Vấn đề của kiến trúc tầng truyền thống</h2>
+    <p class="ut-sub">Kiến trúc N-tier kinh điển (Presentation → Business → Data Access) xếp các tầng chồng lên nhau, mỗi tầng phụ thuộc tầng dưới. Vấn đề: <strong>business logic phụ thuộc vào data access</strong>, mà data access lại phụ thuộc database/EF Core. Khi đổi DB, đổi ORM hay muốn unit test, logic nghiệp vụ bị kéo theo cả thế giới hạ tầng.</p>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h4>🚫 N-tier truyền thống</h4>
+            <p>Dependency hướng <em>xuống dưới</em>: Business → Data Access → Database. Core nghiệp vụ "biết" về EF Core, connection string, SQL. Muốn test logic phải dựng cả database. Đổi ORM = sửa khắp nơi.</p>
+        </div>
+        <div class="ut-card">
+            <h4>✅ Clean / Onion</h4>
+            <p>Đảo ngược: dependency hướng <em>vào trong</em>, về phía Domain. Hạ tầng (DB, HTTP, file) nằm ở vòng ngoài và phụ thuộc vào core, không phải ngược lại. Core thuần nghiệp vụ, test được không cần DB.</p>
+        </div>
+    </div>
+
+    <p class="ut-sub">Clean Architecture (Robert C. Martin) và Onion Architecture (Jeffrey Palermo) cùng một ý tưởng cốt lõi: vẽ hệ thống thành các <strong>vòng tròn đồng tâm</strong>. Càng vào trong càng trừu tượng và ổn định (business rules), càng ra ngoài càng cụ thể và dễ thay đổi (UI, DB, framework). Quy tắc duy nhất: <strong>dependency chỉ được hướng vào trong</strong>.</p>
+
+    <pre class="cb"><span class="c">         ┌─────────────────────────────────────────┐</span>
+<span class="c">         │  API / Presentation  (controllers, DI)    │</span>
+<span class="c">         │   ┌───────────────────────────────────┐   │</span>
+<span class="c">         │   │  Infrastructure (EF Core, SMTP…)  │   │</span>
+<span class="c">         │   │   ┌───────────────────────────┐   │   │</span>
+<span class="c">         │   │   │  Application (use cases)  │   │   │</span>
+<span class="c">         │   │   │   ┌───────────────────┐   │   │   │</span>
+<span class="c">         │   │   │   │  Domain (entity)  │   │   │   │  ← trung tâm</span>
+<span class="c">         │   │   │   └───────────────────┘   │   │   │</span>
+<span class="c">         │   │   └───────────────────────────┘   │   │</span>
+<span class="c">         │   └───────────────────────────────────┘   │</span>
+<span class="c">         └─────────────────────────────────────────┘</span>
+                  ▲ dependency luôn hướng VÀO TRONG ▲</pre>
+
+    <div class="callout info">
+        <strong>Cùng một triết lý:</strong> Clean, Onion và Hexagonal (Ports &amp; Adapters) khác tên gọi nhưng chung một nguyên tắc — tách <em>business logic</em> khỏi <em>chi tiết kỹ thuật</em> bằng cách đảo ngược chiều phụ thuộc. Dưới đây ta dùng cách phân layer phổ biến nhất trong cộng đồng .NET.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">2. The Dependency Rule</h2>
+    <p class="ut-sub">Luật quan trọng nhất, chi phối toàn bộ kiến trúc: <strong>"Source code dependencies chỉ được hướng vào trong."</strong> Vòng trong không bao giờ biết gì về vòng ngoài.</p>
+
+    <div class="ut-grid ut-grid-3">
+        <div class="ut-card">
+            <h4>Hướng vào trong</h4>
+            <p>API biết Infrastructure + Application + Domain. Infrastructure biết Application + Domain. Application biết Domain. Domain <strong>không biết gì</strong>.</p>
+        </div>
+        <div class="ut-card">
+            <h4>Vòng trong "mù"</h4>
+            <p>Domain không tham chiếu EF Core, ASP.NET, JSON, HttpClient. Nó không biết dữ liệu được lưu ở đâu hay UI là gì.</p>
+        </div>
+        <div class="ut-card">
+            <h4>Vượt biên qua interface</h4>
+            <p>Khi vòng trong cần "gọi ra ngoài" (gửi email, lưu DB), nó định nghĩa <strong>interface</strong>; vòng ngoài hiện thực interface đó.</p>
+        </div>
+    </div>
+
+    <div class="callout tip">
+        <strong>💡 Mẹo kiểm tra nhanh:</strong> nhìn vào <code>using</code> trên đầu file Domain. Nếu thấy <code>using Microsoft.EntityFrameworkCore;</code> hay <code>using Microsoft.AspNetCore...;</code> → bạn đã vi phạm Dependency Rule. Domain chỉ được dùng BCL thuần (<code>System.*</code>) và types của chính nó.
+    </div>
+
+    <p class="ut-sub">Hệ quả thực tế: bạn có thể đổi SQL Server sang PostgreSQL, đổi REST sang gRPC, đổi EF Core sang Dapper — mà <strong>không phải đụng một dòng nào</strong> trong Domain và Application. Đó chính là giá trị của việc đảo ngược phụ thuộc.</p>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">3. Bốn layer giải thích kỹ</h2>
+
+    <div class="ut-card" style="margin-bottom:1rem;">
+        <h3>🟣 Domain — trái tim hệ thống</h3>
+        <p>Chứa <strong>Entities</strong>, <strong>Value Objects</strong>, <strong>Domain Events</strong>, <strong>business rules / invariants</strong>, và exception nghiệp vụ. KHÔNG có dependency ngoài nào — không EF Core, không attribute của framework. Đây là kiến thức nghiệp vụ thuần.</p>
+        <pre class="cb"><span class="c">// Domain/Entities/Order.cs — không tham chiếu hạ tầng nào</span>
+<span class="k">namespace</span> Shop.Domain.Entities;
+
+<span class="k">public sealed class</span> <span class="t">Order</span>
+{
+    <span class="k">private readonly</span> List&lt;<span class="t">OrderLine</span>&gt; _lines = <span class="k">new</span>();
+
+    <span class="k">public</span> Guid Id { <span class="k">get</span>; <span class="k">private set</span>; }
+    <span class="k">public</span> <span class="t">Money</span> Total { <span class="k">get</span>; <span class="k">private set</span>; } = <span class="t">Money</span>.Zero;
+    <span class="k">public</span> IReadOnlyList&lt;<span class="t">OrderLine</span>&gt; Lines =&gt; _lines.AsReadOnly();
+    <span class="k">public</span> <span class="t">OrderStatus</span> Status { <span class="k">get</span>; <span class="k">private set</span>; }
+
+    <span class="k">private</span> <span class="n">Order</span>() { } <span class="c">// cho ORM materialize</span>
+
+    <span class="k">public static</span> <span class="t">Order</span> <span class="n">Create</span>(Guid customerId)
+        =&gt; <span class="k">new</span>() { Id = Guid.NewGuid(), Status = <span class="t">OrderStatus</span>.Draft };
+
+    <span class="k">public void</span> <span class="n">AddLine</span>(<span class="t">Product</span> product, <span class="k">int</span> qty)
+    {
+        <span class="k">if</span> (Status != <span class="t">OrderStatus</span>.Draft)            <span class="c">// invariant nghiệp vụ</span>
+            <span class="k">throw new</span> <span class="t">DomainException</span>(<span class="s">"Đơn đã chốt, không thể thêm dòng."</span>);
+        <span class="k">if</span> (qty &lt;= <span class="s">0</span>)
+            <span class="k">throw new</span> <span class="t">DomainException</span>(<span class="s">"Số lượng phải &gt; 0."</span>);
+
+        _lines.Add(<span class="k">new</span> <span class="t">OrderLine</span>(product.Id, product.Price, qty));
+        Total = _lines.Aggregate(<span class="t">Money</span>.Zero, (acc, l) =&gt; acc + l.LineTotal);
+    }
+}</pre>
+        <pre class="cb"><span class="c">// Value Object: bất biến, so sánh theo giá trị (record rất hợp)</span>
+<span class="k">public readonly record struct</span> <span class="t">Money</span>(<span class="k">decimal</span> Amount, <span class="k">string</span> Currency = <span class="s">"VND"</span>)
+{
+    <span class="k">public static</span> <span class="t">Money</span> Zero =&gt; <span class="k">new</span>(<span class="s">0</span>);
+    <span class="k">public static</span> <span class="t">Money</span> <span class="k">operator</span> +(<span class="t">Money</span> a, <span class="t">Money</span> b)
+    {
+        <span class="k">if</span> (a.Currency != b.Currency)
+            <span class="k">throw new</span> <span class="t">DomainException</span>(<span class="s">"Không cộng được hai loại tiền khác nhau."</span>);
+        <span class="k">return</span> a <span class="k">with</span> { Amount = a.Amount + b.Amount };
+    }
+}</pre>
+    </div>
+
+    <div class="ut-card" style="margin-bottom:1rem;">
+        <h3>🔵 Application — use cases</h3>
+        <p>Điều phối nghiệp vụ: <strong>use cases</strong> (thường dạng CQRS Command/Query + handler), <strong>DTOs</strong>, và quan trọng nhất là các <strong>interface (ports)</strong> như <code>IOrderRepository</code>, <code>IEmailSender</code>, <code>IUnitOfWork</code>. Application <em>khai báo</em> những gì nó cần ở vòng ngoài, chứ không tự hiện thực. Chỉ tham chiếu Domain.</p>
+        <pre class="cb"><span class="c">// Application/Orders/Commands/PlaceOrderCommand.cs</span>
+<span class="k">public record</span> <span class="t">PlaceOrderCommand</span>(Guid CustomerId, List&lt;<span class="t">OrderItemDto</span>&gt; Items)
+    : IRequest&lt;<span class="t">OrderResultDto</span>&gt;;   <span class="c">// dùng MediatR (tuỳ chọn)</span>
+
+<span class="c">// Handler điều phối use case — phụ thuộc INTERFACE, không phải EF Core</span>
+<span class="k">public sealed class</span> <span class="t">PlaceOrderHandler</span>
+    : IRequestHandler&lt;<span class="t">PlaceOrderCommand</span>, <span class="t">OrderResultDto</span>&gt;
+{
+    <span class="k">private readonly</span> <span class="t">IOrderRepository</span> _orders;
+    <span class="k">private readonly</span> <span class="t">IProductRepository</span> _products;
+    <span class="k">private readonly</span> <span class="t">IUnitOfWork</span> _uow;
+    <span class="k">private readonly</span> <span class="t">IEmailSender</span> _email;
+
+    <span class="k">public</span> <span class="n">PlaceOrderHandler</span>(<span class="t">IOrderRepository</span> orders, <span class="t">IProductRepository</span> products,
+        <span class="t">IUnitOfWork</span> uow, <span class="t">IEmailSender</span> email)
+        =&gt; (_orders, _products, _uow, _email) = (orders, products, uow, email);
+
+    <span class="k">public async</span> Task&lt;<span class="t">OrderResultDto</span>&gt; <span class="n">Handle</span>(
+        <span class="t">PlaceOrderCommand</span> cmd, CancellationToken ct)
+    {
+        <span class="k">var</span> order = <span class="t">Order</span>.Create(cmd.CustomerId);
+        <span class="k">foreach</span> (<span class="k">var</span> item <span class="k">in</span> cmd.Items)
+        {
+            <span class="k">var</span> product = <span class="k">await</span> _products.GetByIdAsync(item.ProductId, ct)
+                ?? <span class="k">throw new</span> <span class="t">NotFoundException</span>(<span class="s">"Sản phẩm không tồn tại."</span>);
+            order.AddLine(product, item.Quantity);   <span class="c">// rule nằm trong Domain</span>
+        }
+
+        <span class="k">await</span> _orders.AddAsync(order, ct);
+        <span class="k">await</span> _uow.SaveChangesAsync(ct);                <span class="c">// commit transaction</span>
+        <span class="k">await</span> _email.SendOrderConfirmationAsync(order.Id, ct);
+
+        <span class="k">return new</span> <span class="t">OrderResultDto</span>(order.Id, order.Total.Amount);
+    }
+}</pre>
+    </div>
+
+    <div class="ut-card" style="margin-bottom:1rem;">
+        <h3>🟢 Infrastructure — chi tiết kỹ thuật</h3>
+        <p>Nơi "bẩn": <strong>EF Core DbContext</strong>, hiện thực repository, gọi service ngoài (SMTP, payment gateway, blob storage), cache, message bus. Infrastructure <strong>hiện thực các interface</strong> mà Application/Domain đã khai báo. Tham chiếu Application + Domain.</p>
+        <pre class="cb"><span class="c">// Infrastructure/Persistence/OrderRepository.cs — adapter cụ thể</span>
+<span class="k">using</span> Microsoft.EntityFrameworkCore;   <span class="c">// EF Core CHỈ xuất hiện ở đây</span>
+
+<span class="k">public sealed class</span> <span class="t">OrderRepository</span> : <span class="t">IOrderRepository</span>
+{
+    <span class="k">private readonly</span> <span class="t">AppDbContext</span> _db;
+    <span class="k">public</span> <span class="n">OrderRepository</span>(<span class="t">AppDbContext</span> db) =&gt; _db = db;
+
+    <span class="k">public async</span> Task&lt;<span class="t">Order</span>?&gt; <span class="n">GetByIdAsync</span>(Guid id, CancellationToken ct)
+        =&gt; <span class="k">await</span> _db.Orders
+            .Include(o =&gt; o.Lines)
+            .FirstOrDefaultAsync(o =&gt; o.Id == id, ct);
+
+    <span class="k">public async</span> Task <span class="n">AddAsync</span>(<span class="t">Order</span> order, CancellationToken ct)
+        =&gt; <span class="k">await</span> _db.Orders.AddAsync(order, ct);
+}
+
+<span class="c">// EF Core config tách rời Domain — entity Domain KHÔNG có attribute EF</span>
+<span class="k">public sealed class</span> <span class="t">OrderConfiguration</span> : IEntityTypeConfiguration&lt;<span class="t">Order</span>&gt;
+{
+    <span class="k">public void</span> <span class="n">Configure</span>(EntityTypeBuilder&lt;<span class="t">Order</span>&gt; b)
+    {
+        b.HasKey(o =&gt; o.Id);
+        b.OwnsMany(o =&gt; o.Lines, l =&gt; l.WithOwner());
+        b.OwnsOne(o =&gt; o.Total);   <span class="c">// map Value Object Money</span>
+    }
+}</pre>
+    </div>
+
+    <div class="ut-card">
+        <h3>🟠 API / Presentation — composition root</h3>
+        <p>Điểm vào: controllers hoặc Minimal API, model binding, mapping request → command, và <strong>composition root</strong> — nơi DI container ráp interface với implementation. API tham chiếu tất cả để đăng ký DI, nhưng code nghiệp vụ thì gọi qua abstraction.</p>
+        <pre class="cb"><span class="c">// Api/Program.cs — composition root, ráp port với adapter</span>
+<span class="k">var</span> builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext&lt;<span class="t">AppDbContext</span>&gt;(o =&gt;
+    o.UseNpgsql(builder.Configuration.GetConnectionString(<span class="s">"Default"</span>)));
+
+<span class="c">// Đăng ký: interface (Application)  →  implementation (Infrastructure)</span>
+builder.Services.AddScoped&lt;<span class="t">IOrderRepository</span>, <span class="t">OrderRepository</span>&gt;();
+builder.Services.AddScoped&lt;<span class="t">IProductRepository</span>, <span class="t">ProductRepository</span>&gt;();
+builder.Services.AddScoped&lt;<span class="t">IUnitOfWork</span>, <span class="t">EfUnitOfWork</span>&gt;();
+builder.Services.AddScoped&lt;<span class="t">IEmailSender</span>, <span class="t">SmtpEmailSender</span>&gt;();
+builder.Services.AddMediatR(c =&gt;
+    c.RegisterServicesFromAssembly(<span class="k">typeof</span>(<span class="t">PlaceOrderHandler</span>).Assembly));
+
+<span class="k">var</span> app = builder.Build();
+
+<span class="c">// Minimal API endpoint — chỉ điều hướng, không chứa logic</span>
+app.MapPost(<span class="s">"/orders"</span>, <span class="k">async</span> (<span class="t">PlaceOrderRequest</span> req, <span class="t">ISender</span> sender, CancellationToken ct) =&gt;
+{
+    <span class="k">var</span> result = <span class="k">await</span> sender.Send(req.ToCommand(), ct);
+    <span class="k">return</span> Results.Created(<span class="s">$"/orders/{result.Id}"</span>, result);
+});
+
+app.Run();</pre>
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">4. Project structure &amp; chiều tham chiếu</h2>
+    <p class="ut-sub">Mỗi layer là một project riêng trong solution. Quy tắc tham chiếu (project reference) <strong>thực thi</strong> Dependency Rule ở mức compiler — bạn không thể vô tình để Domain dùng EF Core nếu Domain không reference nó.</p>
+
+    <pre class="cb"><span class="c">Shop.sln</span>
+├── src/
+│   ├── <span class="t">Shop.Domain</span>/              <span class="c">← KHÔNG ref project nào</span>
+│   │     ├── Entities/          (Order, Product, OrderLine)
+│   │     ├── ValueObjects/      (Money, Address)
+│   │     ├── Events/            (OrderPlacedEvent)
+│   │     └── Exceptions/        (DomainException)
+│   │
+│   ├── <span class="t">Shop.Application</span>/         <span class="c">← ref Domain</span>
+│   │     ├── Orders/Commands/   (PlaceOrderCommand + Handler)
+│   │     ├── Orders/Queries/    (GetOrderByIdQuery + Handler)
+│   │     ├── Common/Dtos/       (OrderResultDto, OrderItemDto)
+│   │     └── Common/Interfaces/ (IOrderRepository, IEmailSender, IUnitOfWork)
+│   │
+│   ├── <span class="t">Shop.Infrastructure</span>/      <span class="c">← ref Application + Domain</span>
+│   │     ├── Persistence/       (AppDbContext, OrderRepository)
+│   │     ├── Persistence/Config/(OrderConfiguration)
+│   │     └── Services/          (SmtpEmailSender)
+│   │
+│   └── <span class="t">Shop.Api</span>/               <span class="c">← ref Application + Infrastructure (+ Domain)</span>
+│         ├── Endpoints/ | Controllers/
+│         ├── Contracts/         (PlaceOrderRequest — DTO ngoài cùng)
+│         └── Program.cs         (composition root, DI)
+│
+└── tests/
+      ├── <span class="t">Shop.Domain.Tests</span>/       (unit test thuần, 0 mock)
+      └── <span class="t">Shop.Application.Tests</span>/  (mock các interface, không cần DB)</pre>
+
+    <table class="cmp">
+        <tr><th>Project</th><th>Được tham chiếu tới</th><th>Tuyệt đối KHÔNG</th></tr>
+        <tr><td><code>Domain</code></td><td>Không gì cả (chỉ <code>System.*</code>)</td><td>EF Core, ASP.NET, Infrastructure, Application</td></tr>
+        <tr><td><code>Application</code></td><td>Domain</td><td>EF Core, Infrastructure, ASP.NET</td></tr>
+        <tr><td><code>Infrastructure</code></td><td>Application, Domain</td><td>API / Presentation</td></tr>
+        <tr><td><code>Api</code></td><td>Application, Infrastructure, Domain</td><td>(không) — đây là vòng ngoài cùng</td></tr>
+    </table>
+
+    <div class="callout warn">
+        <strong>⚠️ Cẩn thận với reference "tiện tay":</strong> Lý tưởng nhất là API chỉ ref Application, còn Infrastructure được nạp qua một extension method <code>AddInfrastructure()</code> để API không cần biết chi tiết. Nhưng thực tế, vì composition root nằm ở API nên API <em>thường</em> phải ref Infrastructure để đăng ký DI. Điều cấm tuyệt đối là chiều ngược: Infrastructure hay Application <strong>không bao giờ</strong> ref API.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">5. Ports &amp; Adapters (Hexagonal)</h2>
+    <p class="ut-sub">Đây là cơ chế kỹ thuật làm cho Dependency Rule khả thi: <strong>Dependency Inversion Principle</strong>. <em>Port</em> là interface định nghĩa ở vòng trong (Application/Domain). <em>Adapter</em> là implementation cụ thể ở vòng ngoài (Infrastructure). Vòng trong phụ thuộc vào <strong>abstraction nó tự sở hữu</strong>, không phụ thuộc chi tiết.</p>
+
+    <pre class="cb"><span class="c">// === PORT: định nghĩa ở Application — nó "sở hữu" hợp đồng này ===</span>
+<span class="k">namespace</span> Shop.Application.Common.Interfaces;
+
+<span class="k">public interface</span> <span class="t">IOrderRepository</span>
+{
+    Task&lt;<span class="t">Order</span>?&gt; <span class="n">GetByIdAsync</span>(Guid id, CancellationToken ct);
+    Task <span class="n">AddAsync</span>(<span class="t">Order</span> order, CancellationToken ct);
+}
+
+<span class="k">public interface</span> <span class="t">IEmailSender</span>
+{
+    Task <span class="n">SendOrderConfirmationAsync</span>(Guid orderId, CancellationToken ct);
+}</pre>
+
+    <pre class="cb"><span class="c">// === ADAPTER: hiện thực ở Infrastructure — chi tiết kỹ thuật ===</span>
+<span class="k">namespace</span> Shop.Infrastructure.Services;
+
+<span class="k">public sealed class</span> <span class="t">SmtpEmailSender</span> : <span class="t">IEmailSender</span>
+{
+    <span class="k">private readonly</span> <span class="t">SmtpClient</span> _smtp;
+    <span class="k">public</span> <span class="n">SmtpEmailSender</span>(<span class="t">SmtpClient</span> smtp) =&gt; _smtp = smtp;
+
+    <span class="k">public async</span> Task <span class="n">SendOrderConfirmationAsync</span>(Guid orderId, CancellationToken ct)
+    {
+        <span class="k">var</span> msg = <span class="k">new</span> <span class="t">MailMessage</span>(<span class="s">"shop@demo.vn"</span>, <span class="s">"khach@demo.vn"</span>)
+        {
+            Subject = <span class="s">"Xác nhận đơn hàng"</span>,
+            Body = <span class="s">$"Đơn {orderId} đã được tạo thành công."</span>
+        };
+        <span class="k">await</span> _smtp.SendMailAsync(msg, ct);
+    }
+}</pre>
+
+    <div class="callout info">
+        <strong>Đảo ngược dòng chảy:</strong> Lúc <em>runtime</em>, Application gọi <code>SmtpEmailSender</code> (chiều thực thi hướng ra ngoài). Nhưng lúc <em>compile</em>, source dependency lại hướng vào trong: Infrastructure phụ thuộc interface ở Application, chứ Application không hề biết SMTP tồn tại. Đó chính là "đảo ngược phụ thuộc" — và là lý do bạn thay <code>SmtpEmailSender</code> bằng <code>SendGridEmailSender</code> mà không sửa Application.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">6. Mapping với DTOs ở boundary</h2>
+    <p class="ut-sub">Entity Domain <strong>không được leak ra API</strong>. Lý do: entity chứa logic, invariant, có thể có navigation property gây vòng lặp serialize, và nếu expose trực tiếp thì hợp đồng API của bạn bị khoá cứng vào cấu trúc nội bộ. Thay vào đó, map Domain ↔ DTO ở ranh giới.</p>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="ut-card">
+            <h4>Vì sao phải tách DTO?</h4>
+            <ul>
+                <li>API contract ổn định, đổi entity không vỡ client</li>
+                <li>Tránh over-posting / mass assignment</li>
+                <li>Không leak field nhạy cảm (password hash, internal flag)</li>
+                <li>Tránh vòng lặp serialize của navigation property</li>
+                <li>Shape dữ liệu đúng nhu cầu màn hình</li>
+            </ul>
+        </div>
+        <div class="ut-card">
+            <h4>Manual vs Mapper</h4>
+            <ul>
+                <li><strong>Manual mapping</strong>: rõ ràng, dễ debug, không "magic", không reflection runtime — khuyến nghị cho dự án vừa</li>
+                <li><strong>Mapster</strong>: nhanh, có source generator (compile-time, AOT-friendly)</li>
+                <li><strong>AutoMapper</strong>: tiện cho dự án lớn nhưng dễ giấu lỗi mapping, khó trace</li>
+            </ul>
+        </div>
+    </div>
+
+    <pre class="cb"><span class="c">// Manual mapping — minh bạch, không phụ thuộc thư viện ngoài</span>
+<span class="k">public static class</span> <span class="t">OrderMappings</span>
+{
+    <span class="k">public static</span> <span class="t">OrderResultDto</span> <span class="n">ToDto</span>(<span class="k">this</span> <span class="t">Order</span> o) =&gt; <span class="k">new</span>(
+        Id: o.Id,
+        Total: o.Total.Amount,
+        Status: o.Status.ToString(),
+        Lines: o.Lines.Select(l =&gt; <span class="k">new</span> <span class="t">OrderLineDto</span>(l.ProductId, l.Quantity)).ToList());
+}
+
+<span class="c">// DTO là record phẳng, chỉ chứa data — không logic</span>
+<span class="k">public record</span> <span class="t">OrderResultDto</span>(Guid Id, <span class="k">decimal</span> Total, <span class="k">string</span> Status, List&lt;<span class="t">OrderLineDto</span>&gt; Lines);</pre>
+
+    <div class="callout tip">
+        <strong>💡 Nhiều "loại" DTO:</strong> phân biệt <em>Request DTO</em> (input, ở API: <code>PlaceOrderRequest</code>), <em>Command/Query</em> (ở Application), và <em>Response DTO</em> (output: <code>OrderResultDto</code>). Đừng dùng chung một class cho cả input lẫn output — chúng tiến hoá theo hướng khác nhau.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">7. Khi nào Clean Architecture là overkill?</h2>
+    <p class="ut-sub">Sự thật phũ phàng: phần lớn dự án nhỏ <strong>không cần</strong> 4 project, CQRS và hàng đống interface. Clean Architecture đánh đổi <em>nhiều boilerplate</em> để lấy <em>khả năng bảo trì lâu dài</em>. Nếu dự án không sống đủ lâu hoặc không đủ phức tạp, bạn chỉ tốn công.</p>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont dont">
+            <h4>❌ Đừng dùng khi…</h4>
+            <ul>
+                <li>App CRUD thuần, ít business rule (admin panel, form nhập liệu)</li>
+                <li>Prototype / MVP / hackathon cần ship nhanh</li>
+                <li>Microservice nhỏ chỉ vài endpoint</li>
+                <li>Team nhỏ, dự án ngắn hạn, ít người maintain</li>
+                <li>Đội chưa quen — over-engineer làm chậm cả nhóm</li>
+            </ul>
+        </div>
+        <div class="do-dont do">
+            <h4>✅ Hợp lý khi…</h4>
+            <ul>
+                <li>Domain phức tạp, nhiều quy tắc nghiệp vụ thay đổi</li>
+                <li>Dự án dài hạn, nhiều người, sống nhiều năm</li>
+                <li>Cần thay đổi hạ tầng độc lập (DB, message bus, gateway)</li>
+                <li>Yêu cầu test nghiệp vụ cao, cô lập khỏi I/O</li>
+                <li>Nhiều entry point (REST + gRPC + background worker)</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="callout danger">
+        <strong>⚠️ Over-engineering là một chi phí thật:</strong> mỗi interface một implementation duy nhất, mỗi command một handler một dòng, mỗi map qua 3 tầng DTO — tất cả đều là code phải đọc, viết, maintain. Với app nhỏ, chi phí này <em>lớn hơn</em> lợi ích. Đừng thêm abstraction "phòng khi cần"; thêm khi <em>thật sự</em> cần (YAGNI).
+    </div>
+
+    <div class="callout info">
+        <strong>Giải pháp trung gian:</strong> <strong>Vertical Slice Architecture</strong> — gom tất cả code của một tính năng (request, handler, validation, DB access) vào một thư mục/file theo <em>feature</em> thay vì theo <em>layer</em>. Ít boilerplate hơn Clean, vẫn tách biệt tốt. Hoặc đơn giản là <strong>layered architecture</strong> truyền thống cho CRUD. Chọn kiến trúc theo độ phức tạp của bài toán, không theo trào lưu.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">8. Lợi ích khi dùng đúng chỗ</h2>
+    <div class="ut-grid ut-grid-3">
+        <div class="ut-card">
+            <h3>🧪 Testability</h3>
+            <p>Domain test thuần không cần mock. Application test bằng cách mock interface (in-memory repo), không cần dựng DB — test nhanh, ổn định, chạy hàng nghìn lần/giây.</p>
+        </div>
+        <div class="ut-card">
+            <h3>🔌 Độc lập framework / DB</h3>
+            <p>EF Core, ASP.NET, SMTP đều là chi tiết ở vòng ngoài. Đổi PostgreSQL→SQL Server, REST→gRPC, SMTP→SendGrid mà core không đổi.</p>
+        </div>
+        <div class="ut-card">
+            <h3>🔧 Dễ thay đổi &amp; mở rộng</h3>
+            <p>Business rule tập trung ở Domain — sửa một chỗ. Thêm adapter mới (gateway thanh toán mới) chỉ là thêm class hiện thực interface có sẵn.</p>
+        </div>
+    </div>
+
+    <div class="callout tip">
+        <strong>💡 Điểm mấu chốt:</strong> giá trị không nằm ở "nhiều layer" mà ở chỗ <em>business logic được bảo vệ khỏi sự thay đổi của hạ tầng</em>. Nếu kiến trúc của bạn không đạt được điều đó (vd Domain vẫn ref EF Core), thì dù có 10 project cũng vô nghĩa.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">🎯 Checklist Clean / Onion Architecture</h2>
+    <div class="ut-card">
+        <ul>
+            <li>✅ Domain <strong>không</strong> tham chiếu EF Core, ASP.NET, hay bất kỳ framework hạ tầng nào</li>
+            <li>✅ Tất cả interface (port) như <code>IRepository</code>, <code>IEmailSender</code> nằm ở Application (hoặc Domain)</li>
+            <li>✅ Implementation (adapter) của các interface nằm ở Infrastructure</li>
+            <li>✅ Chiều tham chiếu: Api → Infrastructure/Application → Domain — <strong>không có circular dependency</strong></li>
+            <li>✅ Infrastructure và Application <strong>không bao giờ</strong> ref API/Presentation</li>
+            <li>✅ Entity Domain không leak ra API — luôn map qua DTO ở boundary</li>
+            <li>✅ Business rule &amp; invariant nằm trong Domain, không rò rỉ ra handler hay controller</li>
+            <li>✅ DI composition root nằm ở API (<code>Program.cs</code>), ráp interface với implementation</li>
+            <li>✅ <code>CancellationToken</code> truyền xuyên suốt qua các port async</li>
+            <li>✅ Đã cân nhắc: bài toán có đủ phức tạp để xứng đáng kiến trúc này chưa? (tránh over-engineer)</li>
+        </ul>
+    </div>
+</section>
+
+</div>
+
+<footer style="text-align:center;padding:3rem 1.5rem;color:var(--ut-muted);border-top:1px solid var(--ut-border);margin-top:3rem;font-size:.9rem;">
+    <p>Clean / Onion Architecture · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

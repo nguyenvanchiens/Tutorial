@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASP.NET Core Web API đầu tiên — Hướng dẫn A-Z (.NET 8/9)</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --ut-primary: #512bd4;
+        --ut-primary-2: #8a2be2;
+        --ut-accent: #43e97b;
+        --ut-warn: #f39c12;
+        --ut-danger: #f5576c;
+        --ut-card: #1a1d2e;
+        --ut-card-2: #232640;
+        --ut-border: #2d3148;
+        --ut-text: #e2e8f0;
+        --ut-muted: #94a3b8;
+    }
+
+    .ut-hero {
+        text-align: center;
+        padding: 4rem 1.5rem 3rem;
+        background: radial-gradient(ellipse at top, rgba(81,43,212,.18), transparent 60%);
+    }
+    .ut-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 1rem; }
+    .ut-hero h1 .gradient {
+        background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .ut-hero .hero-badge {
+        display: inline-block;
+        background: rgba(81,43,212,.15);
+        color: var(--ut-primary-2);
+        padding: .4rem 1rem;
+        border-radius: 20px;
+        font-size: .78rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        margin-bottom: 1.25rem;
+    }
+    .ut-hero p { color: var(--ut-muted); max-width: 820px; margin: 0 auto; }
+
+    .ut-section { padding: 2.5rem 0; }
+    .ut-title {
+        font-size: 1.7rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        padding-left: 1rem;
+        color: var(--ut-text);
+    }
+    .ut-title::before {
+        content: '';
+        position: absolute;
+        left: 0; top: 6px; bottom: 6px;
+        width: 4px;
+        background: linear-gradient(180deg, var(--ut-primary), var(--ut-primary-2));
+        border-radius: 3px;
+    }
+    .ut-sub { color: var(--ut-muted); margin-bottom: 1.25rem; }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+
+    .ut-grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .ut-grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    .ut-grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+
+    .ut-card {
+        background: var(--ut-card);
+        border: 1px solid var(--ut-border);
+        border-radius: 12px;
+        padding: 1.4rem;
+    }
+    .ut-card h3 { color: var(--ut-primary-2); margin-bottom: .6rem; font-size: 1.1rem; }
+    .ut-card h4 { color: var(--ut-accent); margin-bottom: .45rem; font-size: .98rem; }
+    .ut-card p, .ut-card li { color: var(--ut-muted); font-size: .95rem; }
+    .ut-card ul { padding-left: 1.2rem; }
+    .ut-card ul li { margin-bottom: .3rem; }
+
+    pre.cb {
+        background: #0b1020;
+        border: 1px solid var(--ut-border);
+        border-left: 3px solid var(--ut-primary);
+        border-radius: 8px;
+        padding: 1rem 1.15rem;
+        overflow-x: auto;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+        font-size: .88rem;
+        line-height: 1.6;
+        margin: .75rem 0;
+        color: #d6deeb;
+    }
+    pre.cb .k { color: #c792ea; }
+    pre.cb .s { color: #ecc48d; }
+    pre.cb .c { color: #637777; font-style: italic; }
+    pre.cb .n { color: #82aaff; }
+    pre.cb .t { color: #ffcb8b; }
+    pre.cb .a { color: #7fdbca; }
+    code {
+        background: #2d3148;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: .88em;
+        color: #f8d06b;
+        font-family: 'JetBrains Mono', Consolas, monospace;
+    }
+
+    .callout {
+        border-radius: 10px;
+        padding: .95rem 1.15rem;
+        margin: 1rem 0;
+        border: 1px solid;
+    }
+    .callout.tip { background: rgba(67,233,123,.07); border-color: var(--ut-accent); }
+    .callout.tip strong { color: var(--ut-accent); }
+    .callout.warn { background: rgba(243,156,18,.07); border-color: var(--ut-warn); }
+    .callout.warn strong { color: var(--ut-warn); }
+    .callout.danger { background: rgba(245,87,108,.07); border-color: var(--ut-danger); }
+    .callout.danger strong { color: var(--ut-danger); }
+    .callout.info { background: rgba(81,43,212,.08); border-color: var(--ut-primary-2); }
+    .callout.info strong { color: var(--ut-primary-2); }
+
+    table.cmp { width: 100%; border-collapse: collapse; background: var(--ut-card); border-radius: 10px; overflow: hidden; margin: 1rem 0; font-size: .92rem; }
+    table.cmp th, table.cmp td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--ut-border); }
+    table.cmp th { background: var(--ut-card-2); color: var(--ut-primary-2); font-weight: 600; }
+    table.cmp td { color: var(--ut-muted); }
+    table.cmp tr:last-child td { border-bottom: none; }
+
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; position: relative; padding-left: 2.8rem; margin-bottom: 1rem; }
+    .steps li::before {
+        content: counter(step);
+        position: absolute; left: 0; top: 0;
+        width: 2rem; height: 2rem;
+        background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2));
+        color: #fff;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700;
+    }
+
+    .do-dont { border-left: 3px solid; padding: 1rem 1.15rem; border-radius: 8px; margin-bottom: 1rem; }
+    .do-dont.do { border-color: var(--ut-accent); background: rgba(67,233,123,.04); }
+    .do-dont.dont { border-color: var(--ut-danger); background: rgba(245,87,108,.04); }
+    .do-dont h4 { margin-bottom: .5rem; }
+    .do-dont.do h4 { color: var(--ut-accent); }
+    .do-dont.dont h4 { color: var(--ut-danger); }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo"><a href="index.html" style="color:inherit;-webkit-text-fill-color:inherit;">.NET<span class="accent">Mastery</span></a></div>
+        <div class="nav-links">
+            <a href="index.html">Roadmap</a>
+            <a href="csharp-basics.html">C# Basics</a>
+            <a href="oop.html">OOP</a>
+            <a href="linq.html">LINQ</a>
+            <a href="sql-basics.html">SQL</a>
+            <a href="webapi-first.html" class="nav-active">Web API</a>
+            <a href="efcore.html">EF Core</a>
+            <a href="di.html">DI</a>
+        </div>
+        <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+</nav>
+
+<header class="ut-hero">
+    <div class="hero-badge">CƠ BẢN · FOUNDATION</div>
+    <h1>Xây dựng <span class="gradient">ASP.NET Core</span> Web API đầu tiên</h1>
+    <p>Từ <code>dotnet new webapi</code> đến một REST API CRUD hoàn chỉnh trên .NET 8/9: minimal hosting model, Controller, routing, model binding, DTO, kết quả trả về chuẩn RFC, Swagger/OpenAPI. Mọi thứ bạn cần để viết endpoint đầu tiên một cách chuyên nghiệp.</p>
+</header>
+
+<div class="container">
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">1. Web API là gì &amp; tại sao chọn ASP.NET Core</h2>
+    <p class="ut-sub">Web API là một dịch vụ HTTP trả về dữ liệu (thường là JSON) thay vì HTML. Client có thể là SPA (React/Angular), mobile app, dịch vụ khác, hoặc Postman.</p>
+
+    <div class="ut-grid ut-grid-3">
+        <div class="ut-card">
+            <h4>🌐 REST trên HTTP</h4>
+            <p>Tài nguyên (resource) được định danh bằng URL, thao tác bằng HTTP verb.</p>
+            <ul>
+                <li><code>GET</code> — đọc</li>
+                <li><code>POST</code> — tạo mới</li>
+                <li><code>PUT/PATCH</code> — cập nhật</li>
+                <li><code>DELETE</code> — xoá</li>
+            </ul>
+        </div>
+        <div class="ut-card">
+            <h4>⚡ Hiệu năng cao</h4>
+            <p>Kestrel server là một trong những web server nhanh nhất hiện nay. Hỗ trợ AOT, HTTP/3.</p>
+            <ul>
+                <li>Cross-platform (Win/Linux/macOS)</li>
+                <li>Async/await native</li>
+                <li>DI tích hợp sẵn</li>
+            </ul>
+        </div>
+        <div class="ut-card">
+            <h4>🧰 Hệ sinh thái</h4>
+            <p>EF Core, Identity, SignalR, gRPC, Authentication/Authorization — tất cả first-party.</p>
+            <ul>
+                <li>OpenAPI/Swagger</li>
+                <li>Middleware pipeline</li>
+                <li>Config &amp; Logging chuẩn</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="callout info">
+        <strong>Phiên bản 2026:</strong> .NET 8 là LTS (hỗ trợ tới 11/2026), .NET 9 là STS (mới hơn, có cải tiến OpenAPI built-in). Bài này dùng cú pháp chung cho cả hai; chỗ nào khác biệt sẽ ghi chú rõ.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">2. Tạo project &amp; cấu trúc thư mục</h2>
+    <p class="ut-sub">Cần .NET SDK 8 hoặc 9. Kiểm tra bằng <code>dotnet --version</code>. Nếu chưa có, tải tại dotnet.microsoft.com.</p>
+
+    <ol class="steps">
+        <li><strong>Tạo project Web API</strong> — template <code>webapi</code>:
+            <pre class="cb"><span class="c"># Tạo project dùng Controller (khuyên cho beginner)</span>
+dotnet new webapi -n ShopApi --use-controllers
+
+<span class="c"># .NET 8: mặc định template tạo Minimal API,</span>
+<span class="c"># thêm cờ --use-controllers để có ControllersBase + folder Controllers/</span>
+
+<span class="c"># Tạo solution và add project</span>
+dotnet new sln -n Shop
+dotnet sln add ShopApi/ShopApi.csproj</pre>
+        </li>
+        <li><strong>Chạy thử ngay</strong> — template đã có sẵn endpoint mẫu:
+            <pre class="cb"><span class="k">cd</span> ShopApi
+dotnet run
+
+<span class="c"># Mở https://localhost:5xxx/swagger để xem UI</span>
+<span class="c"># Hot reload khi sửa code:</span>
+dotnet watch run</pre>
+        </li>
+        <li><strong>Hiểu cấu trúc thư mục</strong> sinh ra:
+            <pre class="cb">ShopApi/
+├── Controllers/
+│   └── WeatherForecastController.cs   <span class="c">// endpoint mẫu, có thể xoá</span>
+├── Properties/
+│   └── launchSettings.json            <span class="c">// port, profile, env khi dev</span>
+├── appsettings.json                   <span class="c">// config (connection string, logging)</span>
+├── appsettings.Development.json        <span class="c">// override khi môi trường Development</span>
+├── Program.cs                          <span class="c">// điểm khởi động — toàn bộ cấu hình</span>
+└── ShopApi.csproj                      <span class="c">// target framework, package ref</span></pre>
+        </li>
+    </ol>
+
+    <div class="callout tip">
+        <strong>💡 launchSettings.json</strong> chỉ áp dụng khi chạy local (dev). Khi deploy production, port và environment được điều khiển bằng biến môi trường (<code>ASPNETCORE_URLS</code>, <code>ASPNETCORE_ENVIRONMENT</code>), KHÔNG dùng file này.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">3. Program.cs — Minimal Hosting Model (.NET 8/9)</h2>
+    <p class="ut-sub">Từ .NET 6, không còn <code>Startup.cs</code>. Mọi cấu hình gói gọn trong <code>Program.cs</code> với top-level statements. Có 2 nửa rõ ràng: <strong>builder</strong> (đăng ký service) và <strong>app</strong> (cấu hình pipeline).</p>
+
+    <pre class="cb"><span class="c">// Program.cs — phiên bản dùng Controller</span>
+<span class="k">var</span> builder = WebApplication.CreateBuilder(args);
+
+<span class="c">// === 1. ĐĂNG KÝ SERVICE (DI container) — trước khi Build() ===</span>
+builder.Services.AddControllers();          <span class="c">// bật MVC Controller</span>
+builder.Services.AddEndpointsApiExplorer(); <span class="c">// metadata cho OpenAPI</span>
+builder.Services.AddSwaggerGen();           <span class="c">// sinh Swagger doc</span>
+
+<span class="c">// Đăng ký service riêng của app (sẽ dùng ở phần CRUD)</span>
+builder.Services.AddSingleton&lt;<span class="t">IProductService</span>, <span class="t">InMemoryProductService</span>&gt;();
+
+<span class="k">var</span> app = builder.Build();
+
+<span class="c">// === 2. CẤU HÌNH MIDDLEWARE PIPELINE — thứ tự QUAN TRỌNG ===</span>
+<span class="k">if</span> (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();      <span class="c">// expose /swagger/v1/swagger.json</span>
+    app.UseSwaggerUI();    <span class="c">// giao diện web /swagger</span>
+}
+
+app.UseHttpsRedirection(); <span class="c">// ép HTTP -&gt; HTTPS</span>
+app.UseAuthorization();    <span class="c">// kiểm tra quyền (nếu có [Authorize])</span>
+
+app.MapControllers();      <span class="c">// map route tới các Controller</span>
+
+app.Run();                 <span class="c">// chạy app (blocking)</span>
+
+<span class="c">// Cuối file: expose Program cho integration test (tùy chọn)</span>
+<span class="k">public partial class</span> <span class="t">Program</span> { }</pre>
+
+    <div class="callout warn">
+        <strong>⚠️ Thứ tự middleware là sống còn:</strong> request đi từ trên xuống, response đi ngược lại. <code>UseAuthentication()</code> phải đứng TRƯỚC <code>UseAuthorization()</code>. <code>MapControllers()</code> nên ở gần cuối. Sai thứ tự = auth không chạy hoặc CORS không áp dụng.
+    </div>
+
+    <h3 style="margin-top:1.5rem; color:var(--ut-primary-2)">Vòng đời một request</h3>
+    <pre class="cb">Client  ──HTTP──&gt;  Kestrel  ──&gt;  Middleware pipeline
+                                   │  HttpsRedirection
+                                   │  Routing
+                                   │  Authentication / Authorization
+                                   ▼
+                              Endpoint (Controller action)
+                                   │  Model binding + validation
+                                   │  Logic + gọi service
+                                   ▼
+                              IActionResult  ──&gt;  JSON response  ──&gt;  Client</pre>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">4. Controller — [ApiController] &amp; ControllerBase</h2>
+    <p class="ut-sub">Controller nhóm các endpoint liên quan. Kế thừa <code>ControllerBase</code> (KHÔNG phải <code>Controller</code> — cái đó dành cho MVC trả View HTML). Attribute <code>[ApiController]</code> bật một loạt hành vi tiện lợi cho API.</p>
+
+    <pre class="cb"><span class="c">// Controllers/PingController.cs</span>
+<span class="k">using</span> Microsoft.AspNetCore.Mvc;
+
+[<span class="a">ApiController</span>]
+[<span class="a">Route</span>(<span class="s">"api/[controller]"</span>)]   <span class="c">// [controller] = "ping" (bỏ hậu tố Controller)</span>
+<span class="k">public class</span> <span class="t">PingController</span> : <span class="t">ControllerBase</span>
+{
+    [<span class="a">HttpGet</span>]
+    <span class="k">public</span> <span class="t">IActionResult</span> <span class="n">Get</span>() =&gt; Ok(<span class="k">new</span> { status = <span class="s">"alive"</span>, time = DateTime.UtcNow });
+}</pre>
+
+    <table class="cmp">
+        <tr><th>Hành vi của [ApiController]</th><th>Ý nghĩa</th></tr>
+        <tr><td>Auto 400 khi model invalid</td><td>Không cần tự kiểm tra <code>ModelState.IsValid</code> — tự trả <code>ValidationProblemDetails</code></td></tr>
+        <tr><td>Binding source suy luận</td><td>Tham số complex type tự bind từ body, simple type từ route/query</td></tr>
+        <tr><td>Bắt buộc attribute routing</td><td>Không dùng convention routing — phải khai báo <code>[Route]</code>/<code>[HttpGet]</code></td></tr>
+        <tr><td>ProblemDetails cho lỗi</td><td>Lỗi trả về đúng chuẩn RFC 9457 (mã, type, title, detail)</td></tr>
+    </table>
+
+    <div class="callout info">
+        <strong>Minimal API — lựa chọn thay thế:</strong> với API nhỏ, có thể bỏ Controller và map endpoint thẳng trong <code>Program.cs</code>: <code>app.MapGet("/ping", () =&gt; Results.Ok("alive"));</code>. Gọn cho microservice nhỏ, nhưng Controller dễ tổ chức hơn khi project lớn. Phần 9 sẽ minh hoạ Minimal API CRUD tương đương.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">5. Routing &amp; Attribute Routing</h2>
+    <p class="ut-sub">URL nào gọi tới action nào được quyết định bằng attribute đặt trên class/method. <code>[Route]</code> định nghĩa template, các <code>[HttpVerb]</code> định nghĩa method + segment con.</p>
+
+    <pre class="cb">[<span class="a">ApiController</span>]
+[<span class="a">Route</span>(<span class="s">"api/products"</span>)]              <span class="c">// prefix cố định cho cả controller</span>
+<span class="k">public class</span> <span class="t">ProductsController</span> : <span class="t">ControllerBase</span>
+{
+    [<span class="a">HttpGet</span>]                          <span class="c">// GET  /api/products</span>
+    <span class="k">public</span> <span class="t">IActionResult</span> <span class="n">GetAll</span>() =&gt; Ok();
+
+    [<span class="a">HttpGet</span>(<span class="s">"{id:int}"</span>)]                <span class="c">// GET  /api/products/42  (id phải là int)</span>
+    <span class="k">public</span> <span class="t">IActionResult</span> <span class="n">GetById</span>(<span class="k">int</span> id) =&gt; Ok(id);
+
+    [<span class="a">HttpGet</span>(<span class="s">"search"</span>)]                  <span class="c">// GET  /api/products/search?q=abc</span>
+    <span class="k">public</span> <span class="t">IActionResult</span> <span class="n">Search</span>([<span class="a">FromQuery</span>] <span class="k">string</span> q) =&gt; Ok(q);
+
+    [<span class="a">HttpPost</span>]                         <span class="c">// POST /api/products</span>
+    <span class="k">public</span> <span class="t">IActionResult</span> <span class="n">Create</span>() =&gt; Ok();
+
+    [<span class="a">HttpPut</span>(<span class="s">"{id:int}"</span>)]                <span class="c">// PUT  /api/products/42</span>
+    <span class="k">public</span> <span class="t">IActionResult</span> <span class="n">Update</span>(<span class="k">int</span> id) =&gt; Ok();
+
+    [<span class="a">HttpDelete</span>(<span class="s">"{id:int}"</span>)]             <span class="c">// DELETE /api/products/42</span>
+    <span class="k">public</span> <span class="t">IActionResult</span> <span class="n">Delete</span>(<span class="k">int</span> id) =&gt; Ok();
+}</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Route constraint thường gặp</h3>
+    <table class="cmp">
+        <tr><th>Constraint</th><th>Ví dụ</th><th>Khớp</th></tr>
+        <tr><td><code>:int</code></td><td><code>{id:int}</code></td><td>Số nguyên: <code>/products/42</code></td></tr>
+        <tr><td><code>:guid</code></td><td><code>{id:guid}</code></td><td>GUID hợp lệ</td></tr>
+        <tr><td><code>:min(n)</code> / <code>:max(n)</code></td><td><code>{id:int:min(1)}</code></td><td>int ≥ 1</td></tr>
+        <tr><td><code>:alpha</code></td><td><code>{slug:alpha}</code></td><td>Chỉ chữ cái</td></tr>
+        <tr><td><code>:length(n)</code></td><td><code>{code:length(6)}</code></td><td>Chuỗi đúng 6 ký tự</td></tr>
+        <tr><td><code>?</code> (optional)</td><td><code>{page:int?}</code></td><td>Có thể không truyền</td></tr>
+    </table>
+
+    <div class="callout tip">
+        <strong>Route param vs Query param:</strong> dùng <em>route</em> cho thứ định danh tài nguyên (<code>/products/42</code>). Dùng <em>query</em> cho lọc/phân trang/sắp xếp (<code>/products?page=2&amp;sort=price</code>). Đừng nhét filter vào route.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">6. Model Binding &amp; Validation</h2>
+    <p class="ut-sub">Model binding tự động ánh xạ dữ liệu HTTP (route, query, body, header, form) vào tham số method. Với <code>[ApiComplexType]</code> mặc định bind từ body, simple type bind từ route/query.</p>
+
+    <table class="cmp">
+        <tr><th>Attribute</th><th>Nguồn dữ liệu</th><th>Ví dụ</th></tr>
+        <tr><td><code>[FromRoute]</code></td><td>Segment trong URL</td><td><code>/products/<strong>42</strong></code></td></tr>
+        <tr><td><code>[FromQuery]</code></td><td>Query string</td><td><code>?page=<strong>2</strong></code></td></tr>
+        <tr><td><code>[FromBody]</code></td><td>Body JSON</td><td>Payload POST/PUT</td></tr>
+        <tr><td><code>[FromHeader]</code></td><td>HTTP header</td><td><code>X-Tenant-Id: abc</code></td></tr>
+        <tr><td><code>[FromForm]</code></td><td>multipart/form-data</td><td>Upload file, form HTML</td></tr>
+        <tr><td><code>[FromServices]</code></td><td>DI container</td><td>Inject service vào action</td></tr>
+    </table>
+
+    <pre class="cb">[<span class="a">HttpGet</span>(<span class="s">"{id:int}"</span>)]
+<span class="k">public</span> <span class="t">IActionResult</span> <span class="n">GetOne</span>(
+    [<span class="a">FromRoute</span>] <span class="k">int</span> id,                 <span class="c">// từ URL</span>
+    [<span class="a">FromQuery</span>] <span class="k">bool</span> includeReviews,    <span class="c">// ?includeReviews=true</span>
+    [<span class="a">FromHeader</span>(Name = <span class="s">"X-Tenant-Id"</span>)] <span class="k">string</span>? tenant)
+{
+    <span class="k">return</span> Ok(<span class="k">new</span> { id, includeReviews, tenant });
+}
+
+[<span class="a">HttpPost</span>]
+<span class="k">public</span> <span class="t">IActionResult</span> <span class="n">Create</span>([<span class="a">FromBody</span>] CreateProductDto dto)
+{
+    <span class="c">// Nhờ [ApiController], nếu dto không hợp lệ -&gt; tự trả 400 ở đây</span>
+    <span class="k">return</span> Ok(dto);
+}</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Validation bằng Data Annotation</h3>
+    <p class="ut-sub">Gắn attribute lên property của DTO. <code>[ApiController]</code> tự kiểm tra và trả 400 với chi tiết lỗi — bạn không cần viết tay.</p>
+
+    <pre class="cb"><span class="k">using</span> System.ComponentModel.DataAnnotations;
+
+<span class="k">public class</span> <span class="t">CreateProductDto</span>
+{
+    [<span class="a">Required</span>, <span class="a">StringLength</span>(<span class="s">120</span>, MinimumLength = <span class="s">2</span>)]
+    <span class="k">public</span> <span class="k">string</span> Name { <span class="k">get</span>; <span class="k">set</span>; } = <span class="k">string</span>.Empty;
+
+    [<span class="a">Range</span>(<span class="s">0.01</span>, <span class="s">1_000_000</span>)]
+    <span class="k">public</span> <span class="k">decimal</span> Price { <span class="k">get</span>; <span class="k">set</span>; }
+
+    [<span class="a">Required</span>, <span class="a">MinLength</span>(<span class="s">1</span>)]
+    <span class="k">public</span> <span class="k">string</span> Category { <span class="k">get</span>; <span class="k">set</span>; } = <span class="k">string</span>.Empty;
+}</pre>
+
+    <pre class="cb"><span class="c">// Khi gửi { "name": "", "price": -5 } -&gt; tự động nhận response 400:</span>
+{
+  <span class="s">"type"</span>: <span class="s">"https://tools.ietf.org/html/rfc9110#section-15.5.1"</span>,
+  <span class="s">"title"</span>: <span class="s">"One or more validation errors occurred."</span>,
+  <span class="s">"status"</span>: <span class="s">400</span>,
+  <span class="s">"errors"</span>: {
+    <span class="s">"Name"</span>:  [<span class="s">"The Name field is required."</span>],
+    <span class="s">"Price"</span>: [<span class="s">"The field Price must be between 0.01 and 1000000."</span>]
+  }
+}</pre>
+
+    <div class="callout info">
+        <strong>Validation phức tạp?</strong> Data Annotation đủ cho rule đơn giản. Với rule liên-thuộc-tính hoặc cần gọi DB, dùng thư viện <code>FluentValidation</code> — tách rule ra class riêng, dễ test, dễ tái sử dụng.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">7. DTO — Đừng phơi bày Entity</h2>
+    <p class="ut-sub">DTO (Data Transfer Object) là model riêng cho input/output của API, tách khỏi entity của database. Đây là một trong những thói quen quan trọng nhất của API chuyên nghiệp.</p>
+
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont dont">
+            <h4>❌ Trả thẳng Entity</h4>
+            <pre class="cb">[<span class="a">HttpGet</span>(<span class="s">"{id:int}"</span>)]
+<span class="k">public</span> <span class="t">IActionResult</span> <span class="n">Get</span>(<span class="k">int</span> id)
+{
+    <span class="t">Product</span> p = _db.Find(id);
+    <span class="k">return</span> Ok(p); <span class="c">// lộ cả PasswordHash,</span>
+}                  <span class="c">// CostPrice, navigation...</span></pre>
+            <p>Lộ field nhạy cảm, gắn chặt schema DB với hợp đồng API, dễ lỗi vòng lặp serialize (cyclic reference).</p>
+        </div>
+        <div class="do-dont do">
+            <h4>✅ Map sang DTO</h4>
+            <pre class="cb">[<span class="a">HttpGet</span>(<span class="s">"{id:int}"</span>)]
+<span class="k">public</span> <span class="t">IActionResult</span> <span class="n">Get</span>(<span class="k">int</span> id)
+{
+    <span class="t">Product</span> p = _db.Find(id);
+    <span class="k">return</span> Ok(<span class="k">new</span> <span class="t">ProductDto</span>(
+        p.Id, p.Name, p.Price));
+}</pre>
+            <p>Chỉ expose đúng field cần thiết. API contract ổn định kể cả khi DB đổi. An toàn.</p>
+        </div>
+    </div>
+
+    <pre class="cb"><span class="c">// Request DTO — dữ liệu client GỬI LÊN (không có Id, không có audit field)</span>
+<span class="k">public record</span> <span class="t">CreateProductDto</span>(<span class="k">string</span> Name, <span class="k">decimal</span> Price, <span class="k">string</span> Category);
+
+<span class="c">// Response DTO — dữ liệu API TRẢ VỀ (có Id, định dạng theo nhu cầu client)</span>
+<span class="k">public record</span> <span class="t">ProductDto</span>(<span class="k">int</span> Id, <span class="k">string</span> Name, <span class="k">decimal</span> Price, <span class="k">string</span> Category);
+
+<span class="c">// Entity — model của DATABASE (có field nội bộ)</span>
+<span class="k">public class</span> <span class="t">Product</span>
+{
+    <span class="k">public</span> <span class="k">int</span> Id { <span class="k">get</span>; <span class="k">set</span>; }
+    <span class="k">public</span> <span class="k">string</span> Name { <span class="k">get</span>; <span class="k">set</span>; } = <span class="s">""</span>;
+    <span class="k">public</span> <span class="k">decimal</span> Price { <span class="k">get</span>; <span class="k">set</span>; }
+    <span class="k">public</span> <span class="k">string</span> Category { <span class="k">get</span>; <span class="k">set</span>; } = <span class="s">""</span>;
+    <span class="k">public</span> <span class="k">decimal</span> CostPrice { <span class="k">get</span>; <span class="k">set</span>; }   <span class="c">// KHÔNG bao giờ lộ ra ngoài</span>
+    <span class="k">public</span> DateTime CreatedAt { <span class="k">get</span>; <span class="k">set</span>; }
+}</pre>
+
+    <div class="callout tip">
+        <strong>💡 Mapping:</strong> với DTO nhỏ, map tay (như trên) là rõ ràng nhất và không tốn thư viện. Khi số lượng nhiều, cân nhắc <code>Mapster</code> (nhanh, source-generated) hoặc <code>AutoMapper</code>. Tránh lạm dụng auto-mapper cho logic phức tạp — nó che giấu lỗi.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">8. Trả kết quả — IActionResult, ActionResult&lt;T&gt;, Results</h2>
+    <p class="ut-sub">ASP.NET Core có nhiều kiểu trả về. Hiểu rõ để vừa đúng HTTP status code, vừa rõ ràng cho Swagger sinh tài liệu.</p>
+
+    <table class="cmp">
+        <tr><th>Kiểu trả về</th><th>Dùng khi</th><th>Ưu / Nhược</th></tr>
+        <tr><td><code>IActionResult</code></td><td>Action có thể trả nhiều status khác nhau</td><td>Linh hoạt; nhưng Swagger không biết kiểu body</td></tr>
+        <tr><td><code>ActionResult&lt;T&gt;</code></td><td>Controller — vừa trả T vừa trả status</td><td>Khuyên dùng: vừa rõ kiểu, vừa linh hoạt</td></tr>
+        <tr><td><code>T</code> (trực tiếp)</td><td>Luôn trả 200 với object</td><td>Gọn nhất nhưng không trả được 404/400</td></tr>
+        <tr><td><code>Results</code> / <code>TypedResults</code></td><td>Minimal API</td><td><code>TypedResults</code> rõ kiểu, tốt cho test &amp; OpenAPI</td></tr>
+    </table>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Các helper method của ControllerBase</h3>
+    <pre class="cb"><span class="k">return</span> Ok(dto);                        <span class="c">// 200 + body</span>
+<span class="k">return</span> CreatedAtAction(<span class="k">nameof</span>(GetById), <span class="k">new</span> { id }, dto); <span class="c">// 201 + Location header</span>
+<span class="k">return</span> NoContent();                    <span class="c">// 204 (PUT/DELETE thành công)</span>
+<span class="k">return</span> NotFound();                     <span class="c">// 404</span>
+<span class="k">return</span> BadRequest(<span class="s">"thông điệp"</span>);       <span class="c">// 400</span>
+<span class="k">return</span> Conflict();                     <span class="c">// 409 (trùng dữ liệu)</span>
+<span class="k">return</span> Unauthorized();                 <span class="c">// 401</span>
+<span class="k">return</span> Forbid();                       <span class="c">// 403</span>
+<span class="k">return</span> Problem(detail: <span class="s">"Lỗi hệ thống"</span>, statusCode: <span class="s">500</span>); <span class="c">// ProblemDetails</span></pre>
+
+    <pre class="cb"><span class="c">// ActionResult&lt;T&gt; — kiểu trả về được khuyên dùng nhất</span>
+[<span class="a">HttpGet</span>(<span class="s">"{id:int}"</span>)]
+<span class="k">public</span> ActionResult&lt;<span class="t">ProductDto</span>&gt; <span class="n">GetById</span>(<span class="k">int</span> id)
+{
+    <span class="k">var</span> product = _service.Find(id);
+    <span class="k">if</span> (product <span class="k">is null</span>)
+        <span class="k">return</span> NotFound();      <span class="c">// trả 404</span>
+
+    <span class="k">return</span> product;             <span class="c">// trả 200 + body (implicit conversion)</span>
+}</pre>
+
+    <div class="callout info">
+        <strong>ProblemDetails &amp; RFC 9457:</strong> chuẩn mới (thay RFC 7807) định nghĩa format JSON cho lỗi: <code>type</code>, <code>title</code>, <code>status</code>, <code>detail</code>, <code>instance</code>. <code>[ApiController]</code> tự dùng format này. Bật toàn cục bằng <code>builder.Services.AddProblemDetails();</code> để cả lỗi 500 cũng theo chuẩn — client xử lý lỗi đồng nhất.
+    </div>
+
+    <div class="callout warn">
+        <strong>⚠️ <code>CreatedAtAction</code></strong> cần tên action tồn tại và có route khớp tham số. Nếu sai tên (hoặc dùng <code>nameof</code> sai), runtime ném <code>InvalidOperationException</code> khi sinh URL. Luôn dùng <code>nameof(GetById)</code> thay vì chuỗi hardcode.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">9. Swagger / OpenAPI</h2>
+    <p class="ut-sub">OpenAPI mô tả API dưới dạng máy đọc được. Từ đó sinh tài liệu tương tác (Swagger UI / Scalar) và client SDK tự động.</p>
+
+    <h3 style="color:var(--ut-primary-2)">Cách 1: Swashbuckle (.NET 8 — phổ biến nhất)</h3>
+    <pre class="cb"><span class="c">// Cài (template webapi của .NET 8 đã có sẵn)</span>
+dotnet add package Swashbuckle.AspNetCore</pre>
+    <pre class="cb"><span class="c">// Program.cs</span>
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+<span class="k">if</span> (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();   <span class="c">// /swagger</span>
+}</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">Cách 2: OpenAPI built-in (.NET 9 — mới)</h3>
+    <p class="ut-sub">.NET 9 có package first-party <code>Microsoft.AspNetCore.OpenApi</code>, sinh document mà không cần Swashbuckle. Tuy nhiên nó CHỈ sinh JSON document, không kèm UI — ghép với <strong>Scalar</strong> để có giao diện đẹp.</p>
+    <pre class="cb"><span class="c">// .NET 9</span>
+dotnet add package Microsoft.AspNetCore.OpenApi
+dotnet add package Scalar.AspNetCore</pre>
+    <pre class="cb"><span class="c">// Program.cs (.NET 9)</span>
+builder.Services.AddOpenApi();          <span class="c">// đăng ký generator built-in</span>
+
+<span class="k">if</span> (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();                   <span class="c">// /openapi/v1.json</span>
+    app.MapScalarApiReference();        <span class="c">// /scalar/v1 — UI hiện đại</span>
+}</pre>
+
+    <div class="callout tip">
+        <strong>💡 Tài liệu đẹp hơn:</strong> thêm XML comment (<code>///</code>) cho action và bật <code>&lt;GenerateDocumentationFile&gt;true&lt;/&gt;</code> trong .csproj — Swagger hiển thị mô tả. Dùng <code>[ProducesResponseType(StatusCodes.Status404NotFound)]</code> để khai báo các status code action có thể trả, giúp doc chính xác.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">10. Ví dụ CRUD hoàn chỉnh — ProductsController</h2>
+    <p class="ut-sub">Ghép tất cả: một service in-memory được inject qua DI, một controller đầy đủ GET all / GET by id / POST / PUT / DELETE với DTO, validation và status code chuẩn.</p>
+
+    <h3 style="color:var(--ut-primary-2)">10.1 — Models &amp; DTO</h3>
+    <pre class="cb"><span class="c">// Models/Product.cs — entity nội bộ</span>
+<span class="k">public class</span> <span class="t">Product</span>
+{
+    <span class="k">public</span> <span class="k">int</span> Id { <span class="k">get</span>; <span class="k">set</span>; }
+    <span class="k">public</span> <span class="k">string</span> Name { <span class="k">get</span>; <span class="k">set</span>; } = <span class="s">""</span>;
+    <span class="k">public</span> <span class="k">decimal</span> Price { <span class="k">get</span>; <span class="k">set</span>; }
+    <span class="k">public</span> <span class="k">string</span> Category { <span class="k">get</span>; <span class="k">set</span>; } = <span class="s">""</span>;
+}
+
+<span class="c">// Dtos/ProductDtos.cs</span>
+<span class="k">public record</span> <span class="t">ProductDto</span>(<span class="k">int</span> Id, <span class="k">string</span> Name, <span class="k">decimal</span> Price, <span class="k">string</span> Category);
+
+<span class="k">public class</span> <span class="t">CreateProductDto</span>
+{
+    [<span class="a">Required</span>, <span class="a">StringLength</span>(<span class="s">120</span>, MinimumLength = <span class="s">2</span>)]
+    <span class="k">public</span> <span class="k">string</span> Name { <span class="k">get</span>; <span class="k">set</span>; } = <span class="s">""</span>;
+
+    [<span class="a">Range</span>(<span class="s">0.01</span>, <span class="s">1_000_000</span>)]
+    <span class="k">public</span> <span class="k">decimal</span> Price { <span class="k">get</span>; <span class="k">set</span>; }
+
+    [<span class="a">Required</span>]
+    <span class="k">public</span> <span class="k">string</span> Category { <span class="k">get</span>; <span class="k">set</span>; } = <span class="s">""</span>;
+}
+
+<span class="c">// UpdateProductDto giống Create — tách riêng để contract độc lập</span>
+<span class="k">public class</span> <span class="t">UpdateProductDto</span> : <span class="t">CreateProductDto</span> { }</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">10.2 — Service (inject qua DI)</h3>
+    <pre class="cb"><span class="c">// Services/IProductService.cs</span>
+<span class="k">public interface</span> <span class="t">IProductService</span>
+{
+    IEnumerable&lt;<span class="t">Product</span>&gt; GetAll();
+    <span class="t">Product</span>? GetById(<span class="k">int</span> id);
+    <span class="t">Product</span> Add(<span class="t">Product</span> product);
+    <span class="k">bool</span> Update(<span class="k">int</span> id, <span class="t">Product</span> updated);
+    <span class="k">bool</span> Delete(<span class="k">int</span> id);
+}
+
+<span class="c">// Services/InMemoryProductService.cs — lưu trong List (thay bằng EF Core sau)</span>
+<span class="k">public class</span> <span class="t">InMemoryProductService</span> : <span class="t">IProductService</span>
+{
+    <span class="k">private readonly</span> List&lt;<span class="t">Product</span>&gt; _items = <span class="k">new</span>()
+    {
+        <span class="k">new</span>() { Id = <span class="s">1</span>, Name = <span class="s">"Bàn phím cơ"</span>, Price = <span class="s">990_000</span>, Category = <span class="s">"Phụ kiện"</span> },
+        <span class="k">new</span>() { Id = <span class="s">2</span>, Name = <span class="s">"Chuột không dây"</span>, Price = <span class="s">450_000</span>, Category = <span class="s">"Phụ kiện"</span> },
+    };
+    <span class="k">private</span> <span class="k">int</span> _nextId = <span class="s">3</span>;
+
+    <span class="k">public</span> IEnumerable&lt;<span class="t">Product</span>&gt; <span class="n">GetAll</span>() =&gt; _items;
+
+    <span class="k">public</span> <span class="t">Product</span>? <span class="n">GetById</span>(<span class="k">int</span> id) =&gt;
+        _items.FirstOrDefault(p =&gt; p.Id == id);
+
+    <span class="k">public</span> <span class="t">Product</span> <span class="n">Add</span>(<span class="t">Product</span> product)
+    {
+        product.Id = _nextId++;
+        _items.Add(product);
+        <span class="k">return</span> product;
+    }
+
+    <span class="k">public</span> <span class="k">bool</span> <span class="n">Update</span>(<span class="k">int</span> id, <span class="t">Product</span> updated)
+    {
+        <span class="k">var</span> existing = GetById(id);
+        <span class="k">if</span> (existing <span class="k">is null</span>) <span class="k">return</span> <span class="k">false</span>;
+        existing.Name = updated.Name;
+        existing.Price = updated.Price;
+        existing.Category = updated.Category;
+        <span class="k">return</span> <span class="k">true</span>;
+    }
+
+    <span class="k">public</span> <span class="k">bool</span> <span class="n">Delete</span>(<span class="k">int</span> id)
+    {
+        <span class="k">var</span> existing = GetById(id);
+        <span class="k">if</span> (existing <span class="k">is null</span>) <span class="k">return</span> <span class="k">false</span>;
+        _items.Remove(existing);
+        <span class="k">return</span> <span class="k">true</span>;
+    }
+}</pre>
+
+    <div class="callout warn">
+        <strong>⚠️ In-memory chỉ để học.</strong> <code>AddSingleton</code> giữ data sống suốt vòng đời app nhưng MẤT khi restart và KHÔNG thread-safe nếu nhiều request ghi đồng thời. Production: thay service này bằng repository dùng EF Core (xem bài EF Core).
+    </div>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">10.3 — Controller đầy đủ</h3>
+    <pre class="cb"><span class="c">// Controllers/ProductsController.cs</span>
+<span class="k">using</span> Microsoft.AspNetCore.Mvc;
+
+[<span class="a">ApiController</span>]
+[<span class="a">Route</span>(<span class="s">"api/products"</span>)]
+[<span class="a">Produces</span>(<span class="s">"application/json"</span>)]
+<span class="k">public class</span> <span class="t">ProductsController</span> : <span class="t">ControllerBase</span>
+{
+    <span class="k">private readonly</span> <span class="t">IProductService</span> _service;
+
+    <span class="c">// Constructor injection — DI tự cấp IProductService</span>
+    <span class="k">public</span> <span class="n">ProductsController</span>(<span class="t">IProductService</span> service) =&gt; _service = service;
+
+    <span class="c">// GET /api/products?category=Phụ kiện</span>
+    [<span class="a">HttpGet</span>]
+    [<span class="a">ProducesResponseType</span>(StatusCodes.Status200OK)]
+    <span class="k">public</span> ActionResult&lt;IEnumerable&lt;<span class="t">ProductDto</span>&gt;&gt; <span class="n">GetAll</span>([<span class="a">FromQuery</span>] <span class="k">string</span>? category)
+    {
+        <span class="k">var</span> items = _service.GetAll();
+        <span class="k">if</span> (!<span class="k">string</span>.IsNullOrWhiteSpace(category))
+            items = items.Where(p =&gt; p.Category == category);
+
+        <span class="k">var</span> result = items.Select(ToDto);
+        <span class="k">return</span> Ok(result);
+    }
+
+    <span class="c">// GET /api/products/42</span>
+    [<span class="a">HttpGet</span>(<span class="s">"{id:int}"</span>, Name = <span class="k">nameof</span>(GetById))]
+    [<span class="a">ProducesResponseType</span>(StatusCodes.Status200OK)]
+    [<span class="a">ProducesResponseType</span>(StatusCodes.Status404NotFound)]
+    <span class="k">public</span> ActionResult&lt;<span class="t">ProductDto</span>&gt; <span class="n">GetById</span>(<span class="k">int</span> id)
+    {
+        <span class="k">var</span> product = _service.GetById(id);
+        <span class="k">if</span> (product <span class="k">is null</span>)
+            <span class="k">return</span> NotFound();
+
+        <span class="k">return</span> Ok(ToDto(product));
+    }
+
+    <span class="c">// POST /api/products</span>
+    [<span class="a">HttpPost</span>]
+    [<span class="a">ProducesResponseType</span>(StatusCodes.Status201Created)]
+    [<span class="a">ProducesResponseType</span>(StatusCodes.Status400BadRequest)]
+    <span class="k">public</span> ActionResult&lt;<span class="t">ProductDto</span>&gt; <span class="n">Create</span>([<span class="a">FromBody</span>] CreateProductDto dto)
+    {
+        <span class="c">// [ApiController] đã tự validate dto -&gt; 400 nếu sai</span>
+        <span class="k">var</span> created = _service.Add(<span class="k">new</span> <span class="t">Product</span>
+        {
+            Name = dto.Name,
+            Price = dto.Price,
+            Category = dto.Category
+        });
+
+        <span class="c">// 201 + header Location trỏ tới resource mới tạo</span>
+        <span class="k">return</span> CreatedAtAction(<span class="k">nameof</span>(GetById),
+            <span class="k">new</span> { id = created.Id }, ToDto(created));
+    }
+
+    <span class="c">// PUT /api/products/42</span>
+    [<span class="a">HttpPut</span>(<span class="s">"{id:int}"</span>)]
+    [<span class="a">ProducesResponseType</span>(StatusCodes.Status204NoContent)]
+    [<span class="a">ProducesResponseType</span>(StatusCodes.Status404NotFound)]
+    <span class="k">public</span> <span class="t">IActionResult</span> <span class="n">Update</span>(<span class="k">int</span> id, [<span class="a">FromBody</span>] UpdateProductDto dto)
+    {
+        <span class="k">var</span> ok = _service.Update(id, <span class="k">new</span> <span class="t">Product</span>
+        {
+            Name = dto.Name,
+            Price = dto.Price,
+            Category = dto.Category
+        });
+
+        <span class="k">return</span> ok ? NoContent() : NotFound();
+    }
+
+    <span class="c">// DELETE /api/products/42</span>
+    [<span class="a">HttpDelete</span>(<span class="s">"{id:int}"</span>)]
+    [<span class="a">ProducesResponseType</span>(StatusCodes.Status204NoContent)]
+    [<span class="a">ProducesResponseType</span>(StatusCodes.Status404NotFound)]
+    <span class="k">public</span> <span class="t">IActionResult</span> <span class="n">Delete</span>(<span class="k">int</span> id) =&gt;
+        _service.Delete(id) ? NoContent() : NotFound();
+
+    <span class="c">// Map entity -&gt; DTO (gom 1 chỗ)</span>
+    <span class="k">private static</span> <span class="t">ProductDto</span> <span class="n">ToDto</span>(<span class="t">Product</span> p) =&gt;
+        <span class="k">new</span>(p.Id, p.Name, p.Price, p.Category);
+}</pre>
+
+    <h3 style="margin-top:1rem; color:var(--ut-primary-2)">10.4 — Cùng API viết bằng Minimal API</h3>
+    <pre class="cb"><span class="c">// Program.cs — tương đương, gọn cho microservice nhỏ</span>
+<span class="k">var</span> group = app.MapGroup(<span class="s">"/api/products"</span>);
+
+group.MapGet(<span class="s">"/"</span>, (<span class="t">IProductService</span> svc) =&gt;
+    TypedResults.Ok(svc.GetAll().Select(p =&gt;
+        <span class="k">new</span> <span class="t">ProductDto</span>(p.Id, p.Name, p.Price, p.Category))));
+
+group.MapGet(<span class="s">"/{id:int}"</span>, (<span class="k">int</span> id, <span class="t">IProductService</span> svc) =&gt;
+{
+    <span class="k">var</span> p = svc.GetById(id);
+    <span class="k">return</span> p <span class="k">is null</span>
+        ? Results.NotFound()
+        : Results.Ok(<span class="k">new</span> <span class="t">ProductDto</span>(p.Id, p.Name, p.Price, p.Category));
+});
+
+group.MapPost(<span class="s">"/"</span>, (CreateProductDto dto, <span class="t">IProductService</span> svc) =&gt;
+{
+    <span class="k">var</span> created = svc.Add(<span class="k">new</span> <span class="t">Product</span> { Name = dto.Name, Price = dto.Price, Category = dto.Category });
+    <span class="k">return</span> Results.Created($<span class="s">"/api/products/{created.Id}"</span>, created);
+});</pre>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">11. Test thử API</h2>
+    <p class="ut-sub">Sau khi <code>dotnet run</code>, gọi thử bằng Swagger UI, file <code>.http</code> (VS / Rider hỗ trợ), hoặc curl.</p>
+
+    <pre class="cb"><span class="c"># GET tất cả</span>
+curl https://localhost:5001/api/products
+
+<span class="c"># GET theo id</span>
+curl https://localhost:5001/api/products/1
+
+<span class="c"># POST tạo mới</span>
+curl -X POST https://localhost:5001/api/products \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{"name":"Tai nghe","price":1200000,"category":"Âm thanh"}'</span>
+
+<span class="c"># PUT cập nhật</span>
+curl -X PUT https://localhost:5001/api/products/1 \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{"name":"Bàn phím cơ v2","price":1090000,"category":"Phụ kiện"}'</span>
+
+<span class="c"># DELETE</span>
+curl -X DELETE https://localhost:5001/api/products/2</pre>
+
+    <pre class="cb"><span class="c">// requests.http — tạo file này, bấm "Send Request" ngay trong IDE</span>
+@host = https://localhost:5001
+
+GET {{host}}/api/products
+
+###
+POST {{host}}/api/products
+Content-Type: application/json
+
+{
+  <span class="s">"name"</span>: <span class="s">"Webcam 4K"</span>,
+  <span class="s">"price"</span>: <span class="s">2500000</span>,
+  <span class="s">"category"</span>: <span class="s">"Phụ kiện"</span>
+}</pre>
+
+    <div class="callout tip">
+        <strong>💡 HTTPS dev certificate:</strong> lần đầu chạy có thể bị cảnh báo cert. Tin tưởng cert dev bằng <code>dotnet dev-certs https --trust</code>. Trên Linux/curl, thêm <code>-k</code> để bỏ qua kiểm tra cert khi dev.
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">12. Quy ước &amp; lỗi thường gặp</h2>
+    <div class="ut-grid ut-grid-2">
+        <div class="do-dont do">
+            <h4>✅ Dùng đúng HTTP status</h4>
+            <p>201 cho tạo mới (kèm Location), 204 cho update/delete thành công, 404 khi không thấy, 400 khi input sai. Đừng trả 200 cho mọi thứ.</p>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Nhồi logic vào Controller</h4>
+            <p>Controller nên mỏng: bind input → gọi service → trả kết quả. Logic nghiệp vụ đặt ở service/domain để dễ test và tái sử dụng.</p>
+        </div>
+        <div class="do-dont do">
+            <h4>✅ Async cho I/O</h4>
+            <p>Khi gọi DB/HTTP, dùng <code>async Task&lt;ActionResult&lt;T&gt;&gt;</code> + <code>await</code>. Tăng throughput, không block thread pool.</p>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Quên <code>[ApiController]</code></h4>
+            <p>Thiếu attribute này thì không có auto-400, không suy luận binding source — phải tự kiểm <code>ModelState</code> thủ công khắp nơi.</p>
+        </div>
+        <div class="do-dont do">
+            <h4>✅ Versioning sớm</h4>
+            <p>Đặt prefix <code>/api/v1/...</code> ngay từ đầu. Khi cần đổi contract, thêm v2 mà không phá client cũ.</p>
+        </div>
+        <div class="do-dont dont">
+            <h4>❌ Trả message lỗi lộ nội bộ</h4>
+            <p>Đừng trả stack trace / chi tiết DB ra client production. Dùng <code>ProblemDetails</code> với thông điệp an toàn, log chi tiết ở server.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================ -->
+<section class="ut-section">
+    <h2 class="ut-title">🎯 Checklist — Web API đầu tiên</h2>
+    <div class="ut-card">
+        <ul>
+            <li>✅ Tạo project bằng <code>dotnet new webapi --use-controllers</code> và chạy được <code>dotnet run</code></li>
+            <li>✅ Hiểu 2 nửa của <code>Program.cs</code>: <code>builder.Services</code> (đăng ký) và <code>app.Use...</code> (pipeline)</li>
+            <li>✅ Controller kế thừa <code>ControllerBase</code> + gắn <code>[ApiController]</code> và <code>[Route]</code></li>
+            <li>✅ Dùng attribute routing với constraint (<code>{id:int}</code>) thay vì route lỏng lẻo</li>
+            <li>✅ Phân biệt route param (định danh) vs query param (lọc/phân trang)</li>
+            <li>✅ Dùng <code>[FromBody]</code>/<code>[FromQuery]</code>/<code>[FromRoute]</code> đúng nguồn dữ liệu</li>
+            <li>✅ Validation bằng Data Annotation — tận dụng auto-400 của <code>[ApiController]</code></li>
+            <li>✅ Tách DTO ra khỏi Entity — KHÔNG bao giờ trả thẳng entity DB</li>
+            <li>✅ Trả đúng status: 200 / 201 (CreatedAtAction) / 204 / 400 / 404</li>
+            <li>✅ Dùng <code>ActionResult&lt;T&gt;</code> để vừa rõ kiểu vừa linh hoạt status</li>
+            <li>✅ Bật ProblemDetails (<code>AddProblemDetails()</code>) cho lỗi chuẩn RFC 9457</li>
+            <li>✅ Bật Swagger/OpenAPI và test được toàn bộ CRUD trên UI</li>
+            <li>✅ Inject service qua constructor (DI) — controller mỏng, logic ở service</li>
+        </ul>
+    </div>
+</section>
+
+</div>
+
+<footer style="text-align:center;padding:3rem 1.5rem;color:var(--ut-muted);border-top:1px solid var(--ut-border);margin-top:3rem;font-size:.9rem;">
+    <p>ASP.NET Core Web API · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>

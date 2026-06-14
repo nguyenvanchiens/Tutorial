@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logging & Observability trong ASP.NET Core — A-Z</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --ut-primary: #512bd4;
+        --ut-primary-2: #8a2be2;
+        --ut-accent: #43e97b;
+        --ut-warn: #f39c12;
+        --ut-danger: #f5576c;
+        --ut-card: #1a1d2e;
+        --ut-card-2: #232640;
+        --ut-border: #2d3148;
+        --ut-text: #e2e8f0;
+        --ut-muted: #94a3b8;
+    }
+    .ut-hero { text-align: center; padding: 4rem 1.5rem 3rem; background: radial-gradient(ellipse at top, rgba(81,43,212,.18), transparent 60%); }
+    .ut-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 1rem; }
+    .ut-hero h1 .gradient { background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .ut-hero .hero-badge { display: inline-block; background: rgba(81,43,212,.15); color: var(--ut-primary-2); padding: .4rem 1rem; border-radius: 20px; font-size: .78rem; font-weight: 600; letter-spacing: 1px; margin-bottom: 1.25rem; }
+    .ut-hero p { color: var(--ut-muted); max-width: 820px; margin: 0 auto; }
+    .ut-section { padding: 2.5rem 0; }
+    .ut-title { font-size: 1.7rem; margin-bottom: 1.5rem; position: relative; padding-left: 1rem; color: var(--ut-text); }
+    .ut-title::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 4px; background: linear-gradient(180deg, var(--ut-primary), var(--ut-primary-2)); border-radius: 3px; }
+    .ut-sub { color: var(--ut-muted); margin-bottom: 1.25rem; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+    .ut-grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .ut-grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    .ut-grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .ut-card { background: var(--ut-card); border: 1px solid var(--ut-border); border-radius: 12px; padding: 1.4rem; }
+    .ut-card h3 { color: var(--ut-primary-2); margin-bottom: .6rem; font-size: 1.1rem; }
+    .ut-card h4 { color: var(--ut-accent); margin-bottom: .45rem; font-size: .98rem; }
+    .ut-card p, .ut-card li { color: var(--ut-muted); font-size: .95rem; }
+    .ut-card ul { padding-left: 1.2rem; }
+    .ut-card ul li { margin-bottom: .3rem; }
+    pre.cb { background: #0b1020; border: 1px solid var(--ut-border); border-left: 3px solid var(--ut-primary); border-radius: 8px; padding: 1rem 1.15rem; overflow-x: auto; font-family: 'JetBrains Mono', Consolas, monospace; font-size: .88rem; line-height: 1.6; margin: .75rem 0; color: #d6deeb; }
+    pre.cb .k { color: #c792ea; }
+    pre.cb .s { color: #ecc48d; }
+    pre.cb .c { color: #637777; font-style: italic; }
+    pre.cb .n { color: #82aaff; }
+    pre.cb .t { color: #ffcb8b; }
+    pre.cb .a { color: #7fdbca; }
+    code { background: #2d3148; padding: 2px 6px; border-radius: 4px; font-size: .88em; color: #f8d06b; font-family: 'JetBrains Mono', Consolas, monospace; }
+    .callout { border-radius: 10px; padding: .95rem 1.15rem; margin: 1rem 0; border: 1px solid; }
+    .callout.tip { background: rgba(67,233,123,.07); border-color: var(--ut-accent); }
+    .callout.tip strong { color: var(--ut-accent); }
+    .callout.warn { background: rgba(243,156,18,.07); border-color: var(--ut-warn); }
+    .callout.warn strong { color: var(--ut-warn); }
+    .callout.danger { background: rgba(245,87,108,.07); border-color: var(--ut-danger); }
+    .callout.danger strong { color: var(--ut-danger); }
+    .callout.info { background: rgba(81,43,212,.08); border-color: var(--ut-primary-2); }
+    .callout.info strong { color: var(--ut-primary-2); }
+    table.cmp { width: 100%; border-collapse: collapse; background: var(--ut-card); border-radius: 10px; overflow: hidden; margin: 1rem 0; font-size: .92rem; }
+    table.cmp th, table.cmp td { padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--ut-border); }
+    table.cmp th { background: var(--ut-card-2); color: var(--ut-primary-2); font-weight: 600; }
+    table.cmp td { color: var(--ut-muted); }
+    table.cmp tr:last-child td { border-bottom: none; }
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; position: relative; padding-left: 2.8rem; margin-bottom: 1rem; }
+    .steps li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 2rem; height: 2rem; background: linear-gradient(135deg, var(--ut-primary), var(--ut-primary-2)); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .do-dont { border-left: 3px solid; padding: 1rem 1.15rem; border-radius: 8px; margin-bottom: 1rem; }
+    .do-dont.do { border-color: var(--ut-accent); background: rgba(67,233,123,.04); }
+    .do-dont.dont { border-color: var(--ut-danger); background: rgba(245,87,108,.04); }
+    .do-dont h4 { margin-bottom: .5rem; }
+    .do-dont.do h4 { color: var(--ut-accent); }
+    .do-dont.dont h4 { color: var(--ut-danger); }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo"><a href="index.html" style="color:inherit;-webkit-text-fill-color:inherit;">.NET<span class="accent">Mastery</span></a></div>
+        <div class="nav-links">
+            <a href="index.html">Roadmap</a>
+            <a href="async.html">Async</a>
+            <a href="rest-design.html">REST API</a>
+            <a href="auth-jwt.html">Auth & JWT</a>
+            <a href="caching.html">Caching</a>
+            <a href="logging.html" class="nav-active">Logging</a>
+            <a href="error-handling.html">Error & Resilience</a>
+            <a href="clean-architecture.html">Clean Arch</a>
+            <a href="design-patterns.html">SOLID & Patterns</a>
+        </div>
+        <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+</nav>
+
+<header class="ut-hero">
+    <div class="hero-badge">NÂNG CAO · INTERMEDIATE</div>
+    <h1>Logging &amp; <span class="gradient">Observability</span></h1>
+    <p>Quan sát hệ thống (observability) qua ba trụ cột logs, metrics, traces. Nắm vững <code>ILogger&lt;T&gt;</code>, structured logging, Serilog, correlation ID, OpenTelemetry, health checks và metrics/traces cơ bản. Code chính xác cho ASP.NET Core .NET 8/9 — để khi production cháy, bạn biết chính xác chuyện gì đang xảy ra.</p>
+</header>
+
+<div class="container">
+
+<section class="ut-section">
+    <h2 class="ut-title">1. Ba trụ cột của Observability</h2>
+    <p class="ut-sub">Observability = khả năng <strong>suy ra trạng thái bên trong</strong> hệ thống từ dữ liệu nó phát ra. Khác với monitoring (theo dõi cái đã biết), observability giúp trả lời cả những câu hỏi <em>chưa từng nghĩ tới</em> khi sự cố lạ xảy ra. Ba trụ cột bổ sung cho nhau.</p>
+
+    <table class="cmp">
+        <tr><th>Trụ cột</th><th>Trả lời câu hỏi</th><th>Ví dụ</th><th>Công cụ phổ biến</th></tr>
+        <tr><td><strong>Logs</strong> (nhật ký)</td><td>Chuyện <em>gì</em> đã xảy ra tại 1 thời điểm?</td><td>"User 42 đăng nhập thất bại lúc 10:03"</td><td>Serilog + Seq, ELK, Loki</td></tr>
+        <tr><td><strong>Metrics</strong> (số liệu)</td><td>Hệ thống đang khoẻ <em>cỡ nào</em>? (số liệu tổng hợp theo thời gian)</td><td>RPS, p99 latency, CPU, error rate</td><td>Prometheus, Grafana</td></tr>
+        <tr><td><strong>Traces</strong> (dấu vết)</td><td>1 request đi <em>qua đâu</em> và tốn thời gian ở đâu?</td><td>API → service → DB → cache (span thời gian từng bước)</td><td>Jaeger, Tempo, Zipkin</td></tr>
+    </table>
+
+    <div class="callout info">
+        <strong>Mối liên kết:</strong> một <code>traceId</code> duy nhất nên xuyên suốt cả ba. Từ một metric bất thường (p99 tăng vọt) → nhảy sang trace của request chậm → đọc logs gắn cùng <code>traceId</code> để biết nguyên nhân. OpenTelemetry chính là chuẩn thống nhất ba trụ cột này.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">2. ILogger&lt;T&gt; — nền tảng logging của .NET</h2>
+    <p class="ut-sub">ASP.NET Core có sẵn abstraction logging trong <code>Microsoft.Extensions.Logging</code>. Inject <code>ILogger&lt;T&gt;</code> qua DI — <code>T</code> là class hiện tại, dùng làm <em>category name</em> (giúp lọc log theo namespace).</p>
+
+    <pre class="cb"><span class="k">public class</span> <span class="t">OrderService</span>
+{
+    <span class="k">private readonly</span> ILogger&lt;<span class="t">OrderService</span>&gt; _logger;
+
+    <span class="k">public</span> <span class="n">OrderService</span>(ILogger&lt;<span class="t">OrderService</span>&gt; logger) <span class="c">// DI tự inject</span>
+        =&gt; _logger = logger;
+
+    <span class="k">public async</span> Task <span class="n">CreateAsync</span>(<span class="t">Order</span> order)
+    {
+        <span class="c">// ✅ STRUCTURED logging: message template + named params</span>
+        <span class="c">// {OrderId}, {Amount} là PROPERTY, không phải string interpolation</span>
+        _logger.LogInformation(
+            <span class="s">"Đang tạo đơn hàng {OrderId} cho khách {CustomerId}, tổng {Amount}"</span>,
+            order.Id, order.CustomerId, order.Total);
+
+        <span class="c">// ❌ KHÔNG dùng interpolation $"..." — mất structured properties</span>
+        <span class="c">// _logger.LogInformation($"Tạo đơn {order.Id}"); // SAI</span>
+    }
+}</pre>
+
+    <div class="callout warn">
+        <strong>⚠️ Message template, KHÔNG interpolation:</strong> truyền <code>"... {OrderId} ..."</code> kèm tham số, đừng dùng <code>$"... {order.Id} ..."</code>. Template giữ nguyên thông điệp gốc (gom nhóm log cùng loại) và lưu các giá trị thành <em>property có thể query</em>. Interpolation nối chuỗi ngay → mất cấu trúc, mất khả năng tìm kiếm, và luôn tốn chi phí format kể cả khi log level bị tắt.
+    </div>
+
+    <h3 class="ut-title" style="font-size:1.25rem;margin-top:2rem;">LoggerMessage source generator — high performance</h3>
+    <p class="ut-sub">Với hot path, dùng attribute <code>[LoggerMessage]</code> (source generator). Nó sinh code log <em>không allocate</em>, kiểm tra log level trước khi format, và mạnh về kiểu (compile-time). Đây là cách log nhanh nhất trong .NET hiện đại.</p>
+
+    <pre class="cb"><span class="k">public static partial class</span> <span class="t">OrderLogs</span>
+{
+    [<span class="a">LoggerMessage</span>(
+        EventId = <span class="s">1001</span>,
+        Level = LogLevel.Information,
+        Message = <span class="s">"Tạo đơn {OrderId} cho khách {CustomerId} thành công"</span>)]
+    <span class="k">public static partial void</span> <span class="n">OrderCreated</span>(
+        <span class="k">this</span> ILogger logger, <span class="k">int</span> orderId, <span class="k">int</span> customerId);
+
+    [<span class="a">LoggerMessage</span>(
+        EventId = <span class="s">1002</span>,
+        Level = LogLevel.Warning,
+        Message = <span class="s">"Đơn {OrderId} bị từ chối: {Reason}"</span>)]
+    <span class="k">public static partial void</span> <span class="n">OrderRejected</span>(
+        <span class="k">this</span> ILogger logger, <span class="k">int</span> orderId, <span class="k">string</span> reason);
+}
+
+<span class="c">// Sử dụng — ngắn gọn, không allocate, nhanh hơn LogInformation thường</span>
+_logger.OrderCreated(order.Id, order.CustomerId);
+_logger.OrderRejected(order.Id, <span class="s">"hết hàng"</span>);</pre>
+
+    <div class="callout tip">
+        <strong>💡 Khi nào dùng [LoggerMessage]?</strong> Cho các log gọi thường xuyên (mỗi request, vòng lặp). Cho log thưa thớt, <code>_logger.LogInformation(...)</code> bình thường là đủ. <code>class</code> phải là <code>partial</code> và <code>static</code> (hoặc method partial trong class instance) để generator hoạt động.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">3. Log Levels — khi nào dùng cái nào</h2>
+    <p class="ut-sub">Chọn đúng level là kỹ năng quan trọng. Sai level → hoặc spam noise (mọi thứ Error), hoặc bỏ sót sự cố (mọi thứ Debug bị tắt ở prod).</p>
+
+    <table class="cmp">
+        <tr><th>Level</th><th>Ý nghĩa</th><th>Khi dùng</th><th>Prod?</th></tr>
+        <tr><td><code>Trace</code> (0)</td><td>Chi tiết nhất, có thể chứa dữ liệu nhạy cảm</td><td>Debug sâu nội bộ, dò từng bước</td><td>Tắt</td></tr>
+        <tr><td><code>Debug</code> (1)</td><td>Thông tin gỡ lỗi cho dev</td><td>Giá trị biến, luồng xử lý khi dev</td><td>Tắt</td></tr>
+        <tr><td><code>Information</code> (2)</td><td>Sự kiện nghiệp vụ bình thường</td><td>"Đơn đã tạo", "User đăng nhập", app khởi động</td><td>Bật (vừa phải)</td></tr>
+        <tr><td><code>Warning</code> (3)</td><td>Bất thường nhưng app vẫn chạy</td><td>Retry, fallback, config thiếu, deprecated API</td><td>Bật</td></tr>
+        <tr><td><code>Error</code> (4)</td><td>Một thao tác thất bại</td><td>Exception trong xử lý request, gọi service lỗi</td><td>Bật</td></tr>
+        <tr><td><code>Critical</code> (5)</td><td>Lỗi nghiêm trọng, app/dữ liệu nguy hiểm</td><td>Mất kết nối DB toàn cục, hết bộ nhớ, cần báo động ngay</td><td>Bật + alert</td></tr>
+    </table>
+
+    <p class="ut-sub">Cấu hình <strong>minimum level theo từng category</strong> trong <code>appsettings.json</code> — giảm noise từ framework, giữ chi tiết cho code của bạn:</p>
+
+    <pre class="cb">{
+  <span class="s">"Logging"</span>: {
+    <span class="s">"LogLevel"</span>: {
+      <span class="s">"Default"</span>: <span class="s">"Information"</span>,
+      <span class="s">"Microsoft.AspNetCore"</span>: <span class="s">"Warning"</span>,
+      <span class="s">"Microsoft.EntityFrameworkCore.Database.Command"</span>: <span class="s">"Warning"</span>,
+      <span class="s">"MyApp.OrderService"</span>: <span class="s">"Debug"</span>
+    }
+  }
+}</pre>
+
+    <div class="callout info">
+        <strong>Quy tắc category:</strong> log level áp dụng theo tiền tố namespace dài nhất khớp. <code>MyApp.OrderService</code> ở <code>Debug</code> trong khi <code>Default</code> chỉ <code>Information</code> → bạn xem được chi tiết của riêng service đó mà không bị ngập log từ chỗ khác.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">4. Structured Logging với Serilog</h2>
+    <p class="ut-sub">Serilog là thư viện structured logging phổ biến nhất. Thay vì ghi dòng text phẳng, nó ghi <strong>event có cấu trúc</strong> (properties dạng key-value) — xuất ra JSON, query được như database. Cài đặt cho ASP.NET Core qua <code>Serilog.AspNetCore</code>.</p>
+
+    <pre class="cb"><span class="c">// dotnet add package Serilog.AspNetCore</span>
+<span class="c">// dotnet add package Serilog.Sinks.Seq</span>
+
+<span class="k">using</span> Serilog;
+
+<span class="k">var</span> builder = WebApplication.CreateBuilder(args);
+
+<span class="c">// Cấu hình Serilog: đọc từ appsettings + enrichers + sinks</span>
+builder.Host.UseSerilog((context, services, config) =&gt; config
+    .ReadFrom.Configuration(context.Configuration)
+    .ReadFrom.Services(services)
+    .Enrich.FromLogContext()                 <span class="c">// gắn property từ LogContext (correlation id)</span>
+    .Enrich.WithMachineName()
+    .Enrich.WithEnvironmentName()
+    .WriteTo.Console(<span class="k">new</span> Serilog.Formatting.Compact.<span class="t">CompactJsonFormatter</span>())
+    .WriteTo.File(<span class="s">"logs/app-.json"</span>, rollingInterval: RollingInterval.Day,
+        formatter: <span class="k">new</span> Serilog.Formatting.Compact.<span class="t">CompactJsonFormatter</span>())
+    .WriteTo.Seq(<span class="s">"http://localhost:5341"</span>));     <span class="c">// sink Seq để query log</span>
+
+<span class="k">var</span> app = builder.Build();
+
+<span class="c">// Middleware ghi 1 dòng log gọn cho mỗi HTTP request (thay log ồn ào mặc định)</span>
+app.UseSerilogRequestLogging();
+
+app.Run();</pre>
+
+    <table class="cmp">
+        <tr><th></th><th>Plain text log</th><th>Structured log (JSON)</th></tr>
+        <tr><td>Hình thức</td><td><code>Order 42 created for 7</code></td><td><code>{ "OrderId": 42, "CustomerId": 7 }</code></td></tr>
+        <tr><td>Tìm kiếm</td><td>grep chuỗi, dễ sai</td><td>query <code>OrderId = 42</code> chính xác</td></tr>
+        <tr><td>Lọc / tổng hợp</td><td>gần như không thể</td><td>filter, group, count theo property</td></tr>
+        <tr><td>Tương quan</td><td>khó nối các dòng liên quan</td><td>join theo <code>TraceId</code>, <code>CustomerId</code></td></tr>
+    </table>
+
+    <div class="callout tip">
+        <strong>💡 Vì sao structured &gt; plain text?</strong> Khi sự cố xảy ra lúc 2h sáng, bạn cần <em>truy vấn</em>: "tất cả Error của CustomerId=7 trong 10 phút qua" hay "đơn nào có Amount &gt; 1 triệu mà thất bại". Với log JSON trong Seq/ELK, đó là một câu query. Với text phẳng, đó là cơn ác mộng grep.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">5. Correlation ID — lần theo request xuyên service</h2>
+    <p class="ut-sub">Trong hệ microservice, một request đi qua nhiều service. Để nối tất cả log của cùng một request lại, cần một <strong>correlation/trace ID</strong> chung. Chuẩn hiện đại là <strong>W3C Trace Context</strong> — header <code>traceparent</code>, được .NET tự sinh và truyền đi qua <code>Activity</code>.</p>
+
+    <pre class="cb"><span class="c">// .NET tự tạo Activity cho mỗi request. TraceId nằm ở đây:</span>
+<span class="k">var</span> traceId = Activity.Current?.TraceId.ToString();
+
+<span class="c">// header traceparent (W3C) tự được truyền qua HttpClient sang service khác:</span>
+<span class="c">// traceparent: 00-{traceId}-{spanId}-{flags}</span></pre>
+
+    <p class="ut-sub">Dùng <strong>middleware tuỳ biến</strong> để đảm bảo mọi log trong phạm vi request đều mang correlation id. Kết hợp với <code>BeginScope</code> để gắn property vào <em>tất cả</em> log bên trong scope (không phải lặp lại từng dòng):</p>
+
+    <pre class="cb"><span class="k">public class</span> <span class="t">CorrelationIdMiddleware</span>
+{
+    <span class="k">private const</span> <span class="k">string</span> HeaderName = <span class="s">"X-Correlation-ID"</span>;
+    <span class="k">private readonly</span> RequestDelegate _next;
+    <span class="k">private readonly</span> ILogger&lt;<span class="t">CorrelationIdMiddleware</span>&gt; _logger;
+
+    <span class="k">public</span> <span class="n">CorrelationIdMiddleware</span>(RequestDelegate next, ILogger&lt;<span class="t">CorrelationIdMiddleware</span>&gt; logger)
+        =&gt; (_next, _logger) = (next, logger);
+
+    <span class="k">public async</span> Task <span class="n">InvokeAsync</span>(HttpContext ctx)
+    {
+        <span class="c">// Lấy correlation id từ header, hoặc dùng TraceId của Activity</span>
+        <span class="k">var</span> correlationId = ctx.Request.Headers[HeaderName].FirstOrDefault()
+            ?? Activity.Current?.TraceId.ToString()
+            ?? Guid.NewGuid().ToString(<span class="s">"n"</span>);
+
+        ctx.Response.Headers[HeaderName] = correlationId; <span class="c">// trả lại cho client</span>
+
+        <span class="c">// BeginScope: mọi log trong request này tự động có {CorrelationId}</span>
+        <span class="k">using</span> (_logger.BeginScope(<span class="k">new</span> Dictionary&lt;<span class="k">string</span>, <span class="k">object</span>&gt;
+        {
+            [<span class="s">"CorrelationId"</span>] = correlationId
+        }))
+        {
+            <span class="k">await</span> _next(ctx);
+        }
+    }
+}
+
+<span class="c">// Đăng ký SỚM trong pipeline (Program.cs)</span>
+app.UseMiddleware&lt;<span class="t">CorrelationIdMiddleware</span>&gt;();</pre>
+
+    <div class="callout info">
+        <strong>BeginScope + Serilog:</strong> nhờ <code>.Enrich.FromLogContext()</code>, các property trong scope được Serilog gắn vào mọi log event tự động. Một dòng <code>_logger.LogInformation("Xử lý đơn {OrderId}", id)</code> sâu trong service vẫn mang theo <code>CorrelationId</code> mà không cần truyền tay.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">6. OpenTelemetry — chuẩn quan sát hiện đại</h2>
+    <p class="ut-sub">OpenTelemetry (OTel) là chuẩn mở, vendor-neutral để thu thập traces &amp; metrics. .NET 8/9 hỗ trợ first-class. Bạn instrument một lần, export tới bất kỳ backend nào (Jaeger, Tempo, Prometheus, Grafana, Datadog...) qua giao thức <strong>OTLP</strong>.</p>
+
+    <pre class="cb"><span class="c">// dotnet add package OpenTelemetry.Extensions.Hosting</span>
+<span class="c">// dotnet add package OpenTelemetry.Instrumentation.AspNetCore</span>
+<span class="c">// dotnet add package OpenTelemetry.Instrumentation.Http</span>
+<span class="c">// dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol</span>
+<span class="c">// dotnet add package OpenTelemetry.Instrumentation.EntityFrameworkCore</span>
+
+<span class="k">var</span> builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(r =&gt; r.AddService(serviceName: <span class="s">"OrderApi"</span>))
+    .WithTracing(tracing =&gt; tracing
+        .AddAspNetCoreInstrumentation()      <span class="c">// trace request đến</span>
+        .AddHttpClientInstrumentation()      <span class="c">// trace HttpClient đi ra</span>
+        .AddEntityFrameworkCoreInstrumentation() <span class="c">// trace query EF Core</span>
+        .AddSource(<span class="s">"OrderApi.Orders"</span>)      <span class="c">// custom ActivitySource</span>
+        .AddOtlpExporter())                  <span class="c">// export sang Jaeger/Tempo (OTLP)</span>
+    .WithMetrics(metrics =&gt; metrics
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddRuntimeInstrumentation()         <span class="c">// GC, thread pool...</span>
+        .AddMeter(<span class="s">"OrderApi.Metrics"</span>)
+        .AddOtlpExporter());                 <span class="c">// hoặc AddPrometheusExporter()</span>
+
+<span class="k">var</span> app = builder.Build();</pre>
+
+    <div class="callout tip">
+        <strong>💡 Distributed tracing miễn phí:</strong> chỉ với <code>AddAspNetCoreInstrumentation()</code> + <code>AddHttpClientInstrumentation()</code>, mọi request qua service và mọi cuộc gọi HttpClient ra ngoài đều tự sinh span, tự truyền <code>traceparent</code>. Mở Jaeger lên là thấy waterfall toàn bộ hành trình request qua các service.
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">7. Health Checks</h2>
+    <p class="ut-sub">Health check cho phép load balancer, Kubernetes, hoặc monitoring biết app có khoẻ không. ASP.NET Core có sẵn <code>AddHealthChecks()</code>. Phân biệt <strong>liveness</strong> (app còn sống không — nếu chết thì restart) và <strong>readiness</strong> (app sẵn sàng nhận traffic chưa — DB/cache đã kết nối).</p>
+
+    <pre class="cb"><span class="c">// dotnet add package AspNetCore.HealthChecks.SqlServer</span>
+<span class="c">// dotnet add package AspNetCore.HealthChecks.Redis</span>
+
+builder.Services.AddHealthChecks()
+    .AddSqlServer(connectionString, name: <span class="s">"sql"</span>, tags: <span class="k">new</span>[] { <span class="s">"ready"</span> })
+    .AddRedis(redisConnection, name: <span class="s">"redis"</span>, tags: <span class="k">new</span>[] { <span class="s">"ready"</span> })
+    .AddCheck&lt;<span class="t">OrderQueueHealthCheck</span>&gt;(<span class="s">"order-queue"</span>, tags: <span class="k">new</span>[] { <span class="s">"ready"</span> });
+
+<span class="k">var</span> app = builder.Build();
+
+<span class="c">// /health — tổng quát; /health/live — liveness; /health/ready — readiness</span>
+app.MapHealthChecks(<span class="s">"/health"</span>);
+app.MapHealthChecks(<span class="s">"/health/live"</span>, <span class="k">new</span> HealthCheckOptions
+{
+    Predicate = _ =&gt; <span class="k">false</span>   <span class="c">// không chạy check nào → chỉ xác nhận process còn sống</span>
+});
+app.MapHealthChecks(<span class="s">"/health/ready"</span>, <span class="k">new</span> HealthCheckOptions
+{
+    Predicate = check =&gt; check.Tags.Contains(<span class="s">"ready"</span>) <span class="c">// chỉ check phụ thuộc</span>
+});</pre>
+
+    <pre class="cb"><span class="c">// Custom health check: kiểm tra logic nghiệp vụ của bạn</span>
+<span class="k">public class</span> <span class="t">OrderQueueHealthCheck</span> : IHealthCheck
+{
+    <span class="k">private readonly</span> <span class="t">IOrderQueue</span> _queue;
+    <span class="k">public</span> <span class="n">OrderQueueHealthCheck</span>(<span class="t">IOrderQueue</span> queue) =&gt; _queue = queue;
+
+    <span class="k">public async</span> Task&lt;<span class="t">HealthCheckResult</span>&gt; <span class="n">CheckHealthAsync</span>(
+        HealthCheckContext context, CancellationToken ct = <span class="k">default</span>)
+    {
+        <span class="k">var</span> depth = <span class="k">await</span> _queue.GetDepthAsync(ct);
+        <span class="k">if</span> (depth &gt; <span class="s">10_000</span>)
+            <span class="k">return</span> HealthCheckResult.Degraded(<span class="s">$"Hàng đợi quá tải: {depth}"</span>);
+        <span class="k">return</span> HealthCheckResult.Healthy(<span class="s">$"Độ sâu hàng đợi: {depth}"</span>);
+    }
+}</pre>
+
+    <div class="callout info">
+        <strong>Liveness vs Readiness:</strong> Kubernetes dùng <code>/health/live</code> để quyết định <em>restart</em> pod (đừng cho DB vào đây — DB chết tạm thời không nên gây restart loop). Dùng <code>/health/ready</code> để quyết định có <em>gửi traffic</em> vào pod không (DB chưa sẵn sàng → tạm ngừng nhận request).
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">8. Metrics &amp; Traces cơ bản</h2>
+    <p class="ut-sub">Ngoài instrumentation tự động, bạn tự phát số liệu nghiệp vụ qua <code>System.Diagnostics.Metrics</code> (Meter, Counter, Histogram) và tự tạo span nghiệp vụ qua <code>Activity</code>.</p>
+
+    <h3 class="ut-title" style="font-size:1.25rem;">Metrics — Meter / Counter / Histogram</h3>
+    <pre class="cb"><span class="k">public class</span> <span class="t">OrderMetrics</span>
+{
+    <span class="k">private readonly</span> Counter&lt;<span class="k">long</span>&gt; _ordersCreated;
+    <span class="k">private readonly</span> Histogram&lt;<span class="k">double</span>&gt; _orderValue;
+
+    <span class="k">public</span> <span class="n">OrderMetrics</span>(IMeterFactory meterFactory)
+    {
+        <span class="c">// Tên meter "OrderApi.Metrics" khớp với AddMeter() ở phần 6</span>
+        <span class="k">var</span> meter = meterFactory.Create(<span class="s">"OrderApi.Metrics"</span>);
+        _ordersCreated = meter.CreateCounter&lt;<span class="k">long</span>&gt;(
+            <span class="s">"orders.created"</span>, unit: <span class="s">"{orders}"</span>, description: <span class="s">"Số đơn đã tạo"</span>);
+        _orderValue = meter.CreateHistogram&lt;<span class="k">double</span>&gt;(
+            <span class="s">"orders.value"</span>, unit: <span class="s">"VND"</span>, description: <span class="s">"Phân bố giá trị đơn"</span>);
+    }
+
+    <span class="k">public void</span> <span class="n">RecordOrder</span>(<span class="t">Order</span> order)
+    {
+        <span class="c">// Counter: chỉ tăng (đếm tổng). Tag để phân nhóm.</span>
+        _ordersCreated.Add(<span class="s">1</span>, <span class="k">new</span> KeyValuePair&lt;<span class="k">string</span>, <span class="k">object</span>?&gt;(<span class="s">"region"</span>, order.Region));
+        <span class="c">// Histogram: phân bố giá trị (p50/p95/p99 latency, kích thước...)</span>
+        _orderValue.Record(order.Total);
+    }
+}</pre>
+
+    <h3 class="ut-title" style="font-size:1.25rem;margin-top:2rem;">Traces — Activity &amp; Span</h3>
+    <pre class="cb"><span class="c">// ActivitySource là "nguồn" sinh span. Tên khớp AddSource() ở phần 6.</span>
+<span class="k">public static class</span> <span class="t">Telemetry</span>
+{
+    <span class="k">public static readonly</span> ActivitySource Source = <span class="k">new</span>(<span class="s">"OrderApi.Orders"</span>);
+}
+
+<span class="k">public async</span> Task <span class="n">ProcessAsync</span>(<span class="t">Order</span> order)
+{
+    <span class="c">// StartActivity tạo 1 span con trong trace hiện tại</span>
+    <span class="k">using var</span> activity = Telemetry.Source.StartActivity(<span class="s">"ProcessOrder"</span>);
+    activity?.SetTag(<span class="s">"order.id"</span>, order.Id);
+    activity?.SetTag(<span class="s">"order.region"</span>, order.Region);
+
+    <span class="k">try</span>
+    {
+        <span class="k">await</span> _payment.ChargeAsync(order);  <span class="c">// span con tự nối vào đây</span>
+        activity?.SetStatus(ActivityStatusCode.Ok);
+    }
+    <span class="k">catch</span> (<span class="t">Exception</span> ex)
+    {
+        activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+        <span class="k">throw</span>;
+    }
+}</pre>
+
+    <table class="cmp">
+        <tr><th>Loại instrument</th><th>Đặc tính</th><th>Ví dụ</th></tr>
+        <tr><td><code>Counter&lt;T&gt;</code></td><td>Chỉ tăng, đếm tích luỹ</td><td>Số request, số đơn, số lỗi</td></tr>
+        <tr><td><code>UpDownCounter&lt;T&gt;</code></td><td>Tăng/giảm, giá trị hiện tại</td><td>Số kết nối đang mở, item trong queue</td></tr>
+        <tr><td><code>Histogram&lt;T&gt;</code></td><td>Phân bố giá trị (percentile)</td><td>Latency, kích thước payload</td></tr>
+        <tr><td><code>Activity</code> (span)</td><td>Khoảng thời gian + tag của 1 thao tác</td><td>1 bước xử lý trong trace</td></tr>
+    </table>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">9. Do / Don't khi làm Logging &amp; Observability</h2>
+
+    <div class="do-dont dont">
+        <h4>❌ Log secrets / PII</h4>
+        <pre class="cb">_logger.LogInformation(<span class="s">"Login {User} pass {Password}"</span>, u, pwd); <span class="c">// 💀 rò mật khẩu</span></pre>
+        <p>Không bao giờ log mật khẩu, token, số thẻ, CCCD, email/điện thoại đầy đủ. Vi phạm bảo mật &amp; GDPR/nghị định bảo vệ dữ liệu. Mask hoặc loại bỏ trước khi log.</p>
+    </div>
+
+    <div class="do-dont dont">
+        <h4>❌ Log trong vòng lặp nóng ở mức Information</h4>
+        <pre class="cb"><span class="k">foreach</span> (<span class="k">var</span> row <span class="k">in</span> millionRows)
+    _logger.LogInformation(<span class="s">"Xử lý {Id}"</span>, row.Id); <span class="c">// triệu dòng log → ngập, tốn I/O</span></pre>
+        <p>Log hot loop ở Information làm sink quá tải, tốn đĩa &amp; tiền (log SaaS tính theo dung lượng). Dùng <code>Debug</code>/<code>Trace</code>, hoặc log tổng hợp ("đã xử lý N dòng"), hoặc dùng metric thay vì log.</p>
+    </div>
+
+    <div class="do-dont dont">
+        <h4>❌ String interpolation thay vì structured</h4>
+        <pre class="cb">_logger.LogInformation(<span class="s">$"Đơn {order.Id} lỗi"</span>); <span class="c">// mất property, không query được</span></pre>
+        <p>Mất structured properties, không filter/aggregate được, và luôn tốn chi phí format kể cả khi level bị tắt. Dùng message template + named params.</p>
+    </div>
+
+    <div class="do-dont dont">
+        <h4>❌ Nuốt exception trong im lặng</h4>
+        <pre class="cb"><span class="k">try</span> { <span class="k">await</span> DoAsync(); } <span class="k">catch</span> { } <span class="c">// 💀 lỗi biến mất không dấu vết</span></pre>
+        <p>Catch rỗng làm lỗi tan biến — không log, không metric, không alert. Khi prod sai bạn sẽ mù hoàn toàn. Tối thiểu phải <code>_logger.LogError(ex, "...")</code> rồi xử lý/rethrow.</p>
+    </div>
+
+    <div class="do-dont do">
+        <h4>✅ Log exception đúng cách</h4>
+        <pre class="cb"><span class="k">catch</span> (<span class="t">Exception</span> ex)
+{
+    <span class="c">// exception là tham số ĐẦU TIÊN → giữ nguyên stack trace</span>
+    _logger.LogError(ex, <span class="s">"Tạo đơn {OrderId} thất bại"</span>, order.Id);
+    <span class="k">throw</span>; <span class="c">// rethrow giữ stack (đừng throw ex;)</span>
+}</pre>
+        <p>Truyền exception làm tham số đầu để giữ stack trace; dùng template cho thông điệp; <code>throw;</code> chứ không <code>throw ex;</code>.</p>
+    </div>
+
+    <div class="do-dont do">
+        <h4>✅ Dùng metric cho dữ liệu tần suất cao</h4>
+        <pre class="cb">_ordersCreated.Add(<span class="s">1</span>); <span class="c">// đếm bằng counter, rẻ hơn log triệu dòng</span></pre>
+        <p>Thứ cần đếm/đo theo thời gian → dùng metric (rẻ, tổng hợp sẵn). Log để giải thích sự kiện cụ thể, metric để theo dõi xu hướng.</p>
+    </div>
+</section>
+
+<section class="ut-section">
+    <h2 class="ut-title">🎯 Checklist Logging &amp; Observability</h2>
+    <div class="ut-card">
+        <ul>
+            <li>✅ Dùng <code>ILogger&lt;T&gt;</code> inject qua DI; hot path dùng <code>[LoggerMessage]</code></li>
+            <li>✅ Structured logging: message template + named params, KHÔNG interpolation</li>
+            <li>✅ Chọn đúng log level; cấu hình minimum level theo category trong appsettings</li>
+            <li>✅ Serilog xuất JSON, có enrichers, sink Console/File/Seq để query được</li>
+            <li>✅ Correlation/Trace ID gắn vào mọi log qua middleware + <code>BeginScope</code></li>
+            <li>✅ OpenTelemetry instrument ASP.NET Core + HttpClient + EF Core, export OTLP</li>
+            <li>✅ Health checks tách <code>/health/live</code> và <code>/health/ready</code>; có check DB/Redis</li>
+            <li>✅ Metric (Counter/Histogram) cho số liệu tần suất cao thay vì log</li>
+            <li>✅ Activity/span cho các bước nghiệp vụ quan trọng trong trace</li>
+            <li>✅ KHÔNG log secrets/PII, KHÔNG log hot loop ở Information, KHÔNG nuốt exception</li>
+            <li>✅ Log exception với <code>LogError(ex, ...)</code> và <code>throw;</code> giữ stack trace</li>
+        </ul>
+    </div>
+</section>
+
+</div>
+
+<footer style="text-align:center;padding:3rem 1.5rem;color:var(--ut-muted);border-top:1px solid var(--ut-border);margin-top:3rem;font-size:.9rem;">
+    <p>Logging &amp; Observability · Developer Learning Hub · 2026</p>
+</footer>
+
+</body>
+</html>
