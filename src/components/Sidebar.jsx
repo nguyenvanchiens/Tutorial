@@ -1,15 +1,69 @@
 import { useState } from 'react'
 import { useClaudeBadge } from '../hooks/useClaudeBadge'
 
+// True if `active` matches this node or any of its descendants.
+const containsActive = (node, active) =>
+  node.children ? node.children.some(c => containsActive(c, active)) : node.id === active
+
+// First leaf (page) reachable from this node — what we navigate to on open.
+const firstLeaf = (node) => (node.children ? firstLeaf(node.children[0]) : node)
+
+function NavSubmenu({ nodes, active, onNavigate, expanded, setExpanded, depth }) {
+  return (
+    <ul className={`nav-submenu nav-submenu-depth-${depth}`}>
+      {nodes.map(node => {
+        const hasChildren = !!node.children
+        const descActive = hasChildren && node.children.some(c => containsActive(c, active))
+        const menuOpen = expanded[node.id] ?? descActive
+
+        if (!hasChildren) {
+          return (
+            <li
+              key={node.id}
+              className={`nav-subitem ${active === node.id ? 'active' : ''}`}
+              onClick={(e) => { e.stopPropagation(); onNavigate(node.id) }}
+            >
+              {node.label}
+            </li>
+          )
+        }
+
+        return (
+          <li key={node.id}>
+            <div
+              className={`nav-subitem nav-subgroup ${descActive ? 'active' : ''}`}
+              onClick={(e) => {
+                e.stopPropagation()
+                setExpanded(prev => ({ ...prev, [node.id]: !menuOpen }))
+                if (!descActive) onNavigate(firstLeaf(node).id)
+              }}
+            >
+              <span className="nav-label">{node.label}</span>
+              <span className={`nav-arrow ${menuOpen ? 'open' : ''}`}>&#9656;</span>
+            </div>
+            {menuOpen && (
+              <NavSubmenu
+                nodes={node.children}
+                active={active}
+                onNavigate={onNavigate}
+                expanded={expanded}
+                setExpanded={setExpanded}
+                depth={depth + 1}
+              />
+            )}
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+
 export default function Sidebar({
   sections, active, onNavigate,
   mobileOpen, onMobileClose, progress
 }) {
   const [expanded, setExpanded] = useState({})
   const claudeNewCount = useClaudeBadge()
-
-  const isChildActive = (s) => s.children?.some(c => c.id === active) || false
-  const isMenuOpen = (s) => expanded[s.id] ?? isChildActive(s)
 
   return (
     <nav className={`sidebar ${mobileOpen ? 'mobile-open' : ''}`}>
@@ -24,9 +78,9 @@ export default function Sidebar({
       <ul className="nav-menu">
         {sections.map(s => {
           const hasChildren = !!s.children
-          const childActive = isChildActive(s)
+          const childActive = hasChildren && s.children.some(c => containsActive(c, active))
           const itemActive = active === s.id || childActive
-          const menuOpen = isMenuOpen(s)
+          const menuOpen = expanded[s.id] ?? childActive
 
           return (
             <li key={s.id}>
@@ -36,7 +90,7 @@ export default function Sidebar({
                   e.stopPropagation()
                   if (hasChildren) {
                     setExpanded(prev => ({ ...prev, [s.id]: !menuOpen }))
-                    if (!childActive) onNavigate(s.children[0].id)
+                    if (!childActive) onNavigate(firstLeaf(s).id)
                   } else {
                     onNavigate(s.id)
                   }
@@ -55,17 +109,14 @@ export default function Sidebar({
               </div>
 
               {hasChildren && menuOpen && (
-                <ul className="nav-submenu">
-                  {s.children.map(c => (
-                    <li
-                      key={c.id}
-                      className={`nav-subitem ${active === c.id ? 'active' : ''}`}
-                      onClick={(e) => { e.stopPropagation(); onNavigate(c.id) }}
-                    >
-                      {c.label}
-                    </li>
-                  ))}
-                </ul>
+                <NavSubmenu
+                  nodes={s.children}
+                  active={active}
+                  onNavigate={onNavigate}
+                  expanded={expanded}
+                  setExpanded={setExpanded}
+                  depth={1}
+                />
               )}
             </li>
           )
