@@ -3,6 +3,7 @@ import Sidebar from './components/Sidebar'
 import Dashboard from './components/Dashboard'
 import IframeSection from './components/IframeSection'
 import ClaudeNews from './components/ClaudeNews'
+import RepoFeed from './components/RepoFeed'
 import { useCheckbox } from './hooks/useCheckbox'
 
 const SECTIONS = [
@@ -139,11 +140,15 @@ const SECTIONS = [
       { id: 'ai-skills', label: 'AI Skills Nâng Cao',       src: '/AI-SKILLS/index.html' },
       { id: 'ai-eval',   label: 'Evaluation (LLM-as-Judge)', src: '/AI/evaluation.html' },
     ]},
+    { id: 'ai-tips-grp', label: 'Tips & Tricks', children: [
+      { id: 'ai-tips', label: 'Tips & Tricks', src: '/AI/ai-tips.html' },
+    ]},
     { id: 'ai-on', label: 'Ôn Tập', children: [
       { id: 'ai-quiz', label: 'Trắc Nghiệm Claude', src: '/AI/quiz.html' },
     ]},
   ]},
   { id: 'claude-live', icon: '\u2728', label: 'AI Claude Live', component: 'ClaudeNews' },
+  { id: 'repo-feed', icon: '\u2b50', label: 'Repo \u0110\u00e1ng Ch\u00fa \u00dd', component: 'RepoFeed' },
   { id: 'react', icon: '\u269B', label: 'ReactJS Mastery', children: [
     { id: 'react-cb', label: 'Cơ Bản', children: [
       { id: 'react-roadmap', label: 'Roadmap A-Z', src: '/REACT/index.html' },
@@ -184,6 +189,7 @@ function flattenSections(sections) {
 
 const COMPONENT_REGISTRY = {
   ClaudeNews: ClaudeNews,
+  RepoFeed: RepoFeed,
 }
 
 const ALL_PAGES = flattenSections(SECTIONS)

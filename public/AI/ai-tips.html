@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tips & Tricks — Dùng AI coding (Claude Code) hiệu quả</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="ai.css">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{
+            --bg:#0B0B1A;--surface:#151528;--surface2:#1E1E3A;--border:#2A2A4A;
+            --text:#E8E8F0;--text-dim:#8888AA;--primary:#7C3AED;--accent:#06B6D4;
+            --green:#10B981;--orange:#F59E0B;--red:#EF4444;--pink:#EC4899;--blue:#3B82F6;
+            --radius:12px;--radius-sm:8px;
+        }
+        html{scroll-behavior:smooth}
+        body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.8;min-height:100vh}
+        .navbar{position:fixed;top:0;left:0;width:100%;background:rgba(11,11,26,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px}
+        .nav-logo{font-weight:800;font-size:1rem;color:var(--primary);text-decoration:none}
+        .nav-logo span{color:var(--accent)}
+        .nav-links{display:flex;gap:20px}
+        .nav-links a{color:var(--text-dim);text-decoration:none;font-size:.85rem;font-weight:500;transition:color .2s}
+        .nav-links a:hover,.nav-links a.active{color:var(--primary)}
+        .container{max-width:920px;margin:0 auto;padding:0 24px}
+        .hero{padding:90px 24px 40px;text-align:center;background:linear-gradient(180deg,rgba(124,58,237,.08) 0%,transparent 60%)}
+        .hero h1{font-size:2.4rem;font-weight:900;margin-bottom:12px}
+        .gradient-text{background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .hero p{color:var(--text-dim);font-size:.95rem;max-width:650px;margin:0 auto}
+        .hero-badge{display:inline-block;padding:4px 16px;border-radius:20px;font-size:.75rem;font-weight:700;background:rgba(239,68,68,.15);color:var(--red);margin-bottom:16px;letter-spacing:1px}
+        .toc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 28px;margin:0 auto 40px;max-width:920px}
+        .toc h3{font-size:1rem;font-weight:800;margin-bottom:12px;color:var(--accent)}
+        .toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px}
+        .toc a{color:var(--text-dim);text-decoration:none;font-size:.88rem;padding:4px 0;transition:color .2s;display:flex;align-items:center;gap:8px}
+        .toc a:hover{color:var(--primary)}
+        .toc-num{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;color:var(--primary);min-width:24px}
+        .section{margin-bottom:48px;scroll-margin-top:72px}
+        .section-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid var(--border)}
+        .section-num{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:900;color:var(--primary)}
+        .section-title{font-size:1.25rem;font-weight:800}
+        .section-subtitle{color:var(--text-dim);font-size:.85rem;margin-top:2px}
+        .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px;transition:border-color .2s}
+        .card:hover{border-color:rgba(124,58,237,.3)}
+        .card h4{font-size:1rem;font-weight:700;margin-bottom:8px;color:var(--text)}
+        .card p,.card li{font-size:.9rem;color:var(--text-dim);line-height:1.8}
+        .card ul{padding-left:20px}
+        .card li{margin-bottom:6px}
+        .module{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px;position:relative;overflow:hidden}
+        .module::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;border-radius:4px 0 0 4px}
+        .module.beginner::before{background:var(--green)}
+        .module.intermediate::before{background:var(--orange)}
+        .module.advanced::before{background:var(--red)}
+        .module.expert::before{background:var(--primary)}
+        .module-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+        .module h4{font-size:1.05rem;font-weight:800}
+        .module-level{padding:3px 10px;border-radius:12px;font-size:.7rem;font-weight:700;flex-shrink:0}
+        .level-beginner{background:rgba(16,185,129,.12);color:var(--green)}
+        .level-intermediate{background:rgba(245,158,11,.12);color:var(--orange)}
+        .level-advanced{background:rgba(239,68,68,.12);color:var(--red)}
+        .level-expert{background:rgba(124,58,237,.12);color:var(--primary)}
+        .module p{font-size:.88rem;color:var(--text-dim);margin-bottom:10px}
+        .module-what{font-size:.82rem;color:var(--text);margin-bottom:8px}
+        .module-what strong{color:var(--accent)}
+        .module-tools{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+        .tool-tag{padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:600;background:var(--surface2);color:var(--text-dim);border:1px solid var(--border)}
+        .code-block{background:#0D0D20;border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 20px;margin:12px 0;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.7;color:#A5B4FC;white-space:pre}
+        .code-comment{color:#6B7280}
+        .code-keyword{color:#C084FC}
+        .code-string{color:#34D399}
+        .code-fn{color:#60A5FA}
+        .highlight{border-radius:var(--radius);padding:16px 20px;margin:12px 0;font-size:.88rem}
+        .highlight-warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:var(--orange)}
+        .highlight-tip{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:var(--green)}
+        .highlight-important{background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);color:var(--primary)}
+        .highlight strong{color:var(--text)}
+        .compare-table{width:100%;border-collapse:collapse;font-size:.85rem;margin:12px 0}
+        .compare-table th{background:var(--surface2);padding:10px 14px;text-align:left;font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.5px;color:var(--accent);border-bottom:2px solid var(--border)}
+        .compare-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text-dim)}
+        .compare-table tr:hover td{background:rgba(124,58,237,.03)}
+        .footer{padding:32px 24px;text-align:center;border-top:1px solid var(--border);margin-top:40px}
+        .footer p{color:var(--text-dim);font-size:.82rem}
+        .footer a{color:var(--primary);text-decoration:none}
+        @media(max-width:768px){
+            .hero h1{font-size:1.6rem}
+            .toc-grid{grid-template-columns:1fr}
+            .module-header{flex-direction:column;gap:8px}
+            .nav-links{display:none}
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav class="navbar">
+    <a href="index.html" class="nav-logo">AI<span>Hub</span></a>
+    <div class="nav-links">
+        <a href="index.html">Tin Tuc AI</a>
+        <a href="learn.html">Hoc AI</a>
+        <a href="testing-ai.html">Testing AI</a>
+        <a href="security-ai.html">Security</a>
+        <a href="evaluation.html">Evaluation</a>
+        <a href="ai-tips.html" class="active">Tips & Tricks</a>
+        <a href="../BE/index.html">.NET</a>
+    </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<header class="hero">
+    <div class="hero-badge">TIPS & TRICKS</div>
+    <h1>Dùng AI coding <span class="gradient-text">đúng cách</span></h1>
+    <p>Cùng một con AI, người dùng giỏi cho ra gấp đôi kết quả với một nửa số token. Đây là tập hợp các mẹo cụ thể, đã được kiểm chứng, để làm việc với công cụ AI coding (đặc biệt là <strong>Claude Code</strong>) một cách năng suất, tiết kiệm và an toàn.</p>
+</header>
+
+<!-- ═══ TOC ═══ -->
+<div class="container">
+<div class="toc">
+    <h3>Mục Lục</h3>
+    <div class="toc-grid">
+        <a href="#s1"><span class="toc-num">01</span> Vệ sinh context (context hygiene)</a>
+        <a href="#s2"><span class="toc-num">02</span> Làm chủ CLAUDE.md</a>
+        <a href="#s3"><span class="toc-num">03</span> Mẫu prompt hiệu quả</a>
+        <a href="#s4"><span class="toc-num">04</span> Plan mode & thinking</a>
+        <a href="#s5"><span class="toc-num">05</span> Slash command & Skills</a>
+        <a href="#s6"><span class="toc-num">06</span> Kiểm chứng, đừng tin</a>
+        <a href="#s7"><span class="toc-num">07</span> Refactor lớn & đa file</a>
+        <a href="#s8"><span class="toc-num">08</span> Git workflow với AI</a>
+        <a href="#s9"><span class="toc-num">09</span> Chọn model & tiết kiệm token</a>
+        <a href="#s10"><span class="toc-num">10</span> Bẫy & anti-pattern</a>
+        <a href="#s11"><span class="toc-num">11</span> Prefix command & trigger word</a>
+        <a href="#s12"><span class="toc-num">12</span> Khai thác tối đa gói Max</a>
+        <a href="#s13"><span class="toc-num">13</span> Tự động hoá: Hooks & MCP</a>
+        <a href="#s14"><span class="toc-num">14</span> Mẹo nhỏ tăng tốc mỗi ngày</a>
+    </div>
+</div>
+
+<!-- ═══ SECTION 1 ═══ -->
+<div class="section" id="s1">
+    <div class="section-header">
+        <div class="section-num">01</div>
+        <div>
+            <div class="section-title">Vệ sinh context — giữ ngữ cảnh gọn</div>
+            <div class="section-subtitle">Context dài và bẩn làm chất lượng đi xuống, không phải đi lên</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Vì sao context dài lại làm AI kém đi</h4>
+        <p>Trực giác sai phổ biến nhất: "nhồi càng nhiều thông tin càng tốt". Thực tế, một cửa sổ context đầy ắp tool output cũ, file không liên quan và các nhánh hội thoại đã chết khiến model khó tìm ra thứ thực sự quan trọng — nó bị nhiễu. Một phiên làm việc <em>sạch và tập trung</em> gần như luôn cho kết quả tốt hơn một phiên kéo dài 3 tiếng đủ thứ chuyện.</p>
+        <div class="highlight highlight-tip">
+            <strong>Quy tắc 1 phiên = 1 nhiệm vụ:</strong> Xong một việc thì gõ <code>/clear</code> trước khi sang việc mới. Đừng để phần fix bug lúc sáng còn lẩn quẩn trong context khi bạn đang viết feature buổi chiều.
+        </div>
+    </div>
+
+    <div class="module beginner">
+        <div class="module-header">
+            <h4>Module 1.1: Thói quen giữ context lean</h4>
+            <span class="module-level level-beginner">Cơ bản</span>
+        </div>
+        <ul style="font-size:.88rem;color:var(--text-dim);padding-left:20px">
+            <li><strong><code>/clear</code> giữa các task</strong> — reset hội thoại, giải phóng toàn bộ context cũ.</li>
+            <li><strong>Chỉ tham chiếu file cần thiết</strong> — đừng bảo AI "đọc cả thư mục" nếu chỉ cần 2 file.</li>
+            <li><strong>Tách nhiệm vụ lớn thành phiên nhỏ</strong> — mỗi phiên một mục tiêu rõ ràng.</li>
+            <li><strong>Để AI tự quản lý context</strong> — Claude Code tự nén (compaction) khi gần đầy; đừng cố nhồi thủ công.</li>
+        </ul>
+        <div class="module-tools">
+            <span class="tool-tag">/clear</span>
+            <span class="tool-tag">Compaction</span>
+            <span class="tool-tag">Scoped reads</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 2 ═══ -->
+<div class="section" id="s2">
+    <div class="section-header">
+        <div class="section-num">02</div>
+        <div>
+            <div class="section-title">Làm chủ CLAUDE.md</div>
+            <div class="section-subtitle">File hướng dẫn dự án — ngắn, đậm tín hiệu, AI đọc trong MỌI phiên</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>CLAUDE.md là gì và vì sao quan trọng</h4>
+        <p><code>CLAUDE.md</code> ở gốc dự án được nạp vào context tự động ở đầu mỗi phiên. Đây là nơi bạn dạy AI những thứ nó không thể tự suy ra: lệnh build, quy ước code, kiến trúc tổng thể, các "bẫy" của codebase. Viết tốt một lần, hưởng lợi mãi mãi.</p>
+        <div class="module-what"><strong>Nên đưa vào:</strong></div>
+        <ul>
+            <li><strong>Lệnh hay dùng:</strong> <code>npm run dev</code>, <code>npm test</code>, <code>npm run lint</code>, cách chạy 1 test riêng lẻ.</li>
+            <li><strong>Quy ước:</strong> style code, naming, dùng tabs hay spaces, không dùng thư viện X.</li>
+            <li><strong>Kiến trúc:</strong> module nào làm gì, dữ liệu chảy thế nào, file nào là trung tâm.</li>
+            <li><strong>Gotchas:</strong> "đừng sửa file generated", "luôn chạy migration trước khi test".</li>
+        </ul>
+        <div class="highlight highlight-important">
+            <strong>Ngắn và đậm tín hiệu:</strong> CLAUDE.md tốn context mỗi phiên. Một file 5000 từ lan man còn hại hơn 30 dòng cô đọng. Cắt mọi câu không thay đổi hành vi của AI.
+        </div>
+    </div>
+
+    <div class="module intermediate">
+        <div class="module-header">
+            <h4>Module 2.1: Khung CLAUDE.md gọn</h4>
+            <span class="module-level level-intermediate">Trung cấp</span>
+        </div>
+        <div class="code-block"><span class="code-comment"># CLAUDE.md — ví dụ cô đọng, đậm tín hiệu</span>
+
+<span class="code-keyword">## Commands</span>
+- npm run dev    <span class="code-comment"># chạy dev server</span>
+- npm test       <span class="code-comment"># chạy toàn bộ test</span>
+- npm test -- auth.spec.ts   <span class="code-comment"># chạy 1 file test</span>
+
+<span class="code-keyword">## Conventions</span>
+- React 19, JSX thuần (KHÔNG TypeScript)
+- State-driven, không dùng router
+
+<span class="code-keyword">## Gotchas</span>
+- File trong public/ là HTML tĩnh, KHÔNG phải component React
+- Nội dung viết bằng tiếng Việt có dấu</div>
+        <div class="highlight highlight-tip">
+            <strong>Mẹo cập nhật:</strong> Khi AI hiểu sai một điều gì đó lặp lại, đừng sửa thủ công mỗi lần — thêm một dòng vào CLAUDE.md. Trong Claude Code, gõ <code>#</code> để ghi nhanh một ghi nhớ vào file này.
+        </div>
+        <div class="module-tools">
+            <span class="tool-tag">CLAUDE.md</span>
+            <span class="tool-tag"># memory</span>
+            <span class="tool-tag">/init</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 3 ═══ -->
+<div class="section" id="s3">
+    <div class="section-header">
+        <div class="section-num">03</div>
+        <div>
+            <div class="section-title">Mẫu prompt hiệu quả</div>
+            <div class="section-subtitle">Cụ thể, có ví dụ, tham chiếu file bằng đường dẫn, xin kế hoạch trước</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Cụ thể đánh bại mơ hồ — mọi lúc</h4>
+        <p>"Sửa bug login" là prompt tệ. "Trong <code>src/auth/login.ts</code>, hàm <code>validateToken</code> trả về true cả khi token hết hạn — sửa để nó kiểm tra <code>expiresAt</code> so với thời gian hiện tại, và thêm test cho case hết hạn" là prompt tốt. Càng cụ thể, AI càng ít phải đoán, và càng ít đoán sai.</p>
+        <ul>
+            <li><strong>Tham chiếu file bằng đường dẫn</strong> — <code>src/components/Sidebar.jsx</code>, không phải "cái sidebar đó".</li>
+            <li><strong>Đưa ví dụ input/output</strong> — cho AI thấy đúng cái bạn muốn thay vì mô tả.</li>
+            <li><strong>Nêu rõ ràng buộc</strong> — "đừng thêm thư viện mới", "giữ API cũ tương thích".</li>
+            <li><strong>Xin kế hoạch trước với việc lớn</strong> — "Đề xuất cách làm trước, đừng viết code vội" (xem mục 04).</li>
+        </ul>
+    </div>
+
+    <div class="module intermediate">
+        <div class="module-header">
+            <h4>Module 3.1: Khung prompt "việc khó"</h4>
+            <span class="module-level level-intermediate">Trung cấp</span>
+        </div>
+        <div class="code-block"><span class="code-comment"># Khung prompt cho task phức tạp</span>
+<span class="code-keyword">Bối cảnh:</span> Đây là API thanh toán, dùng cho khách doanh nghiệp.
+<span class="code-keyword">Mục tiêu:</span> Thêm retry với exponential backoff cho hàm chargeCard
+            trong src/billing/charge.ts
+<span class="code-keyword">Ràng buộc:</span> Tối đa 3 lần retry; KHÔNG retry khi lỗi 4xx;
+            dùng thư viện sẵn có, đừng cài mới.
+<span class="code-keyword">Yêu cầu:</span> Đề xuất kế hoạch trước. Sau khi tôi duyệt mới viết code.
+            Viết kèm test cho cả case thành công và case hết retry.</div>
+        <div class="highlight highlight-tip">
+            <strong>Vì sao đưa "lý do":</strong> Nói cho AI biết <em>vì sao</em> bạn cần việc đó ("API này cho khách doanh nghiệp, lỗi tốn tiền thật") giúp nó đưa ra quyết định tốt hơn nhiều so với chỉ đưa mệnh lệnh khô khan.
+        </div>
+        <div class="module-tools">
+            <span class="tool-tag">Specificity</span>
+            <span class="tool-tag">File paths</span>
+            <span class="tool-tag">Examples</span>
+            <span class="tool-tag">Plan-first</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 4 ═══ -->
+<div class="section" id="s4">
+    <div class="section-header">
+        <div class="section-num">04</div>
+        <div>
+            <div class="section-title">Plan mode & thinking</div>
+            <div class="section-subtitle">Bắt AI nghĩ và lập kế hoạch TRƯỚC khi nó đụng vào code</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Lập kế hoạch trước = sửa rẻ</h4>
+        <p>Với task lớn hoặc rủi ro, sai lầm đắt nhất là để AI lao vào sửa 15 file ngay lập tức theo một hướng tiếp cận sai. <strong>Plan mode</strong> trong Claude Code cho AI khảo sát codebase và đề xuất kế hoạch mà <em>không</em> chỉnh sửa gì — bạn duyệt kế hoạch (giai đoạn rẻ nhất để bắt lỗi hiểu sai) rồi mới cho thực thi.</p>
+        <div class="highlight highlight-tip">
+            <strong>Khi nào dùng plan mode:</strong> task chạm nhiều file, refactor kiến trúc, hoặc khi bạn chưa chắc cách làm đúng. Với việc nhỏ rõ ràng (sửa 1 dòng) thì không cần — chỉ tốn thời gian.
+        </div>
+    </div>
+
+    <div class="module advanced">
+        <div class="module-header">
+            <h4>Module 4.1: "Plan first" và mức độ suy nghĩ</h4>
+            <span class="module-level level-advanced">Nâng cao</span>
+        </div>
+        <p>Các model Claude đời mới (như <code>claude-opus-4-8</code>) suy nghĩ sâu hơn ở mỗi bước. Với agentic/coding, đặt mức effort cao (<code>high</code>/<code>xhigh</code>) và <strong>đưa toàn bộ yêu cầu rõ ràng ngay từ lượt đầu tiên</strong> cho kết quả tốt nhất — model lên kế hoạch tốt hơn và thường tốn ÍT token hơn nhờ ít phải làm lại.</p>
+        <div class="module-what"><strong>Mẫu xin kế hoạch:</strong></div>
+        <div class="code-block"><span class="code-comment"># Bắt AI lập kế hoạch trước khi code</span>
+Hãy KHẢO SÁT codebase và đề xuất kế hoạch chi tiết để
+[mô tả task]. Liệt kê các file sẽ sửa và thứ tự thực hiện.
+ĐỪNG viết code cho tới khi tôi duyệt kế hoạch.</div>
+        <div class="highlight highlight-important">
+            <strong>Đưa mục tiêu lên đầu:</strong> Một lượt đầu tiên đặc tả đầy đủ (mục tiêu, ràng buộc, tiêu chí "xong") thắng xa việc nhỏ giọt yêu cầu qua nhiều lượt. Trong Claude Code có thể dùng <code>/goal</code> để đặt định hướng cho cả phiên dài.
+        </div>
+        <div class="module-tools">
+            <span class="tool-tag">Plan mode</span>
+            <span class="tool-tag">effort: high/xhigh</span>
+            <span class="tool-tag">/goal</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 5 ═══ -->
+<div class="section" id="s5">
+    <div class="section-header">
+        <div class="section-num">05</div>
+        <div>
+            <div class="section-title">Slash command tùy biến & Skills</div>
+            <div class="section-subtitle">Tự động hóa các prompt lặp đi lặp lại</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Đóng gói prompt lặp lại thành lệnh</h4>
+        <p>Nếu bạn gõ cùng một đoạn prompt dài lần thứ ba ("review diff này tìm bug, kiểm tra cả null check và race condition..."), đã đến lúc biến nó thành lệnh. <strong>Custom slash command</strong> trong Claude Code là file Markdown trong <code>.claude/commands/</code> — gõ <code>/tên-lệnh</code> là nạp lại nguyên prompt đó.</p>
+        <div class="code-block"><span class="code-comment"># .claude/commands/review.md — gọi bằng /review</span>
+Review diff hiện tại tìm bug đúng/sai (correctness):
+- Kiểm tra null/undefined chưa xử lý
+- Kiểm tra biên (off-by-one, mảng rỗng)
+- Kiểm tra race condition và double-submit
+Báo cáo theo mức độ nghiêm trọng, kèm số dòng.</div>
+    </div>
+
+    <div class="module advanced">
+        <div class="module-header">
+            <h4>Module 5.1: Skills — chuyên môn nạp khi cần</h4>
+            <span class="module-level level-advanced">Nâng cao</span>
+        </div>
+        <p><strong>Skills</strong> là các thư mục chứa <code>SKILL.md</code> đóng gói quy trình/chuyên môn cho một loại task (ví dụ: tạo file Excel, quy ước viết tài liệu). Phần mô tả ngắn nằm sẵn trong context; AI chỉ đọc toàn bộ nội dung khi task thực sự cần — giữ context gốc nhỏ mà vẫn có chuyên môn sâu khi đụng việc.</p>
+        <div class="highlight highlight-tip">
+            <strong>Khác biệt với prompt:</strong> Prompt là chỉ dẫn cho một lần. Slash command và Skills là tài sản tái sử dụng — viết một lần, dùng mọi phiên, chia sẻ cho cả team qua git.
+        </div>
+        <div class="module-tools">
+            <span class="tool-tag">/custom-command</span>
+            <span class="tool-tag">SKILL.md</span>
+            <span class="tool-tag">.claude/commands</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 6 ═══ -->
+<div class="section" id="s6">
+    <div class="section-header">
+        <div class="section-num">06</div>
+        <div>
+            <div class="section-title">Kiểm chứng, đừng tin lời</div>
+            <div class="section-subtitle">Bắt AI chạy test / hiện output thật; tự review diff</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>"Đừng nói nó chạy — CHẠY nó và cho tôi xem output"</h4>
+        <p>Code AI sinh ra trông đúng không có nghĩa là chạy đúng. Khác biệt giữa người dùng nghiệp dư và pro: pro không bao giờ chấp nhận "code này sẽ chạy được". Với agent có quyền chạy lệnh (như Claude Code), hãy bắt nó thực sự chạy test, build, hoặc một đoạn <code>console.log</code> rồi dán output thật làm bằng chứng.</p>
+        <div class="highlight highlight-important">
+            <strong>Luôn đọc diff trước khi merge:</strong> AI có thể "tiện tay" sửa thứ bạn không yêu cầu, xóa code, hoặc đổi hành vi ngầm. Review diff không phải tùy chọn — đó là rào chắn cuối cùng giữa code AI và nhánh main.
+        </div>
+    </div>
+
+    <div class="module intermediate">
+        <div class="module-header">
+            <h4>Module 6.1: Vòng lặp tự chứng minh</h4>
+            <span class="module-level level-intermediate">Trung cấp</span>
+        </div>
+        <ul style="font-size:.88rem;color:var(--text-dim);padding-left:20px">
+            <li><strong>Bắt chạy test sau mỗi lần sửa</strong> — "sửa xong PHẢI chạy <code>npm test</code> và dán output".</li>
+            <li><strong>Dùng hook để tự động</strong> — cấu hình hook chạy test/lint mỗi khi agent sửa file, để nó không thể "quên".</li>
+            <li><strong>Hiểu trước khi chấp nhận</strong> — nếu bạn không hiểu một đoạn code, đừng merge; hỏi AI giải thích.</li>
+            <li><strong>Cảnh giác câu "Done!"</strong> — "xong" mà không có output xác nhận chỉ là lời hứa.</li>
+        </ul>
+        <div class="module-tools">
+            <span class="tool-tag">Run tests</span>
+            <span class="tool-tag">Hooks</span>
+            <span class="tool-tag">Diff review</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 7 ═══ -->
+<div class="section" id="s7">
+    <div class="section-header">
+        <div class="section-num">07</div>
+        <div>
+            <div class="section-title">Refactor lớn & nhiều file</div>
+            <div class="section-subtitle">Giới hạn phạm vi, checkpoint bằng git, đi từng bước nhỏ</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Chia nhỏ, không "big bang"</h4>
+        <p>Yêu cầu AI "refactor toàn bộ codebase sang pattern mới" trong một lượt là công thức cho thảm họa: nửa chừng nó lạc hướng, để lại trạng thái dở dang khó hồi phục. Thay vào đó, chia thành các bước nhỏ kiểm chứng được, và commit sau mỗi bước xanh.</p>
+        <div class="highlight highlight-warn">
+            <strong>Bẫy "context rot" khi refactor dài:</strong> Một lượt sửa quá nhiều file khiến AI quên trạng thái ban đầu và mâu thuẫn với chính nó. Đi từng module một, <code>/clear</code> giữa các module độc lập.
+        </div>
+    </div>
+
+    <div class="module advanced">
+        <div class="module-header">
+            <h4>Module 7.1: Quy trình refactor an toàn</h4>
+            <span class="module-level level-advanced">Nâng cao</span>
+        </div>
+        <div class="code-block"><span class="code-comment"># Refactor lớn — đi từng bước, checkpoint bằng git</span>
+1. git commit / git stash  <span class="code-comment"># lưu trạng thái sạch trước khi bắt đầu</span>
+2. Yêu cầu AI lập kế hoạch chia bước (plan mode)
+3. Làm BƯỚC 1 → chạy test → commit
+4. Làm BƯỚC 2 → chạy test → commit
+5. Lạc hướng? git reset về checkpoint gần nhất, thử lại nhỏ hơn</div>
+        <div class="highlight highlight-tip">
+            <strong>Worktree cho việc rủi ro:</strong> Với thay đổi lớn/mạo hiểm, làm trong một git worktree riêng (xem mục 08) để nhánh chính luôn nguyên vẹn và dễ vứt bỏ nếu hỏng.
+        </div>
+        <div class="module-tools">
+            <span class="tool-tag">Small steps</span>
+            <span class="tool-tag">git checkpoint</span>
+            <span class="tool-tag">git reset</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 8 ═══ -->
+<div class="section" id="s8">
+    <div class="section-header">
+        <div class="section-num">08</div>
+        <div>
+            <div class="section-title">Git workflow với AI</div>
+            <div class="section-subtitle">Commit thường xuyên, worktree cho việc song song/rủi ro, review trước commit</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Git là lưới an toàn cho code AI</h4>
+        <p>Khi để AI sửa code tự động, git là cứu cánh. Commit thường xuyên tạo các điểm hồi phục; mỗi commit nhỏ giúp dễ <code>git diff</code>, dễ <code>git revert</code> đúng phần hỏng mà không mất phần tốt.</p>
+        <ul>
+            <li><strong>Commit nhỏ và thường xuyên</strong> — mỗi đơn vị công việc xanh là một commit.</li>
+            <li><strong>Luôn review diff trước khi commit</strong> — đọc <code>git diff</code>, không commit mù.</li>
+            <li><strong>Đừng để AI tự push lên main</strong> — tạo nhánh trước; chỉ push/commit khi bạn chủ động yêu cầu.</li>
+        </ul>
+    </div>
+
+    <div class="module advanced">
+        <div class="module-header">
+            <h4>Module 8.1: Worktree cho việc song song & mạo hiểm</h4>
+            <span class="module-level level-advanced">Nâng cao</span>
+        </div>
+        <p>Git worktree cho phép checkout nhiều nhánh ra các thư mục riêng cùng lúc — lý tưởng để chạy nhiều phiên AI song song hoặc thử một thay đổi rủi ro mà không động đến working directory chính.</p>
+        <div class="code-block"><span class="code-comment"># Tạo worktree riêng cho một thử nghiệm mạo hiểm</span>
+git worktree add ../proj-experiment -b experiment
+
+<span class="code-comment"># Cho AI làm trong ../proj-experiment; nhánh main vẫn nguyên</span>
+<span class="code-comment"># Hỏng thì xóa sạch, không ảnh hưởng gì:</span>
+git worktree remove ../proj-experiment</div>
+        <div class="highlight highlight-tip">
+            <strong>Mẹo:</strong> Mỗi worktree là một context cô lập. Chạy 2 phiên AI ở 2 worktree để xử lý 2 feature độc lập song song mà không giẫm chân nhau.
+        </div>
+        <div class="module-tools">
+            <span class="tool-tag">git worktree</span>
+            <span class="tool-tag">feature branch</span>
+            <span class="tool-tag">git revert</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 9 ═══ -->
+<div class="section" id="s9">
+    <div class="section-header">
+        <div class="section-num">09</div>
+        <div>
+            <div class="section-title">Chọn model & tiết kiệm token</div>
+            <div class="section-subtitle">Dùng đúng model cho đúng việc; giữ phiên gọn để giảm chi phí</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Không phải việc gì cũng cần model mạnh nhất</h4>
+        <p>Mỗi model có điểm cân bằng riêng giữa trí tuệ, tốc độ và chi phí. Dùng model mạnh cho việc khó (refactor lớn, gỡ bug hóc búa, agentic dài hơi); dùng model nhanh/rẻ cho việc đơn giản (phân loại, tóm tắt, sửa lặt vặt). Chỉ dùng đúng các ID model thật bên dưới.</p>
+        <table class="compare-table">
+            <tr><th>Model ID</th><th>Thế mạnh</th><th>Dùng khi</th></tr>
+            <tr><td><code>claude-opus-4-8</code></td><td>Trí tuệ cao nhất tầng Opus, agentic dài hơi</td><td>Refactor lớn, gỡ bug khó, task nhiều bước</td></tr>
+            <tr><td><code>claude-sonnet-4-6</code></td><td>Cân bằng tốc độ &amp; trí tuệ</td><td>Coding hằng ngày, đa số việc</td></tr>
+            <tr><td><code>claude-haiku-4-5</code></td><td>Nhanh nhất, rẻ nhất</td><td>Phân loại, tóm tắt, việc đơn giản</td></tr>
+        </table>
+        <div class="highlight highlight-warn">
+            <strong>Chỉ dùng ID thật:</strong> <code>claude-opus-4-8</code>, <code>claude-sonnet-4-6</code>, <code>claude-haiku-4-5</code>. Đừng tự bịa hậu tố ngày tháng hay biến thể không tồn tại — sai ID là lỗi 404.
+        </div>
+    </div>
+
+    <div class="module intermediate">
+        <div class="module-header">
+            <h4>Module 9.1: Giảm chi phí mà không giảm chất lượng</h4>
+            <span class="module-level level-intermediate">Trung cấp</span>
+        </div>
+        <ul style="font-size:.88rem;color:var(--text-dim);padding-left:20px">
+            <li><strong>Giữ phiên gọn</strong> — <code>/clear</code> giữa task; context ngắn = ít token đầu vào mỗi lượt.</li>
+            <li><strong>Đặc tả đầy đủ từ đầu</strong> — ít vòng làm-lại nghĩa là ít token tổng, và thường chất lượng cao hơn.</li>
+            <li><strong>Tận dụng prompt caching</strong> — phần ngữ cảnh ổn định (như CLAUDE.md) được cache, đọc lại rẻ hơn nhiều.</li>
+            <li><strong>Chỉnh effort theo việc</strong> — <code>high</code>/<code>xhigh</code> cho coding/agentic; <code>medium</code>/<code>low</code> cho việc thường để tiết kiệm.</li>
+        </ul>
+        <div class="module-tools">
+            <span class="tool-tag">Model selection</span>
+            <span class="tool-tag">Prompt caching</span>
+            <span class="tool-tag">effort</span>
+            <span class="tool-tag">/clear</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 10 ═══ -->
+<div class="section" id="s10">
+    <div class="section-header">
+        <div class="section-num">10</div>
+        <div>
+            <div class="section-title">Bẫy thường gặp & anti-pattern</div>
+            <div class="section-subtitle">Những thói quen âm thầm phá hỏng năng suất của bạn</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Các sai lầm kinh điển khi dùng AI coding</h4>
+        <ul>
+            <li><strong>Copy-paste không hiểu:</strong> dán code AI vào dự án mà không hiểu nó làm gì — nợ kỹ thuật trá hình, không debug nổi khi hỏng.</li>
+            <li><strong>Quá tin AI:</strong> nhận "nó sẽ chạy được" mà không kiểm chứng; bỏ qua review diff.</li>
+            <li><strong>Prompt mơ hồ:</strong> "làm cho nó tốt hơn" — AI buộc phải đoán ý bạn, và đoán sai.</li>
+            <li><strong>Để context thối (context rot):</strong> phiên kéo dài nhiều giờ đủ thứ chuyện, AI lẫn lộn nhiệm vụ.</li>
+            <li><strong>Big-bang refactor:</strong> sửa cả codebase trong một lượt, không checkpoint git.</li>
+            <li><strong>Bịa ID model / API:</strong> dùng tên model không có thật thay vì các ID thật ở mục 09.</li>
+        </ul>
+    </div>
+
+    <div class="module beginner">
+        <div class="module-header">
+            <h4>Module 10.1: Bảng "Nên / Không nên"</h4>
+            <span class="module-level level-beginner">Tham khảo nhanh</span>
+        </div>
+        <table class="compare-table">
+            <tr><th>Nên ✅</th><th>Không nên ❌</th></tr>
+            <tr><td><code>/clear</code> giữa các task</td><td>Một phiên 3 tiếng đủ thứ chuyện</td></tr>
+            <tr><td>Prompt cụ thể, có đường dẫn file</td><td>"Sửa giúp cái bug đó"</td></tr>
+            <tr><td>Xin kế hoạch trước với việc lớn</td><td>Để AI lao vào sửa 15 file ngay</td></tr>
+            <tr><td>Bắt AI chạy test, dán output</td><td>Tin "Done!" mà không kiểm chứng</td></tr>
+            <tr><td>Đọc diff trước khi commit</td><td>Commit/push mù lên main</td></tr>
+            <tr><td>CLAUDE.md ngắn, đậm tín hiệu</td><td>CLAUDE.md 5000 từ lan man</td></tr>
+            <tr><td>Hiểu code trước khi merge</td><td>Copy-paste không hiểu</td></tr>
+            <tr><td>Dùng đúng ID model thật</td><td>Bịa tên model / hậu tố ngày</td></tr>
+        </table>
+        <div class="highlight highlight-important">
+            <strong>Nguyên tắc vàng:</strong> AI là một cộng sự cực giỏi nhưng tự tin kể cả khi sai. Bạn vẫn là người chịu trách nhiệm về code. Giữ context sạch, prompt cụ thể, kiểm chứng bằng bằng chứng — và luôn hiểu thứ bạn merge.
+        </div>
+        <div class="module-tools">
+            <span class="tool-tag">Do / Don't</span>
+            <span class="tool-tag">Ownership</span>
+            <span class="tool-tag">Verify</span>
+        </div>
+    </div>
+</div>
+
+<div class="section" id="s11">
+    <div class="section-header">
+        <div class="section-num">11</div>
+        <div>
+            <div class="section-title">Prefix Command & Trigger Word — "mã lệnh" đặt trước prompt</div>
+            <div class="section-subtitle">Sự thật đằng sau các mã kiểu <code>/Ghost &lt;prompt&gt;</code>, <code>Scaffold &lt;prompt&gt;</code> bạn thấy share trên mạng</div>
+        </div>
+    </div>
+
+    <div class="highlight highlight-warn">
+        <strong>Đọc cái này trước:</strong> Những "mã thần kỳ" như <code>L99 &lt;prompt&gt;</code>, <code>/Ghost &lt;prompt&gt;</code>, <code>Scaffold &lt;prompt&gt;</code> <strong>KHÔNG phải lệnh có sẵn (built-in)</strong> của Claude hay Claude Code. Gõ <code>/Ghost</code> vào một phiên Claude trống thì <em>không có gì xảy ra</em>. Chúng "chạy được" với người share vì <strong>họ đã tự định nghĩa trước</strong> (custom command), hoặc đó chỉ là câu "mồi" persona/mode. Hiểu đúng cơ chế thì bạn tự tạo được bộ của riêng mình — mạnh hơn nhiều việc copy mã của người khác.
+    </div>
+
+    <div class="card">
+        <h4>Vì sao "prefix một mã" lại cho output chuẩn hơn?</h4>
+        <p>Vì cái prefix đó <strong>bung ra (expand) thành một prompt dài có cấu trúc</strong> mà bạn đã soạn sẵn: vai trò, ràng buộc, định dạng đầu ra, checklist... Thay vì gõ lại đoạn dài đó mỗi lần, bạn gói nó vào 1 từ khoá ngắn. Bản chất là <em>tái sử dụng prompt tốt</em>, không phải phép thuật.</p>
+    </div>
+
+    <div class="module advanced">
+        <div class="module-header">
+            <h4>Module 11.1: Cơ chế THẬT #1 — Custom Slash Command</h4>
+            <span class="module-level level-advanced">Cách tự tạo</span>
+        </div>
+        <p class="module-what">Đây chính là thứ đứng sau các ví dụ <code>/Ghost</code>, <code>/scaffold</code>. Trong Claude Code, tạo file Markdown trong <code>.claude/commands/</code> — tên file thành tên lệnh. Dùng <code>$ARGUMENTS</code> để chèn phần prompt bạn gõ sau lệnh.</p>
+        <div class="code-block"><span class="code-comment"># .claude/commands/scaffold.md</span>
+<span class="code-comment"># → tạo ra lệnh /scaffold</span>
+
+Bạn là senior engineer. Scaffold một feature hoàn chỉnh cho yêu cầu sau:
+<span class="code-keyword">$ARGUMENTS</span>
+
+Yêu cầu bắt buộc:
+- Đề xuất cấu trúc file trước, chờ xác nhận nếu thay đổi lớn.
+- Viết code + test đi kèm, theo convention trong CLAUDE.md.
+- Chạy test, dán output thật để chứng minh.</div>
+        <p class="module-what">Giờ gõ <code>/scaffold form đăng ký có validate email</code> → Claude bung nguyên template trên với <code>$ARGUMENTS</code> = "form đăng ký...". <strong>Đó đúng là trải nghiệm "mã + prompt" bạn thấy.</strong></p>
+        <div class="module-tools">
+            <span class="tool-tag">.claude/commands/</span>
+            <span class="tool-tag">$ARGUMENTS</span>
+            <span class="tool-tag">Tái sử dụng prompt</span>
+        </div>
+    </div>
+
+    <div class="module expert">
+        <div class="module-header">
+            <h4>Module 11.2: Cơ chế THẬT #2 — Trigger word có sẵn (dùng được ngay)</h4>
+            <span class="module-level level-expert">Built-in thật</span>
+        </div>
+        <p class="module-what">Khác với mã tự chế, đây là từ khoá <strong>thật sự được Claude Code nhận diện</strong>, không cần cài gì:</p>
+        <ul>
+            <li><strong><code>think</code> → <code>think hard</code> → <code>think harder</code> → <code>ultrathink</code>:</strong> tăng dần "ngân sách suy nghĩ" của model trước khi trả lời. Dùng cho bài toán khó (thiết kế, debug rối). Đây là cái gần nhất với "mã làm output chuẩn hơn" mà <em>có thật</em>.</li>
+            <li><strong>Plan mode:</strong> bắt model lập kế hoạch trước, không sửa file cho tới khi bạn duyệt — lý tưởng cho task lớn.</li>
+        </ul>
+        <div class="code-block"><span class="code-comment">// Dùng trực tiếp, không cần định nghĩa gì:</span>
+ultrathink: thiết kế schema DB cho hệ thống đặt vé có chống overbooking
+
+<span class="code-comment">// càng "nặng" từ khoá, model suy nghĩ càng kỹ (và tốn token hơn)</span></div>
+        <div class="highlight highlight-tip">
+            <strong>Mẹo:</strong> chỉ dùng <code>ultrathink</code> khi thật sự cần — nó tốn token hơn nhiều. Việc đơn giản thì <code>think</code> hoặc không cần là đủ.
+        </div>
+        <div class="module-tools">
+            <span class="tool-tag">think / ultrathink</span>
+            <span class="tool-tag">Plan mode</span>
+        </div>
+    </div>
+
+    <div class="module intermediate">
+        <div class="module-header">
+            <h4>Module 11.3: Cơ chế THẬT #3 — Persona / Mode priming</h4>
+            <span class="module-level level-intermediate">Áp dụng mọi LLM</span>
+        </div>
+        <p class="module-what">Không cần công cụ gì — chỉ là <strong>mồi vai trò + chế độ</strong> ngay đầu prompt. Hoạt động với mọi chatbot AI (Claude, ChatGPT...), và cũng là thứ nhiều "mã share" thực chất đang làm.</p>
+        <div class="code-block"><span class="code-comment"># Thay vì:</span>
+viết hàm parse CSV
+
+<span class="code-comment"># Hãy mồi vai trò + ràng buộc (đây là "prefix" thật sự hữu ích):</span>
+Act as a senior .NET engineer. Plan first, no code yet.
+Viết hàm parse CSV: xử lý quoted field, dòng lỗi, file lớn (streaming).</div>
+        <div class="module-tools">
+            <span class="tool-tag">Role priming</span>
+            <span class="tool-tag">"Plan first"</span>
+            <span class="tool-tag">Ràng buộc rõ</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Tóm lại</h4>
+        <table class="compare-table">
+            <tr><th>Loại "mã"</th><th>Thật sự là gì</th><th>Dùng được khi nào</th></tr>
+            <tr><td><code>/Ghost</code>, <code>/scaffold</code>...</td><td>Custom slash command tự định nghĩa</td><td>Sau khi bạn tạo file trong <code>.claude/commands/</code></td></tr>
+            <tr><td><code>think</code>, <code>ultrathink</code></td><td>Trigger word có sẵn của Claude Code</td><td>Ngay lập tức, không cần cài</td></tr>
+            <tr><td><code>Act as...</code>, <code>Plan first</code></td><td>Persona / mode priming</td><td>Mọi lúc, mọi LLM</td></tr>
+            <tr><td><code>L99</code> & các mã lạ khác</td><td>Thường là quy ước riêng của người share</td><td>Chỉ khi bạn biết & cài đúng định nghĩa của nó</td></tr>
+        </table>
+        <div class="highlight highlight-important">
+            <strong>Lời khuyên:</strong> đừng sưu tầm "mã thần kỳ" của người khác. Hãy soạn vài prompt tốt cho công việc lặp lại của <em>chính bạn</em>, lưu thành slash command — đó mới là "mã lệnh" đáng giá và đúng ngữ cảnh dự án của bạn.
+        </div>
+    </div>
+</div>
+
+<div class="section" id="s12">
+    <div class="section-header">
+        <div class="section-num">12</div>
+        <div>
+            <div class="section-title">Khai thác tối đa gói Max</div>
+            <div class="section-subtitle">Bạn trả tiền cho usage cao — đây là lúc tiêu nó cho đáng</div>
+        </div>
+    </div>
+
+    <div class="highlight highlight-important">
+        <strong>Tư duy gói Max:</strong> đừng dùng Claude Code như chatbox hỏi-đáp từng câu. Hãy giao <em>việc lớn, làm song song, suy nghĩ sâu</em> — phần lớn người dùng phí gói Max vì vẫn xài như gói free.
+    </div>
+
+    <div class="module expert">
+        <div class="module-header">
+            <h4>12.1 · Subagent chạy song song</h4>
+            <span class="module-level level-expert">Đòn mạnh nhất</span>
+        </div>
+        <p class="module-what">Claude Code có thể bung <strong>nhiều agent con cùng lúc</strong>, mỗi agent có context riêng → không làm "thối" context chính. Lý tưởng cho việc fan-out: đọc nhiều subsystem, review nhiều khía cạnh, viết nhiều file.</p>
+        <div class="code-block"><span class="code-comment">// Ví dụ thật:</span>
+"Spawn 5 agent song song, mỗi agent rà 1 thư mục
+ (BE, FE, infra, tests, docs) và báo về các bug tìm được."
+
+<span class="code-comment">// Mỗi agent làm độc lập → gộp kết quả → nhanh gấp nhiều lần</span></div>
+        <div class="highlight highlight-tip"><strong>Mẹo:</strong> nói rõ "song song" / "parallel" và chia việc theo ranh giới rõ ràng (theo thư mục, theo khía cạnh) để các agent không giẫm chân nhau.</div>
+        <div class="module-tools"><span class="tool-tag">Parallel agents</span><span class="tool-tag">Fan-out</span><span class="tool-tag">Context riêng</span></div>
+    </div>
+
+    <div class="module advanced">
+        <div class="module-header">
+            <h4>12.2 · Workflow orchestration</h4>
+            <span class="module-level level-advanced">Việc lớn, nhiều bước</span>
+        </div>
+        <p class="module-what">Với tác vụ quy mô lớn (audit bảo mật toàn repo, migrate hàng loạt, research sâu), yêu cầu Claude điều phối agent theo <strong>pipeline</strong>: tìm → kiểm chứng đối kháng → tổng hợp. Mỗi pha là một đợt agent.</p>
+        <div class="code-block"><span class="code-comment">// Gợi ý câu lệnh:</span>
+"Audit toàn bộ codebase tìm lỗ hổng bảo mật:
+ pha 1 nhiều agent quét song song,
+ pha 2 mỗi bug cử agent khác cố phản biện xem có thật không,
+ pha 3 tổng hợp những bug đã xác nhận."</div>
+        <div class="module-tools"><span class="tool-tag">Pipeline</span><span class="tool-tag">Adversarial verify</span><span class="tool-tag">Audit / Migrate</span></div>
+    </div>
+
+    <div class="module intermediate">
+        <div class="module-header">
+            <h4>12.3 · Background task — không ngồi chờ</h4>
+            <span class="module-level level-intermediate">Tiết kiệm thời gian</span>
+        </div>
+        <p class="module-what">Lệnh chạy lâu (<code>npm run dev</code>, test suite, build, train) cho chạy <strong>nền</strong> → Claude vẫn làm việc khác, xong nó tự báo. Không bị "kẹt" chờ một lệnh.</p>
+        <div class="module-tools"><span class="tool-tag">run in background</span><span class="tool-tag">dev server</span><span class="tool-tag">long tests</span></div>
+    </div>
+
+    <div class="module expert">
+        <div class="module-header">
+            <h4>12.4 · ultrathink thả ga</h4>
+            <span class="module-level level-expert">Suy nghĩ sâu</span>
+        </div>
+        <p class="module-what">Gói Max không lo token → cứ <code>ultrathink</code> cho bài toán khó: thiết kế kiến trúc, debug race condition, tối ưu thuật toán. Nó tăng "ngân sách suy nghĩ" thật sự (xem mục 11).</p>
+        <div class="code-block">ultrathink: thiết kế lại module thanh toán cho chịu tải 10k req/s,
+            phân tích trade-off consistency vs latency</div>
+    </div>
+</div>
+
+<div class="section" id="s13">
+    <div class="section-header">
+        <div class="section-num">13</div>
+        <div>
+            <div class="section-title">Tự động hoá: Hooks & MCP</div>
+            <div class="section-subtitle">Để công cụ làm thay, đỡ phải nhắc Claude từng lần</div>
+        </div>
+    </div>
+
+    <div class="module advanced">
+        <div class="module-header">
+            <h4>13.1 · Hooks — tự động theo sự kiện</h4>
+            <span class="module-level level-advanced">Do harness chạy, chắc chắn</span>
+        </div>
+        <p class="module-what">Hook là lệnh <strong>tự chạy khi có sự kiện</strong> (trước/sau khi sửa file, trước khi commit...). Khác với "nhờ Claude nhớ làm" — hook do harness thực thi nên <strong>luôn chạy</strong>.</p>
+        <ul>
+            <li><strong>PostToolUse:</strong> tự <code>dotnet format</code> / <code>prettier</code> sau mỗi lần sửa file.</li>
+            <li><strong>PreToolUse:</strong> chặn ghi vào file nhạy cảm, chặn commit chứa secret.</li>
+            <li><strong>Stop / Notification:</strong> báo khi Claude làm xong (chuông, thông báo).</li>
+        </ul>
+        <div class="highlight highlight-tip"><strong>Mẹo:</strong> muốn một hành vi "luôn luôn xảy ra tự động" thì phải dùng <em>hook</em>, không phải ghi vào CLAUDE.md — vì model có thể quên, còn hook thì không.</div>
+        <div class="module-tools"><span class="tool-tag">PostToolUse</span><span class="tool-tag">PreToolUse</span><span class="tool-tag">auto-format / lint</span></div>
+    </div>
+
+    <div class="module advanced">
+        <div class="module-header">
+            <h4>13.2 · MCP servers — cắm thêm "giác quan" cho Claude</h4>
+            <span class="module-level level-advanced">Kết nối hệ thống ngoài</span>
+        </div>
+        <p class="module-what">MCP cho Claude thao tác trực tiếp với công cụ ngoài. Vài cái hữu ích cho dev .NET/React/AI:</p>
+        <ul>
+            <li><strong>Playwright MCP:</strong> Claude mở trình duyệt thật, click/chụp màn hình → tự kiểm chứng UI sau khi sửa.</li>
+            <li><strong>Database/Postgres MCP:</strong> truy vấn DB trực tiếp để hiểu schema, kiểm tra dữ liệu.</li>
+            <li><strong>Code-graph MCP</strong> (vd codegraph): index codebase thành đồ thị → Claude tra cứu thay vì đọc mò file, đỡ tốn token với repo lớn.</li>
+            <li><strong>GitHub MCP:</strong> đọc/tạo PR, issue, review.</li>
+        </ul>
+        <div class="highlight highlight-warn"><strong>An toàn:</strong> MCP là bên thứ ba — ưu tiên loại <em>chạy local</em>, mã nguồn mở, ít quyền. "Năm server chọn kỹ hơn hai mươi server cài bừa."</div>
+        <div class="module-tools"><span class="tool-tag">Playwright</span><span class="tool-tag">DB MCP</span><span class="tool-tag">codegraph</span><span class="tool-tag">GitHub MCP</span></div>
+    </div>
+</div>
+
+<div class="section" id="s14">
+    <div class="section-header">
+        <div class="section-num">14</div>
+        <div>
+            <div class="section-title">Mẹo nhỏ tăng tốc mỗi ngày</div>
+            <div class="section-subtitle">Quality-of-life — nhỏ nhưng dùng hằng ngày</div>
+        </div>
+    </div>
+
+    <div class="grid grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card">
+            <h4>🖼️ Dán ảnh / screenshot vào</h4>
+            <p>Bug UI, lỗi trên màn hình, ảnh thiết kế Figma → dán/kéo thẳng ảnh vào Claude Code. Nó "nhìn" được và sửa theo ảnh. Cực mạnh cho frontend React.</p>
+        </div>
+        <div class="card">
+            <h4>📎 Nhắc file bằng <code>@</code></h4>
+            <p>Gõ <code>@</code> rồi tên file để Claude tập trung đúng file đó, thay vì để nó đi tìm — nhanh và chính xác hơn.</p>
+        </div>
+        <div class="card">
+            <h4>⎋ Esc để ngắt</h4>
+            <p>Claude đi sai hướng? Bấm <strong>Esc</strong> để dừng ngay, sửa lại yêu cầu — đừng để nó chạy hết rồi mới sửa (tốn thời gian + token).</p>
+        </div>
+        <div class="card">
+            <h4>🧹 /clear &amp; /compact</h4>
+            <p><code>/clear</code> khi sang task mới (reset context). <code>/compact</code> khi phiên dài muốn nén lại mà vẫn giữ mạch việc đang làm.</p>
+        </div>
+        <div class="card">
+            <h4>▶️ Bắt Claude chạy app để kiểm chứng</h4>
+            <p>Đừng tin "Done!". Bảo nó <em>chạy thật</em> (dev server, test) và dán output/ảnh chụp để chứng minh thay đổi đúng.</p>
+        </div>
+        <div class="card">
+            <h4>↩️ Resume phiên cũ</h4>
+            <p>Quay lại phiên trước để tiếp tục đúng ngữ cảnh đang dở, thay vì kể lại từ đầu.</p>
+        </div>
+    </div>
+
+    <div class="highlight highlight-important" style="margin-top:16px">
+        <strong>Tổng kết cho người dùng Max:</strong> giao việc lớn · cho chạy song song · <code>ultrathink</code> khi khó · tự động hoá bằng hook · cắm MCP đúng nhu cầu · và luôn bắt nó <em>chứng minh</em> bằng kết quả thật. Đó là cách biến gói Max thành một "đội kỹ sư" chứ không phải một ô chat.
+    </div>
+</div>
+
+</div><!-- end container -->
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer">
+    <p>AI Mastery · Tips &amp; Tricks dùng AI coding — <a href="learn.html">Học AI</a> · <a href="testing-ai.html">Testing với AI</a> · <a href="security-ai.html">Security review</a></p>
+</footer>
+
+</body>
+</html>
