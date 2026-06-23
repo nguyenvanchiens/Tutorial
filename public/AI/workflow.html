@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Làm Việc — Quy trình làm việc với AI (review → MR)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="ai.css">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{
+            --bg:#0B0B1A;--surface:#151528;--surface2:#1E1E3A;--border:#2A2A4A;
+            --text:#E8E8F0;--text-dim:#8888AA;--primary:#7C3AED;--accent:#06B6D4;
+            --green:#10B981;--orange:#F59E0B;--red:#EF4444;--pink:#EC4899;--blue:#3B82F6;
+            --radius:12px;--radius-sm:8px;
+        }
+        html{scroll-behavior:smooth}
+        body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.8;min-height:100vh}
+        .navbar{position:fixed;top:0;left:0;width:100%;background:rgba(11,11,26,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px}
+        .nav-logo{font-weight:800;font-size:1rem;color:var(--primary);text-decoration:none}
+        .nav-logo span{color:var(--accent)}
+        .nav-links{display:flex;gap:20px}
+        .nav-links a{color:var(--text-dim);text-decoration:none;font-size:.85rem;font-weight:500;transition:color .2s}
+        .nav-links a:hover,.nav-links a.active{color:var(--primary)}
+        .container{max-width:920px;margin:0 auto;padding:0 24px}
+        .hero{padding:90px 24px 40px;text-align:center;background:linear-gradient(180deg,rgba(124,58,237,.08) 0%,transparent 60%)}
+        .hero h1{font-size:2.4rem;font-weight:900;margin-bottom:12px}
+        .gradient-text{background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .hero p{color:var(--text-dim);font-size:.95rem;max-width:650px;margin:0 auto}
+        .hero-badge{display:inline-block;padding:4px 16px;border-radius:20px;font-size:.75rem;font-weight:700;background:rgba(124,58,237,.15);color:var(--primary);margin-bottom:16px;letter-spacing:1px}
+        .toc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 28px;margin:0 auto 40px;max-width:920px}
+        .toc h3{font-size:1rem;font-weight:800;margin-bottom:12px;color:var(--accent)}
+        .toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px}
+        .toc a{color:var(--text-dim);text-decoration:none;font-size:.88rem;padding:4px 0;transition:color .2s;display:flex;align-items:center;gap:8px}
+        .toc a:hover{color:var(--primary)}
+        .toc-num{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;color:var(--primary);min-width:24px}
+        .section{margin-bottom:48px;scroll-margin-top:72px}
+        .section-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid var(--border)}
+        .section-num{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:900;color:var(--primary)}
+        .section-title{font-size:1.25rem;font-weight:800}
+        .section-subtitle{color:var(--text-dim);font-size:.85rem;margin-top:2px}
+        .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px;transition:border-color .2s}
+        .card:hover{border-color:rgba(124,58,237,.3)}
+        .card h4{font-size:1rem;font-weight:700;margin-bottom:8px;color:var(--text)}
+        .card p,.card li{font-size:.9rem;color:var(--text-dim);line-height:1.8}
+        .card ul{padding-left:20px}
+        .card li{margin-bottom:6px}
+        .module{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px;position:relative;overflow:hidden}
+        .module::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;border-radius:4px 0 0 4px}
+        .module.beginner::before{background:var(--green)}
+        .module.intermediate::before{background:var(--orange)}
+        .module.advanced::before{background:var(--red)}
+        .module.expert::before{background:var(--primary)}
+        .module-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+        .module h4{font-size:1.05rem;font-weight:800}
+        .module-level{padding:3px 10px;border-radius:12px;font-size:.7rem;font-weight:700;flex-shrink:0}
+        .level-beginner{background:rgba(16,185,129,.12);color:var(--green)}
+        .level-intermediate{background:rgba(245,158,11,.12);color:var(--orange)}
+        .level-advanced{background:rgba(239,68,68,.12);color:var(--red)}
+        .level-expert{background:rgba(124,58,237,.12);color:var(--primary)}
+        .module p{font-size:.88rem;color:var(--text-dim);margin-bottom:10px}
+        .module-what{font-size:.82rem;color:var(--text);margin-bottom:8px}
+        .module-what strong{color:var(--accent)}
+        .module ul{padding-left:20px;color:var(--text-dim);font-size:.88rem}
+        .module li{margin-bottom:6px}
+        .module-tools{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+        .tool-tag{padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:600;background:var(--surface2);color:var(--text-dim);border:1px solid var(--border)}
+        .code-block{background:#0D0D20;border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 20px;margin:12px 0;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.7;color:#A5B4FC;white-space:pre-wrap}
+        .code-comment{color:#6B7280}
+        .code-keyword{color:#C084FC}
+        .code-string{color:#34D399}
+        .code-fn{color:#60A5FA}
+        .highlight{border-radius:var(--radius);padding:16px 20px;margin:12px 0;font-size:.88rem}
+        .highlight-warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:var(--orange)}
+        .highlight-tip{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:var(--green)}
+        .highlight-important{background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);color:var(--primary)}
+        .highlight strong{color:var(--text)}
+        .footer{padding:32px 24px;text-align:center;border-top:1px solid var(--border);margin-top:40px}
+        .footer p{color:var(--text-dim);font-size:.82rem}
+        .footer a{color:var(--primary);text-decoration:none}
+        @media(max-width:768px){
+            .hero h1{font-size:1.6rem}
+            .toc-grid{grid-template-columns:1fr}
+            .module-header{flex-direction:column;gap:8px}
+            .nav-links{display:none}
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav class="navbar">
+    <a href="index.html" class="nav-logo">AI<span>Hub</span></a>
+    <div class="nav-links">
+        <a href="index.html">Tin Tuc AI</a>
+        <a href="learn.html">Hoc AI</a>
+        <a href="prompt-engineering.html">Prompt Engineering</a>
+        <a href="ai-tips.html">Tips & Tricks</a>
+        <a href="workflow.html" class="active">Prompt Làm Việc</a>
+        <a href="../BE/index.html">.NET</a>
+    </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<header class="hero">
+    <div class="hero-badge">PROMPT LÀM VIỆC</div>
+    <h1>Quy trình làm việc <span class="gradient-text">với AI</span></h1>
+    <p>6 bước chuẩn để code AI viết ra luôn <strong>sạch trước khi merge</strong>: review nhiều lớp, làm sạch context giữa các lớp, rồi mới tạo và chốt MR. Mỗi bước kèm sẵn prompt/lệnh để copy dùng.</p>
+</header>
+
+<div class="container">
+<div class="toc">
+    <h3>6 Bước</h3>
+    <div class="toc-grid">
+        <a href="#s1"><span class="toc-num">01</span> Review cục bộ (trong lúc làm)</a>
+        <a href="#s2"><span class="toc-num">02</span> Review tổng thể (toàn branch)</a>
+        <a href="#s3"><span class="toc-num">03</span> Sửa &amp; review lại</a>
+        <a href="#s4"><span class="toc-num">04</span> Tạo MR</a>
+        <a href="#s5"><span class="toc-num">05</span> Review lại trên MR</a>
+        <a href="#s6"><span class="toc-num">06</span> Sửa theo feedback &amp; cập nhật MR</a>
+    </div>
+</div>
+
+<div class="highlight highlight-important">
+    <strong>Nguyên tắc xuyên suốt:</strong> review nhiều lớp + <code>/clear</code> để làm sạch context giữa các lớp. Mỗi lần review nên có "đầu óc tỉnh táo" — context cũ lẫn lộn sẽ làm AI review qua loa hoặc review nhầm theo code đã bị bỏ.
+</div>
+
+<!-- BƯỚC 1 -->
+<div class="section" id="s1">
+    <div class="section-header">
+        <div class="section-num">01</div>
+        <div>
+            <div class="section-title">Review trong lúc làm (review cục bộ)</div>
+            <div class="section-subtitle">Bắt lỗi sớm ngay khi đang code</div>
+        </div>
+    </div>
+    <div class="module beginner">
+        <div class="module-header">
+            <h4>Làm gì</h4>
+            <span class="module-level level-beginner">Đang code</span>
+        </div>
+        <ul>
+            <li>Review thủ công 1–2 file cụ thể đang sửa, hoặc</li>
+            <li>Dùng <code>/simplify</code> để review nhanh các file <strong>đã thay đổi nhưng chưa commit</strong> (đây là phiên bản giới hạn của <code>review-branch</code>).</li>
+        </ul>
+        <div class="code-block">/simplify</div>
+        <div class="module-tools"><span class="tool-tag">/simplify</span><span class="tool-tag">Review cục bộ</span></div>
+    </div>
+</div>
+
+<!-- BƯỚC 2 -->
+<div class="section" id="s2">
+    <div class="section-header">
+        <div class="section-num">02</div>
+        <div>
+            <div class="section-title">Review tổng thể</div>
+            <div class="section-subtitle">Khi code đã ổn — quét cả branch</div>
+        </div>
+    </div>
+    <div class="module intermediate">
+        <div class="module-header">
+            <h4>Làm gì</h4>
+            <span class="module-level level-intermediate">Code đã ổn</span>
+        </div>
+        <p class="module-what">Khi thấy code đã ổn, chạy <code>review-branch</code> để kiểm tra <strong>toàn bộ branch</strong> — không chỉ vài file lẻ.</p>
+        <div class="code-block">review-branch</div>
+        <div class="module-tools"><span class="tool-tag">review-branch</span></div>
+    </div>
+</div>
+
+<!-- BƯỚC 3 -->
+<div class="section" id="s3">
+    <div class="section-header">
+        <div class="section-num">03</div>
+        <div>
+            <div class="section-title">Sửa &amp; review lại (nếu sửa nhiều)</div>
+            <div class="section-subtitle">Làm sạch context rồi soi lại</div>
+        </div>
+    </div>
+    <div class="module intermediate">
+        <div class="module-header">
+            <h4>Làm gì</h4>
+            <span class="module-level level-intermediate">Sửa nhiều</span>
+        </div>
+        <p class="module-what">Sau khi sửa xong, nếu thay đổi nhiều → chạy <code>/clear</code> để xoá context cũ → chạy lại review một lần nữa cho sạch.</p>
+        <div class="code-block">/clear
+review-branch</div>
+        <div class="highlight highlight-tip"><strong>Vì sao <code>/clear</code>?</strong> Context cũ chứa code đã bị sửa/loại bỏ — để nguyên thì AI dễ review nhầm theo phiên bản cũ.</div>
+        <div class="module-tools"><span class="tool-tag">/clear</span><span class="tool-tag">Review lại</span></div>
+    </div>
+</div>
+
+<!-- BƯỚC 4 -->
+<div class="section" id="s4">
+    <div class="section-header">
+        <div class="section-num">04</div>
+        <div>
+            <div class="section-title">Tạo MR</div>
+            <div class="section-subtitle">Khi review đã pass</div>
+        </div>
+    </div>
+    <div class="module advanced">
+        <div class="module-header">
+            <h4>Làm gì</h4>
+            <span class="module-level level-advanced">Review pass</span>
+        </div>
+        <p class="module-what">Khi review đã pass → tạo MR (Merge Request).</p>
+        <div class="module-tools"><span class="tool-tag">Create MR</span></div>
+    </div>
+</div>
+
+<!-- BƯỚC 5 -->
+<div class="section" id="s5">
+    <div class="section-header">
+        <div class="section-num">05</div>
+        <div>
+            <div class="section-title">Review lại trên MR</div>
+            <div class="section-subtitle">Lớp kiểm tra cuối</div>
+        </div>
+    </div>
+    <div class="module advanced">
+        <div class="module-header">
+            <h4>Làm gì</h4>
+            <span class="module-level level-advanced">Trên MR</span>
+        </div>
+        <p class="module-what"><code>/clear</code> thêm lần nữa, rồi yêu cầu AI review lại chính MR đó với prompt:</p>
+        <div class="code-block">/clear
+review the MR !number_of_mr</div>
+        <div class="module-tools"><span class="tool-tag">/clear</span><span class="tool-tag">Review MR</span></div>
+    </div>
+</div>
+
+<!-- BƯỚC 6 -->
+<div class="section" id="s6">
+    <div class="section-header">
+        <div class="section-num">06</div>
+        <div>
+            <div class="section-title">Sửa theo feedback &amp; cập nhật MR</div>
+            <div class="section-subtitle">Khép vòng</div>
+        </div>
+    </div>
+    <div class="module expert">
+        <div class="module-header">
+            <h4>Làm gì</h4>
+            <span class="module-level level-expert">Khép vòng</span>
+        </div>
+        <p class="module-what">Bảo AI sửa theo feedback → <strong>commit → push</strong> để update MR luôn.</p>
+        <div class="code-block">Sửa theo các feedback ở trên, sau đó commit và push để cập nhật MR.</div>
+        <div class="module-tools"><span class="tool-tag">Fix</span><span class="tool-tag">Commit &amp; Push</span><span class="tool-tag">Update MR</span></div>
+    </div>
+
+    <div class="highlight highlight-important">
+        <strong>Tóm tắt vòng lặp:</strong> <code>/simplify</code> (cục bộ) → <code>review-branch</code> (toàn branch) → <code>/clear</code> + review lại → tạo MR → <code>/clear</code> + <code>review the MR !id</code> → sửa &amp; push. Mỗi lớp một góc nhìn sạch, code merge ra luôn yên tâm.
+    </div>
+</div>
+
+</div><!-- end container -->
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer">
+    <p>AI Mastery · Prompt Làm Việc — <a href="ai-tips.html">Tips &amp; Tricks</a> · <a href="prompt-engineering.html">Prompt Engineering</a> · <a href="learn.html">Học AI</a></p>
+</footer>
+
+</body>
+</html>

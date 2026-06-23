@@ -127,6 +127,12 @@ const SECTIONS = [
       { id: 'cc-roadmap', label: 'Claude Code · Roadmap', src: '/CLAUDE-CODE/index.html' },
       { id: 'cc-basics',  label: 'Claude Code · Cơ Bản',  src: '/CLAUDE-CODE/basics.html' },
     ]},
+    { id: 'ai-prompt-grp', label: 'Prompt Engineering', children: [
+      { id: 'ai-prompt', label: 'Viết Prompt Tối Ưu', src: '/AI/prompt-engineering.html' },
+    ]},
+    { id: 'ai-workflow-grp', label: 'Prompt Làm Việc', children: [
+      { id: 'ai-workflow', label: 'Quy Trình (Review → MR)', src: '/AI/workflow.html' },
+    ]},
     { id: 'ai-advanced', label: 'AI Nâng Cao', children: [
       { id: 'ai-course',      label: 'Claude Code Masterclass',    src: '/AI/claude-course.html' },
       { id: 'cc-commands',    label: 'Claude Code · Commands',     src: '/CLAUDE-CODE/commands.html' },

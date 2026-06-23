@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Engineering — Viết Prompt Tối Ưu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="ai.css">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{
+            --bg:#0B0B1A;--surface:#151528;--surface2:#1E1E3A;--border:#2A2A4A;
+            --text:#E8E8F0;--text-dim:#8888AA;--primary:#7C3AED;--accent:#06B6D4;
+            --green:#10B981;--orange:#F59E0B;--red:#EF4444;--pink:#EC4899;--blue:#3B82F6;
+            --radius:12px;--radius-sm:8px;
+        }
+        html{scroll-behavior:smooth}
+        body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.8;min-height:100vh}
+        .navbar{position:fixed;top:0;left:0;width:100%;background:rgba(11,11,26,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px}
+        .nav-logo{font-weight:800;font-size:1rem;color:var(--primary);text-decoration:none}
+        .nav-logo span{color:var(--accent)}
+        .nav-links{display:flex;gap:20px}
+        .nav-links a{color:var(--text-dim);text-decoration:none;font-size:.85rem;font-weight:500;transition:color .2s}
+        .nav-links a:hover,.nav-links a.active{color:var(--primary)}
+        .container{max-width:920px;margin:0 auto;padding:0 24px}
+        .hero{padding:90px 24px 40px;text-align:center;background:linear-gradient(180deg,rgba(124,58,237,.08) 0%,transparent 60%)}
+        .hero h1{font-size:2.4rem;font-weight:900;margin-bottom:12px}
+        .gradient-text{background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .hero p{color:var(--text-dim);font-size:.95rem;max-width:650px;margin:0 auto}
+        .hero-badge{display:inline-block;padding:4px 16px;border-radius:20px;font-size:.75rem;font-weight:700;background:rgba(239,68,68,.15);color:var(--red);margin-bottom:16px;letter-spacing:1px}
+        .toc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 28px;margin:0 auto 40px;max-width:920px}
+        .toc h3{font-size:1rem;font-weight:800;margin-bottom:12px;color:var(--accent)}
+        .toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px}
+        .toc a{color:var(--text-dim);text-decoration:none;font-size:.88rem;padding:4px 0;transition:color .2s;display:flex;align-items:center;gap:8px}
+        .toc a:hover{color:var(--primary)}
+        .toc-num{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;color:var(--primary);min-width:24px}
+        .section{margin-bottom:48px;scroll-margin-top:72px}
+        .section-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid var(--border)}
+        .section-num{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:900;color:var(--primary)}
+        .section-title{font-size:1.25rem;font-weight:800}
+        .section-subtitle{color:var(--text-dim);font-size:.85rem;margin-top:2px}
+        .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px;transition:border-color .2s}
+        .card:hover{border-color:rgba(124,58,237,.3)}
+        .card h4{font-size:1rem;font-weight:700;margin-bottom:8px;color:var(--text)}
+        .card p,.card li{font-size:.9rem;color:var(--text-dim);line-height:1.8}
+        .card ul{padding-left:20px}
+        .card li{margin-bottom:6px}
+        .module{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px;position:relative;overflow:hidden}
+        .module::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;border-radius:4px 0 0 4px}
+        .module.beginner::before{background:var(--green)}
+        .module.intermediate::before{background:var(--orange)}
+        .module.advanced::before{background:var(--red)}
+        .module.expert::before{background:var(--primary)}
+        .module-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+        .module h4{font-size:1.05rem;font-weight:800}
+        .module-level{padding:3px 10px;border-radius:12px;font-size:.7rem;font-weight:700;flex-shrink:0}
+        .level-beginner{background:rgba(16,185,129,.12);color:var(--green)}
+        .level-intermediate{background:rgba(245,158,11,.12);color:var(--orange)}
+        .level-advanced{background:rgba(239,68,68,.12);color:var(--red)}
+        .level-expert{background:rgba(124,58,237,.12);color:var(--primary)}
+        .module p{font-size:.88rem;color:var(--text-dim);margin-bottom:10px}
+        .module-what{font-size:.82rem;color:var(--text);margin-bottom:8px}
+        .module-what strong{color:var(--accent)}
+        .module-tools{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+        .tool-tag{padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:600;background:var(--surface2);color:var(--text-dim);border:1px solid var(--border)}
+        .code-block{background:#0D0D20;border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 20px;margin:12px 0;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.7;color:#A5B4FC;white-space:pre}
+        .code-comment{color:#6B7280}
+        .code-keyword{color:#C084FC}
+        .code-string{color:#34D399}
+        .code-fn{color:#60A5FA}
+        .highlight{border-radius:var(--radius);padding:16px 20px;margin:12px 0;font-size:.88rem}
+        .highlight-warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:var(--orange)}
+        .highlight-tip{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:var(--green)}
+        .highlight-important{background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);color:var(--primary)}
+        .highlight strong{color:var(--text)}
+        .compare-table{width:100%;border-collapse:collapse;font-size:.85rem;margin:12px 0}
+        .compare-table th{background:var(--surface2);padding:10px 14px;text-align:left;font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.5px;color:var(--accent);border-bottom:2px solid var(--border)}
+        .compare-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text-dim)}
+        .compare-table tr:hover td{background:rgba(124,58,237,.03)}
+        .footer{padding:32px 24px;text-align:center;border-top:1px solid var(--border);margin-top:40px}
+        .footer p{color:var(--text-dim);font-size:.82rem}
+        .footer a{color:var(--primary);text-decoration:none}
+        @media(max-width:768px){
+            .hero h1{font-size:1.6rem}
+            .toc-grid{grid-template-columns:1fr}
+            .module-header{flex-direction:column;gap:8px}
+            .nav-links{display:none}
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav class="navbar">
+    <a href="index.html" class="nav-logo">AI<span>Hub</span></a>
+    <div class="nav-links">
+        <a href="index.html">Tin Tuc AI</a>
+        <a href="learn.html">Hoc AI</a>
+        <a href="prompt-engineering.html" class="active">Prompt Engineering</a>
+        <a href="testing-ai.html">Testing AI</a>
+        <a href="security-ai.html">Security</a>
+        <a href="evaluation.html">Evaluation</a>
+        <a href="../BE/index.html">.NET</a>
+    </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<header class="hero">
+    <div class="hero-badge">KIẾN THỨC CỐT LÕI</div>
+    <h1>Prompt Engineering — <span class="gradient-text">Viết Prompt Tối Ưu</span></h1>
+    <p>Prompt không phải là "ra lệnh" cho AI — nó là cách bạn <strong>định hình xác suất</strong> để model chọn đúng token tiếp theo. Bài này dạy bạn tư duy nền tảng, giải phẫu một prompt tốt, và các kỹ thuật từ cơ bản đến nâng cao để biến output từ "tạm được" thành "đúng ý".</p>
+</header>
+
+<!-- ═══ TOC ═══ -->
+<div class="container">
+<div class="toc">
+    <h3>Mục Lục</h3>
+    <div class="toc-grid">
+        <a href="#s1"><span class="toc-num">01</span> Mental model: LLM dự đoán token</a>
+        <a href="#s2"><span class="toc-num">02</span> Giải phẫu một prompt tốt</a>
+        <a href="#s3"><span class="toc-num">03</span> Bốn nguyên tắc nền tảng</a>
+        <a href="#s4"><span class="toc-num">04</span> Few-shot: sức mạnh của ví dụ</a>
+        <a href="#s5"><span class="toc-num">05</span> Chain-of-thought & không gian suy nghĩ</a>
+        <a href="#s6"><span class="toc-num">06</span> Best practice riêng cho Claude</a>
+        <a href="#s7"><span class="toc-num">07</span> Định dạng đầu ra (output format)</a>
+        <a href="#s8"><span class="toc-num">08</span> Phân rã & prompt chaining</a>
+        <a href="#s9"><span class="toc-num">09</span> Kỹ thuật nâng cao</a>
+        <a href="#s10"><span class="toc-num">10</span> Iteration mindset & debug prompt</a>
+        <a href="#s11"><span class="toc-num">11</span> Anti-pattern thường gặp</a>
+        <a href="#s12"><span class="toc-num">12</span> Đúc kết & khung prompt vạn năng</a>
+    </div>
+</div>
+
+<!-- ═══ SECTION 1 ═══ -->
+<div class="section" id="s1">
+    <div class="section-header">
+        <div class="section-num">01</div>
+        <div>
+            <div class="section-title">Mental model: LLM chỉ dự đoán token tiếp theo</div>
+            <div class="section-subtitle">Hiểu cơ chế này thì mọi kỹ thuật prompt còn lại đều trở nên hiển nhiên</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Bản chất: một cỗ máy đoán chữ khổng lồ</h4>
+        <p>Một LLM (như <strong>claude-opus-4-8</strong>) về cốt lõi chỉ làm đúng một việc: nhìn vào toàn bộ <em>context</em> hiện có (prompt của bạn + những gì nó đã sinh ra) rồi tính <strong>xác suất</strong> cho token tiếp theo, chọn ra token khả dĩ nhất, lặp lại. Nó không "hiểu" theo nghĩa con người — nó dự đoán điều gì <em>thường đi sau</em> những gì đã thấy trong dữ liệu huấn luyện.</p>
+        <p>Hệ quả trực tiếp: <strong>prompt của bạn là toàn bộ vũ trụ mà model biết tại thời điểm đó.</strong> Bạn không điều khiển model — bạn định hình phân phối xác suất để token "đúng" có khả năng được chọn cao nhất.</p>
+        <div class="highlight highlight-important">
+            <strong>Định nghĩa lại "prompt engineering":</strong> không phải tìm "câu thần chú" bí ẩn, mà là cung cấp đủ context và ràng buộc để vùng xác suất hội tụ về đúng câu trả lời bạn cần.
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Vì sao prompt rõ ràng = output tốt</h4>
+        <p>Prompt mơ hồ mở ra một không gian xác suất rộng — model phải "đoán ý" bạn, và mỗi lần chạy có thể rơi vào một nhánh khác nhau. Prompt cụ thể thu hẹp không gian đó: câu trả lời đúng trở thành con đường có xác suất áp đảo.</p>
+        <div class="code-block"><span class="code-comment"># ❌ MƠ HỒ — model phải đoán: ngắn hay dài? cho ai? định dạng gì?</span>
+Viết về React.
+
+<span class="code-comment"># ✅ RÕ RÀNG — không gian xác suất bị thu hẹp về đúng output mong muốn</span>
+Viết đoạn 3 câu giải thích React hooks là gì, cho lập trình viên
+mới học React, dùng ngôn ngữ đời thường, tránh thuật ngữ academic.</div>
+        <div class="highlight highlight-tip">
+            <strong>Quy tắc vàng đầu tiên:</strong> nếu một người lạ đọc prompt của bạn mà vẫn có thể hiểu sai, thì model cũng sẽ hiểu sai. Mọi sự mơ hồ đều là rủi ro.
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 2 ═══ -->
+<div class="section" id="s2">
+    <div class="section-header">
+        <div class="section-num">02</div>
+        <div>
+            <div class="section-title">Giải phẫu một prompt tốt</div>
+            <div class="section-subtitle">Sáu thành phần: vai trò · nhiệm vụ · bối cảnh · ràng buộc · định dạng · ví dụ</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Sáu thành phần của một prompt đầy đủ</h4>
+        <ul>
+            <li><strong>Vai trò (role):</strong> model nên "đóng vai" ai? (chuyên gia bảo mật, biên tập viên, senior dev...) — định hình giọng văn & độ sâu chuyên môn.</li>
+            <li><strong>Nhiệm vụ (task):</strong> chính xác phải LÀM gì? Dùng động từ rõ ràng (phân loại, tóm tắt, viết lại, trích xuất...).</li>
+            <li><strong>Bối cảnh (context):</strong> dữ liệu, tài liệu, hoàn cảnh xung quanh. Đây là phần model dễ thiếu nhất.</li>
+            <li><strong>Ràng buộc (constraints):</strong> giới hạn — độ dài, điều được/không được làm, phong cách.</li>
+            <li><strong>Định dạng đầu ra (output format):</strong> JSON? bảng? markdown? gạch đầu dòng?</li>
+            <li><strong>Ví dụ (examples):</strong> 1–3 mẫu input→output để "neo" hành vi (xem mục 04).</li>
+        </ul>
+    </div>
+
+    <div class="module beginner">
+        <div class="module-header">
+            <h4>Module 2.1: Mẫu prompt "đầy đủ 6 thành phần"</h4>
+            <span class="module-level level-beginner">Beginner</span>
+        </div>
+        <div class="module-what"><strong>Bài toán:</strong> phân loại cảm xúc phản hồi khách hàng.</div>
+        <div class="code-block"><span class="code-comment"># ① VAI TRÒ</span>
+Bạn là chuyên viên phân tích phản hồi khách hàng của một sàn TMĐT.
+
+<span class="code-comment"># ② NHIỆM VỤ</span>
+Phân loại cảm xúc của đoạn phản hồi dưới đây.
+
+<span class="code-comment"># ③ BỐI CẢNH</span>
+Đây là review sản phẩm trên app. Khách thường viết tiếng Việt
+có dấu, đôi khi pha tiếng Anh, có thể mỉa mai.
+
+<span class="code-comment"># ④ RÀNG BUỘC</span>
+- Chỉ chọn 1 trong 3 nhãn: TÍCH_CỰC / TIÊU_CỰC / TRUNG_TÍNH
+- Nếu mỉa mai khen-mà-chê → xếp TIÊU_CỰC
+
+<span class="code-comment"># ⑤ ĐỊNH DẠNG ĐẦU RA</span>
+Trả về JSON: {"nhan": "...", "do_tin_cay": 0.0-1.0, "ly_do": "..."}
+
+<span class="code-comment"># ⑥ VÍ DỤ</span>
+Input: "Giao nhanh phết, đúng 3 ngày như quảng cáo... cho 5 sao luôn"
+Output: {"nhan": "TÍCH_CỰC", "do_tin_cay": 0.95, "ly_do": "khen tốc độ giao"}
+
+<span class="code-comment"># ── PHẢN HỒI CẦN PHÂN LOẠI ──</span>
+"Ừ thì hàng cũng ổn, có điều đợi mãi 2 tuần mới tới, đỉnh thật."</div>
+        <div class="highlight highlight-tip">
+            <strong>Không phải prompt nào cũng cần đủ 6.</strong> Một câu hỏi đơn giản chỉ cần task. Nhưng khi output sai, hãy kiểm tra: thành phần nào đang thiếu?
+        </div>
+        <div class="module-tools">
+            <span class="tool-tag">Role-Task-Context</span>
+            <span class="tool-tag">RTCFE framework</span>
+            <span class="tool-tag">Structured prompt</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 3 ═══ -->
+<div class="section" id="s3">
+    <div class="section-header">
+        <div class="section-num">03</div>
+        <div>
+            <div class="section-title">Bốn nguyên tắc nền tảng</div>
+            <div class="section-subtitle">Rõ ràng · nói thẳng điều MUỐN · cho đủ context · một prompt một mục tiêu</div>
+        </div>
+    </div>
+
+    <div class="module beginner">
+        <div class="module-header">
+            <h4>Module 3.1: Rõ ràng & cụ thể</h4>
+            <span class="module-level level-beginner">Beginner</span>
+        </div>
+        <p>"Tốt hơn" là bao nhiêu? "Ngắn gọn" là mấy câu? Hãy lượng hóa mọi tính từ mơ hồ thành con số hoặc tiêu chí kiểm chứng được.</p>
+        <div class="code-block"><span class="code-comment"># ❌ MƠ HỒ</span>
+Tóm tắt bài này ngắn gọn thôi.
+
+<span class="code-comment"># ✅ CỤ THỂ</span>
+Tóm tắt bài này thành đúng 3 gạch đầu dòng, mỗi gạch tối đa 20 từ,
+tập trung vào kết luận chính chứ không phải phương pháp.</div>
+    </div>
+
+    <div class="module intermediate">
+        <div class="module-header">
+            <h4>Module 3.2: Nói điều BẠN MUỐN, không phải điều bạn không muốn</h4>
+            <span class="module-level level-intermediate">Intermediate</span>
+        </div>
+        <p>Model làm theo hướng dẫn tích cực tốt hơn nhiều so với danh sách cấm. "Đừng dài dòng" mơ hồ; "viết tối đa 2 câu" rõ ràng. Mỗi mệnh đề "đừng X" còn vô tình đưa khái niệm X vào context.</p>
+        <table class="compare-table">
+            <tr><th>❌ Nói điều không muốn</th><th>✅ Nói điều muốn</th></tr>
+            <tr><td>"Đừng dùng thuật ngữ kỹ thuật"</td><td>"Giải thích như nói với học sinh cấp 2"</td></tr>
+            <tr><td>"Đừng trả lời quá dài"</td><td>"Trả lời trong tối đa 3 câu"</td></tr>
+            <tr><td>"Đừng bịa thông tin"</td><td>"Chỉ dùng dữ kiện trong tài liệu; nếu không có, ghi 'không đủ thông tin'"</td></tr>
+        </table>
+    </div>
+
+    <div class="module beginner">
+        <div class="module-header">
+            <h4>Module 3.3: Cho đủ context — đừng giả định model "biết"</h4>
+            <span class="module-level level-beginner">Beginner</span>
+        </div>
+        <p>Model không biết dự án của bạn, không biết hôm nay là ngày mấy, không đọc được màn hình bạn. Mọi thứ cần thiết phải nằm trong prompt. Thiếu context là nguyên nhân số một của output "đúng kỹ thuật nhưng sai ý".</p>
+        <div class="highlight highlight-warn">
+            <strong>Bẫy phổ biến:</strong> hỏi "sửa lỗi này" mà không dán code, không dán thông báo lỗi. Model buộc phải đoán — và nó đoán rất tự tin.
+        </div>
+    </div>
+
+    <div class="module intermediate">
+        <div class="module-header">
+            <h4>Module 3.4: Một prompt, một mục tiêu</h4>
+            <span class="module-level level-intermediate">Intermediate</span>
+        </div>
+        <p>Nhồi 5 yêu cầu vào 1 prompt khiến model phân tán và thường làm hời hợt tất cả. Nếu task có nhiều bước độc lập, hãy tách thành chuỗi prompt (xem mục 08). Một mục tiêu rõ ràng cho output sắc nét hơn năm mục tiêu mờ nhạt.</p>
+        <div class="module-tools">
+            <span class="tool-tag">Specificity</span>
+            <span class="tool-tag">Positive framing</span>
+            <span class="tool-tag">Single responsibility</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 4 ═══ -->
+<div class="section" id="s4">
+    <div class="section-header">
+        <div class="section-num">04</div>
+        <div>
+            <div class="section-title">Few-shot: sức mạnh của ví dụ</div>
+            <div class="section-subtitle">Zero-shot vs one-shot vs few-shot — một ví dụ tốt hơn một đoạn giải thích dài</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Ba mức độ "cho ví dụ"</h4>
+        <table class="compare-table">
+            <tr><th>Kỹ thuật</th><th>Số ví dụ</th><th>Khi nào dùng</th></tr>
+            <tr><td><strong>Zero-shot</strong></td><td>0</td><td>Task đơn giản, phổ biến, model đã quá quen (dịch, tóm tắt cơ bản)</td></tr>
+            <tr><td><strong>One-shot</strong></td><td>1</td><td>Cần "neo" định dạng output hoặc một quy ước cụ thể</td></tr>
+            <tr><td><strong>Few-shot</strong></td><td>2–5</td><td>Task có quy tắc tinh tế, nhãn riêng, hoặc cần thể hiện edge case</td></tr>
+        </table>
+    </div>
+
+    <div class="module intermediate">
+        <div class="module-header">
+            <h4>Module 4.1: Ví dụ "dạy" tốt hơn lời mô tả</h4>
+            <span class="module-level level-intermediate">Intermediate</span>
+        </div>
+        <p>Bạn có thể viết 5 đoạn mô tả "định dạng ngày tháng phải chuẩn hóa thế nào" — hoặc cho 2 ví dụ và model tự suy ra quy tắc. Ví dụ cụ thể loại bỏ mọi mơ hồ mà lời văn không làm được.</p>
+        <div class="code-block"><span class="code-comment"># Few-shot: dạy chuẩn hóa ngày bằng ví dụ thay vì mô tả</span>
+Chuẩn hóa ngày về định dạng YYYY-MM-DD.
+
+"mùng 2 tết 2024"      → 2024-02-10
+"3/4/25"               → 2025-04-03   <span class="code-comment"># dd/mm/yy</span>
+"hôm qua" (nay 17/6)   → 2025-06-16
+"Q1 2026"              → 2026-01-01   <span class="code-comment"># lấy ngày đầu quý</span>
+
+<span class="code-comment"># Input cần xử lý:</span>
+"15 tháng chạp năm ngoái" →</div>
+        <div class="highlight highlight-important">
+            <strong>Quy tắc chọn ví dụ:</strong> chọn ví dụ <em>đa dạng</em> và bao phủ <em>các trường hợp khó</em>, không phải 3 ví dụ dễ giống hệt nhau. Ví dụ thể hiện edge case mới có giá trị thực sự.
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Khi nào cần few-shot, khi nào không</h4>
+        <p><strong>Cần:</strong> output có format đặc thù, có nhãn/thuật ngữ riêng, có quy tắc tinh tế khó diễn đạt bằng lời, hoặc bạn thấy model hay làm sai một kiểu nhất định.</p>
+        <p><strong>Không cần (thậm chí thừa):</strong> task quá phổ biến — thêm ví dụ chỉ tốn token và đôi khi khiến model bắt chước máy móc cả những đặc điểm không liên quan của ví dụ.</p>
+    </div>
+</div>
+
+<!-- ═══ SECTION 5 ═══ -->
+<div class="section" id="s5">
+    <div class="section-header">
+        <div class="section-num">05</div>
+        <div>
+            <div class="section-title">Chain-of-thought & cho mô hình "không gian suy nghĩ"</div>
+            <div class="section-subtitle">Bắt model lập luận trước khi kết luận thì kết luận chính xác hơn nhiều</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Vì sao "suy nghĩ từng bước" lại hiệu nghiệm</h4>
+        <p>Nhớ lại mục 01: model sinh token tuần tự. Nếu bạn bắt nó trả lời đáp án ngay lập tức, nó phải "nhảy cóc" tới kết luận trong một bước — dễ sai với bài toán nhiều bước. Khi bạn cho nó <strong>không gian để viết ra quá trình lập luận trước</strong>, mỗi bước trung gian trở thành context cho bước sau, và đáp án cuối được "xây" trên nền lập luận đã hiện ra.</p>
+        <div class="code-block"><span class="code-comment"># ❌ ÉP ĐÁP ÁN NGAY — dễ sai với bài nhiều bước</span>
+Một cửa hàng giảm 20%, rồi giảm thêm 10% trên giá đã giảm.
+Áo gốc 500k thì còn bao nhiêu? Trả lời ngay con số.
+
+<span class="code-comment"># ✅ CHO KHÔNG GIAN SUY NGHĨ</span>
+Một cửa hàng giảm 20%, rồi giảm thêm 10% trên giá đã giảm.
+Áo gốc 500k còn bao nhiêu?
+Hãy suy nghĩ từng bước: tính giá sau lần giảm 1, rồi sau lần giảm 2,
+rồi mới đưa ra đáp án cuối cùng.</div>
+    </div>
+
+    <div class="module intermediate">
+        <div class="module-header">
+            <h4>Module 5.1: Yêu cầu lập kế hoạch trước khi làm</h4>
+            <span class="module-level level-intermediate">Intermediate</span>
+        </div>
+        <p>Với task phức tạp (viết code, soạn tài liệu dài), thêm một bước "lập dàn ý / kế hoạch trước" giúp model định hình cấu trúc trước khi đi vào chi tiết — giảm hẳn chuyện viết nửa chừng rồi lạc hướng.</p>
+        <div class="code-block"><span class="code-comment"># Pattern: plan-then-execute</span>
+Trước khi viết code, hãy:
+1. Liệt kê các bước cần làm và các edge case phải xử lý.
+2. Đợi tôi xác nhận kế hoạch.
+3. Sau khi tôi OK, mới viết code đầy đủ.</div>
+    </div>
+
+    <div class="module advanced">
+        <div class="module-header">
+            <h4>Module 5.2: Thẻ &lt;thinking&gt; và "think / ultrathink" trong Claude Code</h4>
+            <span class="module-level level-advanced">Advanced</span>
+        </div>
+        <p>Một cách phổ biến là yêu cầu model viết lập luận vào một khối <code>&lt;thinking&gt;</code> riêng, rồi đáp án sạch nằm ngoài — tiện cho việc tách "suy nghĩ" khỏi "kết quả" khi hiển thị cho người dùng.</p>
+        <div class="code-block"><span class="code-comment"># Tách suy nghĩ ra khối riêng</span>
+Hãy lập luận trong thẻ &lt;thinking&gt;...&lt;/thinking&gt;,
+sau đó đưa câu trả lời cuối cùng trong thẻ &lt;answer&gt;...&lt;/answer&gt;.</div>
+        <p>Với các model 4.6+ (như <strong>claude-opus-4-8</strong>, <strong>claude-sonnet-4-6</strong>), "extended thinking" đã được tích hợp ở mức API (adaptive thinking) — model tự quyết định suy nghĩ sâu đến đâu. Trong <strong>Claude Code</strong>, bạn còn có thể tăng độ sâu suy nghĩ bằng các từ khóa như <code>think</code> → <code>think hard</code> → <code>ultrathink</code>: càng "nặng đô" thì model càng dành nhiều ngân sách lập luận trước khi hành động — hữu ích cho bài toán kiến trúc hoặc debug khó.</p>
+        <div class="module-tools">
+            <span class="tool-tag">Chain-of-Thought</span>
+            <span class="tool-tag">Plan-then-execute</span>
+            <span class="tool-tag">&lt;thinking&gt; tags</span>
+            <span class="tool-tag">ultrathink</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 6 ═══ -->
+<div class="section" id="s6">
+    <div class="section-header">
+        <div class="section-num">06</div>
+        <div>
+            <div class="section-title">Best practice riêng cho Claude</div>
+            <div class="section-subtitle">XML tags · system vs user prompt · đặt dữ liệu dài trước câu hỏi</div>
+        </div>
+    </div>
+
+    <div class="module intermediate">
+        <div class="module-header">
+            <h4>Module 6.1: Dùng XML tags để cấu trúc prompt</h4>
+            <span class="module-level level-intermediate">Intermediate</span>
+        </div>
+        <p>Claude được huấn luyện để đặc biệt nhạy với thẻ kiểu XML. Bọc từng phần của prompt trong thẻ rõ ràng giúp model phân biệt chính xác đâu là dữ liệu, đâu là ví dụ, đâu là hướng dẫn — tránh nhầm lẫn.</p>
+        <div class="code-block"><span class="code-keyword">&lt;instructions&gt;</span>
+Tóm tắt tài liệu dưới đây thành 3 ý chính.
+<span class="code-keyword">&lt;/instructions&gt;</span>
+
+<span class="code-keyword">&lt;context&gt;</span>
+{...nội dung tài liệu dài...}
+<span class="code-keyword">&lt;/context&gt;</span>
+
+<span class="code-keyword">&lt;example&gt;</span>
+Input: báo cáo doanh thu Q1 → Output: • Doanh thu tăng 12% • ...
+<span class="code-keyword">&lt;/example&gt;</span></div>
+        <div class="highlight highlight-tip">
+            <strong>Mẹo:</strong> tên thẻ tự do (<code>&lt;document&gt;</code>, <code>&lt;data&gt;</code>, <code>&lt;rules&gt;</code>...), miễn là đóng/mở khớp nhau và mô tả đúng nội dung bên trong.
+        </div>
+    </div>
+
+    <div class="module intermediate">
+        <div class="module-header">
+            <h4>Module 6.2: System prompt vs User prompt</h4>
+            <span class="module-level level-intermediate">Intermediate</span>
+        </div>
+        <p><strong>System prompt</strong> định nghĩa vai trò, quy tắc nền, hành vi xuyên suốt cuộc hội thoại (đặt một lần). <strong>User prompt</strong> là yêu cầu cụ thể của từng lượt. Đặt "bạn là ai và luôn tuân theo quy tắc gì" vào system; đặt "lần này làm gì với dữ liệu nào" vào user.</p>
+        <table class="compare-table">
+            <tr><th>System prompt</th><th>User prompt</th></tr>
+            <tr><td>"Bạn là trợ lý pháp lý, luôn trích dẫn điều luật cụ thể, không tư vấn ngoài luật VN."</td><td>"Hợp đồng thuê nhà này có điều khoản nào bất lợi cho bên thuê?"</td></tr>
+        </table>
+    </div>
+
+    <div class="module advanced">
+        <div class="module-header">
+            <h4>Module 6.3: Prefill & thứ tự "dữ liệu dài TRƯỚC, câu hỏi SAU"</h4>
+            <span class="module-level level-advanced">Advanced</span>
+        </div>
+        <p><strong>Đặt tài liệu/dữ liệu dài lên đầu, đặt câu hỏi xuống cuối.</strong> Với input dài, để câu hỏi ở cuối giúp model "ghi nhớ" yêu cầu ngay trước khi trả lời, cải thiện độ chính xác đáng kể.</p>
+        <div class="code-block"><span class="code-keyword">&lt;document&gt;</span>
+{...10 trang tài liệu...}
+<span class="code-keyword">&lt;/document&gt;</span>
+
+Dựa CHỈ trên tài liệu trên, trả lời: chính sách hoàn tiền áp dụng
+trong bao nhiêu ngày? Nếu tài liệu không nêu, ghi "không đề cập".</div>
+        <div class="highlight highlight-warn">
+            <strong>Lưu ý về prefill:</strong> kỹ thuật "mồi" sẵn đầu câu trả lời của model (ví dụ ép nó bắt đầu bằng <code>{</code>) là cách cũ. Trên các model mới như <strong>claude-opus-4-8</strong> / <strong>claude-sonnet-4-6</strong>, hãy dùng <strong>structured outputs</strong> (định nghĩa schema JSON) để ép định dạng thay vì prefill — vừa chắc chắn hơn vừa đúng chuẩn hiện hành (2026).
+        </div>
+        <div class="module-tools">
+            <span class="tool-tag">XML tags</span>
+            <span class="tool-tag">System prompt</span>
+            <span class="tool-tag">Long-context ordering</span>
+            <span class="tool-tag">Structured outputs</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 7 ═══ -->
+<div class="section" id="s7">
+    <div class="section-header">
+        <div class="section-num">07</div>
+        <div>
+            <div class="section-title">Định dạng đầu ra (output format)</div>
+            <div class="section-subtitle">Yêu cầu JSON/bảng/markdown rõ ràng — mô tả schema và cho ví dụ định dạng</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Đừng để model tự chọn định dạng</h4>
+        <p>Nếu output sẽ được code khác đọc (parse), bạn phải mô tả định dạng chính xác. Mơ hồ về format = output mỗi lần một kiểu = code parse vỡ. Mô tả schema, nêu kiểu dữ liệu từng trường, và quan trọng nhất: <strong>cho một ví dụ định dạng cụ thể</strong>.</p>
+        <div class="code-block"><span class="code-comment"># ❌ MƠ HỒ VỀ FORMAT</span>
+Trích xuất thông tin liên hệ từ chữ ký email này.
+
+<span class="code-comment"># ✅ MÔ TẢ SCHEMA + VÍ DỤ ĐỊNH DẠNG</span>
+Trích xuất thông tin liên hệ, trả về JSON đúng schema sau:
+{
+  "ho_ten": string,
+  "email": string | null,
+  "dien_thoai": string | null,    <span class="code-comment"># chuẩn hóa +84...</span>
+  "chuc_danh": string | null
+}
+Chỉ trả về JSON, không thêm chữ nào khác. Trường thiếu để null.
+
+Ví dụ output: {"ho_ten":"Nguyễn Đệ","email":"de@cty.vn","dien_thoai":"+84901234567","chuc_danh":"CTO"}</div>
+    </div>
+
+    <div class="module intermediate">
+        <div class="module-header">
+            <h4>Module 7.1: Chọn định dạng theo mục đích</h4>
+            <span class="module-level level-intermediate">Intermediate</span>
+        </div>
+        <table class="compare-table">
+            <tr><th>Mục đích</th><th>Định dạng nên dùng</th></tr>
+            <tr><td>Máy đọc / tích hợp hệ thống</td><td>JSON (kèm schema, hoặc dùng structured outputs ở mức API)</td></tr>
+            <tr><td>So sánh nhiều mục theo tiêu chí</td><td>Bảng markdown</td></tr>
+            <tr><td>Người đọc, có cấu trúc phân cấp</td><td>Markdown với heading + bullet</td></tr>
+            <tr><td>Output ngắn, một giá trị</td><td>Ép trả lời đúng một từ/nhãn, không giải thích</td></tr>
+        </table>
+        <div class="highlight highlight-tip">
+            <strong>Với JSON nghiêm ngặt:</strong> các API hiện đại hỗ trợ <em>structured outputs</em> — bạn khai báo schema và model bị ràng buộc trả về đúng cấu trúc. Đây là cách chắc chắn nhất khi output phải parse được 100%.
+        </div>
+        <div class="module-tools">
+            <span class="tool-tag">JSON schema</span>
+            <span class="tool-tag">Markdown table</span>
+            <span class="tool-tag">Format example</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 8 ═══ -->
+<div class="section" id="s8">
+    <div class="section-header">
+        <div class="section-num">08</div>
+        <div>
+            <div class="section-title">Phân rã & prompt chaining</div>
+            <div class="section-subtitle">Chia bài lớn thành chuỗi prompt nhỏ — output bước trước làm input bước sau</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Vì sao chia nhỏ thắng "một prompt khổng lồ"</h4>
+        <p>Một task lớn nhồi vào một prompt buộc model làm mọi thứ cùng lúc — và làm hời hợt tất cả. Chia thành chuỗi: mỗi prompt một mục tiêu rõ, output của bước này là input có cấu trúc cho bước kế. Bạn còn có thể <strong>kiểm tra giữa các bước</strong>, bắt lỗi sớm thay vì chờ kết quả cuối.</p>
+        <div class="code-block"><span class="code-comment"># Chain xử lý một bài blog dài</span>
+Prompt 1 (TRÍCH XUẤT): "Liệt kê 5 luận điểm chính của bài → JSON list"
+        ↓ output làm input
+Prompt 2 (KIỂM CHỨNG): "Với mỗi luận điểm, đánh dấu có dẫn chứng hay không"
+        ↓
+Prompt 3 (VIẾT LẠI):  "Viết bản tóm tắt 150 từ chỉ dùng các luận điểm CÓ dẫn chứng"</div>
+    </div>
+
+    <div class="module advanced">
+        <div class="module-header">
+            <h4>Module 8.1: Nguyên tắc nối chuỗi sạch</h4>
+            <span class="module-level level-advanced">Advanced</span>
+        </div>
+        <ul style="font-size:.88rem;color:var(--text-dim);padding-left:20px">
+            <li><strong>Output có cấu trúc:</strong> mỗi bước trả JSON/list rõ ràng để bước sau parse chắc chắn, không phải đoán.</li>
+            <li><strong>Một bước một việc:</strong> trích xuất riêng, đánh giá riêng, viết riêng — đừng gộp.</li>
+            <li><strong>Checkpoint:</strong> chèn bước kiểm tra giữa chuỗi để dừng sớm khi sai.</li>
+            <li><strong>Tránh trôi lỗi:</strong> lỗi nhỏ ở bước 1 sẽ bị khuếch đại qua các bước — nên validate đầu ra mỗi mắt xích.</li>
+        </ul>
+        <div class="module-tools">
+            <span class="tool-tag">Prompt chaining</span>
+            <span class="tool-tag">Task decomposition</span>
+            <span class="tool-tag">Pipeline</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 9 ═══ -->
+<div class="section" id="s9">
+    <div class="section-header">
+        <div class="section-num">09</div>
+        <div>
+            <div class="section-title">Kỹ thuật nâng cao</div>
+            <div class="section-subtitle">Self-consistency · ReAct / tool-use · LLM-as-judge · persona priming</div>
+        </div>
+    </div>
+
+    <div class="module advanced">
+        <div class="module-header">
+            <h4>Module 9.1: Self-consistency — hỏi nhiều lần, lấy đa số</h4>
+            <span class="module-level level-advanced">Advanced</span>
+        </div>
+        <p>Với câu hỏi có đáp án xác định nhưng dễ sai (toán, suy luận logic), chạy cùng một prompt nhiều lần (có thêm bước lập luận) rồi lấy đáp án <strong>xuất hiện nhiều nhất</strong>. Vì mỗi lần model đi một nhánh lập luận khác nhau, đáp án đúng thường là đáp án nhất quán qua nhiều lần.</p>
+        <div class="code-block"><span class="code-comment"># Ý tưởng: 5 lần chạy → vote</span>
+Chạy prompt CoT 5 lần độc lập → thu 5 đáp án
+→ chọn đáp án xuất hiện ≥ 3 lần làm kết quả cuối</div>
+    </div>
+
+    <div class="module advanced">
+        <div class="module-header">
+            <h4>Module 9.2: ReAct & tool-use — suy luận xen kẽ hành động</h4>
+            <span class="module-level level-advanced">Advanced</span>
+        </div>
+        <p><strong>ReAct</strong> (Reason + Act) cho model luân phiên: <em>suy nghĩ</em> → <em>gọi công cụ</em> (tìm kiếm, chạy code, query DB) → <em>quan sát kết quả</em> → suy nghĩ tiếp. Đây là nền tảng của các "agent": thay vì đoán từ trí nhớ, model lấy dữ kiện thật từ công cụ rồi mới kết luận.</p>
+        <div class="code-block"><span class="code-comment"># Vòng lặp ReAct</span>
+Thought: cần biết tỷ giá USD hôm nay
+Action:  search("tỷ giá USD/VND 17/06/2026")
+Observation: 1 USD ≈ 25.400 VND
+Thought: giờ tính được giá quy đổi
+Answer:  ...</div>
+    </div>
+
+    <div class="module expert">
+        <div class="module-header">
+            <h4>Module 9.3: LLM-as-judge — để model tự chấm</h4>
+            <span class="module-level level-expert">Expert</span>
+        </div>
+        <p>Dùng một lượt gọi model riêng để <strong>đánh giá</strong> output của lượt trước theo tiêu chí (rubric) bạn đặt ra. Hữu ích để tự kiểm soát chất lượng ở quy mô lớn. Bí quyết: rubric phải cụ thể, chấm điểm được từng tiêu chí độc lập — đừng hỏi "output này có tốt không" mà hỏi "có đủ 3 luận điểm? có trích dẫn nguồn? đúng định dạng JSON?".</p>
+        <div class="code-block"><span class="code-comment"># LLM-as-judge với rubric rõ ràng</span>
+Chấm output dưới đây theo từng tiêu chí (đạt/không + lý do):
+1. Có đúng 3 gạch đầu dòng?
+2. Mỗi gạch ≤ 20 từ?
+3. Không bịa thông tin ngoài tài liệu nguồn?
+Trả về JSON: {"tieu_chi_1": {...}, ..., "tong_diem": x/3}</div>
+    </div>
+
+    <div class="module intermediate">
+        <div class="module-header">
+            <h4>Module 9.4: Role / persona priming</h4>
+            <span class="module-level level-intermediate">Intermediate</span>
+        </div>
+        <p>Gán vai trò chuyên gia cụ thể "neo" model vào vùng kiến thức và giọng văn phù hợp. "Bạn là kỹ sư bảo mật 15 năm kinh nghiệm" cho output sâu và đúng phong cách hơn "hãy nói về bảo mật". Nhưng đừng lạm dụng — vai trò phải khớp task, persona màu mè không liên quan chỉ gây nhiễu.</p>
+        <div class="module-tools">
+            <span class="tool-tag">Self-consistency</span>
+            <span class="tool-tag">ReAct</span>
+            <span class="tool-tag">Tool-use</span>
+            <span class="tool-tag">LLM-as-judge</span>
+            <span class="tool-tag">Persona priming</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 10 ═══ -->
+<div class="section" id="s10">
+    <div class="section-header">
+        <div class="section-num">10</div>
+        <div>
+            <div class="section-title">Iteration mindset & debug prompt</div>
+            <div class="section-subtitle">Prompt là quá trình lặp: viết → chạy → soi lỗi → tinh chỉnh</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Không ai viết đúng prompt ngay lần đầu</h4>
+        <p>Prompt engineering là kỹ năng <strong>thực nghiệm</strong>, không phải lý thuyết. Người giỏi không "nghĩ ra" prompt hoàn hảo — họ viết bản đầu, chạy, soi kỹ output sai ở đâu, rồi tinh chỉnh đúng chỗ đó. Lặp lại 3–4 vòng thường tốt hơn nhiều so với cố viết "một prompt thật dài thật kỹ" ngay từ đầu.</p>
+    </div>
+
+    <div class="module intermediate">
+        <div class="module-header">
+            <h4>Module 10.1: Checklist debug khi output sai</h4>
+            <span class="module-level level-intermediate">Intermediate</span>
+        </div>
+        <p>Khi output không như ý, đừng đập đi viết lại. Hãy chẩn đoán theo thứ tự:</p>
+        <ul style="font-size:.88rem;color:var(--text-dim);padding-left:20px">
+            <li><strong>Thiếu context?</strong> — model có đủ dữ kiện để trả lời đúng không? Đây là nguyên nhân số 1.</li>
+            <li><strong>Mơ hồ?</strong> — có chỗ nào prompt cho phép hiểu theo nhiều cách? Lượng hóa lại.</li>
+            <li><strong>Thiếu ví dụ?</strong> — nếu model sai một kiểu cố định, cho 1–2 ví dụ đúng để "neo".</li>
+            <li><strong>Format chưa rõ?</strong> — model có biết chính xác cần trả về dạng gì không?</li>
+            <li><strong>Quá tải?</strong> — prompt có nhồi quá nhiều mục tiêu? Tách ra.</li>
+        </ul>
+        <div class="highlight highlight-tip">
+            <strong>Mẹo chẩn đoán mạnh:</strong> bắt model giải thích <em>vì sao</em> nó trả lời như vậy. Lập luận của nó thường lộ ra chính xác nó đã hiểu sai chỗ nào trong prompt của bạn.
+        </div>
+        <div class="module-tools">
+            <span class="tool-tag">Iterative refinement</span>
+            <span class="tool-tag">Error diagnosis</span>
+            <span class="tool-tag">Test-driven prompting</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 11 ═══ -->
+<div class="section" id="s11">
+    <div class="section-header">
+        <div class="section-num">11</div>
+        <div>
+            <div class="section-title">Anti-pattern thường gặp</div>
+            <div class="section-subtitle">Những lỗi khiến prompt tốt thành prompt tệ</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Bảng các "tội" prompt phổ biến</h4>
+        <table class="compare-table">
+            <tr><th>Anti-pattern</th><th>Vì sao hại</th><th>Cách sửa</th></tr>
+            <tr><td>Prompt mơ hồ</td><td>Mở không gian xác suất quá rộng, output mỗi lần một kiểu</td><td>Lượng hóa mọi tính từ, nêu tiêu chí kiểm chứng được</td></tr>
+            <tr><td>Nhồi quá nhiều mục tiêu</td><td>Model làm hời hợt tất cả</td><td>Một prompt một mục tiêu, hoặc tách thành chain</td></tr>
+            <tr><td>Hướng dẫn mâu thuẫn</td><td>"Chi tiết nhưng thật ngắn" — model không biết nghe ai</td><td>Ưu tiên rõ ràng, bỏ ràng buộc xung đột</td></tr>
+            <tr><td>Quá nhiều "đừng làm X"</td><td>Đưa khái niệm X vào context, model dễ vẫn làm X</td><td>Diễn đạt lại thành điều MUỐN</td></tr>
+            <tr><td>Context thừa gây nhiễu</td><td>Dữ liệu không liên quan làm loãng tín hiệu</td><td>Chỉ đưa thông tin cần thiết cho task</td></tr>
+            <tr><td>Giả định model "biết"</td><td>Model không đọc được màn hình, không biết dự án bạn</td><td>Dán đủ code/lỗi/dữ kiện vào prompt</td></tr>
+        </table>
+    </div>
+
+    <div class="module intermediate">
+        <div class="module-header">
+            <h4>Module 11.1: Ví dụ một prompt "đầy lỗi" và bản sửa</h4>
+            <span class="module-level level-intermediate">Intermediate</span>
+        </div>
+        <div class="code-block"><span class="code-comment"># ❌ XẤU — mơ hồ + nhiều mục tiêu + mâu thuẫn + cấm thay vì muốn</span>
+Phân tích bài viết này cho hay, đừng dài dòng nhưng phải thật đầy đủ,
+đừng dùng từ khó, và tiện thể sửa luôn lỗi chính tả với gợi ý SEO nhé.
+
+<span class="code-comment"># ✅ TỐT — tách mục tiêu, lượng hóa, nói điều muốn</span>
+Nhiệm vụ: tóm tắt bài viết dưới đây.
+- Đúng 3 gạch đầu dòng, mỗi gạch ≤ 25 từ.
+- Dùng ngôn ngữ phổ thông cho độc giả không chuyên.
+(Phần sửa chính tả và SEO tôi sẽ hỏi ở lượt riêng.)
+
+&lt;bai_viet&gt; {...} &lt;/bai_viet&gt;</div>
+        <div class="module-tools">
+            <span class="tool-tag">Anti-pattern</span>
+            <span class="tool-tag">Conflict removal</span>
+            <span class="tool-tag">Context hygiene</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SECTION 12 ═══ -->
+<div class="section" id="s12">
+    <div class="section-header">
+        <div class="section-num">12</div>
+        <div>
+            <div class="section-title">Đúc kết & khung prompt vạn năng</div>
+            <div class="section-subtitle">Mười nguyên tắc vàng + cách tự nâng trình + khung copy-dùng-ngay</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>10 nguyên tắc vàng (checklist)</h4>
+        <ul>
+            <li><strong>1.</strong> Prompt là cách định hình xác suất — rõ ràng = output tốt.</li>
+            <li><strong>2.</strong> Cụ thể đến mức người lạ đọc cũng không hiểu sai. Lượng hóa mọi tính từ.</li>
+            <li><strong>3.</strong> Nói điều BẠN MUỐN, không phải danh sách "đừng làm".</li>
+            <li><strong>4.</strong> Cho đủ context — đừng giả định model "biết".</li>
+            <li><strong>5.</strong> Một prompt, một mục tiêu. Task lớn thì chia chuỗi.</li>
+            <li><strong>6.</strong> Một ví dụ tốt hơn một đoạn mô tả dài — và phải bao phủ edge case.</li>
+            <li><strong>7.</strong> Cho model không gian suy nghĩ trước khi kết luận.</li>
+            <li><strong>8.</strong> Mô tả định dạng đầu ra rõ ràng; cần parse thì dùng structured outputs.</li>
+            <li><strong>9.</strong> Với Claude: dùng XML tags, đặt dữ liệu dài TRƯỚC, câu hỏi SAU.</li>
+            <li><strong>10.</strong> Prompt là quá trình lặp — viết, chạy, soi lỗi, tinh chỉnh.</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h4>Cách tự nâng trình prompt engineering</h4>
+        <ul>
+            <li><strong>Xây thư viện prompt cá nhân:</strong> mỗi khi tìm được prompt chạy tốt, lưu lại kèm ghi chú "dùng cho việc gì". Theo thời gian bạn có một bộ template tái sử dụng.</li>
+            <li><strong>Lưu prompt tốt thành slash command:</strong> trong Claude Code, biến prompt hay dùng thành slash command (file <code>.md</code> trong <code>.claude/commands/</code>) để gọi lại bằng một dòng thay vì gõ lại.</li>
+            <li><strong>Đọc tài liệu chính thức:</strong> Anthropic có hướng dẫn prompt engineering và prompt library cập nhật — đọc để cập nhật best practice mới (như structured outputs, adaptive thinking 2026).</li>
+            <li><strong>So sánh A/B:</strong> giữ một bộ test nhỏ, thử 2 phiên bản prompt trên cùng input, đo phiên bản nào tốt hơn thay vì cảm tính.</li>
+        </ul>
+    </div>
+
+    <div class="module expert">
+        <div class="module-header">
+            <h4>Module 12.1: Khung prompt vạn năng — copy &amp; dùng ngay</h4>
+            <span class="module-level level-expert">Expert</span>
+        </div>
+        <p>Khung này gói gọn cả 6 thành phần (mục 02) lẫn best practice cho Claude (mục 06). Điền vào chỗ trống, bỏ phần không cần:</p>
+        <div class="code-block"><span class="code-keyword">&lt;role&gt;</span>
+Bạn là [chuyên gia gì, kinh nghiệm gì].
+<span class="code-keyword">&lt;/role&gt;</span>
+
+<span class="code-keyword">&lt;task&gt;</span>
+Nhiệm vụ: [động từ rõ ràng + đối tượng cụ thể].
+<span class="code-keyword">&lt;/task&gt;</span>
+
+<span class="code-keyword">&lt;context&gt;</span>
+[Mọi dữ kiện/dữ liệu/tài liệu model cần — đặt dữ liệu dài ở đây, TRƯỚC câu hỏi]
+<span class="code-keyword">&lt;/context&gt;</span>
+
+<span class="code-keyword">&lt;constraints&gt;</span>
+- [Giới hạn độ dài / phong cách, lượng hóa được]
+- [Điều MUỐN, không phải "đừng làm"]
+- Nếu thiếu dữ kiện: ghi rõ "không đủ thông tin", KHÔNG bịa.
+<span class="code-keyword">&lt;/constraints&gt;</span>
+
+<span class="code-keyword">&lt;output_format&gt;</span>
+[JSON schema / bảng / số gạch đầu dòng — kèm 1 ví dụ định dạng]
+<span class="code-keyword">&lt;/output_format&gt;</span>
+
+<span class="code-keyword">&lt;example&gt;</span>
+Input: [...]  →  Output: [...]   <span class="code-comment"># 1–3 ví dụ bao phủ edge case</span>
+<span class="code-keyword">&lt;/example&gt;</span>
+
+<span class="code-comment"># Với bài khó: thêm dòng "Hãy suy nghĩ từng bước trước khi trả lời."</span>
+Dựa CHỈ trên &lt;context&gt; ở trên: [câu hỏi cụ thể đặt ở CUỐI].</div>
+        <div class="highlight highlight-important">
+            <strong>Lời cuối:</strong> đừng học thuộc khung này như công thức cứng. Hiểu <em>vì sao</em> mỗi phần tồn tại (quay lại mục 01: bạn đang định hình xác suất) thì bạn sẽ tự biết khi nào thêm, khi nào bớt. Prompt giỏi đến từ tư duy, không phải template.
+        </div>
+        <div class="module-tools">
+            <span class="tool-tag">Universal template</span>
+            <span class="tool-tag">Prompt library</span>
+            <span class="tool-tag">Slash command</span>
+            <span class="tool-tag">A/B testing</span>
+        </div>
+    </div>
+</div>
+
+</div><!-- end container -->
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer">
+    <p>AI Mastery · Prompt Engineering — <a href="learn.html">Học AI</a> · <a href="testing-ai.html">Testing với AI</a> · <a href="evaluation.html">Evaluation</a></p>
+</footer>
+
+</body>
+</html>
