@@ -132,6 +132,7 @@ const SECTIONS = [
     ]},
     { id: 'ai-workflow-grp', label: 'Prompt Làm Việc', children: [
       { id: 'ai-workflow', label: 'Quy Trình (Review → MR)', src: '/AI/workflow.html' },
+      { id: 'ai-workflow-flows', label: '2 Luồng Chuẩn (Có/Không MR)', src: '/AI/workflow-flows.html' },
     ]},
     { id: 'ai-advanced', label: 'AI Nâng Cao', children: [
       { id: 'ai-course',      label: 'Claude Code Masterclass',    src: '/AI/claude-course.html' },

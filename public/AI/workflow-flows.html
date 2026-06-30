@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2 Luồng Chuẩn — Vòng lặp code + Có/Không Merge Request</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="ai.css">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{
+            --bg:#0B0B1A;--surface:#151528;--surface2:#1E1E3A;--border:#2A2A4A;
+            --text:#E8E8F0;--text-dim:#8888AA;--primary:#7C3AED;--accent:#06B6D4;
+            --green:#10B981;--orange:#F59E0B;--red:#EF4444;--pink:#EC4899;--blue:#3B82F6;
+            --radius:12px;--radius-sm:8px;
+        }
+        html{scroll-behavior:smooth}
+        body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.8;min-height:100vh}
+        .navbar{position:fixed;top:0;left:0;width:100%;background:rgba(11,11,26,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px}
+        .nav-logo{font-weight:800;font-size:1rem;color:var(--primary);text-decoration:none}
+        .nav-logo span{color:var(--accent)}
+        .nav-links{display:flex;gap:20px}
+        .nav-links a{color:var(--text-dim);text-decoration:none;font-size:.85rem;font-weight:500;transition:color .2s}
+        .nav-links a:hover,.nav-links a.active{color:var(--primary)}
+        .container{max-width:920px;margin:0 auto;padding:0 24px}
+        .hero{padding:90px 24px 40px;text-align:center;background:linear-gradient(180deg,rgba(124,58,237,.08) 0%,transparent 60%)}
+        .hero h1{font-size:2.4rem;font-weight:900;margin-bottom:12px}
+        .gradient-text{background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .hero p{color:var(--text-dim);font-size:.95rem;max-width:680px;margin:0 auto}
+        .hero-badge{display:inline-block;padding:4px 16px;border-radius:20px;font-size:.75rem;font-weight:700;background:rgba(124,58,237,.15);color:var(--primary);margin-bottom:16px;letter-spacing:1px}
+        .toc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 28px;margin:0 auto 40px;max-width:920px}
+        .toc h3{font-size:1rem;font-weight:800;margin-bottom:12px;color:var(--accent)}
+        .toc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 24px}
+        .toc a{color:var(--text-dim);text-decoration:none;font-size:.88rem;padding:4px 0;transition:color .2s;display:flex;align-items:center;gap:8px}
+        .toc a:hover{color:var(--primary)}
+        .toc-num{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;color:var(--primary);min-width:24px}
+        .section{margin-bottom:48px;scroll-margin-top:72px}
+        .section-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid var(--border)}
+        .section-num{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:900;color:var(--primary)}
+        .section-title{font-size:1.25rem;font-weight:800}
+        .section-subtitle{color:var(--text-dim);font-size:.85rem;margin-top:2px}
+        .highlight{border-radius:var(--radius);padding:16px 20px;margin:12px 0;font-size:.88rem}
+        .highlight-warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:var(--orange)}
+        .highlight-tip{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:var(--green)}
+        .highlight-important{background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);color:var(--primary)}
+        .highlight strong{color:var(--text)}
+        .footer{padding:32px 24px;text-align:center;border-top:1px solid var(--border);margin-top:40px}
+        .footer p{color:var(--text-dim);font-size:.82rem}
+        .footer a{color:var(--primary);text-decoration:none}
+        code{font-family:'JetBrains Mono',monospace;font-size:.85em;background:rgba(124,58,237,.12);color:#C4B5FD;padding:1px 6px;border-radius:5px}
+        /* ── 2 luồng ── */
+        .flow-tabs{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:36px}
+        .flow-tab{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;text-decoration:none;transition:border-color .2s,transform .2s}
+        .flow-tab:hover{border-color:var(--primary);transform:translateY(-2px)}
+        .flow-tab .ft-label{font-size:.72rem;font-weight:800;letter-spacing:1px;color:var(--text-dim)}
+        .flow-tab .ft-title{font-size:1.05rem;font-weight:800;color:var(--text);margin:4px 0 6px}
+        .flow-tab.fa .ft-title{color:var(--green)}
+        .flow-tab.fb .ft-title{color:var(--orange)}
+        .flow-tab .ft-desc{font-size:.82rem;color:var(--text-dim);line-height:1.6}
+        .role-band{display:flex;align-items:center;gap:12px;margin:28px 0 14px}
+        .role-band::after{content:'';flex:1;height:1px;background:var(--border)}
+        .role-badge{padding:5px 14px;border-radius:8px;font-size:.74rem;font-weight:800;letter-spacing:.5px}
+        .role-dev{background:rgba(59,130,246,.14);color:var(--blue);border:1px solid rgba(59,130,246,.3)}
+        .role-rev{background:rgba(236,72,153,.14);color:var(--pink);border:1px solid rgba(236,72,153,.3)}
+        .role-merge{background:rgba(16,185,129,.14);color:var(--green);border:1px solid rgba(16,185,129,.3)}
+        .role-note{font-size:.78rem;color:var(--text-dim);font-weight:500}
+        .step{display:flex;gap:16px;margin-bottom:14px}
+        .step-no{flex-shrink:0;width:34px;height:34px;border-radius:9px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.9rem;color:var(--primary)}
+        .step-body{flex:1;min-width:0}
+        .step-body .st-title{font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:4px}
+        .step-body .st-desc{font-size:.85rem;color:var(--text-dim);line-height:1.7}
+        .step-body code.trigger{display:inline-block;background:#0D0D20;border:1px solid var(--border);border-radius:6px;padding:3px 11px;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:#A5B4FC;margin-top:8px}
+        .loop-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(124,58,237,.1);border:1px dashed rgba(124,58,237,.4);color:var(--primary);border-radius:20px;padding:4px 14px;font-size:.78rem;font-weight:700;margin:6px 0 14px 50px}
+        .mini-token{font-size:.82rem;color:var(--text-dim);background:var(--surface);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:12px 18px;margin-top:16px;line-height:1.7}
+        .mini-token strong{color:var(--accent)}
+        @media(max-width:768px){
+            .hero h1{font-size:1.6rem}
+            .toc-grid{grid-template-columns:1fr}
+            .flow-tabs{grid-template-columns:1fr}
+            .nav-links{display:none}
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav class="navbar">
+    <a href="index.html" class="nav-logo">AI<span>Hub</span></a>
+    <div class="nav-links">
+        <a href="index.html">Tin Tuc AI</a>
+        <a href="learn.html">Hoc AI</a>
+        <a href="prompt-engineering.html">Prompt Engineering</a>
+        <a href="workflow.html">Quy Trình (Review → MR)</a>
+        <a href="workflow-flows.html" class="active">2 Luồng Chuẩn</a>
+        <a href="../BE/index.html">.NET</a>
+    </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<header class="hero">
+    <div class="hero-badge">2 LUỒNG CHUẨN</div>
+    <h1>Vòng lặp code <span class="gradient-text">+ 2 luồng kết</span></h1>
+    <p>Hai luồng làm việc theo vai trò, dùng chung một <strong>vòng lặp code</strong> ở giữa — chỉ khác phần kết. Mỗi bước ghi sẵn <strong>trigger</strong> để gõ thẳng cho skill.</p>
+</header>
+
+<div class="container">
+<div class="toc">
+    <h3>Mục lục</h3>
+    <div class="toc-grid">
+        <a href="#loop"><span class="toc-num">🔧</span> Phần chung — Vòng lặp code</a>
+        <a href="#flow-a"><span class="toc-num">🅰️</span> Luồng CÓ Merge Request</a>
+        <a href="#flow-b"><span class="toc-num">🅱️</span> Luồng KHÔNG có MR</a>
+    </div>
+</div>
+
+<div class="flow-tabs">
+    <a href="#flow-a" class="flow-tab fa">
+        <div class="ft-label">🅰️ LUỒNG CÓ MR</div>
+        <div class="ft-title">Team GitLab chuẩn</div>
+        <div class="ft-desc">Có reviewer thứ 2. Developer (Pro) code nhẹ, mọi review nặng dồn cho reviewer (Pro Max) trên MR.</div>
+    </a>
+    <a href="#flow-b" class="flow-tab fb">
+        <div class="ft-label">🅱️ LUỒNG KHÔNG MR</div>
+        <div class="ft-title">Dự án nhỏ / commit thẳng</div>
+        <div class="ft-desc">Không ai review hộ → bạn tự gánh. <strong>Bắt buộc</strong> review toàn branch trước khi nhập code.</div>
+    </a>
+</div>
+
+<!-- ── PHẦN CHUNG: VÒNG LẶP CODE ── -->
+<div class="section" id="loop">
+    <div class="section-header">
+        <div class="section-num">🔧</div>
+        <div>
+            <div class="section-title">Phần chung — Vòng lặp code</div>
+            <div class="section-subtitle">Cả 2 luồng đều giống nhau · member làm hằng ngày, nhẹ token</div>
+        </div>
+    </div>
+
+    <div class="step">
+        <div class="step-no">1</div>
+        <div class="step-body">
+            <div class="st-title">Tạo nhánh từ task</div>
+            <div class="st-desc">Skill đề xuất tên nhánh, hỏi base (main/dev), tạo <code>feature/WRA-40-...</code>. (Hoặc bạn tự tạo/nhảy nhánh bằng SourceTree cũng được.)</div>
+            <code class="trigger">create branch from task WRA-40 giới hạn domain account</code>
+        </div>
+    </div>
+    <div class="step">
+        <div class="step-no">2</div>
+        <div class="step-body">
+            <div class="st-title">Paste mô tả task Jira</div>
+            <div class="st-desc">Dán mô tả task → Claude sinh code.</div>
+        </div>
+    </div>
+    <div class="step">
+        <div class="step-no">3</div>
+        <div class="step-body">
+            <div class="st-title">Review thay đổi vừa rồi</div>
+            <div class="st-desc">Soi nhanh phần code mới sinh, fix issue tại chỗ.</div>
+            <code class="trigger">review the last change</code>
+        </div>
+    </div>
+    <div class="loop-pill">⟲ Lặp 2 ↔ 3 tới khi xong 1 mảng việc</div>
+    <div class="step">
+        <div class="step-no">4</div>
+        <div class="step-body">
+            <div class="st-title">Commit &amp; push</div>
+            <div class="st-desc">Commit local, skill hỏi bạn rồi mới push.</div>
+            <code class="trigger">commit and push</code>
+        </div>
+    </div>
+    <div class="loop-pill">⟲ Lặp 2 → 4 cho từng mảng việc</div>
+
+    <div class="highlight highlight-tip">
+        <strong>Đây là phần member làm hằng ngày</strong> — toàn review nhẹ, tốn rất ít token.
+    </div>
+</div>
+
+<!-- ── LUỒNG A: CÓ MR ── -->
+<div class="section" id="flow-a">
+    <div class="section-header">
+        <div class="section-num" style="color:var(--green)">🅰️</div>
+        <div>
+            <div class="section-title">Luồng CÓ Merge Request</div>
+            <div class="section-subtitle">Team GitLab chuẩn · phân vai Developer ↔ Reviewer</div>
+        </div>
+    </div>
+
+    <div class="role-band">
+        <span class="role-badge role-dev">DEVELOPER</span>
+        <span class="role-note">member · Pro</span>
+    </div>
+    <div class="highlight highlight-important" style="margin-top:0">
+        Chạy trọn <strong>vòng lặp code (bước 1–4)</strong> ở phần chung, sau đó:
+    </div>
+    <div class="step">
+        <div class="step-no">5</div>
+        <div class="step-body">
+            <div class="st-title">Tạo Merge Request</div>
+            <div class="st-desc">Skill xác định target (main/dev), tạo MR, trả về <code>!N</code>.</div>
+            <code class="trigger">create a merge request</code>
+            <div class="highlight highlight-warn" style="margin-top:10px">⚠️ Member <strong>KHÔNG</strong> cần chạy "review the whole branch" — để dành cho reviewer.</div>
+        </div>
+    </div>
+
+    <div class="role-band">
+        <span class="role-badge role-rev">REVIEWER</span>
+        <span class="role-note">bạn · Pro Max</span>
+    </div>
+    <div class="step">
+        <div class="step-no">6</div>
+        <div class="step-body">
+            <div class="st-title">Review trên MR</div>
+            <div class="st-desc">Review full diff của MR (inline, <strong>KHÔNG</strong> cần nhảy nhánh).</div>
+            <code class="trigger">review the MR !&lt;N&gt;</code>
+            <ul style="padding-left:20px;margin-top:10px;color:var(--text-dim);font-size:.85rem">
+                <li><strong style="color:var(--green)">MR thường</strong> → đủ rồi, sang bước 7.</li>
+                <li><strong style="color:var(--red)">MR to / hiểm</strong> → (SourceTree) nhảy sang nhánh MR → chạy <code>review the whole branch</code> (3-agent, đọc full file) → quay lại.</li>
+            </ul>
+        </div>
+    </div>
+    <div class="step">
+        <div class="step-no">7</div>
+        <div class="step-body">
+            <div class="st-title">Đẩy kết quả review lên MR</div>
+            <div class="st-desc">Post comment + <strong>APPROVE</strong> / <strong>REQUEST_CHANGES</strong> lên GitLab.</div>
+            <code class="trigger">post review result to the MR</code>
+        </div>
+    </div>
+
+    <div class="role-band">
+        <span class="role-badge role-dev">DEVELOPER</span>
+        <span class="role-note">member</span>
+    </div>
+    <div class="step">
+        <div class="step-no">8</div>
+        <div class="step-body">
+            <div class="st-title">Fix toàn bộ issue</div>
+            <div class="st-desc">Fix → đề xuất commit msg → đợi bạn xác nhận.</div>
+            <code class="trigger">fix all issues</code>
+        </div>
+    </div>
+    <div class="step">
+        <div class="step-no">9</div>
+        <div class="step-body">
+            <div class="st-title">(Xác nhận) commit &amp; push</div>
+            <div class="st-desc">Push các fix lên, MR tự cập nhật.</div>
+            <code class="trigger">commit and push</code>
+        </div>
+    </div>
+    <div class="loop-pill">⟲ Lặp 6 → 9 nếu còn REQUEST_CHANGES — lần sau skill tự đối chiếu issue cũ</div>
+
+    <div class="role-band">
+        <span class="role-badge role-merge">MERGE</span>
+    </div>
+    <div class="step">
+        <div class="step-no">10</div>
+        <div class="step-body">
+            <div class="st-title">Merge request</div>
+            <div class="st-desc">Check approve + CI → merge <code>--squash</code>, xoá nhánh.</div>
+            <code class="trigger">merge the request</code>
+        </div>
+    </div>
+
+    <div class="mini-token">
+        <strong>💰 Token:</strong> member chỉ tốn ở bước 1–4 và 8–9 (toàn review nhẹ). Mọi review nặng dồn vào bạn (Max) ở bước 6.
+    </div>
+</div>
+
+<!-- ── LUỒNG B: KHÔNG MR ── -->
+<div class="section" id="flow-b">
+    <div class="section-header">
+        <div class="section-num" style="color:var(--orange)">🅱️</div>
+        <div>
+            <div class="section-title">Luồng KHÔNG có Merge Request</div>
+            <div class="section-subtitle">Dự án nhỏ / commit thẳng nhánh tích hợp · bạn tự gánh review</div>
+        </div>
+    </div>
+
+    <div class="highlight highlight-warn" style="margin-top:0">
+        Không có reviewer thứ 2 → bạn tự review, nên <strong>phải soi kỹ trước khi nhập code</strong>.
+    </div>
+
+    <div class="role-band">
+        <span class="role-badge role-dev">DEVELOPER = REVIEWER</span>
+        <span class="role-note">một mình bạn</span>
+    </div>
+    <div class="highlight highlight-important" style="margin-top:0">
+        Chạy trọn <strong>vòng lặp code (bước 1–4)</strong> ở phần chung, sau đó:
+    </div>
+    <div class="step">
+        <div class="step-no">5</div>
+        <div class="step-body">
+            <div class="st-title">Review toàn branch — <span style="color:var(--red)">BẮT BUỘC</span></div>
+            <div class="st-desc">3-agent đọc full file. Vì không ai review hộ, đây là <strong>lưới an toàn cuối</strong>. Skill hỏi base main/dev (không có MR để tự dò).</div>
+            <code class="trigger">review the whole branch</code>
+        </div>
+    </div>
+    <div class="step">
+        <div class="step-no">6</div>
+        <div class="step-body">
+            <div class="st-title">Commit &amp; push</div>
+            <div class="st-desc">Commit các fix từ bước 5 (nếu có).</div>
+            <code class="trigger">commit and push</code>
+        </div>
+    </div>
+    <div class="step">
+        <div class="step-no">7</div>
+        <div class="step-body">
+            <div class="st-title">Tích hợp vào base — làm tay</div>
+            <div class="st-desc">KHÔNG có trigger glab. (SourceTree) merge nhánh feature vào main/dev, hoặc push thẳng theo cách dự án bạn vẫn làm.</div>
+        </div>
+    </div>
+
+    <div class="mini-token">
+        <strong>🔑 Khác biệt cốt lõi với luồng A:</strong> ở luồng A bạn <em>skip</em> "review the whole branch" phía developer (reviewer lo); ở luồng B <strong>không được skip</strong> vì bạn là người duy nhất review.
+    </div>
+</div>
+
+</div><!-- end container -->
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer">
+    <p>AI Mastery · 2 Luồng Chuẩn — <a href="workflow.html">Quy Trình (Review → MR)</a> · <a href="ai-tips.html">Tips &amp; Tricks</a> · <a href="learn.html">Học AI</a></p>
+</footer>
+
+</body>
+</html>
