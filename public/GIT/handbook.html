@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sổ Tay Nền Tảng — Trái tim của nghề BE</title>
+<style>
+  :root {
+    --primary: #667eea;
+    --accent: #f5576c;
+    --bg: #0f1117;
+    --card: #1a1d2e;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --border: #2d3148;
+    --success: #43e97b;
+    --warn: #f39c12;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; padding: 2rem; }
+
+  .hero { text-align: center; margin-bottom: 2rem; }
+  .hero h1 { font-size: 2.2rem; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero p { color: var(--muted); margin-top: .6rem; font-size: 1.05rem; max-width: 720px; margin-left: auto; margin-right: auto; }
+
+  .legend { max-width: 760px; margin: 0 auto 2.5rem; background: linear-gradient(135deg, rgba(102,126,234,.1), rgba(67,233,123,.08)); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; color: var(--muted); font-size: .95rem; text-align: center; }
+  .legend strong { color: var(--success); }
+
+  /* Món header */
+  .mon { margin-bottom: 3rem; }
+  .mon-head { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
+  .mon-badge { flex-shrink: 0; background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; font-weight: 700; font-size: .75rem; padding: .35rem .8rem; border-radius: 999px; text-transform: uppercase; letter-spacing: .5px; }
+  .mon-badge.hot { background: linear-gradient(135deg, var(--accent), var(--warn)); }
+  .mon-head h2 { font-size: 1.7rem; color: var(--text); }
+
+  .core { background: var(--card); border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; }
+  .core h3 { color: var(--primary); font-size: 1.1rem; margin-bottom: .6rem; display: flex; align-items: center; gap: .4rem; }
+  .core ul { padding-left: 1.3rem; }
+  .core li { color: var(--muted); font-size: .95rem; margin-bottom: .4rem; }
+  .core li strong { color: var(--text); }
+
+  .grp-title { color: var(--success); font-size: 1.05rem; margin: 1.5rem 0 .75rem; padding-left: .6rem; border-left: 3px solid var(--success); }
+
+  /* Command list — clickable to copy */
+  .cmds { display: grid; gap: .5rem; }
+  .cmd { background: #1e2235; border: 1px solid var(--border); border-radius: 8px; padding: .7rem .9rem; cursor: pointer; transition: border-color .15s, background .15s; position: relative; }
+  .cmd:hover { border-color: var(--primary); background: #232842; }
+  .cmd:active { transform: scale(.995); }
+  .cmd .code { font-family: 'Cascadia Code', 'Consolas', monospace; font-size: .88rem; color: #f8d06b; white-space: pre-wrap; word-break: break-word; }
+  .cmd .desc { color: var(--muted); font-size: .82rem; margin-top: .25rem; }
+  .cmd .star { color: var(--warn); }
+  .cmd .danger { color: var(--accent); }
+  .cmd .copied { position: absolute; top: .5rem; right: .7rem; background: var(--success); color: #06210f; font-size: .68rem; font-weight: 700; padding: 1px 8px; border-radius: 6px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .cmd.show-copied .copied { opacity: 1; }
+
+  /* multi-line block (also clickable) */
+  .block { background: #1e2235; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin: .75rem 0; cursor: pointer; position: relative; transition: border-color .15s; overflow-x: auto; }
+  .block:hover { border-color: var(--primary); }
+  .block pre { font-family: 'Cascadia Code', 'Consolas', monospace; font-size: .85rem; color: var(--text); white-space: pre; margin: 0; }
+  .block .cm { color: var(--muted); }
+  .block .kw { color: #f8d06b; }
+  .block .copied { position: absolute; top: .6rem; right: .7rem; background: var(--success); color: #06210f; font-size: .68rem; font-weight: 700; padding: 1px 8px; border-radius: 6px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .block.show-copied .copied { opacity: 1; }
+
+  /* tables */
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+  th, td { padding: .55rem .8rem; border: 1px solid var(--border); text-align: left; font-size: .88rem; }
+  th { background: var(--card); color: var(--primary); }
+  td { color: var(--muted); }
+  td strong, td b { color: var(--text); }
+
+  .tip { background: linear-gradient(135deg, rgba(102,126,234,.1), rgba(67,233,123,.1)); border: 1px solid var(--primary); border-radius: 10px; padding: .9rem 1.2rem; margin: 1rem 0; font-size: .92rem; }
+  .tip strong { color: var(--success); }
+  .warn-box { background: rgba(245,87,108,.08); border: 1px solid var(--accent); border-radius: 10px; padding: .9rem 1.2rem; margin: 1rem 0; font-size: .92rem; }
+  .warn-box strong { color: var(--accent); }
+
+  .diy { background: var(--card); border: 1px dashed var(--success); border-radius: 10px; padding: 1rem 1.25rem; margin: 1.25rem 0; }
+  .diy h4 { color: var(--success); margin-bottom: .5rem; font-size: 1rem; }
+  .diy ol { padding-left: 1.3rem; }
+  .diy li { color: var(--muted); font-size: .9rem; margin-bottom: .35rem; }
+  .diy code, .core code, td code { background: #2d3148; padding: 1px 6px; border-radius: 4px; font-size: .85rem; color: #f8d06b; font-family: 'Cascadia Code', 'Consolas', monospace; }
+
+  hr.div { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+
+  #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--success); color: #06210f; padding: .6rem 1.4rem; border-radius: 999px; font-weight: 700; font-size: .9rem; box-shadow: 0 8px 24px rgba(0,0,0,.4); transition: transform .25s; z-index: 999; }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Sổ tay nền tảng — trái tim của nghề BE</h1>
+  <p>Đây là những thứ bạn dùng hằng ngày mà đôi khi quên mất bản chất. Chắc tầng này thì cả các món hạ tầng phía dưới mới hết "ảo diệu khó hiểu".</p>
+</div>
+
+<div class="legend">
+  💡 <strong>Bấm vào ô lệnh/cú pháp bất kỳ để copy.</strong> &nbsp; ⭐ = thứ dùng nhiều nhất, nên thuộc.
+</div>
+
+<!-- ============ MÓN 1: GIT ============ -->
+<section class="mon" id="git">
+  <div class="mon-head">
+    <span class="mon-badge">Món 1</span>
+    <h2>Git — quản lý code</h2>
+  </div>
+
+  <div class="core">
+    <h3>🧠 Cốt lõi cần nhớ</h3>
+    <ul>
+      <li>Code đi qua 3 vùng: <strong>thư mục làm việc → staging (<code>git add</code>) → commit</strong> (ảnh chụp lịch sử).</li>
+      <li><strong>Branch</strong> = nhánh làm việc song song; làm xong <strong>merge</strong> vào nhánh chính.</li>
+      <li><strong>Remote</strong> (thường tên <code>origin</code>) = bản trên server (GitHub/GitLab). <code>push</code> đẩy lên, <code>pull</code> kéo về.</li>
+      <li><strong>Conflict</strong> xảy ra khi hai người sửa cùng chỗ — phải sửa tay rồi commit lại.</li>
+    </ul>
+  </div>
+
+  <h3 class="grp-title">⌨️ Lệnh thiết yếu</h3>
+
+  <p class="grp-title" style="color:var(--muted);border-color:var(--muted);font-size:.9rem">Cài đặt lần đầu (chỉ 1 lần/máy)</p>
+  <div class="cmds">
+    <div class="cmd"><div class="code">git config --global user.name "Tên Của Bạn"</div><div class="desc">tên hiển thị trên mỗi commit</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git config --global user.email "email@cty.com"</div><div class="desc">email gắn với commit</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git init</div><div class="desc">biến thư mục hiện tại thành repo Git</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git clone https://github.com/user/repo.git</div><div class="desc">tải một repo có sẵn về máy</div><span class="copied">✓ Đã copy</span></div>
+  </div>
+
+  <p class="grp-title" style="color:var(--muted);border-color:var(--muted);font-size:.9rem">Hằng ngày</p>
+  <div class="cmds">
+    <div class="cmd"><div class="code">git status</div><div class="desc"><span class="star">⭐</span> đang thay đổi gì, đang ở nhánh nào</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git add .</div><div class="desc">đưa mọi thay đổi vào staging (hoặc <code>git add file</code>)</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git add -p</div><div class="desc">chọn từng đoạn để add (kiểm soát kỹ nội dung commit)</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git commit -m "mô tả thay đổi"</div><div class="desc"><span class="star">⭐</span> chốt một ảnh chụp vào lịch sử</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git commit -am "sửa bug X"</div><div class="desc">add + commit các file đã theo dõi trong 1 lệnh</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git push</div><div class="desc"><span class="star">⭐</span> đẩy commit lên remote; <code>git pull</code> kéo cái mới về</div><span class="copied">✓ Đã copy</span></div>
+  </div>
+
+  <p class="grp-title" style="color:var(--muted);border-color:var(--muted);font-size:.9rem">Xem lịch sử &amp; khác biệt</p>
+  <div class="cmds">
+    <div class="cmd"><div class="code">git log --oneline --graph --all</div><div class="desc"><span class="star">⭐</span> toàn bộ lịch sử gọn dạng cây</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git diff</div><div class="desc">xem thay đổi chưa add; <code>git diff --staged</code> xem cái đã add</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git show &lt;commit&gt;</div><div class="desc">xem chi tiết một commit cụ thể</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git blame file.js</div><div class="desc"><span class="star">⭐</span> dòng nào do ai sửa, ở commit nào</div><span class="copied">✓ Đã copy</span></div>
+  </div>
+
+  <p class="grp-title" style="color:var(--muted);border-color:var(--muted);font-size:.9rem">Nhánh &amp; hợp nhất</p>
+  <div class="cmds">
+    <div class="cmd"><div class="code">git branch</div><div class="desc">liệt kê nhánh (đang ở nhánh có dấu *)</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git switch -c feature/login</div><div class="desc"><span class="star">⭐</span> tạo &amp; chuyển sang nhánh mới</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git switch main</div><div class="desc">quay về nhánh chính</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git merge feature/login</div><div class="desc"><span class="star">⭐</span> gộp nhánh kia vào nhánh hiện tại</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git branch -d feature/login</div><div class="desc">xoá nhánh đã merge xong</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git rebase main</div><div class="desc">dời các commit của nhánh lên trên đầu main (lịch sử thẳng)</div><span class="copied">✓ Đã copy</span></div>
+  </div>
+
+  <p class="grp-title" style="color:var(--muted);border-color:var(--muted);font-size:.9rem">Làm việc với remote</p>
+  <div class="cmds">
+    <div class="cmd"><div class="code">git remote -v</div><div class="desc">xem đang nối tới remote nào</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git remote add origin https://github.com/user/repo.git</div><div class="desc">gắn remote cho repo mới tạo</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git push -u origin main</div><div class="desc"><span class="star">⭐</span> đẩy lần đầu &amp; nhớ nhánh mặc định</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git fetch</div><div class="desc">tải cập nhật về nhưng chưa gộp vào code</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git pull --rebase</div><div class="desc">kéo về &amp; xếp commit của bạn lên trên (lịch sử sạch)</div><span class="copied">✓ Đã copy</span></div>
+  </div>
+
+  <p class="grp-title" style="color:var(--muted);border-color:var(--muted);font-size:.9rem">Undo &amp; cứu nguy</p>
+  <div class="cmds">
+    <div class="cmd"><div class="code">git restore file.txt</div><div class="desc">bỏ thay đổi chưa commit của một file</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git restore --staged file.txt</div><div class="desc">gỡ file khỏi staging (chưa mất thay đổi)</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git stash</div><div class="desc"><span class="star">⭐</span> cất tạm mọi thay đổi để làm việc khác; <code>git stash pop</code> lấy lại</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git commit --amend</div><div class="desc">sửa lại commit gần nhất (nội dung hoặc lời nhắn)</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git reset --soft HEAD~1</div><div class="desc">gỡ commit gần nhất, GIỮ lại code</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git reset --hard HEAD</div><div class="desc"><span class="danger">⚠️</span> vứt sạch mọi thay đổi chưa commit — không lấy lại được</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git revert &lt;commit&gt;</div><div class="desc"><span class="star">⭐</span> tạo commit đảo ngược — an toàn cho nhánh chung (không xoá lịch sử)</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git reflog</div><div class="desc"><span class="star">⭐</span> vị cứu tinh: xem MỌI thao tác, tìm lại commit tưởng đã mất</div><span class="copied">✓ Đã copy</span></div>
+  </div>
+
+  <p class="grp-title" style="color:var(--muted);border-color:var(--muted);font-size:.9rem">Nâng cao (khi đã quen)</p>
+  <div class="cmds">
+    <div class="cmd"><div class="code">git rebase -i HEAD~3</div><div class="desc">gộp/sửa/đổi thứ tự 3 commit gần nhất (dọn lịch sử trước khi push)</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git cherry-pick &lt;commit&gt;</div><div class="desc">bê một commit từ nhánh khác sang nhánh hiện tại</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">git tag v1.0.0</div><div class="desc">đánh dấu một phiên bản; <code>git push --tags</code> đẩy tag lên</div><span class="copied">✓ Đã copy</span></div>
+  </div>
+
+  <h3 class="grp-title">Xử lý conflict (khi merge/pull bị đụng)</h3>
+  <div class="block">
+<pre><span class="cm"># Khi Git báo "CONFLICT", mở file bị đụng — bạn sẽ thấy:</span>
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+code của bạn
+=======
+code của người khác
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; nhanh-kia
+
+<span class="cm"># 1. Sửa lại cho đúng, XOÁ hết 3 dấu &lt;&lt;&lt; === &gt;&gt;&gt;</span>
+<span class="kw">git add</span> file-da-sua        <span class="cm"># 2. đánh dấu đã giải quyết</span>
+<span class="kw">git commit</span>                 <span class="cm"># 3. hoàn tất việc merge</span></pre>
+    <span class="copied">✓ Đã copy</span>
+  </div>
+  <div class="tip"><strong>Đừng hoảng khi thấy conflict</strong> — nó chỉ là Git nói "hai người sửa cùng chỗ, bạn quyết định giữ gì". Tạo file <code>.gitignore</code> để Git bỏ qua những thứ không nên commit (thư mục <code>node_modules/</code>, file <code>.env</code>, log…).</div>
+
+  <div class="diy">
+    <h4>✍️ Tự tay làm:</h4>
+    <ol>
+      <li>Tạo thư mục mới → <code>git init</code> → tạo 1 file → <code>git add .</code> → <code>git commit -m "khởi tạo"</code>.</li>
+      <li>Tạo nhánh <code>git switch -c thu-nghiem</code>, sửa file, commit, rồi <code>git switch main</code> và <code>git merge thu-nghiem</code>.</li>
+      <li>Chạy <code>git log --oneline --graph</code> xem lịch sử vừa tạo.</li>
+    </ol>
+  </div>
+</section>
+
+<hr class="div" />
+
+<!-- ============ MÓN 2: DATABASE & SQL ============ -->
+<section class="mon" id="sql">
+  <div class="mon-head">
+    <span class="mon-badge hot">Món 2 · Quan trọng nhất ⭐</span>
+    <h2>Database &amp; SQL</h2>
+  </div>
+
+  <div class="core">
+    <h3>🧠 Cốt lõi cần nhớ</h3>
+    <ul>
+      <li>Dữ liệu ở trong <strong>bảng</strong> (hàng &amp; cột). <strong>Khóa chính (PK)</strong> định danh mỗi hàng; <strong>khóa ngoại (FK)</strong> nối sang bảng khác.</li>
+      <li><strong>Index</strong> = mục lục giúp tìm cực nhanh. Tăng tốc đọc, nhưng làm ghi chậm hơn chút → chỉ đánh vào cột hay dùng để lọc/join.</li>
+      <li><strong>Transaction</strong> = nhiều lệnh chạy như một khối "được ăn cả, ngã về không" (COMMIT hoặc ROLLBACK).</li>
+      <li>Cạm bẫy kinh điển: <strong>N+1 query</strong> — lặp query trong vòng lặp thay vì dùng một JOIN.</li>
+    </ul>
+  </div>
+
+  <h3 class="grp-title">⌨️ Câu lệnh thiết yếu</h3>
+
+  <p class="grp-title" style="color:var(--muted);border-color:var(--muted);font-size:.9rem">Truy vấn cơ bản</p>
+  <div class="cmds">
+    <div class="cmd"><div class="code">SELECT * FROM users WHERE id = 1;</div><div class="desc"><span class="star">⭐</span> lấy dữ liệu theo điều kiện</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">SELECT name, email FROM users WHERE age &gt; 18 ORDER BY created_at DESC LIMIT 10;</div><div class="desc">lọc + sắp xếp + giới hạn số dòng</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">INSERT INTO users (name, email) VALUES ('An', 'an@x.com');</div><div class="desc">thêm hàng mới</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">UPDATE users SET name = 'An B' WHERE id = 1;</div><div class="desc"><span class="star">⭐</span> sửa — luôn nhớ WHERE kẻo sửa cả bảng!</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">DELETE FROM users WHERE id = 1;</div><div class="desc">xoá hàng (cũng phải có WHERE)</div><span class="copied">✓ Đã copy</span></div>
+  </div>
+
+  <p class="grp-title" style="color:var(--muted);border-color:var(--muted);font-size:.9rem">Nối bảng &amp; tổng hợp</p>
+  <div class="cmds">
+    <div class="cmd"><div class="code">SELECT o.id, u.name FROM orders o JOIN users u ON o.user_id = u.id;</div><div class="desc"><span class="star">⭐</span> JOIN — nối 2 bảng theo khóa</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">SELECT user_id, COUNT(*) FROM orders GROUP BY user_id;</div><div class="desc">đếm/tổng hợp theo nhóm</div><span class="copied">✓ Đã copy</span></div>
+  </div>
+
+  <p class="grp-title" style="color:var(--muted);border-color:var(--muted);font-size:.9rem">Index &amp; hiệu năng</p>
+  <div class="cmds">
+    <div class="cmd"><div class="code">CREATE INDEX idx_users_email ON users(email);</div><div class="desc"><span class="star">⭐</span> đánh index cho cột hay tìm kiếm</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">EXPLAIN SELECT * FROM users WHERE email = 'a@x.com';</div><div class="desc"><span class="star">⭐</span> xem query có dùng index không (chống query chậm)</div><span class="copied">✓ Đã copy</span></div>
+  </div>
+
+  <h3 class="grp-title">Transaction</h3>
+  <div class="block">
+<pre><span class="kw">BEGIN</span>;                                <span class="cm"># mở transaction</span>
+<span class="kw">UPDATE</span> accounts SET balance = balance - 100 WHERE id = 1;
+<span class="kw">UPDATE</span> accounts SET balance = balance + 100 WHERE id = 2;
+<span class="kw">COMMIT</span>;                               <span class="cm"># chốt cả hai; lỗi giữa chừng thì ROLLBACK</span></pre>
+    <span class="copied">✓ Đã copy</span>
+  </div>
+
+  <div class="diy">
+    <h4>✍️ Tự tay làm:</h4>
+    <ol>
+      <li>Chạy nhanh Postgres bằng Docker: <code>docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=secret --name db postgres:16</code>.</li>
+      <li>Tạo một bảng <code>users</code>, <code>INSERT</code> vài hàng, rồi tập <code>SELECT ... WHERE ... ORDER BY</code>.</li>
+      <li>Đánh một <code>CREATE INDEX</code>, chạy <code>EXPLAIN</code> trước &amp; sau xem kế hoạch truy vấn đổi thế nào.</li>
+    </ol>
+  </div>
+</section>
+
+<hr class="div" />
+
+<!-- ============ MÓN 3: HTTP & API ============ -->
+<section class="mon" id="http">
+  <div class="mon-head">
+    <span class="mon-badge">Món 3</span>
+    <h2>HTTP &amp; API</h2>
+  </div>
+
+  <div class="core">
+    <h3>🧠 Cốt lõi cần nhớ</h3>
+    <ul>
+      <li>Một lượt gọi = <strong>Request</strong> (method + URL + headers + body) → <strong>Response</strong> (status + headers + body).</li>
+      <li>Method: <strong>GET</strong> lấy · <strong>POST</strong> tạo · <strong>PUT/PATCH</strong> sửa · <strong>DELETE</strong> xoá.</li>
+      <li><strong>REST</strong>: mỗi tài nguyên là một URL (vd <code>/users/42</code>), dùng method đúng ý nghĩa.</li>
+      <li><strong>Stateless</strong>: mỗi request độc lập — server không "nhớ" request trước, nên cần token/session gửi kèm.</li>
+      <li>Header hay gặp: <code>Content-Type: application/json</code>, <code>Authorization: Bearer &lt;token&gt;</code>.</li>
+    </ul>
+  </div>
+
+  <h3 class="grp-title">📊 Bảng status code phải thuộc</h3>
+  <table>
+    <thead><tr><th>Nhóm</th><th>Mã</th><th>Ý nghĩa</th></tr></thead>
+    <tbody>
+      <tr><td><strong>2xx ✅</strong></td><td>200 / 201 / 204</td><td>OK / Đã tạo / Thành công không có nội dung</td></tr>
+      <tr><td><strong>3xx ↪️</strong></td><td>301 / 302</td><td>Chuyển hướng (redirect)</td></tr>
+      <tr><td><strong>4xx 🙅 lỗi phía client</strong></td><td>400 / 401 / 403 / 404 / 409</td><td>Sai request / Chưa đăng nhập / Không có quyền / Không tìm thấy / Xung đột</td></tr>
+      <tr><td><strong>5xx 💥 lỗi phía server</strong></td><td>500 / 502 / 503</td><td>Lỗi nội bộ / Gateway lỗi / Quá tải</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="grp-title">⌨️ Thực hành bằng curl</h3>
+  <div class="cmds">
+    <div class="cmd"><div class="code">curl https://api.github.com/users/torvalds</div><div class="desc"><span class="star">⭐</span> GET — gọi lấy dữ liệu (thử ngay, API công khai)</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">curl -i https://api.github.com</div><div class="desc"><span class="star">⭐</span> <code>-i</code> hiện cả status code &amp; headers trả về</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">curl -X POST -H "Content-Type: application/json" -d '{"name":"An"}' http://localhost:8080/api/users</div><div class="desc"><span class="star">⭐</span> POST — gửi JSON để tạo dữ liệu</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">curl -H "Authorization: Bearer TOKEN123" http://localhost:8080/api/me</div><div class="desc">gọi API cần đăng nhập (kèm token)</div><span class="copied">✓ Đã copy</span></div>
+  </div>
+
+  <div class="diy">
+    <h4>✍️ Tự tay làm:</h4>
+    <ol>
+      <li>Chạy <code>curl -i https://api.github.com/users/torvalds</code> — đọc status code &amp; body JSON trả về.</li>
+      <li>Gọi thử một URL sai để thấy <strong>404</strong>, và thử API cần token mà không gửi để thấy <strong>401</strong>.</li>
+      <li>Nếu có app của bạn đang chạy, dùng <code>curl -X POST</code> tạo thử một bản ghi.</li>
+    </ol>
+  </div>
+</section>
+
+<hr class="div" />
+
+<!-- ============ MÓN 4: NETWORKING ============ -->
+<section class="mon" id="net">
+  <div class="mon-head">
+    <span class="mon-badge">Món 4</span>
+    <h2>Networking cơ bản</h2>
+  </div>
+
+  <div class="core">
+    <h3>🧠 Cốt lõi cần nhớ</h3>
+    <ul>
+      <li><strong>IP</strong> = địa chỉ của máy. <strong>Port</strong> = cổng của một dịch vụ trên máy đó. Kết hợp lại: <code>1.2.3.4:8080</code>.</li>
+      <li><strong>localhost</strong> = <code>127.0.0.1</code> = chính máy bạn. Vậy <code>localhost:8080</code> = "dịch vụ đang mở ở cổng 8080 trên máy này". <span class="star">⭐</span></li>
+      <li><strong>DNS</strong> = danh bạ đổi tên miền (<code>google.com</code>) → IP.</li>
+      <li><strong>Firewall</strong> chặn/mở port — lý do app "chạy mà không truy cập được từ ngoài".</li>
+    </ul>
+  </div>
+  <div class="warn-box"><strong>⚠️ Trong Docker/k8s:</strong> các container gọi nhau bằng <strong>tên service</strong> (vd <code>redis:6379</code>), không phải <code>localhost</code>.</div>
+
+  <h3 class="grp-title">📊 Các port nên nhớ</h3>
+  <table>
+    <thead><tr><th>Port</th><th>Dịch vụ</th><th>Port</th><th>Dịch vụ</th></tr></thead>
+    <tbody>
+      <tr><td><strong>22</strong></td><td>SSH</td><td><strong>5432</strong></td><td>PostgreSQL</td></tr>
+      <tr><td><strong>80</strong></td><td>HTTP</td><td><strong>3306</strong></td><td>MySQL</td></tr>
+      <tr><td><strong>443</strong></td><td>HTTPS</td><td><strong>6379</strong></td><td>Redis</td></tr>
+      <tr><td><strong>8080</strong></td><td>HTTP (app dev)</td><td><strong>27017</strong></td><td>MongoDB</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="grp-title">⌨️ Lệnh thiết yếu</h3>
+  <div class="cmds">
+    <div class="cmd"><div class="code">ss -tulpn</div><div class="desc"><span class="star">⭐</span> port nào đang mở trên máy, tiến trình nào giữ</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">curl http://localhost:8080</div><div class="desc"><span class="star">⭐</span> thử một dịch vụ ở cổng cụ thể có phản hồi không</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">ping google.com</div><div class="desc">kiểm tra có kết nối tới một máy khác không</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">nslookup google.com</div><div class="desc">tên miền này trỏ về IP nào (kiểm tra DNS)</div><span class="copied">✓ Đã copy</span></div>
+    <div class="cmd"><div class="code">nc -zv localhost 5432</div><div class="desc">test xem một cổng có mở/nghe không</div><span class="copied">✓ Đã copy</span></div>
+  </div>
+</section>
+
+<div id="toast">✓ Đã copy vào clipboard</div>
+
+<script>
+  const toast = document.getElementById('toast');
+  let toastTimer;
+
+  function showToast() {
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 1400);
+  }
+
+  function copyText(text, el) {
+    const done = () => {
+      el.classList.add('show-copied');
+      setTimeout(() => el.classList.remove('show-copied'), 1400);
+      showToast();
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(() => fallback(text, done));
+    } else {
+      fallback(text, done);
+    }
+  }
+
+  function fallback(text, done) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  // Command boxes: copy the .code text
+  document.querySelectorAll('.cmd').forEach(el => {
+    el.addEventListener('click', () => {
+      const code = el.querySelector('.code');
+      if (code) copyText(code.innerText.trim(), el);
+    });
+  });
+
+  // Multi-line blocks: copy the <pre> text
+  document.querySelectorAll('.block').forEach(el => {
+    el.addEventListener('click', () => {
+      const pre = el.querySelector('pre');
+      if (pre) copyText(pre.innerText, el);
+    });
+  });
+</script>
+</body>
+</html>

@@ -177,6 +177,7 @@ const SECTIONS = [
   ]},
   { id: 'git-sourcetree', icon: '\uD83C\uDF33', label: 'GitHub & Sourcetree', children: [
     { id: 'git-guide', label: 'Hướng Dẫn A-Z', src: '/GIT/index.html' },
+    { id: 'git-handbook', label: 'Sổ Tay Nền Tảng', src: '/GIT/handbook.html' },
     { id: 'git-quiz', label: 'Trắc Nghiệm Git', src: '/GIT/quiz.html' },
   ]},
   { id: 'tips', icon: '\uD83D\uDCA1', label: 'Tips & Tricks', children: [
