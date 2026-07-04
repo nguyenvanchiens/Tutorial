@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 import fs from 'fs'
 
+import { cloudflare } from "@cloudflare/vite-plugin";
+
 // Plugin to serve original tutorial files from parent directory
 function serveTutorialFiles() {
   const parentDir = path.resolve(__dirname, '../AI LEARN TUTORIAL')
@@ -44,5 +46,5 @@ function serveTutorialFiles() {
 }
 
 export default defineConfig({
-  plugins: [react(), serveTutorialFiles()],
+  plugins: [react(), serveTutorialFiles(), cloudflare()],
 })
